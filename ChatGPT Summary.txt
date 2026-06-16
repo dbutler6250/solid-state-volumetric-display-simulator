@@ -1,0 +1,458 @@
+# Volumetric Display Simulator Project Summary (for Codex Agent)
+
+## Project Goal
+
+Build a browser-based optics simulation platform that can evolve into a volumetric display design and analysis environment.
+
+### Version 1 Goal
+
+Implement a **Transfer Matrix Method (TMM) Bragg Reflector Simulator** that allows users to:
+
+* Define multilayer dielectric stacks
+* Calculate reflectance and transmission spectra
+* Visualize results interactively
+* Explore parameter changes through a modern web UI
+
+The simulator should be usable from both desktop and mobile browsers.
+
+---
+
+## Current Architecture / Tech Stack
+
+### Chosen Stack
+
+```text
+TypeScript
+React
+Vite
+Plotly
+Three.js (future use)
+GitHub Pages
+```
+
+### Rationale
+
+* TypeScript for maintainable scientific code.
+* React for scalable UI architecture.
+* Vite for fast development/build workflow.
+* Plotly for engineering/scientific charting.
+* Three.js reserved for future visualization features.
+* GitHub Pages for free static hosting.
+
+### Hosting Model
+
+```text
+Browser
+│
+├── React UI
+├── Simulation Engine (TypeScript)
+├── Plotly Visualizations
+└── GitHub Pages Hosting
+```
+
+No backend server is planned for Version 1.
+
+All computation runs client-side in the browser.
+
+---
+
+## Important Decisions Already Made
+
+### Language Choice
+
+Python approach was considered and intentionally abandoned.
+
+Project will be implemented using:
+
+```text
+TypeScript + React
+```
+
+rather than:
+
+```text
+Python + Dash
+```
+
+### Three.js Decision
+
+Three.js remains part of the long-term stack but:
+
+* DO NOT implement it in Version 1.
+* Introduce only when optical visualization becomes necessary.
+
+### Architecture Philosophy
+
+Future-proof the codebase without overengineering.
+
+Design the simulation engine so that:
+
+* Additional optical structures can be added later.
+* The Bragg reflector is only the first supported structure.
+* Core TMM code remains reusable for future simulations.
+
+---
+
+## Version 1 Scope
+
+### Inputs
+
+```text
+nH  (high-index material)
+
+nL  (low-index material)
+
+dH  (high-index layer thickness)
+
+dL  (low-index layer thickness)
+
+Number of periods
+
+Design wavelength
+
+Incident angle
+
+Polarization (TE / TM)
+```
+
+### Outputs
+
+```text
+Reflectance spectrum
+
+Transmission spectrum
+
+Peak reflectance
+
+Center wavelength
+
+Bandwidth
+```
+
+### Primary Visualization
+
+```text
+Reflectance vs Wavelength
+```
+
+using Plotly.
+
+---
+
+## Planned Future Versions
+
+### Version 1.5
+
+Add automatic layer-stack visualization.
+
+Example:
+
+```text
+Air
+
+| H |
+| L |
+| H |
+| L |
+| H |
+| L |
+
+Substrate
+```
+
+Generated from user parameters.
+
+### Version 2
+
+Add parameter sweeps and multidimensional analysis.
+
+Features:
+
+```text
+Reflectance vs Angle
+
+Transmission vs Angle
+
+Reflectance(λ, θ) heatmaps
+
+Stopband evolution
+
+Polarization comparison
+```
+
+---
+
+## Files / Modules Discussed
+
+Planned project structure:
+
+```text
+src/
+
+├── components/
+├── simulation/
+├── plots/
+├── visualization/
+└── types/
+```
+
+More detailed simulation structure:
+
+```text
+simulation/
+
+├── materials/
+├── layers/
+├── structures/
+├── solvers/
+│   └── transferMatrix.ts
+├── sweeps/
+└── results/
+```
+
+### Expected Responsibilities
+
+#### materials/
+
+Material definitions.
+
+Examples:
+
+```text
+Refractive index
+Dispersion data
+```
+
+#### layers/
+
+Layer representations.
+
+Examples:
+
+```text
+Thickness
+Material association
+```
+
+#### structures/
+
+Optical structures.
+
+Examples:
+
+```text
+Bragg reflector
+Future gratings
+Future cavities
+```
+
+#### solvers/
+
+Numerical engines.
+
+Initially:
+
+```text
+transferMatrix.ts
+```
+
+#### sweeps/
+
+Parameter sweeps.
+
+Future:
+
+```text
+Wavelength sweeps
+Angle sweeps
+```
+
+#### results/
+
+Output data models.
+
+Examples:
+
+```text
+Reflectance arrays
+Transmission arrays
+Metadata
+```
+
+---
+
+## Commands / Run Steps (Planned)
+
+### Session 1 Setup
+
+Install:
+
+```text
+Node.js
+VS Code
+Git
+```
+
+Create project:
+
+```bash
+npm create vite@latest
+```
+
+(React + TypeScript template)
+
+Install dependencies.
+
+Run locally:
+
+```bash
+npm install
+
+npm run dev
+```
+
+Version control:
+
+```bash
+git init
+
+git add .
+
+git commit -m "Initial project setup"
+
+git push
+```
+
+Deploy:
+
+```text
+GitHub Pages
+```
+
+### Development Environment
+
+VS Code is the preferred IDE.
+
+Suggested extensions:
+
+```text
+ESLint
+Prettier
+GitHub Pull Requests and Issues
+```
+
+---
+
+## Bugs or Open Questions
+
+No bugs yet.
+
+### Open Technical Questions
+
+#### TMM Scope
+
+Need to decide:
+
+* Quarter-wave stack assumptions?
+* Arbitrary layer thicknesses?
+* Material dispersion support?
+* Complex refractive indices?
+* TE only initially or TE/TM from day one?
+
+#### Data Model
+
+Need to define:
+
+```typescript
+Material
+Layer
+Structure
+SimulationResult
+```
+
+interfaces.
+
+#### Visualization Scope
+
+Need to decide:
+
+* Single chart initially?
+* Reflectance + transmission chart?
+* Multi-trace Plotly layouts?
+
+---
+
+## Constraints / Preferences
+
+### Strong Preferences
+
+* Browser-only application.
+* No backend server.
+* Mobile and desktop accessible.
+* GitHub Pages deployment.
+* Future-proof architecture.
+* Avoid unnecessary complexity.
+* Keep simulation engine reusable.
+
+### Developer Background
+
+User is:
+
+* Comfortable with Java.
+* Familiar with JavaScript.
+* Familiar with HTML/CSS.
+* New to TypeScript but willing to learn.
+* Using VS Code.
+
+### Project Philosophy
+
+Prefer:
+
+```text
+Simple foundation
++
+Clean architecture
++
+Incremental growth
+```
+
+Avoid:
+
+```text
+Premature optimization
+Overengineering
+Large framework sprawl
+```
+
+---
+
+## Next Recommended Task
+
+### Session 1
+
+Set up the development environment and establish the project skeleton.
+
+#### Goals
+
+1. Install Node.js.
+2. Verify Node/npm.
+3. Create Vite React TypeScript project.
+4. Configure VS Code.
+5. Create initial folder structure.
+6. Create GitHub repository.
+7. Push first commit.
+8. Deploy blank application to GitHub Pages.
+
+### Success Criteria
+
+A working URL such as:
+
+```text
+https://<username>.github.io/<project-name>
+```
+
+serving a basic React application.
+
+No physics implementation yet.
+
+The objective is to prove that the full development pipeline works end-to-end before implementing the Transfer Matrix Method solver.
