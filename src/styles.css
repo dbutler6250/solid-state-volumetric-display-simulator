@@ -237,13 +237,14 @@ label {
   display: flex;
   align-items: stretch;
   gap: 0.18rem;
-  overflow-x: auto;
+  overflow: hidden;
   padding: 0.75rem;
 }
 
 .stack-segment {
   display: grid;
-  min-width: 4.6rem;
+  flex: 1 1 0;
+  min-width: 0;
   grid-template-rows: 1fr auto;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -260,10 +261,14 @@ label {
 .stack-segment span {
   color: rgba(244, 248, 251, 0.78);
   font-size: 0.72rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .stack-segment-ambient {
+  flex-grow: 0.82;
   background: #1d2631;
 }
 
@@ -276,7 +281,7 @@ label {
 }
 
 .stack-segment-ellipsis {
-  min-width: 5.4rem;
+  flex-grow: 1.35;
   background: #182231;
   border-style: dashed;
 }
@@ -406,5 +411,18 @@ label {
 
   .stack-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .stack-diagram {
+    gap: 0.12rem;
+    padding: 0.55rem;
+  }
+
+  .stack-segment {
+    padding: 0.45rem 0.25rem;
+  }
+
+  .stack-segment span {
+    font-size: 0.66rem;
   }
 }

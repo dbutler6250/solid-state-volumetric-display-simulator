@@ -12,9 +12,9 @@ type DiagramSegment = {
   kind: 'ambient' | 'high' | 'low' | 'ellipsis';
 };
 
-const MAX_VISIBLE_PERIODS = 7;
-const LEADING_PERIODS = 3;
-const TRAILING_PERIODS = 2;
+const MAX_VISIBLE_PERIODS = 3;
+const LEADING_PERIODS = 1;
+const TRAILING_PERIODS = 1;
 
 const formatNumber = (value: number, digits = 2): string =>
   Number.isFinite(value) ? value.toFixed(digits) : 'Invalid';
@@ -76,7 +76,7 @@ const createLayerSegments = (inputs: BraggReflectorInputs): DiagramSegment[] => 
     {
       key: 'ellipsis',
       label: '...',
-      detail: `${inputs.periodCount - LEADING_PERIODS - TRAILING_PERIODS} more`,
+      detail: `${inputs.periodCount - LEADING_PERIODS - TRAILING_PERIODS} periods hidden`,
       kind: 'ellipsis',
     },
     ...Array.from({ length: TRAILING_PERIODS }, (_, index) =>
