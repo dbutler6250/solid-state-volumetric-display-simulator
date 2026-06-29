@@ -1,5 +1,11 @@
 import type { Material } from './material';
 
+export const AIR: Material = {
+  id: 'air',
+  name: 'Air',
+  refractiveIndex: 1,
+};
+
 export const MATERIAL_CATALOG: Material[] = [
   {
     id: 'tio2',

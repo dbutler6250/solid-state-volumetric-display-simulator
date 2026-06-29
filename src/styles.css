@@ -146,18 +146,22 @@ select {
   padding: 1rem;
 }
 
-.chart-placeholder {
-  display: grid;
+.reflectance-chart {
+  display: block;
+  width: 100%;
   min-height: 26rem;
-  place-items: center;
-  color: #9aa8b7;
   border: 1px dashed #46586d;
   border-radius: 8px;
   background:
     linear-gradient(135deg, rgba(90, 167, 200, 0.08), rgba(218, 181, 94, 0.04)),
     #101720;
-  text-align: center;
-  padding: 1rem;
+  overflow: hidden;
+}
+
+.reflectance-chart,
+.reflectance-chart .plot-container,
+.reflectance-chart .svg-container {
+  height: 26rem;
 }
 
 @media (max-width: 860px) {

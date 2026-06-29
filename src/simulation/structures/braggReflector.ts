@@ -1,4 +1,6 @@
-import { MATERIAL_CATALOG } from '../materials/catalog';
+import type { OpticalLayer } from '../layers/layer';
+import type { LayerStack } from '../layers/stack';
+import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
 import type { BraggReflectorInputs } from '../../types/simulation';
 
 export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
@@ -11,3 +13,30 @@ export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
   incidentAngleDegrees: 0,
   polarization: 'TE',
 };
+
+export function buildBraggReflectorLayers(inputs: BraggReflectorInputs): OpticalLayer[] {
+  const layers: OpticalLayer[] = [];
+
+  for (let period = 0; period < inputs.periodCount; period += 1) {
+    layers.push(
+      {
+        material: inputs.highIndexMaterial,
+        thicknessNm: inputs.highIndexThicknessNm,
+      },
+      {
+        material: inputs.lowIndexMaterial,
+        thicknessNm: inputs.lowIndexThicknessNm,
+      },
+    );
+  }
+
+  return layers;
+}
+
+export function buildBraggReflectorStack(inputs: BraggReflectorInputs): LayerStack {
+  return {
+    incidentMedium: AIR,
+    layers: buildBraggReflectorLayers(inputs),
+    exitMedium: AIR,
+  };
+}

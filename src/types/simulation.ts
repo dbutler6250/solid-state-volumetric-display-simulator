@@ -12,6 +12,9 @@ export type BraggReflectorInputs = {
   designWavelengthNm: number;
   incidentAngleDegrees: number;
   polarization: Polarization;
+  wavelengthStartNm?: number;
+  wavelengthEndNm?: number;
+  wavelengthPointCount?: number;
 };
 
 export type SimulationResult = {
