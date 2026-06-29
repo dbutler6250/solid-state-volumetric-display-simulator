@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { BraggReflectorForm } from './inputs/BraggReflectorForm';
 import { AssumptionsPanel } from './outputs/AssumptionsPanel';
 import { MetricsPanel } from './outputs/MetricsPanel';
+import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_BRAGG_REFLECTOR_INPUTS } from '../simulation/structures/braggReflector';
 import { solveBraggReflector } from '../simulation/solvers/transferMatrix';
@@ -54,6 +55,7 @@ export function SimulationShell() {
           </div>
           <ReflectanceChart result={result} showTransmission={showTransmission} />
           <MetricsPanel result={result} />
+          <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />
         </section>
       </section>
     </main>

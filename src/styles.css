@@ -173,6 +173,122 @@ label {
   grid-column: 1 / -1;
 }
 
+.stack-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
+.stack-panel-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.stack-panel-heading h2 {
+  margin: 0;
+}
+
+.stack-panel-heading span {
+  color: #8fa0b1;
+  font-size: 0.86rem;
+}
+
+.stack-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.stack-summary-item {
+  min-width: 0;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  padding: 0.65rem;
+  background: #101720;
+}
+
+.stack-summary-item span {
+  display: block;
+  color: #8fa0b1;
+  font-size: 0.76rem;
+}
+
+.stack-summary-item strong {
+  display: block;
+  margin-top: 0.15rem;
+  color: #e5edf5;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.stack-diagram,
+.stack-diagram-placeholder {
+  min-height: 5.5rem;
+  border: 1px dashed #46586d;
+  border-radius: 8px;
+  background: #101720;
+}
+
+.stack-diagram {
+  display: flex;
+  align-items: stretch;
+  gap: 0.18rem;
+  overflow-x: auto;
+  padding: 0.75rem;
+}
+
+.stack-segment {
+  display: grid;
+  min-width: 4.6rem;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 0.5rem 0.45rem;
+  text-align: center;
+}
+
+.stack-segment strong {
+  color: #f4f8fb;
+  font-size: 0.95rem;
+}
+
+.stack-segment span {
+  color: rgba(244, 248, 251, 0.78);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.stack-segment-ambient {
+  background: #1d2631;
+}
+
+.stack-segment-high {
+  background: #245f78;
+}
+
+.stack-segment-low {
+  background: #6f5b25;
+}
+
+.stack-segment-ellipsis {
+  min-width: 5.4rem;
+  background: #182231;
+  border-style: dashed;
+}
+
+.stack-diagram-placeholder {
+  display: grid;
+  place-items: center;
+  color: #9aa8b7;
+  padding: 1rem;
+  text-align: center;
+}
+
 .chart-panel {
   min-width: 0;
   padding: 1rem;
@@ -267,6 +383,10 @@ label {
   .metric-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .stack-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 540px) {
@@ -276,6 +396,15 @@ label {
   }
 
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stack-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .stack-summary-grid {
     grid-template-columns: 1fr;
   }
 }
