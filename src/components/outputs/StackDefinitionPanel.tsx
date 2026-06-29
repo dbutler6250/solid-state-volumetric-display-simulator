@@ -128,8 +128,8 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
             1,
           )} nm`}
         />
-        <StackSummaryItem label="H optical thickness" value={`${highOpticalThickness} lambda0`} />
-        <StackSummaryItem label="L optical thickness" value={`${lowOpticalThickness} lambda0`} />
+        <StackSummaryItem label="H optical thickness" value={`${highOpticalThickness} \u03bb`} />
+        <StackSummaryItem label="L optical thickness" value={`${lowOpticalThickness} \u03bb`} />
       </div>
 
       {isValid ? (
