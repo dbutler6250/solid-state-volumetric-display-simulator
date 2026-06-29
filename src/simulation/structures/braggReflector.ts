@@ -12,6 +12,9 @@ export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
   designWavelengthNm: 600,
   incidentAngleDegrees: 0,
   polarization: 'TE',
+  wavelengthStartNm: 300,
+  wavelengthEndNm: 900,
+  wavelengthPointCount: 401,
 };
 
 export function buildBraggReflectorLayers(inputs: BraggReflectorInputs): OpticalLayer[] {

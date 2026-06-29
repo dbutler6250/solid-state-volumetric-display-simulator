@@ -29,6 +29,13 @@ select {
   font: inherit;
 }
 
+button,
+input,
+select,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .app-shell {
   min-height: 100vh;
   display: grid;
@@ -108,6 +115,11 @@ select {
   background: #0f151d;
 }
 
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"] {
+  border-color: #d87a7a;
+}
+
 .field input:focus,
 .field select:focus {
   border-color: #5aa7c8;
@@ -115,9 +127,25 @@ select {
   outline: none;
 }
 
+.field-error {
+  color: #f0aaaa;
+  font-size: 0.78rem;
+}
+
+.form-section-title {
+  margin-top: 0.3rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #2d3a4b;
+  color: #8fa0b1;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
 }
@@ -141,9 +169,41 @@ select {
   font-size: 1.05rem;
 }
 
+.metric-wide {
+  grid-column: 1 / -1;
+}
+
 .chart-panel {
   min-width: 0;
   padding: 1rem;
+}
+
+.chart-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chart-heading h2 {
+  margin: 0;
+}
+
+.toggle-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #c7d4e2;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.toggle-control input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #5aa7c8;
 }
 
 .reflectance-chart {
@@ -164,9 +224,55 @@ select {
   height: 26rem;
 }
 
+.chart-placeholder {
+  display: grid;
+  width: 100%;
+  min-height: 26rem;
+  place-items: center;
+  border: 1px dashed #46586d;
+  border-radius: 8px;
+  color: #9aa8b7;
+  background: #101720;
+  text-align: center;
+  padding: 1rem;
+}
+
+.assumptions-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
+.assumptions-panel h2 {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+.assumptions-panel ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #9aa8b7;
+  font-size: 0.86rem;
+}
+
+.assumptions-panel li + li {
+  margin-top: 0.35rem;
+}
+
 @media (max-width: 860px) {
   .workspace {
     grid-template-columns: 1fr;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .chart-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .metric-grid {

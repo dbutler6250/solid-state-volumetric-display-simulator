@@ -3,6 +3,7 @@ import type { LayerStack } from '../layers/stack';
 import { add, complex, divide, magnitudeSquared, multiply, scale, subtract } from '../math/complex';
 import { identityMatrix2, multiplyMatrix2, type Matrix2 } from '../math/matrix2';
 import { buildBraggReflectorStack } from '../structures/braggReflector';
+import { validateBraggReflectorInputs } from '../validation/braggReflectorValidation';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -31,20 +32,10 @@ const getSweepSettings = (inputs: BraggReflectorInputs): SweepSettings => ({
 });
 
 const assertValidInputs = (inputs: BraggReflectorInputs) => {
-  if (inputs.periodCount < 1 || !Number.isInteger(inputs.periodCount)) {
-    throw new Error('Period count must be an integer greater than zero.');
-  }
+  const issues = validateBraggReflectorInputs(inputs);
 
-  if (inputs.highIndexThicknessNm <= 0 || inputs.lowIndexThicknessNm <= 0) {
-    throw new Error('Layer thicknesses must be greater than zero.');
-  }
-
-  if (inputs.designWavelengthNm <= 0) {
-    throw new Error('Design wavelength must be greater than zero.');
-  }
-
-  if (inputs.incidentAngleDegrees < 0 || inputs.incidentAngleDegrees >= 90) {
-    throw new Error('Incident angle must be at least 0 degrees and less than 90 degrees.');
+  if (issues.length > 0) {
+    throw new Error(issues.map((issue) => issue.message).join(' '));
   }
 };
 
@@ -173,18 +164,27 @@ const createWavelengthSweep = ({ startNm, endNm, pointCount }: SweepSettings): n
 
 const calculateMetrics = (
   spectrum: LayerStackPointResult[],
-): Pick<SimulationResult, 'peakReflectance' | 'centerWavelengthNm' | 'bandwidthNm'> => {
+): Pick<
+  SimulationResult,
+  'peakReflectance' | 'centerWavelengthNm' | 'bandwidthNm' | 'maxEnergyConservationError'
+> => {
   const peak = spectrum.reduce((best, point) =>
     point.reflectance > best.reflectance ? point : best,
   );
   const halfPeakReflectance = peak.reflectance / 2;
   const aboveHalfMaximum = spectrum.filter((point) => point.reflectance >= halfPeakReflectance);
+  const maxEnergyConservationError = spectrum.reduce(
+    (worstError, point) =>
+      Math.max(worstError, Math.abs(point.reflectance + point.transmission - 1)),
+    0,
+  );
 
   if (aboveHalfMaximum.length === 0) {
     return {
       peakReflectance: peak.reflectance,
       centerWavelengthNm: peak.wavelengthNm,
       bandwidthNm: 0,
+      maxEnergyConservationError,
     };
   }
 
@@ -195,6 +195,7 @@ const calculateMetrics = (
     peakReflectance: peak.reflectance,
     centerWavelengthNm: (lowerEdge + upperEdge) / 2,
     bandwidthNm: upperEdge - lowerEdge,
+    maxEnergyConservationError,
   };
 };
 

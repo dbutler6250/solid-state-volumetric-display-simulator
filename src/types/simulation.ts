@@ -22,4 +22,5 @@ export type SimulationResult = {
   peakReflectance: number;
   centerWavelengthNm: number;
   bandwidthNm: number;
+  maxEnergyConservationError: number;
 };

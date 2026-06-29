@@ -3,29 +3,55 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 import type { SimulationResult } from '../types/simulation';
 
 type ReflectanceChartProps = {
-  result: SimulationResult;
+  result: SimulationResult | null;
+  showTransmission: boolean;
 };
 
 const Plot = createPlotlyComponent(Plotly);
 
-export function ReflectanceChart({ result }: ReflectanceChartProps) {
+export function ReflectanceChart({ result, showTransmission }: ReflectanceChartProps) {
+  if (!result) {
+    return (
+      <div className="chart-placeholder" role="status">
+        The spectrum will update when the inputs are valid.
+      </div>
+    );
+  }
+
+  const chartData = [
+    {
+      x: result.spectrum.map((point) => point.wavelengthNm),
+      y: result.spectrum.map((point) => point.reflectance),
+      type: 'scatter' as const,
+      mode: 'lines' as const,
+      name: 'Reflectance',
+      line: {
+        color: '#5aa7c8',
+        width: 3,
+      },
+      hovertemplate: '%{x:.1f} nm<br>R=%{y:.4f}<extra></extra>',
+    },
+  ];
+
+  if (showTransmission) {
+    chartData.push({
+      x: result.spectrum.map((point) => point.wavelengthNm),
+      y: result.spectrum.map((point) => point.transmission),
+      type: 'scatter' as const,
+      mode: 'lines' as const,
+      name: 'Transmission',
+      line: {
+        color: '#dab55e',
+        width: 2,
+      },
+      hovertemplate: '%{x:.1f} nm<br>T=%{y:.4f}<extra></extra>',
+    });
+  }
+
   return (
     <Plot
       className="reflectance-chart"
-      data={[
-        {
-          x: result.spectrum.map((point) => point.wavelengthNm),
-          y: result.spectrum.map((point) => point.reflectance),
-          type: 'scatter',
-          mode: 'lines',
-          name: 'Reflectance',
-          line: {
-            color: '#5aa7c8',
-            width: 3,
-          },
-          hovertemplate: '%{x:.1f} nm<br>R=%{y:.4f}<extra></extra>',
-        },
-      ]}
+      data={chartData}
       layout={{
         autosize: true,
         paper_bgcolor: '#101720',
@@ -55,7 +81,12 @@ export function ReflectanceChart({ result }: ReflectanceChartProps) {
           gridcolor: '#263443',
           zerolinecolor: '#334457',
         },
-        showlegend: false,
+        showlegend: showTransmission,
+        legend: {
+          orientation: 'h',
+          x: 0,
+          y: 1.12,
+        },
       }}
       config={{
         displaylogo: false,
