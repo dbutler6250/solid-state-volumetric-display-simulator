@@ -15,8 +15,6 @@ const CUSTOM_MATERIAL_NAME = 'Custom';
 
 type NumericField = keyof Pick<
   BraggReflectorInputs,
-  | 'highIndexThicknessNm'
-  | 'lowIndexThicknessNm'
   | 'periodCount'
   | 'designWavelengthNm'
   | 'incidentAngleDegrees'
@@ -144,31 +142,13 @@ export function BraggReflectorForm({
       {renderMaterialField('highIndexMaterial', 'High-index material')}
       {renderMaterialField('lowIndexMaterial', 'Low-index material')}
 
-      <label className="field">
-        <span>High-index thickness (nm)</span>
-        <input
-          type="number"
-          min="0.1"
-          value={inputs.highIndexThicknessNm}
-          onChange={updateNumberField('highIndexThicknessNm')}
-          onBlur={normalizeNumberField('highIndexThicknessNm', 0.1)}
-          aria-invalid={isInvalid('highIndexThicknessNm')}
-        />
-        <FieldError message={getIssueForField(validationIssues, 'highIndexThicknessNm')} />
-      </label>
-
-      <label className="field">
-        <span>Low-index thickness (nm)</span>
-        <input
-          type="number"
-          min="0.1"
-          value={inputs.lowIndexThicknessNm}
-          onChange={updateNumberField('lowIndexThicknessNm')}
-          onBlur={normalizeNumberField('lowIndexThicknessNm', 0.1)}
-          aria-invalid={isInvalid('lowIndexThicknessNm')}
-        />
-        <FieldError message={getIssueForField(validationIssues, 'lowIndexThicknessNm')} />
-      </label>
+      <div className="field">
+        <span>Layer thicknesses</span>
+        <small>
+          Quarter-wave stack values are derived automatically from the design wavelength and each
+          layer&apos;s refractive index.
+        </small>
+      </div>
 
       <label className="field">
         <span>Periods</span>

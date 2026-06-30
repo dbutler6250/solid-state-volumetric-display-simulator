@@ -40,4 +40,5 @@ Last Updated 6/29/26
 - [] Clean up UI description
 - [] Add substrate material selection to replace air default
 - [] For custom and selected refractive indidices, convert thicknesses into outputs rather than inputs
+    - [] Appears thickness calculation in Stack Definition pane update when Design Wavelength changes, but thickness "inputs" do not change, nor does reflectance data
 - [] ...

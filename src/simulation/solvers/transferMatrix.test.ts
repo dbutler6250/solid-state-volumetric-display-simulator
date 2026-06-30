@@ -65,8 +65,6 @@ describe('transfer matrix solver', () => {
     const inputs: BraggReflectorInputs = {
       highIndexMaterial,
       lowIndexMaterial,
-      highIndexThicknessNm: designWavelengthNm / (4 * highIndexMaterial.refractiveIndex),
-      lowIndexThicknessNm: designWavelengthNm / (4 * lowIndexMaterial.refractiveIndex),
       periodCount: 8,
       designWavelengthNm,
       incidentAngleDegrees: 0,
@@ -89,8 +87,6 @@ describe('transfer matrix solver', () => {
     const result = solveBraggReflector({
       highIndexMaterial,
       lowIndexMaterial,
-      highIndexThicknessNm: designWavelengthNm / (4 * highIndexMaterial.refractiveIndex),
-      lowIndexThicknessNm: designWavelengthNm / (4 * lowIndexMaterial.refractiveIndex),
       periodCount: 6,
       designWavelengthNm,
       incidentAngleDegrees: 25,

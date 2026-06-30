@@ -6,8 +6,6 @@ export type Polarization = 'TE' | 'TM';
 export type BraggReflectorInputs = {
   highIndexMaterial: Material;
   lowIndexMaterial: Material;
-  highIndexThicknessNm: number;
-  lowIndexThicknessNm: number;
   periodCount: number;
   designWavelengthNm: number;
   incidentAngleDegrees: number;

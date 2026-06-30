@@ -13,20 +13,6 @@ export function validateBraggReflectorInputs(inputs: BraggReflectorInputs): Vali
   const wavelengthEndNm = inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5;
   const wavelengthPointCount = inputs.wavelengthPointCount ?? 401;
 
-  if (!isFiniteNumber(inputs.highIndexThicknessNm) || inputs.highIndexThicknessNm <= 0) {
-    issues.push({
-      field: 'highIndexThicknessNm',
-      message: 'High-index thickness must be greater than 0 nm.',
-    });
-  }
-
-  if (!isFiniteNumber(inputs.lowIndexThicknessNm) || inputs.lowIndexThicknessNm <= 0) {
-    issues.push({
-      field: 'lowIndexThicknessNm',
-      message: 'Low-index thickness must be greater than 0 nm.',
-    });
-  }
-
   if (
     !isFiniteNumber(inputs.periodCount) ||
     inputs.periodCount < 1 ||

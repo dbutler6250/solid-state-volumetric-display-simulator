@@ -36,13 +36,19 @@ const createPeriodSegments = (inputs: BraggReflectorInputs, period: number): Dia
   {
     key: `h-${period}`,
     label: 'H',
-    detail: `${formatNumber(inputs.highIndexThicknessNm, 1)} nm`,
+    detail: `${formatNumber(
+      inputs.designWavelengthNm / (4 * inputs.highIndexMaterial.refractiveIndex),
+      1,
+    )} nm`,
     kind: 'high',
   },
   {
     key: `l-${period}`,
     label: 'L',
-    detail: `${formatNumber(inputs.lowIndexThicknessNm, 1)} nm`,
+    detail: `${formatNumber(
+      inputs.designWavelengthNm / (4 * inputs.lowIndexMaterial.refractiveIndex),
+      1,
+    )} nm`,
     kind: 'low',
   },
 ];
@@ -90,19 +96,22 @@ const createLayerSegments = (inputs: BraggReflectorInputs): DiagramSegment[] => 
 };
 
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
+  const highIndexThicknessNm =
+    inputs.designWavelengthNm / (4 * inputs.highIndexMaterial.refractiveIndex);
+  const lowIndexThicknessNm =
+    inputs.designWavelengthNm / (4 * inputs.lowIndexMaterial.refractiveIndex);
   const totalLayerCount = Number.isFinite(inputs.periodCount)
     ? Math.max(0, Math.round(inputs.periodCount) * 2)
     : Number.NaN;
-  const totalPhysicalThicknessNm =
-    inputs.periodCount * (inputs.highIndexThicknessNm + inputs.lowIndexThicknessNm);
+  const totalPhysicalThicknessNm = inputs.periodCount * (highIndexThicknessNm + lowIndexThicknessNm);
   const highOpticalThickness = formatOpticalThickness(
     inputs.highIndexMaterial.refractiveIndex,
-    inputs.highIndexThicknessNm,
+    highIndexThicknessNm,
     inputs.designWavelengthNm,
   );
   const lowOpticalThickness = formatOpticalThickness(
     inputs.lowIndexMaterial.refractiveIndex,
-    inputs.lowIndexThicknessNm,
+    lowIndexThicknessNm,
     inputs.designWavelengthNm,
   );
   const segments = isValid ? createLayerSegments(inputs) : [];
@@ -122,14 +131,14 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
           value={`${formatMaterialLabel(
             inputs.highIndexMaterial.name,
             inputs.highIndexMaterial.refractiveIndex,
-          )}; d=${formatNumber(inputs.highIndexThicknessNm, 1)} nm`}
+          )}; d=${formatNumber(highIndexThicknessNm, 1)} nm`}
         />
         <StackSummaryItem
           label="Low layer"
           value={`${formatMaterialLabel(
             inputs.lowIndexMaterial.name,
             inputs.lowIndexMaterial.refractiveIndex,
-          )}; d=${formatNumber(inputs.lowIndexThicknessNm, 1)} nm`}
+          )}; d=${formatNumber(lowIndexThicknessNm, 1)} nm`}
         />
         <StackSummaryItem label="H optical thickness" value={`${highOpticalThickness} \u03bb`} />
         <StackSummaryItem label="L optical thickness" value={`${lowOpticalThickness} \u03bb`} />

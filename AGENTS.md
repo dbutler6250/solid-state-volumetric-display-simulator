@@ -6,7 +6,7 @@
 
 ## Project Context
 
-- Read `PROJECT_CONTEXT.md` for the imported summary from the prior ChatGPT thread before making architectural decisions. Do not waste tokens reading project context if already known.
+- Read `PROJECT_CONTEXT.md` and `HANDOFF.md` for the summary from prior ChatGPT thread(s). Do not waste tokens reading project context if already known.
 
 ## Milestone Status
 

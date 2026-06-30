@@ -3,11 +3,12 @@ import type { LayerStack } from '../layers/stack';
 import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
 import type { BraggReflectorInputs } from '../../types/simulation';
 
+const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
+  designWavelengthNm / (4 * refractiveIndex);
+
 export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
   highIndexMaterial: MATERIAL_CATALOG[0],
   lowIndexMaterial: MATERIAL_CATALOG[1],
-  highIndexThicknessNm: 62.5,
-  lowIndexThicknessNm: 103.4,
   periodCount: 8,
   designWavelengthNm: 600,
   incidentAngleDegrees: 0,
@@ -18,17 +19,25 @@ export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
 };
 
 export function buildBraggReflectorLayers(inputs: BraggReflectorInputs): OpticalLayer[] {
+  const highIndexThicknessNm = getQuarterWaveThickness(
+    inputs.designWavelengthNm,
+    inputs.highIndexMaterial.refractiveIndex,
+  );
+  const lowIndexThicknessNm = getQuarterWaveThickness(
+    inputs.designWavelengthNm,
+    inputs.lowIndexMaterial.refractiveIndex,
+  );
   const layers: OpticalLayer[] = [];
 
   for (let period = 0; period < inputs.periodCount; period += 1) {
     layers.push(
       {
         material: inputs.highIndexMaterial,
-        thicknessNm: inputs.highIndexThicknessNm,
+        thicknessNm: highIndexThicknessNm,
       },
       {
         material: inputs.lowIndexMaterial,
-        thicknessNm: inputs.lowIndexThicknessNm,
+        thicknessNm: lowIndexThicknessNm,
       },
     );
   }
