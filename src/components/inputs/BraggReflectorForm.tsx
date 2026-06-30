@@ -10,6 +10,8 @@ type BraggReflectorFormProps = {
 };
 
 const toNumber = (value: string): number => Number(value);
+const CUSTOM_MATERIAL_ID = 'custom';
+const CUSTOM_MATERIAL_NAME = 'Custom';
 
 type NumericField = keyof Pick<
   BraggReflectorInputs,
@@ -35,6 +37,8 @@ const clampNumber = (value: number, min: number, max?: number): number => {
 
   return Math.min(max ?? value, Math.max(min, value));
 };
+
+const isCustomMaterial = (materialId: string): boolean => materialId === CUSTOM_MATERIAL_ID;
 
 export function BraggReflectorForm({
   inputs,
@@ -65,43 +69,80 @@ export function BraggReflectorForm({
   const updateMaterial =
     (field: 'highIndexMaterial' | 'lowIndexMaterial') =>
     (event: ChangeEvent<HTMLSelectElement>) => {
-      const material = MATERIAL_CATALOG.find((item) => item.id === event.target.value);
+      const selectedMaterialId = event.target.value;
+      const material = MATERIAL_CATALOG.find((item) => item.id === selectedMaterialId);
 
-      if (!material) {
+      if (!material && !isCustomMaterial(selectedMaterialId)) {
         return;
       }
 
       onChange({
         ...inputs,
-        [field]: material,
+        [field]:
+          material ??
+          ({
+            id: CUSTOM_MATERIAL_ID,
+            name: CUSTOM_MATERIAL_NAME,
+            refractiveIndex: inputs[field].refractiveIndex,
+          } as BraggReflectorInputs[typeof field]),
+      });
+    };
+
+  const updateCustomRefractiveIndex =
+    (field: 'highIndexMaterial' | 'lowIndexMaterial') =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onChange({
+        ...inputs,
+        [field]: {
+          ...inputs[field],
+          id: CUSTOM_MATERIAL_ID,
+          name: CUSTOM_MATERIAL_NAME,
+          refractiveIndex: toNumber(event.target.value),
+        },
       });
     };
   const isInvalid = (field: keyof BraggReflectorInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;
 
+  const renderMaterialField = (field: 'highIndexMaterial' | 'lowIndexMaterial', label: string) => {
+    const material = inputs[field];
+    const isCustom = isCustomMaterial(material.id);
+
+    return (
+      <div className="field">
+        <span>{label}</span>
+        <select
+          value={isCustom ? CUSTOM_MATERIAL_ID : material.id}
+          onChange={updateMaterial(field)}
+        >
+          {MATERIAL_CATALOG.map((catalogMaterial) => (
+            <option key={catalogMaterial.id} value={catalogMaterial.id}>
+              {catalogMaterial.name} (n={catalogMaterial.refractiveIndex})
+            </option>
+          ))}
+          <option value={CUSTOM_MATERIAL_ID}>Custom refractive index</option>
+        </select>
+        {isCustom ? (
+          <div className="field">
+            <span>{label} n</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={material.refractiveIndex}
+              onChange={updateCustomRefractiveIndex(field)}
+              aria-label={`${label} refractive index`}
+            />
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
   return (
     <form className="form-grid">
-      <label className="field">
-        <span>High-index material</span>
-        <select value={inputs.highIndexMaterial.id} onChange={updateMaterial('highIndexMaterial')}>
-          {MATERIAL_CATALOG.map((material) => (
-            <option key={material.id} value={material.id}>
-              {material.name} (n={material.refractiveIndex})
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="field">
-        <span>Low-index material</span>
-        <select value={inputs.lowIndexMaterial.id} onChange={updateMaterial('lowIndexMaterial')}>
-          {MATERIAL_CATALOG.map((material) => (
-            <option key={material.id} value={material.id}>
-              {material.name} (n={material.refractiveIndex})
-            </option>
-          ))}
-        </select>
-      </label>
+      {renderMaterialField('highIndexMaterial', 'High-index material')}
+      {renderMaterialField('lowIndexMaterial', 'Low-index material')}
 
       <label className="field">
         <span>High-index thickness (nm)</span>

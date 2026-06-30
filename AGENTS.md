@@ -43,3 +43,5 @@ Refresh includes: current status, next steps, test results, artifacts, environme
     - Carry out normal tasks on your own, only notifying when necessary
     - Do not read full files unless absolutely necessary
     - Do not randomly explore directories, ask if not obvious
+    - Produce the minimal diff necessary
+    - Code only as much as possible, provide little explanation unless asked

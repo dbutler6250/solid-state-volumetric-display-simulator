@@ -21,6 +21,9 @@ const formatNumber = (value: number, digits = 2): string =>
 
 const formatCount = (value: number): string => (Number.isFinite(value) ? `${Math.round(value)}` : 'Invalid');
 
+const formatMaterialLabel = (name: string, refractiveIndex: number): string =>
+  `${name}${name === 'Custom' ? ' material' : ''} (n=${formatNumber(refractiveIndex)})`;
+
 const formatOpticalThickness = (refractiveIndex: number, thicknessNm: number, wavelengthNm: number) => {
   if (!Number.isFinite(wavelengthNm) || wavelengthNm <= 0) {
     return 'Invalid';
@@ -116,17 +119,17 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
         <StackSummaryItem label="Total thickness" value={`${formatNumber(totalPhysicalThicknessNm, 1)} nm`} />
         <StackSummaryItem
           label="High layer"
-          value={`n=${formatNumber(inputs.highIndexMaterial.refractiveIndex)}; d=${formatNumber(
-            inputs.highIndexThicknessNm,
-            1,
-          )} nm`}
+          value={`${formatMaterialLabel(
+            inputs.highIndexMaterial.name,
+            inputs.highIndexMaterial.refractiveIndex,
+          )}; d=${formatNumber(inputs.highIndexThicknessNm, 1)} nm`}
         />
         <StackSummaryItem
           label="Low layer"
-          value={`n=${formatNumber(inputs.lowIndexMaterial.refractiveIndex)}; d=${formatNumber(
-            inputs.lowIndexThicknessNm,
-            1,
-          )} nm`}
+          value={`${formatMaterialLabel(
+            inputs.lowIndexMaterial.name,
+            inputs.lowIndexMaterial.refractiveIndex,
+          )}; d=${formatNumber(inputs.lowIndexThicknessNm, 1)} nm`}
         />
         <StackSummaryItem label="H optical thickness" value={`${highOpticalThickness} \u03bb`} />
         <StackSummaryItem label="L optical thickness" value={`${lowOpticalThickness} \u03bb`} />
