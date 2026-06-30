@@ -22,6 +22,7 @@ Last Updated 6/29/26
     - [x] Remove horizontal scroll
     - [x] Fix lambda symbols
 - [x] Clean up documentation for future reference and better AI tool integration
+- [x] Allow custom refractive index values
 
 ## Ideas
 - [] Add parameter sweeps and multidimensional analysis
@@ -32,4 +33,11 @@ Last Updated 6/29/26
 - [] Add Three.js capabilities for improved stack visualizations and result visuals
 - [] Add capabilites for complex refractive index handling
 - [] Add accurate layer thickness and remove quarter wave assumption
+- [] Add export/import and similar abilities via csv data format
+- [] Add input field presets
+- [] Improved UI input fields, explore slider usages
+- [] Clarify bandwidth output, confirm FWHM usage
+- [] Clean up UI description
+- [] Add substrate material selection to replace air default
+- [] For custom and selected refractive indidices, convert thicknesses into outputs rather than inputs
 - [] ...
