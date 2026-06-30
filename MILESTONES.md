@@ -23,6 +23,7 @@ Last Updated 6/29/26
     - [x] Fix lambda symbols
 - [x] Clean up documentation for future reference and better AI tool integration
 - [x] Allow custom refractive index values
+- [x] Change layer thicknesses to dervied values based off of design wavelength
 
 ## Ideas
 - [] Add parameter sweeps and multidimensional analysis
@@ -39,6 +40,6 @@ Last Updated 6/29/26
 - [] Clarify bandwidth output, confirm FWHM usage
 - [] Clean up UI description
 - [] Add substrate material selection to replace air default
-- [] For custom and selected refractive indidices, convert thicknesses into outputs rather than inputs
-    - [] Appears thickness calculation in Stack Definition pane update when Design Wavelength changes, but thickness "inputs" do not change, nor does reflectance data
+- [] Improve default sweep width handling
+- [] Improve stack definition UI
 - [] ...

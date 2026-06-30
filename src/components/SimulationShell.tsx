@@ -20,6 +20,20 @@ export function SimulationShell() {
     return solveBraggReflector(inputs);
   }, [inputs, validationIssues]);
 
+  const centerSweepOnBandwidth = () => {
+    if (!result || result.bandwidthNm <= 0) {
+      return;
+    }
+
+    const halfWindow = (result.bandwidthNm * 5) / 2;
+
+    setInputs({
+      ...inputs,
+      wavelengthStartNm: result.centerWavelengthNm - halfWindow,
+      wavelengthEndNm: result.centerWavelengthNm + halfWindow,
+    });
+  };
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -44,14 +58,23 @@ export function SimulationShell() {
         <section className="chart-panel" aria-label="Simulation outputs">
           <div className="chart-heading">
             <h2>Spectrum</h2>
-            <label className="toggle-control">
-              <input
-                type="checkbox"
-                checked={showTransmission}
-                onChange={(event) => setShowTransmission(event.target.checked)}
-              />
-              <span>Transmission</span>
-            </label>
+            <div className="chart-controls">
+              <button
+                type="button"
+                onClick={centerSweepOnBandwidth}
+                disabled={!result || result.bandwidthNm <= 0}
+              >
+                Center on Bandwidth
+              </button>
+              <label className="toggle-control">
+                <input
+                  type="checkbox"
+                  checked={showTransmission}
+                  onChange={(event) => setShowTransmission(event.target.checked)}
+                />
+                <span>Transmission</span>
+              </label>
+            </div>
           </div>
           <ReflectanceChart result={result} showTransmission={showTransmission} />
           <MetricsPanel result={result} />
