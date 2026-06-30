@@ -8,6 +8,11 @@ import { DEFAULT_BRAGG_REFLECTOR_INPUTS } from '../simulation/structures/braggRe
 import { solveBraggReflector } from '../simulation/solvers/transferMatrix';
 import { validateBraggReflectorInputs } from '../simulation/validation/braggReflectorValidation';
 
+const MIN_WAVELENGTH_NM = 1;
+const MIN_SPECTRUM_SPAN_NM = 1;
+const MIN_SWEEP_MULTIPLIER = 1;
+const MAX_SWEEP_MULTIPLIER = 5;
+
 export function SimulationShell() {
   const [inputs, setInputs] = useState(DEFAULT_BRAGG_REFLECTOR_INPUTS);
   const [showTransmission, setShowTransmission] = useState(false);
@@ -25,12 +30,20 @@ export function SimulationShell() {
       return;
     }
 
-    const halfWindow = (result.bandwidthNm * 5) / 2;
+    const normalizedBandwidth = result.bandwidthNm / inputs.designWavelengthNm;
+    const sweepMultiplier = clamp(
+      MAX_SWEEP_MULTIPLIER - normalizedBandwidth * (MAX_SWEEP_MULTIPLIER - MIN_SWEEP_MULTIPLIER),
+      MIN_SWEEP_MULTIPLIER,
+      MAX_SWEEP_MULTIPLIER,
+    );
+    const halfWindow = (result.bandwidthNm * sweepMultiplier) / 2;
+    const startNm = Math.max(MIN_WAVELENGTH_NM, result.centerWavelengthNm - halfWindow);
+    const endNm = Math.max(startNm + MIN_SPECTRUM_SPAN_NM, result.centerWavelengthNm + halfWindow);
 
     setInputs({
       ...inputs,
-      wavelengthStartNm: result.centerWavelengthNm - halfWindow,
-      wavelengthEndNm: result.centerWavelengthNm + halfWindow,
+      wavelengthStartNm: startNm,
+      wavelengthEndNm: endNm,
     });
   };
 
@@ -83,4 +96,8 @@ export function SimulationShell() {
       </section>
     </main>
   );
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }

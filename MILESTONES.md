@@ -24,6 +24,7 @@ Last Updated 6/29/26
 - [x] Clean up documentation for future reference and better AI tool integration
 - [x] Allow custom refractive index values
 - [x] Change layer thicknesses to dervied values based off of design wavelength
+- [x] Add ability to center plot around bandwidth quickly
 
 ## Ideas
 - [] Add parameter sweeps and multidimensional analysis
@@ -40,6 +41,5 @@ Last Updated 6/29/26
 - [] Clarify bandwidth output, confirm FWHM usage
 - [] Clean up UI description
 - [] Add substrate material selection to replace air default
-- [] Improve default sweep width handling
 - [] Improve stack definition UI
 - [] ...
