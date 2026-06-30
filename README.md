@@ -1,19 +1,29 @@
 # Solid State Volumetric Display Simulator
 
+Author: Dylan Butler
+Last Updated 6/29/26
+
+## Project Description
+
 Browser-based optics simulation platform for solid-state volumetric display design.
 
-Version 1 is scoped to a Transfer Matrix Method Bragg reflector simulator built with
-TypeScript, React, Vite, and Plotly.
+Utilizes Transfer Matrix Method (TMM) solver to simulate [Bragg Reflectors](https://www.rp-photonics.com/bragg_mirrors.html) and their performance metrics. Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
+
+## Demonstration
+
+Screenshots to be added once development is complete.
+
+## How To Use
+
+Screenshots and instructions to be added once development is complete.
 
 ## Local Setup
 
-1. Install Node.js LTS.
-2. Install Git.
-3. Install the recommended VS Code extensions when prompted.
-4. Run `npm install`.
-5. Run `npm run dev`.
-
-Three.js is intentionally not included in Version 1.
+1. Install Node.js LTS
+2. Install Git
+3. Install the recommended VS Code extensions when prompted (ESLint, Prettier, GitHub)
+4. Run `npm install`
+5. Run `npm run dev`
 
 ## GitHub Pages Deployment
 
