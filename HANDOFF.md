@@ -3,6 +3,7 @@
 ## Latest Task
 
 - Fixed `centerWavelengthNm` in `transferMatrix.ts` so it is derived from the contiguous half-max stopband around the true peak instead of being forced to the design wavelength.
+- Added a sweep range control with a live numeric display, preset range buttons, and symmetric start/end updates around the current sweep center.
 
 ## Verification
 

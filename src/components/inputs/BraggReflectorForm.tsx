@@ -6,12 +6,20 @@ import type { BraggReflectorInputs, Polarization } from '../../types/simulation'
 type BraggReflectorFormProps = {
   inputs: BraggReflectorInputs;
   validationIssues: ValidationIssue[];
+  centerWavelengthNm?: number;
   onChange: (inputs: BraggReflectorInputs) => void;
 };
 
 const toNumber = (value: string): number => Number(value);
 const CUSTOM_MATERIAL_ID = 'custom';
 const CUSTOM_MATERIAL_NAME = 'Custom';
+const SWEEP_RANGE_PRESETS_NM = [10, 50, 100, 200, 300, 600];
+const SWEEP_RANGE_MIN_NM = 10;
+const SWEEP_RANGE_MAX_NM = 1200;
+const SWEEP_RANGE_STEP_NM = 10;
+const SWEEP_ENDPOINT_MIN_NM = 1;
+const SWEEP_ENDPOINT_MAX_NM = 2000;
+const SWEEP_ENDPOINT_STEP_NM = 0.1;
 
 type NumericField = keyof Pick<
   BraggReflectorInputs,
@@ -37,10 +45,58 @@ const clampNumber = (value: number, min: number, max?: number): number => {
 };
 
 const isCustomMaterial = (materialId: string): boolean => materialId === CUSTOM_MATERIAL_ID;
+const getSweepCenter = (inputs: BraggReflectorInputs): number =>
+  ((inputs.wavelengthStartNm ?? 0) + (inputs.wavelengthEndNm ?? 0)) / 2;
+
+const getSweepRange = (inputs: BraggReflectorInputs): number =>
+  Math.max(0, (inputs.wavelengthEndNm ?? 0) - (inputs.wavelengthStartNm ?? 0));
+
+const normalizeSweepRange = (rangeNm: number): number =>
+  clampNumber(rangeNm, SWEEP_RANGE_MIN_NM, SWEEP_RANGE_MAX_NM);
+
+const formatWavelengthInput = (value: number | undefined): string => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return '';
+  }
+
+  return value.toFixed(4);
+};
+
+const formatSweepRangeInput = (value: number): string => value.toFixed(4);
+
+const applySweepRange = (inputs: BraggReflectorInputs, rangeNm: number): BraggReflectorInputs => {
+  const centerNm = getSweepCenter(inputs);
+  const halfRangeNm = Math.max(0, rangeNm) / 2;
+  const nextStartNm = Math.max(1, centerNm - halfRangeNm);
+  const nextEndNm = Math.max(nextStartNm + 1, centerNm + halfRangeNm);
+
+  return {
+    ...inputs,
+    wavelengthStartNm: nextStartNm,
+    wavelengthEndNm: nextEndNm,
+  };
+};
+
+const applyCenteredSweepRange = (
+  inputs: BraggReflectorInputs,
+  centerNm: number,
+  rangeNm: number,
+): BraggReflectorInputs => {
+  const halfRangeNm = Math.max(0, rangeNm) / 2;
+  const nextStartNm = Math.max(1, centerNm - halfRangeNm);
+  const nextEndNm = Math.max(nextStartNm + 1, centerNm + halfRangeNm);
+
+  return {
+    ...inputs,
+    wavelengthStartNm: nextStartNm,
+    wavelengthEndNm: nextEndNm,
+  };
+};
 
 export function BraggReflectorForm({
   inputs,
   validationIssues,
+  centerWavelengthNm,
   onChange,
 }: BraggReflectorFormProps) {
   const updateNumberField =
@@ -99,6 +155,16 @@ export function BraggReflectorForm({
         },
       });
     };
+  const updateSweepRange = (rangeNm: number) => {
+    onChange(applySweepRange(inputs, normalizeSweepRange(rangeNm)));
+  };
+  const centerSweepOnDesignLambda = () => {
+    if (centerWavelengthNm === undefined || !Number.isFinite(centerWavelengthNm)) {
+      return;
+    }
+
+    onChange(applyCenteredSweepRange(inputs, centerWavelengthNm, getSweepRange(inputs)));
+  };
   const isInvalid = (field: keyof BraggReflectorInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;
 
@@ -204,17 +270,43 @@ export function BraggReflectorForm({
         </select>
       </label>
 
-      <div className="form-section-title">Wavelength Sweep</div>
+      <div className="form-section-title sweep-section-title">
+        <span>Wavelength Sweep</span>
+        <button
+          type="button"
+          className="sweep-center-button"
+          onClick={centerSweepOnDesignLambda}
+          disabled={!Number.isFinite(centerWavelengthNm)}
+        >
+          Center on Design λ
+        </button>
+      </div>
 
       <label className="field">
         <span>Start wavelength (nm)</span>
         <input
           type="number"
-          min="1"
+          min={SWEEP_ENDPOINT_MIN_NM}
+          max={SWEEP_ENDPOINT_MAX_NM}
+          step={SWEEP_ENDPOINT_STEP_NM}
+          value={formatWavelengthInput(inputs.wavelengthStartNm)}
+          onChange={updateNumberField('wavelengthStartNm')}
+          onBlur={normalizeNumberField(
+            'wavelengthStartNm',
+            SWEEP_ENDPOINT_MIN_NM,
+            SWEEP_ENDPOINT_MAX_NM,
+          )}
+          aria-invalid={isInvalid('wavelengthStartNm')}
+        />
+        <input
+          className="sweep-range-slider"
+          type="range"
+          min={SWEEP_ENDPOINT_MIN_NM}
+          max={SWEEP_ENDPOINT_MAX_NM}
+          step={SWEEP_ENDPOINT_STEP_NM}
           value={inputs.wavelengthStartNm}
           onChange={updateNumberField('wavelengthStartNm')}
-          onBlur={normalizeNumberField('wavelengthStartNm', 1)}
-          aria-invalid={isInvalid('wavelengthStartNm')}
+          aria-label="Start wavelength slider"
         />
         <FieldError message={getIssueForField(validationIssues, 'wavelengthStartNm')} />
       </label>
@@ -223,14 +315,66 @@ export function BraggReflectorForm({
         <span>End wavelength (nm)</span>
         <input
           type="number"
-          min="1"
+          min={SWEEP_ENDPOINT_MIN_NM}
+          max={SWEEP_ENDPOINT_MAX_NM}
+          step={SWEEP_ENDPOINT_STEP_NM}
+          value={formatWavelengthInput(inputs.wavelengthEndNm)}
+          onChange={updateNumberField('wavelengthEndNm')}
+          onBlur={normalizeNumberField('wavelengthEndNm', SWEEP_ENDPOINT_MIN_NM, SWEEP_ENDPOINT_MAX_NM)}
+          aria-invalid={isInvalid('wavelengthEndNm')}
+        />
+        <input
+          className="sweep-range-slider"
+          type="range"
+          min={SWEEP_ENDPOINT_MIN_NM}
+          max={SWEEP_ENDPOINT_MAX_NM}
+          step={SWEEP_ENDPOINT_STEP_NM}
           value={inputs.wavelengthEndNm}
           onChange={updateNumberField('wavelengthEndNm')}
-          onBlur={normalizeNumberField('wavelengthEndNm', 1)}
-          aria-invalid={isInvalid('wavelengthEndNm')}
+          aria-label="End wavelength slider"
         />
         <FieldError message={getIssueForField(validationIssues, 'wavelengthEndNm')} />
       </label>
+
+      <div className="field">
+        <span>Sweep range</span>
+        <div className="sweep-range-summary">
+          <input
+            type="number"
+            min={SWEEP_RANGE_MIN_NM}
+            max={SWEEP_RANGE_MAX_NM}
+            step={SWEEP_RANGE_STEP_NM}
+            value={formatSweepRangeInput(normalizeSweepRange(getSweepRange(inputs)))}
+            onChange={(event) => updateSweepRange(toNumber(event.target.value))}
+            onBlur={() => updateSweepRange(getSweepRange(inputs))}
+            aria-label="Sweep range in nanometers"
+          />
+          <span>Centered on the current start/end midpoint</span>
+        </div>
+        <input
+          className="sweep-range-slider"
+          type="range"
+          min={SWEEP_RANGE_MIN_NM}
+          max={SWEEP_RANGE_MAX_NM}
+          step={SWEEP_RANGE_STEP_NM}
+          value={clampNumber(getSweepRange(inputs), SWEEP_RANGE_MIN_NM, SWEEP_RANGE_MAX_NM)}
+          onChange={(event) => updateSweepRange(toNumber(event.target.value))}
+          aria-label="Sweep range"
+        />
+        <div className="sweep-range-presets" role="group" aria-label="Sweep range presets">
+          {SWEEP_RANGE_PRESETS_NM.map((presetNm) => (
+            <button
+              key={presetNm}
+              type="button"
+              className="sweep-range-preset"
+              onClick={() => updateSweepRange(presetNm)}
+              aria-pressed={Math.round(getSweepRange(inputs)) === presetNm}
+            >
+              {presetNm} nm
+            </button>
+          ))}
+        </div>
+      </div>
 
       <label className="field">
         <span>Sweep points</span>

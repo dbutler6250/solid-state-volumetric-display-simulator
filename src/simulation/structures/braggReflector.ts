@@ -9,13 +9,13 @@ const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: nu
 export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
   highIndexMaterial: MATERIAL_CATALOG[0],
   lowIndexMaterial: MATERIAL_CATALOG[1],
-  periodCount: 8,
+  periodCount: 10,
   designWavelengthNm: 600,
   incidentAngleDegrees: 0,
   polarization: 'TE',
   wavelengthStartNm: 300,
   wavelengthEndNm: 900,
-  wavelengthPointCount: 401,
+  wavelengthPointCount: 500,
 };
 
 export function buildBraggReflectorLayers(inputs: BraggReflectorInputs): OpticalLayer[] {

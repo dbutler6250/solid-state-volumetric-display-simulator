@@ -144,6 +144,59 @@ label {
   font-size: 0.78rem;
 }
 
+.sweep-range-summary {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.sweep-range-summary input {
+  width: 100%;
+  max-width: 10rem;
+}
+
+.sweep-range-summary strong {
+  color: #eef5fb;
+  font-size: 1rem;
+}
+
+.sweep-range-summary span {
+  color: #8fa0b1;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.sweep-range-slider {
+  width: 100%;
+  margin: 0.15rem 0 0;
+  accent-color: #5aa7c8;
+}
+
+.sweep-range-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.sweep-range-preset {
+  min-height: 2rem;
+  border: 1px solid #3a495b;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  color: #c7d4e2;
+  background: #101720;
+  cursor: pointer;
+}
+
+.sweep-range-preset[aria-pressed='true'] {
+  border-color: #5aa7c8;
+  color: #eef5fb;
+  background: #1b2734;
+}
+
+.sweep-range-preset:hover {
+  border-color: #5aa7c8;
+}
+
 .form-section-title {
   margin-top: 0.3rem;
   padding-top: 0.85rem;
@@ -153,6 +206,37 @@ label {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+.sweep-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sweep-center-button {
+  min-height: 1.8rem;
+  border: 1px solid #3a495b;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  color: #c7d4e2;
+  background: #101720;
+  cursor: pointer;
+  font-size: 0.74rem;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.sweep-center-button:hover:not(:disabled) {
+  border-color: #5aa7c8;
+  background: #1b2734;
+}
+
+.sweep-center-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .metric-grid {

@@ -62,6 +62,7 @@ export function SimulationShell() {
           <BraggReflectorForm
             inputs={inputs}
             validationIssues={validationIssues}
+            centerWavelengthNm={result?.centerWavelengthNm}
             onChange={setInputs}
           />
           <AssumptionsPanel />
