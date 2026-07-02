@@ -28,7 +28,7 @@ type SweepSettings = {
 const getSweepSettings = (inputs: BraggReflectorInputs): SweepSettings => ({
   startNm: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
   endNm: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
-  pointCount: inputs.wavelengthPointCount ?? 401,
+  pointCount: inputs.wavelengthPointCount ?? 500,
 });
 
 const assertValidInputs = (inputs: BraggReflectorInputs) => {
@@ -162,24 +162,53 @@ const createWavelengthSweep = ({ startNm, endNm, pointCount }: SweepSettings): n
   return Array.from({ length: pointCount }, (_, index) => startNm + step * index);
 };
 
+const findHalfMaximumBand = (
+  spectrum: LayerStackPointResult[],
+  peakIndex: number,
+  halfPeakReflectance: number,
+): [number, number] | null => {
+  let lowerIndex = peakIndex;
+  let upperIndex = peakIndex;
+
+  while (lowerIndex > 0 && spectrum[lowerIndex - 1].reflectance >= halfPeakReflectance) {
+    lowerIndex -= 1;
+  }
+
+  while (
+    upperIndex < spectrum.length - 1 &&
+    spectrum[upperIndex + 1].reflectance >= halfPeakReflectance
+  ) {
+    upperIndex += 1;
+  }
+
+  if (lowerIndex === upperIndex) {
+    return null;
+  }
+
+  return [spectrum[lowerIndex].wavelengthNm, spectrum[upperIndex].wavelengthNm];
+};
+
 const calculateMetrics = (
   spectrum: LayerStackPointResult[],
 ): Pick<
   SimulationResult,
   'peakReflectance' | 'centerWavelengthNm' | 'bandwidthNm' | 'maxEnergyConservationError'
 > => {
-  const peak = spectrum.reduce((best, point) =>
-    point.reflectance > best.reflectance ? point : best,
+  const peakIndex = spectrum.reduce(
+    (bestIndex, point, index, points) =>
+      point.reflectance > points[bestIndex].reflectance ? index : bestIndex,
+    0,
   );
+  const peak = spectrum[peakIndex];
   const halfPeakReflectance = peak.reflectance / 2;
-  const aboveHalfMaximum = spectrum.filter((point) => point.reflectance >= halfPeakReflectance);
+  const halfMaximumBand = findHalfMaximumBand(spectrum, peakIndex, halfPeakReflectance);
   const maxEnergyConservationError = spectrum.reduce(
     (worstError, point) =>
       Math.max(worstError, Math.abs(point.reflectance + point.transmission - 1)),
     0,
   );
 
-  if (aboveHalfMaximum.length === 0) {
+  if (!halfMaximumBand) {
     return {
       peakReflectance: peak.reflectance,
       centerWavelengthNm: peak.wavelengthNm,
@@ -188,8 +217,7 @@ const calculateMetrics = (
     };
   }
 
-  const lowerEdge = aboveHalfMaximum[0].wavelengthNm;
-  const upperEdge = aboveHalfMaximum[aboveHalfMaximum.length - 1].wavelengthNm;
+  const [lowerEdge, upperEdge] = halfMaximumBand;
 
   return {
     peakReflectance: peak.reflectance,

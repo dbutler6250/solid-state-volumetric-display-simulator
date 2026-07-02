@@ -53,3 +53,12 @@ npm.cmd install
 npm.cmd run dev
 npm.cmd run build
 ```
+
+## Local Dev Server
+
+```powershell
+Start: 
+$proc = Start-Process -FilePath npm.cmd -ArgumentList 'run','dev','--','--host','127.0.0.1' -WorkingDirectory 'C:\Users\dbutl\OneDrive\Documents\Projects\Volumetric Display\Solid State\MkII\01_Software\Simulation Tool' -PassThru; $proc.Id
+Stop: 
+Stop-Process -Id <PID>
+```

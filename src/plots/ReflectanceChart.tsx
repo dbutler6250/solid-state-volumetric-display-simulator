@@ -5,11 +5,12 @@ import type { SimulationResult } from '../types/simulation';
 type ReflectanceChartProps = {
   result: SimulationResult | null;
   showTransmission: boolean;
+  xRange?: [number, number] | null;
 };
 
 const Plot = createPlotlyComponent(Plotly);
 
-export function ReflectanceChart({ result, showTransmission }: ReflectanceChartProps) {
+export function ReflectanceChart({ result, showTransmission, xRange }: ReflectanceChartProps) {
   if (!result) {
     return (
       <div className="chart-placeholder" role="status">
@@ -72,6 +73,7 @@ export function ReflectanceChart({ result, showTransmission }: ReflectanceChartP
           },
           gridcolor: '#263443',
           zerolinecolor: '#334457',
+          range: xRange ?? undefined,
         },
         yaxis: {
           title: {

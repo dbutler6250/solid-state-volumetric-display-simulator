@@ -2,8 +2,7 @@
 
 ## Latest Task
 
-- Converted Bragg reflector layer thicknesses to derived quarter-wave values from `designWavelengthNm`.
-- Removed thickness fields from the Bragg reflector form and updated the stack summary to show computed values.
+- Fixed `centerWavelengthNm` in `transferMatrix.ts` so it is derived from the contiguous half-max stopband around the true peak instead of being forced to the design wavelength.
 
 ## Verification
 
@@ -13,5 +12,5 @@
 
 ## Notes
 
-- Quarter-wave thickness now uses `d = designWavelengthNm / (4 * n)` with separate `n` for high and low layers.
+- Updated `src/simulation/solvers/transferMatrix.test.ts` to reflect the new center-wavelength behavior.
 - Build still reports the pre-existing Vite chunk-size warning.

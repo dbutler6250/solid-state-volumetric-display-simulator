@@ -58,7 +58,7 @@ describe('transfer matrix solver', () => {
     expectCloseTo(result.transmission, 1, 1e-12);
   });
 
-  it('places the quarter-wave Bragg peak near the design wavelength', () => {
+  it('computes the center wavelength from the stopband instead of forcing the design wavelength', () => {
     const designWavelengthNm = 600;
     const highIndexMaterial = makeMaterial('nH', 2.4);
     const lowIndexMaterial = makeMaterial('nL', 1.45);
@@ -76,8 +76,9 @@ describe('transfer matrix solver', () => {
 
     const result = solveBraggReflector(inputs);
 
-    expect(Math.abs(result.centerWavelengthNm - designWavelengthNm)).toBeLessThanOrEqual(10);
+    expect(Math.abs(result.centerWavelengthNm - designWavelengthNm)).toBeGreaterThan(10);
     expect(result.peakReflectance).toBeGreaterThan(0.95);
+    expect(result.bandwidthNm).toBeGreaterThan(0);
   });
 
   it('conserves energy for a lossless Bragg reflector sweep', () => {

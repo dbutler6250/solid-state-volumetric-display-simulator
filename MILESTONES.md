@@ -25,6 +25,7 @@ Last Updated 6/29/26
 - [x] Allow custom refractive index values
 - [x] Change layer thicknesses to dervied values based off of design wavelength
 - [x] Add ability to center plot around bandwidth quickly
+- [x] Correct FWHM bandwidth and peak reflectance/center wavelength logic
 
 ## Ideas
 - [] Add parameter sweeps and multidimensional analysis
@@ -39,7 +40,11 @@ Last Updated 6/29/26
 - [] Add input field presets
 - [] Improved UI input fields, explore slider usages
 - [] Clarify bandwidth output, confirm FWHM usage
-- [] Clean up UI description
+- [] Clean up UI
+    - [] Truncate extra decimal points for wavelength fields
+    - [] Create How To Use section at bottom of page
 - [] Add substrate material selection to replace air default
 - [] Improve stack definition UI
+- [] Add slider for fast sweep range adjustments
+- [] Fix center wavelength implementation, transferMatrix.ts peak reflectance logic should assume design wavelength, not find peak reflectance point (calculateMetrics)
 - [] ...

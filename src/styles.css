@@ -70,6 +70,18 @@ label {
   align-items: start;
 }
 
+.how-to-use-panel {
+  width: min(100%, 1260px);
+  margin: 0 auto clamp(1rem, 3vw, 2rem);
+}
+
+.how-to-use-panel-body {
+  min-height: 8rem;
+  border: 1px dashed #46586d;
+  border-radius: 8px;
+  background: #101720;
+}
+
 .panel,
 .chart-panel {
   border: 1px solid #2d3a4b;
@@ -311,10 +323,53 @@ label {
   margin: 0;
 }
 
+.chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.chart-button-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 999px;
+  background: #101720;
+}
+
+.chart-button-group button {
+  min-height: 2.2rem;
+  border: 1px solid #3a495b;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  color: #e5edf5;
+  background: #16202b;
+  cursor: pointer;
+}
+
+.chart-button-group button:hover:not(:disabled) {
+  border-color: #5aa7c8;
+  background: #1b2734;
+}
+
+.chart-button-group button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .toggle-control {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: 2.2rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 999px;
+  background: #101720;
   color: #c7d4e2;
   cursor: pointer;
   font-size: 0.9rem;
@@ -398,6 +453,11 @@ label {
   .chart-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .chart-toolbar {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .metric-grid {
