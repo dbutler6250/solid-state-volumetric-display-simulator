@@ -3,7 +3,7 @@
 Author: Dylan Butler
 Last Updated 6/29/26
 
-## Milestones
+## Completed Milestones
 
 - [x] Set up development environment
     - [x] Install required dependencies (Node.js, Lint, etc.)
@@ -27,23 +27,37 @@ Last Updated 6/29/26
 - [x] Add ability to center plot around bandwidth quickly
 - [x] Correct FWHM bandwidth and peak reflectance/center
 - [x] Add slider for fast sweep range adjustments
+- [x] Add CSV export for simulation spectra
 
-## Ideas
+## Future Milestones
 - [] Add parameter sweeps and multidimensional analysis
 - [] Add reflectance & transmission versus angle plots
-- [] Add reflectance heatmaps over wavelength and angle
 - [] Add stopband evolution
 - [] Add polarization comparison
 - [] Add Three.js capabilities for improved stack visualizations and result visuals
 - [] Add capabilites for complex refractive index handling
-- [] Add accurate layer thickness and remove quarter wave assumption
-- [] Add export/import and similar abilities via csv data format
-- [] Add input field presets
-- [] Improved UI input fields, explore slider usages
-- [] Clarify bandwidth output, confirm FWHM usage
+- [] Recontextualize "Bragg" within codebase and genericize
 - [] Clean up UI
-    - [] Truncate extra decimal points for wavelength fields
     - [] Complete How To Use section at bottom of page
-- [] Add substrate material selection to replace air default
 - [] Improve stack definition UI
+- [] Add capabilities outside of just quarter wave stacks
+- [] Add secondary bandwidth output (not FWHM), based on user selected R% threshold
+- [] Add reflectance heatmaps over wavelength and angle
+- [] Add "period multiplier" similar to matlab to get closer to acoustic frequencies
+- [] Allow custom non-quarter wave thicknesses to better simulate acoustic wave behavior?
+    - [] Add acoustic logic (frequency input) and optionally(?) drive design thicknesses
+- [] Create heat map of optical wavelength vs acoustic frequency of reflection
+    - [] Pick out acoustic frequency to design EMAT against
+- [] Add logic behind volumetric display simulation
+    - [] reflection plane width
+    - [] plane location
+    - [] playback speed
+    - [] Add logic for acousto-optic engine
+        - [] Ideally want real reflection valuew driving three.js display simulation
+        - [] Need to define equations and research more
+- [] Add 3D visualization abilities to display outputs rom logic above (three.js)
+    - [] Result should be similar to MKI slice simulator plus playback capabilities
+    - [] Will have slicing structure complete and tested so it can be simulated in software regardless of hardware status
+- [] Add JSON export/import for simulation setups
+- [] Add CSV import for external comparison data
 - [] ...

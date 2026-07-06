@@ -7,6 +7,8 @@ import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_BRAGG_REFLECTOR_INPUTS } from '../simulation/structures/braggReflector';
 import { solveBraggReflector } from '../simulation/solvers/transferMatrix';
 import { validateBraggReflectorInputs } from '../simulation/validation/braggReflectorValidation';
+import { exportResultsCsv } from '../io/exportResultsCsv';
+import { downloadTextFile } from '../io/download';
 
 const MIN_WAVELENGTH_NM = 1;
 const MIN_VIEW_MULTIPLIER = 0.5;
@@ -47,6 +49,20 @@ export function SimulationShell() {
     setXRange(null);
   };
 
+  const exportCsv = () => {
+    if (!result) {
+      return;
+    }
+
+    const csv = exportResultsCsv(inputs, result);
+    const now = new Date();
+    const filename = `bragg-results-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}-${String(now.getDate()).padStart(2, '0')}.csv`;
+    downloadTextFile(filename, csv);
+  };
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -82,6 +98,9 @@ export function SimulationShell() {
                 </button>
                 <button type="button" onClick={resetView} disabled={!xRange}>
                   Reset View
+                </button>
+                <button type="button" onClick={exportCsv} disabled={!result}>
+                  Export CSV
                 </button>
               </div>
               <label className="toggle-control">
