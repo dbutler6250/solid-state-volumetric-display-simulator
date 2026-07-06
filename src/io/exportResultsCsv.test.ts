@@ -40,6 +40,7 @@ describe('exportResultsCsv', () => {
 
     expect(lines[0]).toBe('# Solid State Volumetric Display Simulator');
     expect(lines[1]).toBe('# Bragg reflector spectrum export');
+    expect(lines[2]).toBe('# schema: ssvds-results-csv-v1');
     expect(lines).toContain('# highIndexMaterial.name: High\\nIndex');
     expect(lines).toContain('# highIndexMaterial.id: hi, \\"quoted\\"');
     expect(lines).toContain('wavelength_nm,reflectance,transmission');

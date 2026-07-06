@@ -7,6 +7,7 @@ import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_BRAGG_REFLECTOR_INPUTS } from '../simulation/structures/braggReflector';
 import { solveBraggReflector } from '../simulation/solvers/transferMatrix';
 import { validateBraggReflectorInputs } from '../simulation/validation/braggReflectorValidation';
+import { exportBraggConfigJson } from '../io/exportBraggConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
 import { downloadTextFile } from '../io/download';
 
@@ -55,12 +56,14 @@ export function SimulationShell() {
     }
 
     const csv = exportResultsCsv(inputs, result);
-    const now = new Date();
-    const filename = `bragg-results-${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      '0',
-    )}-${String(now.getDate()).padStart(2, '0')}.csv`;
+    const filename = `bragg-results-${formatDateStamp(new Date())}.csv`;
     downloadTextFile(filename, csv);
+  };
+
+  const exportSetup = () => {
+    const json = exportBraggConfigJson(inputs);
+    const filename = `bragg-setup-${formatDateStamp(new Date())}.json`;
+    downloadTextFile(filename, json, 'application/json');
   };
 
   return (
@@ -88,7 +91,7 @@ export function SimulationShell() {
           <div className="chart-heading">
             <h2>Spectrum</h2>
             <div className="chart-toolbar">
-              <div className="chart-button-group" role="group" aria-label="Chart view controls">
+              <div className="chart-button-group" role="group" aria-label="Chart Controls">
                 <button
                   type="button"
                   onClick={centerOnBandwidth}
@@ -101,6 +104,9 @@ export function SimulationShell() {
                 </button>
                 <button type="button" onClick={exportCsv} disabled={!result}>
                   Export CSV
+                </button>
+                <button type="button" onClick={exportSetup}>
+                  Export Setup
                 </button>
               </div>
               <label className="toggle-control">
@@ -129,4 +135,10 @@ export function SimulationShell() {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function formatDateStamp(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate(),
+  ).padStart(2, '0')}`;
 }

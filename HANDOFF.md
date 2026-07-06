@@ -2,8 +2,8 @@
 
 ## Latest Task
 
-- Fixed `centerWavelengthNm` in `transferMatrix.ts` so it is derived from the contiguous half-max stopband around the true peak instead of being forced to the design wavelength.
-- Added a sweep range control with a live numeric display, preset range buttons, and symmetric start/end updates around the current sweep center.
+- Added JSON setup export for Phase 2 via `src/io/exportBraggConfigJson.ts` and wired an `Export Setup` button into `SimulationShell`.
+- Added the CSV schema metadata line `# schema: ssvds-results-csv-v1` and renamed the chart control group aria-label to `Chart Controls`.
 
 ## Verification
 
@@ -13,5 +13,5 @@
 
 ## Notes
 
-- Updated `src/simulation/solvers/transferMatrix.test.ts` to reflect the new center-wavelength behavior.
+- Added Vitest coverage for the JSON export contract and the CSV schema/version comment.
 - Build still reports the pre-existing Vite chunk-size warning.

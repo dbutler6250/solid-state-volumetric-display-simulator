@@ -19,6 +19,7 @@ export function exportResultsCsv(inputs: BraggReflectorInputs, result: Simulatio
   const lines = [
     '# Solid State Volumetric Display Simulator',
     '# Bragg reflector spectrum export',
+    '# schema: ssvds-results-csv-v1',
     formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
     formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
     formatCommentLine('highIndexMaterial.refractiveIndex', inputs.highIndexMaterial.refractiveIndex),
