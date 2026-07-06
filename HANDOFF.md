@@ -7,7 +7,9 @@
 
 ## Verification
 
-- Not run yet in this pass.
+- `npm.cmd run test` passed
+- `npm.cmd run lint` passed
+- `npm.cmd run build` passed with the existing Vite chunk-size warning
 
 ## Notes
 

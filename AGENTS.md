@@ -34,7 +34,7 @@ Refresh includes: current status, next steps, test results, artifacts, environme
 
 - Prefer explicit, highly readable code over clever optimization
 - Keep simulation code reusable so additional optical structures can be added later
-- Treat the Bragg reflector as the first supported structure, not the whole architecture
+- Treat the quarter-wave optical stack as the first supported structure, not the whole architecture
 - Always run these checks sequentially to verify your work before declaring a task complete:
     - Test: `npm.cmd run test`
     - Lint: `npm.cmd run lint`
