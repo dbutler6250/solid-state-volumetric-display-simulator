@@ -415,6 +415,12 @@ label {
   gap: 0.65rem;
 }
 
+.chart-toolbar-message {
+  margin: 0 0 1rem;
+  color: #f0aaaa;
+  font-size: 0.88rem;
+}
+
 .chart-button-group {
   display: inline-flex;
   flex-wrap: wrap;

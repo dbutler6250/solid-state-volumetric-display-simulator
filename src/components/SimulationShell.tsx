@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import { BraggReflectorForm } from './inputs/BraggReflectorForm';
 import { AssumptionsPanel } from './outputs/AssumptionsPanel';
 import { MetricsPanel } from './outputs/MetricsPanel';
@@ -10,6 +11,7 @@ import { validateBraggReflectorInputs } from '../simulation/validation/braggRefl
 import { exportBraggConfigJson } from '../io/exportBraggConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
 import { downloadTextFile } from '../io/download';
+import { importBraggConfigJson } from '../io/importBraggConfigJson';
 
 const MIN_WAVELENGTH_NM = 1;
 const MIN_VIEW_MULTIPLIER = 0.5;
@@ -19,6 +21,8 @@ export function SimulationShell() {
   const [inputs, setInputs] = useState(DEFAULT_BRAGG_REFLECTOR_INPUTS);
   const [showTransmission, setShowTransmission] = useState(false);
   const [xRange, setXRange] = useState<[number, number] | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const validationIssues = useMemo(() => validateBraggReflectorInputs(inputs), [inputs]);
   const result = useMemo(() => {
     if (validationIssues.length > 0) {
@@ -66,6 +70,36 @@ export function SimulationShell() {
     downloadTextFile(filename, json, 'application/json');
   };
 
+  const openImportPicker = () => {
+    importInputRef.current?.click();
+  };
+
+  const importSetup = async (event: ChangeEvent<HTMLInputElement>) => {
+    const [file] = Array.from(event.target.files ?? []);
+
+    if (!file) {
+      event.target.value = '';
+      return;
+    }
+
+    try {
+      const imported = importBraggConfigJson(await file.text());
+
+      if (!imported.ok) {
+        setImportError(imported.message);
+        return;
+      }
+
+      setInputs(imported.inputs);
+      setXRange(null);
+      setImportError(null);
+    } catch {
+      setImportError('The selected file could not be read.');
+    } finally {
+      event.target.value = '';
+    }
+  };
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -105,9 +139,19 @@ export function SimulationShell() {
                 <button type="button" onClick={exportCsv} disabled={!result}>
                   Export CSV
                 </button>
+                <button type="button" onClick={openImportPicker}>
+                  Import Setup
+                </button>
                 <button type="button" onClick={exportSetup}>
                   Export Setup
                 </button>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={importSetup}
+                  hidden
+                />
               </div>
               <label className="toggle-control">
                 <input
@@ -119,6 +163,11 @@ export function SimulationShell() {
               </label>
             </div>
           </div>
+          {importError ? (
+            <p className="chart-toolbar-message" role="alert">
+              {importError}
+            </p>
+          ) : null}
           <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
           <MetricsPanel result={result} />
           <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />

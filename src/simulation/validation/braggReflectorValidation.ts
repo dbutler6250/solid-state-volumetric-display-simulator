@@ -6,12 +6,54 @@ export type ValidationIssue = {
 };
 
 const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
 
 export function validateBraggReflectorInputs(inputs: BraggReflectorInputs): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const wavelengthStartNm = inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5;
   const wavelengthEndNm = inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5;
   const wavelengthPointCount = inputs.wavelengthPointCount ?? 401;
+
+  if (
+    !isNonEmptyString(inputs.highIndexMaterial.id) ||
+    !isNonEmptyString(inputs.highIndexMaterial.name)
+  ) {
+    issues.push({
+      field: 'highIndexMaterial',
+      message: 'High-index material must include an id and name.',
+    });
+  }
+
+  if (
+    !isFiniteNumber(inputs.highIndexMaterial.refractiveIndex) ||
+    inputs.highIndexMaterial.refractiveIndex <= 0
+  ) {
+    issues.push({
+      field: 'highIndexMaterial',
+      message: 'High-index material refractive index must be greater than 0.',
+    });
+  }
+
+  if (
+    !isNonEmptyString(inputs.lowIndexMaterial.id) ||
+    !isNonEmptyString(inputs.lowIndexMaterial.name)
+  ) {
+    issues.push({
+      field: 'lowIndexMaterial',
+      message: 'Low-index material must include an id and name.',
+    });
+  }
+
+  if (
+    !isFiniteNumber(inputs.lowIndexMaterial.refractiveIndex) ||
+    inputs.lowIndexMaterial.refractiveIndex <= 0
+  ) {
+    issues.push({
+      field: 'lowIndexMaterial',
+      message: 'Low-index material refractive index must be greater than 0.',
+    });
+  }
 
   if (
     !isFiniteNumber(inputs.periodCount) ||
@@ -39,6 +81,13 @@ export function validateBraggReflectorInputs(inputs: BraggReflectorInputs): Vali
     issues.push({
       field: 'incidentAngleDegrees',
       message: 'Incident angle must be at least 0 degrees and less than 90 degrees.',
+    });
+  }
+
+  if (inputs.polarization !== 'TE' && inputs.polarization !== 'TM') {
+    issues.push({
+      field: 'polarization',
+      message: 'Polarization must be TE or TM.',
     });
   }
 

@@ -28,7 +28,8 @@ Last Updated 6/29/26
 - [x] Correct FWHM bandwidth and peak reflectance/center
 - [x] Add slider for fast sweep range adjustments
 - [x] Add CSV export for simulation spectra
-- [X] Add JSON export for simulation setup/configuration
+- [x] Add JSON export for simulation setup/configuration
+- [x] Add JSON import for simulation setup/configuration
 
 ## Future Milestones
 - [] Add parameter sweeps and multidimensional analysis
@@ -59,6 +60,4 @@ Last Updated 6/29/26
 - [] Add 3D visualization abilities to display outputs rom logic above (three.js)
     - [] Result should be similar to MKI slice simulator plus playback capabilities
     - [] Will have slicing structure complete and tested so it can be simulated in software regardless of hardware status
-- [] Add JSON import for simulation setup/configuration
-- [] Add optional CSV import for external comparison data
 - [] ...
