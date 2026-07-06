@@ -65,6 +65,10 @@ export function SimulationShell() {
   };
 
   const exportSetup = () => {
+    if (validationIssues.length > 0) {
+      return;
+    }
+
     const json = exportBraggConfigJson(inputs);
     const filename = `bragg-setup-${formatDateStamp(new Date())}.json`;
     downloadTextFile(filename, json, 'application/json');
@@ -142,7 +146,11 @@ export function SimulationShell() {
                 <button type="button" onClick={openImportPicker}>
                   Import Setup
                 </button>
-                <button type="button" onClick={exportSetup}>
+                <button
+                  type="button"
+                  onClick={exportSetup}
+                  disabled={validationIssues.length > 0}
+                >
                   Export Setup
                 </button>
                 <input
@@ -167,6 +175,8 @@ export function SimulationShell() {
             <p className="chart-toolbar-message" role="alert">
               {importError}
             </p>
+          ) : validationIssues.length > 0 ? (
+            <p className="chart-toolbar-message">Fix highlighted inputs before exporting setup.</p>
           ) : null}
           <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
           <MetricsPanel result={result} />
