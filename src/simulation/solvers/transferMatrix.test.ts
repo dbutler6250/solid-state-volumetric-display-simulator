@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { BraggReflectorInputs, SimulationResult } from '../../types/simulation';
+import type { QuarterWaveStackInputs, SimulationResult } from '../../types/simulation';
 import type { LayerStack } from '../layers/stack';
 import { AIR } from '../materials/catalog';
 import type { Material } from '../materials/material';
-import { solveBraggReflector, solveLayerStack } from './transferMatrix';
+import { solveQuarterWaveStack, solveLayerStack } from './transferMatrix';
 
 const expectCloseTo = (actual: number, expected: number, tolerance: number) => {
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(tolerance);
@@ -62,7 +62,7 @@ describe('transfer matrix solver', () => {
     const designWavelengthNm = 600;
     const highIndexMaterial = makeMaterial('nH', 2.4);
     const lowIndexMaterial = makeMaterial('nL', 1.45);
-    const inputs: BraggReflectorInputs = {
+    const inputs: QuarterWaveStackInputs = {
       highIndexMaterial,
       lowIndexMaterial,
       periodCount: 8,
@@ -74,18 +74,18 @@ describe('transfer matrix solver', () => {
       wavelengthPointCount: 301,
     };
 
-    const result = solveBraggReflector(inputs);
+    const result = solveQuarterWaveStack(inputs);
 
     expect(Math.abs(result.centerWavelengthNm - designWavelengthNm)).toBeGreaterThan(10);
     expect(result.peakReflectance).toBeGreaterThan(0.95);
     expect(result.bandwidthNm).toBeGreaterThan(0);
   });
 
-  it('conserves energy for a lossless Bragg reflector sweep', () => {
+  it('conserves energy for a lossless quarter-wave stack sweep', () => {
     const designWavelengthNm = 600;
     const highIndexMaterial = makeMaterial('nH', 2.4);
     const lowIndexMaterial = makeMaterial('nL', 1.45);
-    const result = solveBraggReflector({
+    const result = solveQuarterWaveStack({
       highIndexMaterial,
       lowIndexMaterial,
       periodCount: 6,

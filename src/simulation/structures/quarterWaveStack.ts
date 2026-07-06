@@ -1,12 +1,12 @@
 import type { OpticalLayer } from '../layers/layer';
 import type { LayerStack } from '../layers/stack';
 import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
-import type { BraggReflectorInputs } from '../../types/simulation';
+import type { QuarterWaveStackInputs } from '../../types/simulation';
 
 const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
   designWavelengthNm / (4 * refractiveIndex);
 
-export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
+export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   highIndexMaterial: MATERIAL_CATALOG[0],
   lowIndexMaterial: MATERIAL_CATALOG[1],
   periodCount: 10,
@@ -18,7 +18,7 @@ export const DEFAULT_BRAGG_REFLECTOR_INPUTS: BraggReflectorInputs = {
   wavelengthPointCount: 500,
 };
 
-export function buildBraggReflectorLayers(inputs: BraggReflectorInputs): OpticalLayer[] {
+export function buildQuarterWaveStackLayers(inputs: QuarterWaveStackInputs): OpticalLayer[] {
   const highIndexThicknessNm = getQuarterWaveThickness(
     inputs.designWavelengthNm,
     inputs.highIndexMaterial.refractiveIndex,
@@ -45,10 +45,10 @@ export function buildBraggReflectorLayers(inputs: BraggReflectorInputs): Optical
   return layers;
 }
 
-export function buildBraggReflectorStack(inputs: BraggReflectorInputs): LayerStack {
+export function buildQuarterWaveStack(inputs: QuarterWaveStackInputs): LayerStack {
   return {
     incidentMedium: AIR,
-    layers: buildBraggReflectorLayers(inputs),
+    layers: buildQuarterWaveStackLayers(inputs),
     exitMedium: AIR,
   };
 }

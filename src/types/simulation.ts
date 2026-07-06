@@ -3,7 +3,7 @@ import type { SpectrumPoint } from '../simulation/results/spectrum';
 
 export type Polarization = 'TE' | 'TM';
 
-export type BraggReflectorInputs = {
+export type QuarterWaveStackInputs = {
   highIndexMaterial: Material;
   lowIndexMaterial: Material;
   periodCount: number;

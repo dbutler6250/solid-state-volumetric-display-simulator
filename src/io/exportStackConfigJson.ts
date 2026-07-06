@@ -1,33 +1,33 @@
-import type { BraggReflectorInputs } from '../types/simulation';
+import type { QuarterWaveStackInputs } from '../types/simulation';
 
-type BraggConfigExport = {
-  schema: 'ssvds-bragg-config-v1';
+type StackConfigExport = {
+  schema: 'ssvds-stack-config-v1';
   app: 'solid-state-volumetric-display-simulator';
   exportedAt: string;
-  structureType: 'quarter-wave-bragg-reflector';
+  structureType: 'quarter-wave-stack';
   units: {
     wavelength: 'nm';
     angle: 'deg';
   };
   inputs: {
-    highIndexMaterial: BraggReflectorInputs['highIndexMaterial'];
-    lowIndexMaterial: BraggReflectorInputs['lowIndexMaterial'];
+    highIndexMaterial: QuarterWaveStackInputs['highIndexMaterial'];
+    lowIndexMaterial: QuarterWaveStackInputs['lowIndexMaterial'];
     periodCount: number;
     designWavelengthNm: number;
     incidentAngleDegrees: number;
-    polarization: BraggReflectorInputs['polarization'];
+    polarization: QuarterWaveStackInputs['polarization'];
     wavelengthStartNm?: number;
     wavelengthEndNm?: number;
     wavelengthPointCount?: number;
   };
 };
 
-export function exportBraggConfigJson(inputs: BraggReflectorInputs): string {
-  const payload: BraggConfigExport = {
-    schema: 'ssvds-bragg-config-v1',
+export function exportStackConfigJson(inputs: QuarterWaveStackInputs): string {
+  const payload: StackConfigExport = {
+    schema: 'ssvds-stack-config-v1',
     app: 'solid-state-volumetric-display-simulator',
     exportedAt: new Date().toISOString(),
-    structureType: 'quarter-wave-bragg-reflector',
+    structureType: 'quarter-wave-stack',
     units: {
       wavelength: 'nm',
       angle: 'deg',

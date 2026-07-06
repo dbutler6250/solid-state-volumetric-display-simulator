@@ -2,19 +2,20 @@
 
 ## Latest Task
 
-- Added JSON setup export for Phase 2 via `src/io/exportBraggConfigJson.ts` and wired an `Export Setup` button into `SimulationShell`.
+- Recontextualized the implemented quarter-wave multilayer as a general optical stack across the app codebase.
+- Renamed the main inputs/form/solver/validation/export-import symbols to `QuarterWaveStack*` / `Stack*` variants.
+- Kept JSON import backward-compatible with both `ssvds-stack-config-v1` and legacy `ssvds-bragg-config-v1` files, including `quarter-wave-stack` and legacy `quarter-wave-bragg-reflector` structure types.
 - Added the CSV schema metadata line `# schema: ssvds-results-csv-v1` and renamed the chart control group aria-label to `Chart Controls`.
-- Added Phase 3 JSON setup import via `src/io/importBraggConfigJson.ts` with strict schema/app/structure validation, shared input validation reuse, and inline import errors in `SimulationShell`.
-- Protected JSON setup export so invalid simulator inputs cannot be exported, disabled `Export Setup` while invalid, and surfaced a nearby guidance message while highlighted input issues remain.
+- Updated export filenames to `stack-results-...` and `stack-setup-...`, plus the CSV spectrum export comment to use optical stack wording.
 
 ## Verification
 
 - `npm.cmd run test` passed
 - `npm.cmd run lint` passed
-- `npm.cmd run build` passed
+- `npm.cmd run build` passed with the existing Vite chunk-size warning
 
 ## Notes
 
-- Added Vitest coverage for the JSON export contract and the CSV schema/version comment.
-- Added Vitest coverage for JSON import success and failure cases, including schema mismatch, missing inputs, invalid polarization, invalid material refractive index, invalid sweep range, and invalid point count.
-- Build still reports the pre-existing Vite chunk-size warning.
+- Files changed include `src/components/SimulationShell.tsx`, `src/components/inputs/QuarterWaveStackForm.tsx`, `src/components/outputs/StackDefinitionPanel.tsx`, `src/io/exportStackConfigJson.ts`, `src/io/importStackConfigJson.ts`, `src/io/exportResultsCsv.ts`, `src/simulation/structures/quarterWaveStack.ts`, `src/simulation/validation/quarterWaveStackValidation.ts`, `src/simulation/solvers/transferMatrix.ts`, `src/types/simulation.ts`, and the related tests.
+- Legacy Bragg schema/type strings are retained only inside the importer for compatibility checks and test coverage.
+- Assumption: the generic `ssvds-stack-config-v1` export schema is now the preferred future format.

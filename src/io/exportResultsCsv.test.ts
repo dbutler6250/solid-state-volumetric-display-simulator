@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { exportResultsCsv } from './exportResultsCsv';
-import type { BraggReflectorInputs, SimulationResult } from '../types/simulation';
+import type { QuarterWaveStackInputs, SimulationResult } from '../types/simulation';
 import type { Material } from '../simulation/materials/material';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
@@ -9,7 +9,7 @@ const makeMaterial = (id: string, name: string, refractiveIndex: number): Materi
   refractiveIndex,
 });
 
-const inputs: BraggReflectorInputs = {
+const inputs: QuarterWaveStackInputs = {
   highIndexMaterial: makeMaterial('hi, "quoted"', 'High\nIndex', 2.45),
   lowIndexMaterial: makeMaterial('lo', 'Low Index', 1.52),
   periodCount: 8,
@@ -39,7 +39,7 @@ describe('exportResultsCsv', () => {
     const lines = csv.trimEnd().split('\n');
 
     expect(lines[0]).toBe('# Solid State Volumetric Display Simulator');
-    expect(lines[1]).toBe('# Bragg reflector spectrum export');
+    expect(lines[1]).toBe('# Optical stack spectrum export');
     expect(lines[2]).toBe('# schema: ssvds-results-csv-v1');
     expect(lines).toContain('# highIndexMaterial.name: High\\nIndex');
     expect(lines).toContain('# highIndexMaterial.id: hi, \\"quoted\\"');

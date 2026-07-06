@@ -1,35 +1,35 @@
 import { useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { BraggReflectorForm } from './inputs/BraggReflectorForm';
+import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
 import { AssumptionsPanel } from './outputs/AssumptionsPanel';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
-import { DEFAULT_BRAGG_REFLECTOR_INPUTS } from '../simulation/structures/braggReflector';
-import { solveBraggReflector } from '../simulation/solvers/transferMatrix';
-import { validateBraggReflectorInputs } from '../simulation/validation/braggReflectorValidation';
-import { exportBraggConfigJson } from '../io/exportBraggConfigJson';
+import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
+import { solveQuarterWaveStack } from '../simulation/solvers/transferMatrix';
+import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
+import { exportStackConfigJson } from '../io/exportStackConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
 import { downloadTextFile } from '../io/download';
-import { importBraggConfigJson } from '../io/importBraggConfigJson';
+import { importStackConfigJson } from '../io/importStackConfigJson';
 
 const MIN_WAVELENGTH_NM = 1;
 const MIN_VIEW_MULTIPLIER = 0.5;
 const MAX_VIEW_MULTIPLIER = 5;
 
 export function SimulationShell() {
-  const [inputs, setInputs] = useState(DEFAULT_BRAGG_REFLECTOR_INPUTS);
+  const [inputs, setInputs] = useState(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
   const [showTransmission, setShowTransmission] = useState(false);
   const [xRange, setXRange] = useState<[number, number] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
-  const validationIssues = useMemo(() => validateBraggReflectorInputs(inputs), [inputs]);
+  const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
   const result = useMemo(() => {
     if (validationIssues.length > 0) {
       return null;
     }
 
-    return solveBraggReflector(inputs);
+    return solveQuarterWaveStack(inputs);
   }, [inputs, validationIssues]);
 
   const centerOnBandwidth = () => {
@@ -60,7 +60,7 @@ export function SimulationShell() {
     }
 
     const csv = exportResultsCsv(inputs, result);
-    const filename = `bragg-results-${formatDateStamp(new Date())}.csv`;
+    const filename = `stack-results-${formatDateStamp(new Date())}.csv`;
     downloadTextFile(filename, csv);
   };
 
@@ -69,8 +69,8 @@ export function SimulationShell() {
       return;
     }
 
-    const json = exportBraggConfigJson(inputs);
-    const filename = `bragg-setup-${formatDateStamp(new Date())}.json`;
+    const json = exportStackConfigJson(inputs);
+    const filename = `stack-setup-${formatDateStamp(new Date())}.json`;
     downloadTextFile(filename, json, 'application/json');
   };
 
@@ -87,7 +87,7 @@ export function SimulationShell() {
     }
 
     try {
-      const imported = importBraggConfigJson(await file.text());
+      const imported = importStackConfigJson(await file.text());
 
       if (!imported.ok) {
         setImportError(imported.message);
@@ -113,10 +113,10 @@ export function SimulationShell() {
         </p>
       </header>
 
-      <section className="workspace" aria-label="Bragg reflector simulator">
+      <section className="workspace" aria-label="Quarter-wave stack simulator">
         <aside className="panel" aria-label="Simulation inputs">
           <h2>Optical Stack Inputs</h2>
-          <BraggReflectorForm
+          <QuarterWaveStackForm
             inputs={inputs}
             validationIssues={validationIssues}
             centerWavelengthNm={result?.centerWavelengthNm}

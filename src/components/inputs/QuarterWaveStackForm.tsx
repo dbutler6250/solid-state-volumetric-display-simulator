@@ -1,13 +1,13 @@
 import type { ChangeEvent } from 'react';
 import { MATERIAL_CATALOG } from '../../simulation/materials/catalog';
-import type { ValidationIssue } from '../../simulation/validation/braggReflectorValidation';
-import type { BraggReflectorInputs, Polarization } from '../../types/simulation';
+import type { ValidationIssue } from '../../simulation/validation/quarterWaveStackValidation';
+import type { Polarization, QuarterWaveStackInputs } from '../../types/simulation';
 
-type BraggReflectorFormProps = {
-  inputs: BraggReflectorInputs;
+type QuarterWaveStackFormProps = {
+  inputs: QuarterWaveStackInputs;
   validationIssues: ValidationIssue[];
   centerWavelengthNm?: number;
-  onChange: (inputs: BraggReflectorInputs) => void;
+  onChange: (inputs: QuarterWaveStackInputs) => void;
 };
 
 const toNumber = (value: string): number => Number(value);
@@ -22,7 +22,7 @@ const SWEEP_ENDPOINT_MAX_NM = 2000;
 const SWEEP_ENDPOINT_STEP_NM = 0.1;
 
 type NumericField = keyof Pick<
-  BraggReflectorInputs,
+  QuarterWaveStackInputs,
   | 'periodCount'
   | 'designWavelengthNm'
   | 'incidentAngleDegrees'
@@ -33,7 +33,7 @@ type NumericField = keyof Pick<
 
 const getIssueForField = (
   issues: ValidationIssue[],
-  field: keyof BraggReflectorInputs,
+  field: keyof QuarterWaveStackInputs,
 ): string | undefined => issues.find((issue) => issue.field === field)?.message;
 
 const clampNumber = (value: number, min: number, max?: number): number => {
@@ -45,10 +45,10 @@ const clampNumber = (value: number, min: number, max?: number): number => {
 };
 
 const isCustomMaterial = (materialId: string): boolean => materialId === CUSTOM_MATERIAL_ID;
-const getSweepCenter = (inputs: BraggReflectorInputs): number =>
+const getSweepCenter = (inputs: QuarterWaveStackInputs): number =>
   ((inputs.wavelengthStartNm ?? 0) + (inputs.wavelengthEndNm ?? 0)) / 2;
 
-const getSweepRange = (inputs: BraggReflectorInputs): number =>
+const getSweepRange = (inputs: QuarterWaveStackInputs): number =>
   Math.max(0, (inputs.wavelengthEndNm ?? 0) - (inputs.wavelengthStartNm ?? 0));
 
 const normalizeSweepRange = (rangeNm: number): number =>
@@ -64,7 +64,7 @@ const formatWavelengthInput = (value: number | undefined): string => {
 
 const formatSweepRangeInput = (value: number): string => value.toFixed(4);
 
-const applySweepRange = (inputs: BraggReflectorInputs, rangeNm: number): BraggReflectorInputs => {
+const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): QuarterWaveStackInputs => {
   const centerNm = getSweepCenter(inputs);
   const halfRangeNm = Math.max(0, rangeNm) / 2;
   const nextStartNm = Math.max(1, centerNm - halfRangeNm);
@@ -78,10 +78,10 @@ const applySweepRange = (inputs: BraggReflectorInputs, rangeNm: number): BraggRe
 };
 
 const applyCenteredSweepRange = (
-  inputs: BraggReflectorInputs,
+  inputs: QuarterWaveStackInputs,
   centerNm: number,
   rangeNm: number,
-): BraggReflectorInputs => {
+): QuarterWaveStackInputs => {
   const halfRangeNm = Math.max(0, rangeNm) / 2;
   const nextStartNm = Math.max(1, centerNm - halfRangeNm);
   const nextEndNm = Math.max(nextStartNm + 1, centerNm + halfRangeNm);
@@ -93,12 +93,12 @@ const applyCenteredSweepRange = (
   };
 };
 
-export function BraggReflectorForm({
+export function QuarterWaveStackForm({
   inputs,
   validationIssues,
   centerWavelengthNm,
   onChange,
-}: BraggReflectorFormProps) {
+}: QuarterWaveStackFormProps) {
   const updateNumberField =
     (field: NumericField) =>
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +138,7 @@ export function BraggReflectorForm({
             id: CUSTOM_MATERIAL_ID,
             name: CUSTOM_MATERIAL_NAME,
             refractiveIndex: inputs[field].refractiveIndex,
-          } as BraggReflectorInputs[typeof field]),
+          } as QuarterWaveStackInputs[typeof field]),
       });
     };
 
@@ -165,7 +165,7 @@ export function BraggReflectorForm({
 
     onChange(applyCenteredSweepRange(inputs, centerWavelengthNm, getSweepRange(inputs)));
   };
-  const isInvalid = (field: keyof BraggReflectorInputs): boolean =>
+  const isInvalid = (field: keyof QuarterWaveStackInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;
 
   const renderMaterialField = (field: 'highIndexMaterial' | 'lowIndexMaterial', label: string) => {

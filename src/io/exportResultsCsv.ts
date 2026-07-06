@@ -1,4 +1,4 @@
-import type { BraggReflectorInputs, SimulationResult } from '../types/simulation';
+import type { QuarterWaveStackInputs, SimulationResult } from '../types/simulation';
 import { formatCsvRow } from './csv';
 
 const formatNumber = (value: number): string => {
@@ -15,10 +15,10 @@ const formatCommentValue = (value: string | number): string =>
 const formatCommentLine = (label: string, value: string | number): string =>
   `# ${label}: ${formatCommentValue(value)}`;
 
-export function exportResultsCsv(inputs: BraggReflectorInputs, result: SimulationResult): string {
+export function exportResultsCsv(inputs: QuarterWaveStackInputs, result: SimulationResult): string {
   const lines = [
     '# Solid State Volumetric Display Simulator',
-    '# Bragg reflector spectrum export',
+    '# Optical stack spectrum export',
     '# schema: ssvds-results-csv-v1',
     formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
     formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),

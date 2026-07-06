@@ -30,6 +30,7 @@ Last Updated 6/29/26
 - [x] Add CSV export for simulation spectra
 - [x] Add JSON export for simulation setup/configuration
 - [x] Add JSON import for simulation setup/configuration
+- [x] Recontextualize "Bragg" within codebase and genericize
 
 ## Future Milestones
 - [] Add parameter sweeps and multidimensional analysis
@@ -38,7 +39,6 @@ Last Updated 6/29/26
 - [] Add polarization comparison
 - [] Add Three.js capabilities for improved stack visualizations and result visuals
 - [] Add capabilites for complex refractive index handling
-- [] Recontextualize "Bragg" within codebase and genericize
 - [] Clean up UI
     - [] Complete How To Use section at bottom of page
 - [] Improve stack definition UI

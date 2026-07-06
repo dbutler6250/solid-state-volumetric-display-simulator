@@ -1,7 +1,7 @@
-import type { BraggReflectorInputs } from '../../types/simulation';
+import type { QuarterWaveStackInputs } from '../../types/simulation';
 
 export type ValidationIssue = {
-  field: keyof BraggReflectorInputs;
+  field: keyof QuarterWaveStackInputs;
   message: string;
 };
 
@@ -9,7 +9,7 @@ const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
-export function validateBraggReflectorInputs(inputs: BraggReflectorInputs): ValidationIssue[] {
+export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const wavelengthStartNm = inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5;
   const wavelengthEndNm = inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5;

@@ -1,7 +1,7 @@
-import type { BraggReflectorInputs } from '../../types/simulation';
+import type { QuarterWaveStackInputs } from '../../types/simulation';
 
 type StackDefinitionPanelProps = {
-  inputs: BraggReflectorInputs;
+  inputs: QuarterWaveStackInputs;
   isValid: boolean;
 };
 
@@ -32,7 +32,7 @@ const formatOpticalThickness = (refractiveIndex: number, thicknessNm: number, wa
   return formatNumber((refractiveIndex * thicknessNm) / wavelengthNm, 3);
 };
 
-const createPeriodSegments = (inputs: BraggReflectorInputs, period: number): DiagramSegment[] => [
+const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): DiagramSegment[] => [
   {
     key: `h-${period}`,
     label: 'H',
@@ -53,7 +53,7 @@ const createPeriodSegments = (inputs: BraggReflectorInputs, period: number): Dia
   },
 ];
 
-const createLayerSegments = (inputs: BraggReflectorInputs): DiagramSegment[] => {
+const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
   const incidentMedium: DiagramSegment = {
     key: 'incident',
     label: 'Air',
@@ -117,7 +117,7 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
   const segments = isValid ? createLayerSegments(inputs) : [];
 
   return (
-    <section className="stack-panel" aria-label="Bragg reflector stack definition">
+    <section className="stack-panel" aria-label="Quarter-wave stack definition">
       <div className="stack-panel-heading">
         <h2>Stack Definition</h2>
         <span>Air | H/L x {formatCount(inputs.periodCount)} | Air</span>
