@@ -6,6 +6,7 @@ import type { QuarterWaveStackInputs } from '../../types/simulation';
 const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
   designWavelengthNm / (4 * refractiveIndex);
 
+/** Default inputs that provide a valid starting stack for the UI. */
 export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   highIndexMaterial: MATERIAL_CATALOG[0],
   lowIndexMaterial: MATERIAL_CATALOG[1],
@@ -18,6 +19,7 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   wavelengthPointCount: 500,
 };
 
+/** Builds the alternating high/low layer sequence for the solver. */
 export function buildQuarterWaveStackLayers(inputs: QuarterWaveStackInputs): OpticalLayer[] {
   const highIndexThicknessNm = getQuarterWaveThickness(
     inputs.designWavelengthNm,
@@ -45,6 +47,7 @@ export function buildQuarterWaveStackLayers(inputs: QuarterWaveStackInputs): Opt
   return layers;
 }
 
+/** Wraps the generated layers with air on both sides of the stack. */
 export function buildQuarterWaveStack(inputs: QuarterWaveStackInputs): LayerStack {
   return {
     incidentMedium: AIR,

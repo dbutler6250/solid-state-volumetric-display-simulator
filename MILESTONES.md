@@ -31,6 +31,7 @@ Last Updated 6/29/26
 - [x] Add JSON export for simulation setup/configuration
 - [x] Add JSON import for simulation setup/configuration
 - [x] Recontextualize "Bragg" within codebase and genericize
+- [x] Add comments across codebase
 
 ## Future Milestones
 - [] Add parameter sweeps and multidimensional analysis

@@ -24,6 +24,7 @@ const formatCount = (value: number): string => (Number.isFinite(value) ? `${Math
 const formatMaterialLabel = (name: string, refractiveIndex: number): string =>
   `${name}${name === 'Custom' ? ' material' : ''} (n=${formatNumber(refractiveIndex)})`;
 
+/** Expresses optical thickness in design-wavelength units. */
 const formatOpticalThickness = (refractiveIndex: number, thicknessNm: number, wavelengthNm: number) => {
   if (!Number.isFinite(wavelengthNm) || wavelengthNm <= 0) {
     return 'Invalid';
@@ -53,6 +54,7 @@ const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): D
   },
 ];
 
+/** Builds a compact layer sequence for the stack preview. */
 const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
   const incidentMedium: DiagramSegment = {
     key: 'incident',
@@ -95,6 +97,7 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
   ];
 };
 
+/** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
   const highIndexThicknessNm =
     inputs.designWavelengthNm / (4 * inputs.highIndexMaterial.refractiveIndex);

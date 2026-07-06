@@ -20,6 +20,7 @@ type ImportFailure = {
 
 export type ImportStackConfigJsonResult = ImportSuccess | ImportFailure;
 
+/** Parses stack setup JSON and accepts the legacy Bragg schema for compatibility. */
 export function importStackConfigJson(rawJson: string): ImportStackConfigJsonResult {
   let parsed: unknown;
 
@@ -104,12 +105,15 @@ function parseMaterial(
   };
 }
 
+/** Narrows unknown values to plain JSON objects. */
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
+/** Checks for a non-empty string field. */
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
+/** Checks for a positive finite numeric field. */
 function isPositiveFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0;
 }

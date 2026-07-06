@@ -15,6 +15,7 @@ const formatCommentValue = (value: string | number): string =>
 const formatCommentLine = (label: string, value: string | number): string =>
   `# ${label}: ${formatCommentValue(value)}`;
 
+/** Exports the current simulation setup and spectrum as a self-describing CSV file. */
 export function exportResultsCsv(inputs: QuarterWaveStackInputs, result: SimulationResult): string {
   const lines = [
     '# Solid State Volumetric Display Simulator',

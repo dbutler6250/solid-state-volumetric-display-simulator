@@ -18,6 +18,7 @@ const makeMaterial = (id: string, refractiveIndex: number): Material => ({
   refractiveIndex,
 });
 
+// Exercises solver accuracy, energy conservation, and band metrics.
 describe('transfer matrix solver', () => {
   it('returns zero reflectance and unit transmission for an empty air-to-air stack', () => {
     const stack: LayerStack = {

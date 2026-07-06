@@ -31,11 +31,13 @@ const getSweepSettings = (inputs: QuarterWaveStackInputs): SweepSettings => ({
   pointCount: inputs.wavelengthPointCount ?? 500,
 });
 
+/** Validates the input bundle before any solver work begins. */
 const assertValidInputs = (inputs: QuarterWaveStackInputs) => {
   const issues = validateQuarterWaveStackInputs(inputs);
   if (issues.length > 0) throw new Error(issues.map((issue) => issue.message).join(' '));
 };
 
+/** Computes the propagation angle inside a layer using Snell's law. */
 const getLayerCosine = (incidentIndex: number, layerIndex: number, incidentAngleRadians: number) => {
   const sinTheta = (incidentIndex / layerIndex) * Math.sin(incidentAngleRadians);
   const cosineSquared = 1 - sinTheta * sinTheta;
@@ -43,12 +45,14 @@ const getLayerCosine = (incidentIndex: number, layerIndex: number, incidentAngle
   return Math.sqrt(Math.max(0, cosineSquared));
 };
 
+/** Converts refractive index and angle into the TE/TM optical admittance. */
 const getOpticalAdmittance = (
   refractiveIndex: number,
   cosTheta: number,
   polarization: QuarterWaveStackInputs['polarization'],
 ): number => (polarization === 'TE' ? refractiveIndex * cosTheta : refractiveIndex / cosTheta);
 
+/** Builds the characteristic matrix for one homogeneous layer. */
 const getLayerMatrix = (
   refractiveIndex: number,
   thicknessNm: number,
@@ -65,6 +69,7 @@ const getLayerMatrix = (
   ];
 };
 
+/** Solves one stack at a single wavelength and incident angle. */
 export function solveLayerStack(stack: LayerStack, options: SolveLayerStackOptions) {
   const incidentAngleRadians = options.incidentAngleDegrees * DEGREES_TO_RADIANS;
   const incidentIndex = stack.incidentMedium.refractiveIndex;
@@ -103,6 +108,7 @@ export function solveLayerStack(stack: LayerStack, options: SolveLayerStackOptio
 
 const clampUnitInterval = (value: number): number => Math.min(1, Math.max(0, value));
 
+/** Expands the spectrum around the design wavelength when no sweep is specified. */
 const createWavelengthSweep = ({ startNm, endNm, pointCount }: SweepSettings): number[] => {
   if (startNm <= 0 || endNm <= startNm) throw new Error('Wavelength sweep must have a positive start and an end greater than start.');
   if (pointCount < 2 || !Number.isInteger(pointCount)) throw new Error('Wavelength sweep must include at least two integer points.');
@@ -110,6 +116,7 @@ const createWavelengthSweep = ({ startNm, endNm, pointCount }: SweepSettings): n
   return Array.from({ length: pointCount }, (_, index) => startNm + step * index);
 };
 
+/** Finds the half-maximum band edges around the spectral peak. */
 const findHalfMaximumBand = (spectrum: LayerStackPointResult[], peakIndex: number, halfPeakReflectance: number): [number, number] | null => {
   let lowerIndex = peakIndex;
   let upperIndex = peakIndex;
@@ -119,6 +126,7 @@ const findHalfMaximumBand = (spectrum: LayerStackPointResult[], peakIndex: numbe
   return [spectrum[lowerIndex].wavelengthNm, spectrum[upperIndex].wavelengthNm];
 };
 
+/** Derives peak, center, bandwidth, and energy-conservation metrics from the spectrum. */
 const calculateMetrics = (spectrum: LayerStackPointResult[]) => {
   const peakIndex = spectrum.reduce((bestIndex, point, index, points) => (point.reflectance > points[bestIndex].reflectance ? index : bestIndex), 0);
   const peak = spectrum[peakIndex];
@@ -130,6 +138,7 @@ const calculateMetrics = (spectrum: LayerStackPointResult[]) => {
   return { peakReflectance: peak.reflectance, centerWavelengthNm: (lowerEdge + upperEdge) / 2, bandwidthNm: upperEdge - lowerEdge, maxEnergyConservationError };
 };
 
+/** Runs the quarter-wave stack sweep and returns the plotted spectrum and summary metrics. */
 export function solveQuarterWaveStack(inputs: QuarterWaveStackInputs): SimulationResult {
   assertValidInputs(inputs);
   const stack = buildQuarterWaveStack(inputs);

@@ -7,6 +7,7 @@ type MetricsPanelProps = {
 const formatPercent = (value: number): string => `${(value * 100).toFixed(2)}%`;
 const formatNanometers = (value: number): string => `${value.toFixed(1)} nm`;
 
+/** Summarizes the key spectral metrics produced by the simulation. */
 export function MetricsPanel({ result }: MetricsPanelProps) {
   if (!result) {
     return (

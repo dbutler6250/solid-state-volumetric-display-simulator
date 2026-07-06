@@ -17,6 +17,7 @@ const MIN_WAVELENGTH_NM = 1;
 const MIN_VIEW_MULTIPLIER = 0.5;
 const MAX_VIEW_MULTIPLIER = 5;
 
+/** Coordinates inputs, solver execution, exports, imports, and chart controls. */
 export function SimulationShell() {
   const [inputs, setInputs] = useState(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
   const [showTransmission, setShowTransmission] = useState(false);
@@ -196,6 +197,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+/** Formats a date stamp for exported filenames. */
 function formatDateStamp(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
     date.getDate(),

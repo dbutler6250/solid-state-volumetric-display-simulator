@@ -1,5 +1,6 @@
 import type { Material } from './material';
 
+/** Default ambient medium used at the stack boundaries. */
 export const AIR: Material = {
   id: 'air',
   name: 'Air',

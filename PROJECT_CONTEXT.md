@@ -7,7 +7,7 @@ Last Updated 6/29/26
 
 Build a browser-based optics simulation platform that can evolve into a volumetric display design and analysis environment.
 
-Version 1 should implement a Transfer Matrix Method (TMM) Bragg reflector simulator that lets users:
+Version 1 implements a Transfer Matrix Method (TMM) quarter-wave optical stack simulator that lets users:
 
 - Define multilayer optical stacks
 - Calculate reflectance and transmission spectra
@@ -44,7 +44,7 @@ No backend server. All computation should run client-side in the browser.
 The architecture should be future-proof without being overengineered. Design the simulation engine so that:
 
 - Additional optical structures can be added later
-- The Bragg reflector is only the first supported structure
+- The quarter-wave stack is only the first supported structure
 - Core TMM code remains reusable for future simulations
 
 ## Version 1 Initial Scope
@@ -102,7 +102,7 @@ Expected responsibilities:
 
 - `materials/`: material definitions such as refractive index and future dispersion data
 - `layers/`: layer representations such as thickness and material association
-- `structures/`: optical structures such as Bragg reflectors, future gratings, and future cavities
+- `structures/`: optical structures such as quarter-wave stacks, future gratings, and future cavities
 - `solvers/`: numerical engines, initially `transferMatrix.ts`
 - `sweeps/`: future wavelength and angle sweep helpers
 - `results/`: output data models, arrays, and metadata

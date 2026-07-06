@@ -22,6 +22,7 @@ const inputs: QuarterWaveStackInputs = {
   wavelengthPointCount: 401,
 };
 
+// Covers the preferred schema and the retained legacy Bragg aliases.
 describe('importStackConfigJson', () => {
   it('round-trips a valid exported JSON setup', () => {
     const json = exportStackConfigJson(inputs);

@@ -36,6 +36,7 @@ const getIssueForField = (
   field: keyof QuarterWaveStackInputs,
 ): string | undefined => issues.find((issue) => issue.field === field)?.message;
 
+/** Keeps numeric edits within the supported input range. */
 const clampNumber = (value: number, min: number, max?: number): number => {
   if (!Number.isFinite(value)) {
     return min;
@@ -64,6 +65,7 @@ const formatWavelengthInput = (value: number | undefined): string => {
 
 const formatSweepRangeInput = (value: number): string => value.toFixed(4);
 
+/** Re-centers the sweep range while preserving the current midpoint. */
 const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): QuarterWaveStackInputs => {
   const centerNm = getSweepCenter(inputs);
   const halfRangeNm = Math.max(0, rangeNm) / 2;
@@ -77,6 +79,7 @@ const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): Quart
   };
 };
 
+/** Re-centers the sweep range around a chosen wavelength. */
 const applyCenteredSweepRange = (
   inputs: QuarterWaveStackInputs,
   centerNm: number,

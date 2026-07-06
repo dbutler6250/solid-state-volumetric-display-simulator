@@ -1,3 +1,4 @@
+/** Downloads text content as a client-side file. */
 export const downloadTextFile = (filename: string, text: string, mimeType = 'text/csv'): void => {
   const blob = new Blob([text], { type: `${mimeType};charset=utf-8` });
   const url = URL.createObjectURL(blob);
@@ -12,4 +13,3 @@ export const downloadTextFile = (filename: string, text: string, mimeType = 'tex
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 };
-

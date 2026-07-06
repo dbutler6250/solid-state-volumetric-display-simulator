@@ -7,7 +7,7 @@ Last Updated 6/29/26
 
 Browser-based optics simulation platform for solid-state volumetric display design.
 
-Utilizes Transfer Matrix Method (TMM) solver to simulate [Bragg Reflectors](https://www.rp-photonics.com/bragg_mirrors.html) and their performance metrics. Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
+Uses a Transfer Matrix Method (TMM) solver to simulate quarter-wave optical stacks and their reflectance/transmission performance metrics. Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
 
 ## Demonstration
 

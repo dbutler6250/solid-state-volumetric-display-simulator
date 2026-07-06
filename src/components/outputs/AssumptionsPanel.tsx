@@ -6,6 +6,7 @@ const assumptions = [
   'Non-magnetic materials',
 ];
 
+/** Lists the simplifying assumptions used by the current solver. */
 export function AssumptionsPanel() {
   return (
     <section className="assumptions-panel" aria-label="Simulation assumptions">

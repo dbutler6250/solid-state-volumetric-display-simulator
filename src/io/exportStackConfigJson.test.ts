@@ -21,6 +21,7 @@ const inputs: QuarterWaveStackInputs = {
   wavelengthPointCount: 401,
 };
 
+// Verifies the preferred stack config schema stays structurally stable.
 describe('exportStackConfigJson', () => {
   it('exports the expected setup shape and metadata', () => {
     const json = exportStackConfigJson(inputs);

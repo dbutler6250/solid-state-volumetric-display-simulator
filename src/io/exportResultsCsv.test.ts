@@ -33,6 +33,7 @@ const result: SimulationResult = {
   ],
 };
 
+// Keeps the exported CSV schema and metadata headers stable.
 describe('exportResultsCsv', () => {
   it('exports metadata comments and spectrum rows', () => {
     const csv = exportResultsCsv(inputs, result);

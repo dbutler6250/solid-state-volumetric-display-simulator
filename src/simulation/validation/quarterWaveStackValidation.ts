@@ -9,6 +9,7 @@ const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
+/** Validates the stack inputs used by the form, importer, and solver. */
 export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
   const wavelengthStartNm = inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5;

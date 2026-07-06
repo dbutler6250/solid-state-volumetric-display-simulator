@@ -10,6 +10,7 @@ type ReflectanceChartProps = {
 
 const Plot = createPlotlyComponent(Plotly);
 
+/** Renders the reflectance spectrum with an optional transmission overlay. */
 export function ReflectanceChart({ result, showTransmission, xRange }: ReflectanceChartProps) {
   if (!result) {
     return (
