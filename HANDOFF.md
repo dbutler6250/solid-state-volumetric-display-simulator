@@ -2,8 +2,8 @@
 
 ## Latest Task
 
-- Hid the Spectrum toolbar "Center on Bandwidth" and "Reset View" controls while preserving their code as comments.
-- Renamed the Spectrum export button to "Export Spectrum CSV".
+- Centralized the angle-sweep warning text in `SimulationShell.tsx`.
+- Updated local dev-server guidance to start Vite in the background only when it is not already running.
 
 ## Verification
 
@@ -13,4 +13,4 @@
 
 ## Notes
 
-- Changes committed and pushed from `main`.
+- Ready to commit and push from `main`.

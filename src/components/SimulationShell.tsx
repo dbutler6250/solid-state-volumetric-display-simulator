@@ -34,6 +34,8 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   end: 750,
   pointCount: 9,
 };
+const DEFAULT_PARAMETER_SWEEP_WARNING =
+  'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
 const DEFAULT_INCIDENT_ANGLE_SWEEP = {
   start: 0,
   end: 89,
@@ -58,7 +60,7 @@ export function SimulationShell() {
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
   const parameterSweepWarning =
     parameterSweep.parameter === 'incidentAngleDegrees'
-      ? 'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.'
+      ? DEFAULT_PARAMETER_SWEEP_WARNING
       : null;
   const result = useMemo(() => {
     if (validationIssues.length > 0) {
