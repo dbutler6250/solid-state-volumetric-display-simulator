@@ -2,8 +2,9 @@
 
 ## Latest Task
 
-- Centralized the angle-sweep warning text in `SimulationShell.tsx`.
-- Updated local dev-server guidance to start Vite in the background only when it is not already running.
+- Fixed the numeric form inputs so decimal fields can be backspaced/cleared while editing, then snap back to the prior value on blur.
+- Removed trailing zeros from refractive-index display values and lowered refractive-index spinner steps to `0.001`.
+- Branch: `issue-6-complex-refractive-index`.
 
 ## Verification
 
@@ -13,4 +14,4 @@
 
 ## Notes
 
-- Ready to commit and push from `main`.
+- The sweep controls were left unchanged as requested.

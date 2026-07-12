@@ -5,10 +5,23 @@ import type {
   SimulationResult,
 } from '../../types/simulation';
 import type { LayerStack } from '../layers/stack';
-import { add, complex, divide, magnitudeSquared, multiply, scale, subtract } from '../math/complex';
+import {
+  add,
+  complex,
+  cos,
+  divide,
+  magnitudeSquared,
+  multiply,
+  scale,
+  sin,
+  sqrt,
+  subtract,
+  type Complex,
+} from '../math/complex';
 import { identityMatrix2, multiplyMatrix2, type Matrix2 } from '../math/matrix2';
 import { buildQuarterWaveStack } from '../structures/quarterWaveStack';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
+import { toComplexRefractiveIndex } from '../materials/material';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
@@ -45,48 +58,53 @@ const assertValidInputs = (inputs: QuarterWaveStackInputs) => {
 };
 
 /** Computes the propagation angle inside a layer using Snell's law. */
-const getLayerCosine = (incidentIndex: number, layerIndex: number, incidentAngleRadians: number) => {
-  const sinTheta = (incidentIndex / layerIndex) * Math.sin(incidentAngleRadians);
-  const cosineSquared = 1 - sinTheta * sinTheta;
-  if (cosineSquared < -1e-12) throw new Error('Total internal reflection with real-valued indices is not supported yet.');
-  return Math.sqrt(Math.max(0, cosineSquared));
+const getLayerCosine = (
+  incidentIndex: Complex,
+  layerIndex: Complex,
+  incidentAngleRadians: number,
+): Complex => {
+  const sinIncident = complex(Math.sin(incidentAngleRadians));
+  const sinTheta = multiply(divide(incidentIndex, layerIndex), sinIncident);
+  const cosineSquared = subtract(complex(1), multiply(sinTheta, sinTheta));
+  return sqrt(cosineSquared);
 };
 
 /** Converts refractive index and angle into the TE/TM optical admittance. */
 const getOpticalAdmittance = (
-  refractiveIndex: number,
-  cosTheta: number,
+  refractiveIndex: Complex,
+  cosTheta: Complex,
   polarization: QuarterWaveStackInputs['polarization'],
-): number => (polarization === 'TE' ? refractiveIndex * cosTheta : refractiveIndex / cosTheta);
+): Complex => (polarization === 'TE' ? multiply(refractiveIndex, cosTheta) : divide(refractiveIndex, cosTheta));
 
 /** Builds the characteristic matrix for one homogeneous layer. */
 const getLayerMatrix = (
-  refractiveIndex: number,
+  refractiveIndex: Complex,
   thicknessNm: number,
   wavelengthNm: number,
-  cosTheta: number,
-  admittance: number,
+  cosTheta: Complex,
+  admittance: Complex,
 ): Matrix2 => {
-  const phaseThickness = (2 * Math.PI * refractiveIndex * thicknessNm * cosTheta) / wavelengthNm;
-  const cosPhase = Math.cos(phaseThickness);
-  const sinPhase = Math.sin(phaseThickness);
+  const phaseThickness = scale(multiply(refractiveIndex, cosTheta), (2 * Math.PI * thicknessNm) / wavelengthNm);
+  const cosPhase = cos(phaseThickness);
+  const sinPhase = sin(phaseThickness);
   return [
-    [complex(cosPhase), complex(0, sinPhase / admittance)],
-    [complex(0, admittance * sinPhase), complex(cosPhase)],
+    [cosPhase, multiply(complex(0, 1), divide(sinPhase, admittance))],
+    [multiply(complex(0, 1), multiply(admittance, sinPhase)), cosPhase],
   ];
 };
 
 /** Solves one stack at a single wavelength and incident angle. */
 export function solveLayerStack(stack: LayerStack, options: SolveLayerStackOptions) {
   const incidentAngleRadians = options.incidentAngleDegrees * DEGREES_TO_RADIANS;
-  const incidentIndex = stack.incidentMedium.refractiveIndex;
-  const incidentCosine = Math.cos(incidentAngleRadians);
-  const exitCosine = getLayerCosine(incidentIndex, stack.exitMedium.refractiveIndex, incidentAngleRadians);
+  const incidentIndex = toComplexRefractiveIndex(stack.incidentMedium.refractiveIndex);
+  const exitIndex = toComplexRefractiveIndex(stack.exitMedium.refractiveIndex);
+  const incidentCosine = complex(Math.cos(incidentAngleRadians));
+  const exitCosine = getLayerCosine(incidentIndex, exitIndex, incidentAngleRadians);
   const incidentAdmittance = getOpticalAdmittance(incidentIndex, incidentCosine, options.polarization);
-  const exitAdmittance = getOpticalAdmittance(stack.exitMedium.refractiveIndex, exitCosine, options.polarization);
+  const exitAdmittance = getOpticalAdmittance(exitIndex, exitCosine, options.polarization);
 
   const systemMatrix = stack.layers.reduce((matrix, layer) => {
-    const refractiveIndex = layer.material.refractiveIndex;
+    const refractiveIndex = toComplexRefractiveIndex(layer.material.refractiveIndex);
     const cosTheta = getLayerCosine(incidentIndex, refractiveIndex, incidentAngleRadians);
     const admittance = getOpticalAdmittance(refractiveIndex, cosTheta, options.polarization);
     return multiplyMatrix2(matrix, getLayerMatrix(refractiveIndex, layer.thicknessNm, options.wavelengthNm, cosTheta, admittance));
@@ -96,15 +114,15 @@ export function solveLayerStack(stack: LayerStack, options: SolveLayerStackOptio
   const m12 = systemMatrix[0][1];
   const m21 = systemMatrix[1][0];
   const m22 = systemMatrix[1][1];
-  const exitAdmittanceComplex = complex(exitAdmittance);
-  const incidentAdmittanceComplex = complex(incidentAdmittance);
-  const fieldB = add(m11, multiply(m12, exitAdmittanceComplex));
-  const fieldC = add(m21, multiply(m22, exitAdmittanceComplex));
-  const denominator = add(multiply(incidentAdmittanceComplex, fieldB), fieldC);
-  const reflectionAmplitude = divide(subtract(multiply(incidentAdmittanceComplex, fieldB), fieldC), denominator);
-  const transmissionAmplitude = divide(scale(incidentAdmittanceComplex, 2), denominator);
+  const fieldB = add(m11, multiply(m12, exitAdmittance));
+  const fieldC = add(m21, multiply(m22, exitAdmittance));
+  const denominator = add(multiply(incidentAdmittance, fieldB), fieldC);
+  const reflectionAmplitude = divide(subtract(multiply(incidentAdmittance, fieldB), fieldC), denominator);
+  const transmissionAmplitude = divide(scale(incidentAdmittance, 2), denominator);
   const reflectance = magnitudeSquared(reflectionAmplitude);
-  const transmission = (exitAdmittance / incidentAdmittance) * magnitudeSquared(transmissionAmplitude);
+  const incidentPower = getPowerFlowFactor(incidentAdmittance);
+  const exitPower = getPowerFlowFactor(exitAdmittance);
+  const transmission = (exitPower / incidentPower) * magnitudeSquared(transmissionAmplitude);
 
   return {
     wavelengthNm: options.wavelengthNm,
@@ -114,6 +132,9 @@ export function solveLayerStack(stack: LayerStack, options: SolveLayerStackOptio
 }
 
 const clampUnitInterval = (value: number): number => Math.min(1, Math.max(0, value));
+
+/** Approximates the real power flow factor for a complex admittance. */
+const getPowerFlowFactor = (admittance: Complex): number => Math.max(0, admittance.re);
 
 /** Expands the spectrum around the design wavelength when no sweep is specified. */
 const createWavelengthSweep = ({

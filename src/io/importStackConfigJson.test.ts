@@ -4,7 +4,7 @@ import { importStackConfigJson } from './importStackConfigJson';
 import type { Material } from '../simulation/materials/material';
 import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
 
-const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
+const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
   name,
   refractiveIndex,
@@ -109,7 +109,39 @@ describe('importStackConfigJson', () => {
 
     expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
       ok: false,
-      message: 'The high-index material refractive index must be a finite number greater than 0.',
+      message: 'The material refractive index must be a finite number greater than 0.',
+    });
+  });
+
+  it('imports complex refractive-index objects', () => {
+    const payload = {
+      schema: 'ssvds-stack-config-v1',
+      app: 'solid-state-volumetric-display-simulator',
+      structureType: 'quarter-wave-stack',
+      inputs: {
+        ...inputs,
+        highIndexMaterial: {
+          ...inputs.highIndexMaterial,
+          refractiveIndex: {
+            real: 2.3,
+            imag: 0.15,
+          },
+        },
+      },
+    };
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: true,
+      inputs: {
+        ...inputs,
+        highIndexMaterial: {
+          ...inputs.highIndexMaterial,
+          refractiveIndex: {
+            real: 2.3,
+            imag: 0.15,
+          },
+        },
+      },
     });
   });
 

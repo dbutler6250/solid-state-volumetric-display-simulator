@@ -1,4 +1,5 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
+import { getRefractiveIndexImag, getRefractiveIndexReal, isComplexRefractiveIndex } from '../materials/material';
 
 export type ValidationIssue = {
   field: keyof QuarterWaveStackInputs;
@@ -8,6 +9,37 @@ export type ValidationIssue = {
 const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
+
+const validateRefractiveIndex = (
+  value: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex'],
+  label: 'high-index' | 'low-index',
+): ValidationIssue | null => {
+  const real = getRefractiveIndexReal(value);
+  const imag = getRefractiveIndexImag(value);
+
+  if (!Number.isFinite(real) || real <= 0) {
+    return {
+      field: label === 'high-index' ? 'highIndexMaterial' : 'lowIndexMaterial',
+      message: `${label === 'high-index' ? 'High' : 'Low'}-index material refractive index real part must be greater than 0.`,
+    };
+  }
+
+  if (!Number.isFinite(imag) || imag < 0) {
+    return {
+      field: label === 'high-index' ? 'highIndexMaterial' : 'lowIndexMaterial',
+      message: `${label === 'high-index' ? 'High' : 'Low'}-index material refractive index imaginary part must be 0 or greater.`,
+    };
+  }
+
+  if (isComplexRefractiveIndex(value) && (!Number.isFinite(value.real) || !Number.isFinite(value.imag))) {
+    return {
+      field: label === 'high-index' ? 'highIndexMaterial' : 'lowIndexMaterial',
+      message: `${label === 'high-index' ? 'High' : 'Low'}-index material refractive index must be finite.`,
+    };
+  }
+
+  return null;
+};
 
 /** Validates the stack inputs used by the form, importer, and solver. */
 export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): ValidationIssue[] {
@@ -26,15 +58,8 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
     });
   }
 
-  if (
-    !isFiniteNumber(inputs.highIndexMaterial.refractiveIndex) ||
-    inputs.highIndexMaterial.refractiveIndex <= 0
-  ) {
-    issues.push({
-      field: 'highIndexMaterial',
-      message: 'High-index material refractive index must be greater than 0.',
-    });
-  }
+  const highIndexIssue = validateRefractiveIndex(inputs.highIndexMaterial.refractiveIndex, 'high-index');
+  if (highIndexIssue) issues.push(highIndexIssue);
 
   if (
     !isNonEmptyString(inputs.lowIndexMaterial.id) ||
@@ -46,15 +71,8 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
     });
   }
 
-  if (
-    !isFiniteNumber(inputs.lowIndexMaterial.refractiveIndex) ||
-    inputs.lowIndexMaterial.refractiveIndex <= 0
-  ) {
-    issues.push({
-      field: 'lowIndexMaterial',
-      message: 'Low-index material refractive index must be greater than 0.',
-    });
-  }
+  const lowIndexIssue = validateRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex, 'low-index');
+  if (lowIndexIssue) issues.push(lowIndexIssue);
 
   if (
     !isFiniteNumber(inputs.periodCount) ||
@@ -97,12 +115,22 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       field: 'wavelengthStartNm',
       message: 'Sweep start must be greater than 0 nm.',
     });
+  } else if (!Number.isInteger(wavelengthStartNm)) {
+    issues.push({
+      field: 'wavelengthStartNm',
+      message: 'Sweep start must be a whole number of nanometers.',
+    });
   }
 
   if (!isFiniteNumber(wavelengthEndNm) || wavelengthEndNm <= wavelengthStartNm) {
     issues.push({
       field: 'wavelengthEndNm',
       message: 'Sweep end must be greater than sweep start.',
+    });
+  } else if (!Number.isInteger(wavelengthEndNm)) {
+    issues.push({
+      field: 'wavelengthEndNm',
+      message: 'Sweep end must be a whole number of nanometers.',
     });
   }
 

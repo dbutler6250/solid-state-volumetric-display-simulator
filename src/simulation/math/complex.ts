@@ -46,3 +46,26 @@ export const scale = (a: Complex, factor: number): Complex => ({
 
 /** Returns the squared magnitude of a complex value. */
 export const magnitudeSquared = (a: Complex): number => a.re * a.re + a.im * a.im;
+
+/** Returns the complex conjugate. */
+export const conjugate = (a: Complex): Complex => ({ re: a.re, im: -a.im });
+
+/** Returns the complex square root using the principal branch. */
+export const sqrt = (a: Complex): Complex => {
+  const magnitude = Math.hypot(a.re, a.im);
+  const real = Math.sqrt(Math.max(0, (magnitude + a.re) / 2));
+  const imag = Math.sqrt(Math.max(0, (magnitude - a.re) / 2));
+  return a.im >= 0 ? { re: real, im: imag } : { re: real, im: -imag };
+};
+
+/** Returns the complex cosine. */
+export const cos = (a: Complex): Complex => ({
+  re: Math.cos(a.re) * Math.cosh(a.im),
+  im: -Math.sin(a.re) * Math.sinh(a.im),
+});
+
+/** Returns the complex sine. */
+export const sin = (a: Complex): Complex => ({
+  re: Math.sin(a.re) * Math.cosh(a.im),
+  im: Math.cos(a.re) * Math.sinh(a.im),
+});
