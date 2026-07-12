@@ -1,6 +1,8 @@
-import { useReducer, type InputHTMLAttributes } from 'react';
+import { useEffect, useReducer, useRef, type InputHTMLAttributes } from 'react';
 import {
   formattedNumberInputReducer,
+  normalizeCommittedNumber,
+  parseFiniteIntegerDraft,
   parseFiniteNumberDraft,
 } from './formattedNumberInputState';
 
@@ -11,6 +13,9 @@ type FormattedNumberInputProps = Omit<
   value: number | undefined;
   onValueChange: (value: number) => void;
   formatInactive: (value: number | undefined) => string;
+  parseMode?: 'decimal' | 'integer';
+  normalizeOnBlur?: (value: number) => number;
+  resetKey?: string | number;
 };
 
 /** Displays a concise inactive value while preserving an exact local editing draft. */
@@ -18,6 +23,9 @@ export function FormattedNumberInput({
   value,
   onValueChange,
   formatInactive,
+  parseMode = 'decimal',
+  normalizeOnBlur,
+  resetKey,
   min,
   max,
   ...inputProps
@@ -26,12 +34,26 @@ export function FormattedNumberInput({
     isFocused: false,
     draft: '',
   });
+  const previousResetKey = useRef(resetKey);
+
+  useEffect(() => {
+    if (previousResetKey.current !== resetKey) {
+      previousResetKey.current = resetKey;
+      dispatch({ type: 'reset', value });
+    }
+  }, [resetKey, value]);
+
+  const parseDraft = parseMode === 'integer' ? parseFiniteIntegerDraft : parseFiniteNumberDraft;
 
   const commitDraft = () => {
     const parsed = parseFiniteNumberDraft(state.draft);
     if (parsed !== undefined) {
-      const lowerBounded = typeof min === 'number' ? Math.max(min, parsed) : parsed;
-      const bounded = typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
+      const bounded = normalizeCommittedNumber(
+        parsed,
+        typeof min === 'number' ? min : undefined,
+        typeof max === 'number' ? max : undefined,
+        normalizeOnBlur,
+      );
       onValueChange(bounded);
     }
     dispatch({ type: 'blur' });
@@ -41,7 +63,7 @@ export function FormattedNumberInput({
     <input
       {...inputProps}
       type="text"
-      inputMode="decimal"
+      inputMode={parseMode === 'integer' ? 'numeric' : 'decimal'}
       min={min}
       max={max}
       value={state.isFocused ? state.draft : formatInactive(value)}
@@ -49,7 +71,7 @@ export function FormattedNumberInput({
       onChange={(event) => {
         const draft = event.target.value;
         dispatch({ type: 'change', draft });
-        const parsed = parseFiniteNumberDraft(draft);
+        const parsed = parseDraft(draft);
         if (parsed !== undefined) {
           onValueChange(parsed);
         }

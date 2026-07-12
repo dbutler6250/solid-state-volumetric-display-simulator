@@ -6,6 +6,7 @@ export type FormattedNumberInputState = {
 export type FormattedNumberInputAction =
   | { type: 'focus'; value: number | undefined }
   | { type: 'change'; draft: string }
+  | { type: 'reset'; value: number | undefined }
   | { type: 'blur' };
 
 /** Returns the exact JavaScript numeric representation used when editing begins. */
@@ -29,6 +30,24 @@ export const parseFiniteNumberDraft = (draft: string): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
+/** Parses a complete finite integer without rounding a temporary fractional draft. */
+export const parseFiniteIntegerDraft = (draft: string): number | undefined => {
+  const parsed = parseFiniteNumberDraft(draft);
+  return parsed !== undefined && Number.isInteger(parsed) ? parsed : undefined;
+};
+
+/** Applies optional blur normalization and native-style numeric bounds to a committed value. */
+export const normalizeCommittedNumber = (
+  value: number,
+  min?: number,
+  max?: number,
+  normalize?: (value: number) => number,
+): number => {
+  const normalized = normalize ? normalize(value) : value;
+  const lowerBounded = typeof min === 'number' ? Math.max(min, normalized) : normalized;
+  return typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
+};
+
 /** Tracks focus explicitly so external prop updates cannot replace an active draft. */
 export function formattedNumberInputReducer(
   state: FormattedNumberInputState,
@@ -39,6 +58,8 @@ export function formattedNumberInputReducer(
       return { isFocused: true, draft: formatEditableNumber(action.value) };
     case 'change':
       return { ...state, draft: action.draft };
+    case 'reset':
+      return { ...state, draft: formatEditableNumber(action.value) };
     case 'blur':
       return { ...state, isFocused: false };
   }

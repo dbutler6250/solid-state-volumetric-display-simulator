@@ -5,7 +5,9 @@ import { FormattedNumberInput } from './FormattedNumberInput';
 import {
   formatEditableNumber,
   formattedNumberInputReducer,
+  normalizeCommittedNumber,
   parseFiniteNumberDraft,
+  parseFiniteIntegerDraft,
   type FormattedNumberInputState,
 } from './formattedNumberInputState';
 
@@ -45,6 +47,14 @@ describe('FormattedNumberInput state', () => {
     expect(parseFiniteNumberDraft('not-a-number')).toBeUndefined();
   });
 
+  it('commits only complete integers and preserves existing blur rounding and bounds', () => {
+    expect(parseFiniteIntegerDraft('12')).toBe(12);
+    expect(parseFiniteIntegerDraft('12.5')).toBeUndefined();
+    expect(parseFiniteIntegerDraft('1e')).toBeUndefined();
+    expect(normalizeCommittedNumber(1.4, 2, 2001, Math.round)).toBe(2);
+    expect(normalizeCommittedNumber(2001.6, 2, 2001, Math.round)).toBe(2001);
+  });
+
   it('preserves an active draft independently of external values until blur', () => {
     const initial: FormattedNumberInputState = { isFocused: false, draft: '' };
     const focused = formattedNumberInputReducer(initial, { type: 'focus', value: 103.25 });
@@ -55,5 +65,25 @@ describe('FormattedNumberInput state', () => {
       isFocused: false,
       draft: '105.6250',
     });
+  });
+
+  it('replaces an active draft only for an intentional reset', () => {
+    const editing: FormattedNumberInputState = { isFocused: true, draft: '105.6250' };
+
+    expect(formattedNumberInputReducer(editing, { type: 'change', draft: '105.6250' }))
+      .toEqual(editing);
+    expect(formattedNumberInputReducer(editing, { type: 'reset', value: 120.125 }))
+      .toEqual({ isFocused: true, draft: '120.125' });
+  });
+
+  it('uses the integer keyboard hint when requested', () => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 12,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      parseMode: 'integer',
+    }));
+
+    expect(markup).toContain('inputMode="numeric"');
   });
 });

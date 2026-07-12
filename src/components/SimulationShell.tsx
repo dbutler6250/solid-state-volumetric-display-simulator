@@ -52,6 +52,7 @@ export function SimulationShell() {
   const [activeTab, setActiveTab] = useState<OutputTab>('spectrum');
   const [xRange, setXRange] = useState<[number, number] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [inputResetKey, setInputResetKey] = useState(0);
   const [parameterSweep, setParameterSweep] =
     useState<ParameterSweepSettings>(DEFAULT_PARAMETER_SWEEP);
   const [parameterSweepResult, setParameterSweepResult] = useState<ParameterSweepResult | null>(
@@ -219,6 +220,7 @@ export function SimulationShell() {
       }
 
       setInputs(imported.inputs);
+      setInputResetKey((current) => current + 1);
       if (imported.parameterSweep) {
         setParameterSweep(imported.parameterSweep);
       }
@@ -266,6 +268,7 @@ export function SimulationShell() {
             inputs={inputs}
             validationIssues={validationIssues}
             onChange={setInputs}
+            externalResetKey={inputResetKey}
           />
         </aside>
 
@@ -342,6 +345,7 @@ export function SimulationShell() {
                 validationIssues={validationIssues}
                 onChange={setInputs}
                 section="sweep"
+                externalResetKey={inputResetKey}
               />
             </section>
           </section>
