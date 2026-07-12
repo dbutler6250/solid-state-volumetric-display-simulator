@@ -1,7 +1,7 @@
 # Solid State Volumetric Display Simulator
 
 Author: Dylan Butler
-Last Updated: 2026-07-11
+Last Updated: 2026-07-12
 
 This document is the historical record of completed project work. Active roadmap items, backlog work, and implementation details now live in GitHub Issues.
 
@@ -28,7 +28,14 @@ Keep this section as the historical record. Do not create issues for these items
 - JSON export and import
 - Bragg terminology genericization
 - Code comments
+- Parameter sweep analysis
 
 ## Notes
 
 Use this section for quick general brain dumps before cleaning them up into GitHub Issues. Keep active roadmap, backlog, and implementation tracking in GitHub Issues.
+
+- Consider richer parameter sweep export metadata if external analysis pipelines become important.
+- Consider angle sweep support as a future analysis workflow.
+- Consider 2D sweep heatmaps after multiple swept parameters are supported.
+- Improve peak, center, and bandwidth metric extraction with interpolation instead of sampled-point estimates.
+- Split Plotly into a lazy-loaded chunk to address the current Vite large chunk warning.
