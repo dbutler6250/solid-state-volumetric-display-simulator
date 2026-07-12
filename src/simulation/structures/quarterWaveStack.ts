@@ -7,6 +7,28 @@ import type { QuarterWaveStackInputs } from '../../types/simulation';
 const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
   designWavelengthNm / (4 * refractiveIndex);
 
+const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
+  highIndexThicknessNm: getQuarterWaveThickness(
+    inputs.designWavelengthNm,
+    getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex),
+  ),
+  lowIndexThicknessNm: getQuarterWaveThickness(
+    inputs.designWavelengthNm,
+    getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex),
+  ),
+});
+
+const getResolvedThicknesses = (inputs: QuarterWaveStackInputs) => {
+  if (inputs.thicknessMode === 'manual') {
+    return {
+      highIndexThicknessNm: inputs.highIndexThicknessNm ?? 0,
+      lowIndexThicknessNm: inputs.lowIndexThicknessNm ?? 0,
+    };
+  }
+
+  return getDerivedThicknesses(inputs);
+};
+
 /** Default inputs that provide a valid starting stack for the UI. */
 export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   highIndexMaterial: MATERIAL_CATALOG[0],
@@ -15,6 +37,7 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   designWavelengthNm: 600,
   incidentAngleDegrees: 0,
   polarization: 'TE',
+  thicknessMode: 'derived',
   wavelengthStartNm: 300,
   wavelengthEndNm: 900,
   wavelengthPointCount: 500,
@@ -22,14 +45,7 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
 
 /** Builds the alternating high/low layer sequence for the solver. */
 export function buildQuarterWaveStackLayers(inputs: QuarterWaveStackInputs): OpticalLayer[] {
-  const highIndexThicknessNm = getQuarterWaveThickness(
-    inputs.designWavelengthNm,
-    getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex),
-  );
-  const lowIndexThicknessNm = getQuarterWaveThickness(
-    inputs.designWavelengthNm,
-    getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex),
-  );
+  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
   const layers: OpticalLayer[] = [];
 
   for (let period = 0; period < inputs.periodCount; period += 1) {

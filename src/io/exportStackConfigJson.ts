@@ -16,6 +16,9 @@ type StackConfigExport = {
     designWavelengthNm: number;
     incidentAngleDegrees: number;
     polarization: QuarterWaveStackInputs['polarization'];
+    thicknessMode: QuarterWaveStackInputs['thicknessMode'];
+    highIndexThicknessNm?: number;
+    lowIndexThicknessNm?: number;
     wavelengthStartNm?: number;
     wavelengthEndNm?: number;
     wavelengthPointCount?: number;
@@ -43,6 +46,9 @@ export function exportStackConfigJson(
       designWavelengthNm: inputs.designWavelengthNm,
       incidentAngleDegrees: inputs.incidentAngleDegrees,
       polarization: inputs.polarization,
+      thicknessMode: inputs.thicknessMode,
+      highIndexThicknessNm: inputs.highIndexThicknessNm,
+      lowIndexThicknessNm: inputs.lowIndexThicknessNm,
       wavelengthStartNm: inputs.wavelengthStartNm,
       wavelengthEndNm: inputs.wavelengthEndNm,
       wavelengthPointCount: inputs.wavelengthPointCount,

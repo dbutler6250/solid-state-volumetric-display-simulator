@@ -17,6 +17,7 @@ const inputs: QuarterWaveStackInputs = {
   designWavelengthNm: 532,
   incidentAngleDegrees: 17.5,
   polarization: 'TM',
+  thicknessMode: 'derived',
   wavelengthStartNm: 450,
   wavelengthEndNm: 650,
   wavelengthPointCount: 401,

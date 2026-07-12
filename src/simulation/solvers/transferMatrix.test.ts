@@ -134,6 +134,7 @@ describe('transfer matrix solver', () => {
       designWavelengthNm,
       incidentAngleDegrees: 0,
       polarization: 'TE',
+      thicknessMode: 'derived',
       wavelengthStartNm: 450,
       wavelengthEndNm: 750,
       wavelengthPointCount: 301,
@@ -157,6 +158,7 @@ describe('transfer matrix solver', () => {
       designWavelengthNm: 603,
       incidentAngleDegrees: 0,
       polarization: 'TE',
+      thicknessMode: 'derived',
       wavelengthStartNm,
       wavelengthEndNm,
       wavelengthPointCount,
@@ -182,6 +184,7 @@ describe('transfer matrix solver', () => {
       designWavelengthNm,
       incidentAngleDegrees: 25,
       polarization: 'TE',
+      thicknessMode: 'derived',
       wavelengthStartNm: 450,
       wavelengthEndNm: 750,
       wavelengthPointCount: 121,
@@ -199,6 +202,7 @@ describe('transfer matrix solver', () => {
       designWavelengthNm: 600,
       incidentAngleDegrees: 0,
       polarization: 'TE',
+      thicknessMode: 'derived',
       wavelengthStartNm: 400,
       wavelengthEndNm: 900,
       wavelengthPointCount: 101,
@@ -232,6 +236,7 @@ describe('transfer matrix solver', () => {
       designWavelengthNm: 600,
       incidentAngleDegrees: 0,
       polarization: 'TE',
+      thicknessMode: 'derived',
       wavelengthStartNm: 400,
       wavelengthEndNm: 900,
       wavelengthPointCount: 101,
@@ -258,6 +263,7 @@ describe('transfer matrix solver', () => {
         designWavelengthNm: 600,
         incidentAngleDegrees: 0,
         polarization: 'TE',
+      thicknessMode: 'derived',
         wavelengthStartNm: 300,
         wavelengthEndNm: 900,
         wavelengthPointCount: 2,
@@ -277,6 +283,7 @@ describe('transfer matrix solver', () => {
         designWavelengthNm: 600,
         incidentAngleDegrees: 0,
         polarization: 'TE',
+      thicknessMode: 'derived',
         wavelengthStartNm: 300,
         wavelengthEndNm: 900,
         wavelengthPointCount: 301,
@@ -306,6 +313,7 @@ describe('transfer matrix solver', () => {
       designWavelengthNm: 600,
       incidentAngleDegrees: 0,
       polarization: 'TE',
+      thicknessMode: 'derived',
       wavelengthStartNm: 450,
       wavelengthEndNm: 750,
       wavelengthPointCount: 81,
@@ -325,3 +333,4 @@ describe('transfer matrix solver', () => {
     expect(lastPeakReflectance).toBeGreaterThan(firstPeakReflectance);
   });
 });
+

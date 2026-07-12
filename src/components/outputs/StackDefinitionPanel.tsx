@@ -46,6 +46,11 @@ const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): D
   },
 ];
 
+const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
+  highIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
+  lowIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
+});
+
 /** Builds a compact layer sequence for the stack preview. */
 const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
   const incidentMedium: DiagramSegment = {
@@ -91,10 +96,12 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
 
 /** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
+  const thicknessMode = inputs.thicknessMode ?? 'derived';
+  const derivedThicknesses = getDerivedThicknesses(inputs);
   const highIndexThicknessNm =
-    inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex));
+    thicknessMode === 'manual' ? inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm : derivedThicknesses.highIndexThicknessNm;
   const lowIndexThicknessNm =
-    inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex));
+    thicknessMode === 'manual' ? inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm : derivedThicknesses.lowIndexThicknessNm;
   const totalLayerCount = Number.isFinite(inputs.periodCount)
     ? Math.max(0, Math.round(inputs.periodCount) * 2)
     : Number.NaN;
@@ -106,6 +113,9 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
       <div className="stack-panel-heading">
         <h2>Stack Definition</h2>
         <span>Air | H/L x {formatCount(inputs.periodCount)} | Air</span>
+      </div>
+      <div className="stack-panel-subtitle">
+        Thickness mode: {thicknessMode === 'derived' ? 'Derived from design wavelength' : thicknessMode === 'manual' ? 'User typed' : 'Acoustic (future)'}
       </div>
 
       <div className="stack-summary-grid">
@@ -125,8 +135,8 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
             inputs.lowIndexMaterial.refractiveIndex,
           )}
         />
-        <StackSummaryItem label="H optical thickness" value={`d=${formatNumber(highIndexThicknessNm, 1)} nm`} />
-        <StackSummaryItem label="L optical thickness" value={`d=${formatNumber(lowIndexThicknessNm, 1)} nm`} />
+        <StackSummaryItem label="H optical thickness" value={`d=${formatNumber(highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm, 1)} nm`} />
+        <StackSummaryItem label="L optical thickness" value={`d=${formatNumber(lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm, 1)} nm`} />
       </div>
 
       {isValid ? (

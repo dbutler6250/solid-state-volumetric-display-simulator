@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
-import { AssumptionsPanel } from './outputs/AssumptionsPanel';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
@@ -241,7 +240,6 @@ export function SimulationShell() {
             validationIssues={validationIssues}
             onChange={setInputs}
           />
-          <AssumptionsPanel />
           <section className="parameter-sweep-panel" aria-label="Parameter sweep controls">
             <h2>Parameter Sweep</h2>
             <label className="field">

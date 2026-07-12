@@ -4,6 +4,9 @@ import type { SpectrumPoint } from '../simulation/results/spectrum';
 /** Supported incident polarizations for the current transfer-matrix model. */
 export type Polarization = 'TE' | 'TM';
 
+/** Selects how layer thicknesses are sourced for the current stack. */
+export type ThicknessMode = 'derived' | 'manual' | 'acoustic';
+
 /** Input bundle shared by the form, importer, solver, and exports. */
 export type QuarterWaveStackInputs = {
   highIndexMaterial: Material;
@@ -12,6 +15,9 @@ export type QuarterWaveStackInputs = {
   designWavelengthNm: number;
   incidentAngleDegrees: number;
   polarization: Polarization;
+  thicknessMode?: ThicknessMode;
+  highIndexThicknessNm?: number;
+  lowIndexThicknessNm?: number;
   wavelengthStartNm?: number;
   wavelengthEndNm?: number;
   wavelengthPointCount?: number;

@@ -2,15 +2,16 @@
 
 ## Latest Task
 
-- Merged PR `#36`, pruned stale remote-tracking refs, and cleaned up the merged feature branch.
-- Updated the workflow notes to reflect the separate `main` worktree and the `fetch --prune` / stale-rebase cleanup steps we actually use.
-- Branch: `main`.
+- Implemented issue `#8` on branch `codex/issue-8-thickness-modes`.
+- Added explicit thickness modes: `Derived from design wavelength`, `User typed`, and `Acoustic (future)`.
+- Preserved the current derived quarter-wave workflow as the default and kept solver/import/export paths intact.
 
 ## Verification
 
-- `git fetch --prune origin` - passed.
-- `git pull --ff-only origin main` - passed in the `main` worktree.
+- `npm.cmd run test` - passed.
+- `npm.cmd run lint` - passed.
+- `npm.cmd run build` - passed.
 
 ## Notes
 
-- `main` is current; the feature worktree is detached at the merged commit and the remote feature branch has been deleted.
+- Switching away from derived thickness now seeds the editable values from the last derived thicknesses.

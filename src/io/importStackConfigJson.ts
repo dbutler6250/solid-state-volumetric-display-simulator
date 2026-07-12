@@ -73,10 +73,19 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     designWavelengthNm: rawInputs.designWavelengthNm as number,
     incidentAngleDegrees: rawInputs.incidentAngleDegrees as number,
     polarization: polarization as Polarization,
+    thicknessMode: normalizeThicknessMode(rawInputs.thicknessMode),
     wavelengthStartNm: rawInputs.wavelengthStartNm as number | undefined,
     wavelengthEndNm: rawInputs.wavelengthEndNm as number | undefined,
     wavelengthPointCount: rawInputs.wavelengthPointCount as number | undefined,
   };
+
+  if (typeof rawInputs.highIndexThicknessNm === 'number') {
+    inputs.highIndexThicknessNm = rawInputs.highIndexThicknessNm;
+  }
+
+  if (typeof rawInputs.lowIndexThicknessNm === 'number') {
+    inputs.lowIndexThicknessNm = rawInputs.lowIndexThicknessNm;
+  }
 
   const issues = validateQuarterWaveStackInputs(inputs);
   if (issues.length > 0) {
@@ -89,7 +98,7 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
   return {
     ok: true,
     inputs,
-    parameterSweep: parameterSweep.settings,
+    ...(parameterSweep.settings ? { parameterSweep: parameterSweep.settings } : {}),
   };
 }
 
@@ -213,4 +222,12 @@ function isNonNegativeFiniteNumber(value: unknown): value is number {
 /** Checks for a finite angle inside the supported open interval below 90 degrees. */
 function isAngleFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < 90;
+}
+
+function normalizeThicknessMode(value: unknown): QuarterWaveStackInputs['thicknessMode'] {
+  if (value === 'manual' || value === 'acoustic') {
+    return value;
+  }
+
+  return 'derived';
 }
