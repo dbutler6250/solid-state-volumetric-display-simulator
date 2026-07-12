@@ -186,6 +186,36 @@ describe('transfer matrix solver', () => {
     expect(derivedResult.reflectance - manualResult.reflectance).toBeGreaterThan(0.1);
   });
 
+  it('shifts the peak wavelength when manual thickness is detuned', () => {
+    const designWavelengthNm = 600;
+    const highIndexMaterial = makeMaterial('nH', 2.4);
+    const lowIndexMaterial = makeMaterial('nL', 1.45);
+    const derivedInputs: QuarterWaveStackInputs = {
+      highIndexMaterial,
+      lowIndexMaterial,
+      periodCount: 10,
+      designWavelengthNm,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+      thicknessMode: 'derived',
+      wavelengthStartNm: 500,
+      wavelengthEndNm: 700,
+      wavelengthPointCount: 201,
+    };
+    const manualInputs: QuarterWaveStackInputs = {
+      ...derivedInputs,
+      thicknessMode: 'manual',
+      highIndexThicknessNm: (designWavelengthNm / (4 * 2.4)) * 1.2,
+      lowIndexThicknessNm: (designWavelengthNm / (4 * 1.45)) * 1.2,
+    };
+
+    const derivedResult = solveQuarterWaveStack(derivedInputs);
+    const manualResult = solveQuarterWaveStack(manualInputs);
+
+    expect(Math.abs(manualResult.centerWavelengthNm - derivedResult.centerWavelengthNm)).toBeGreaterThan(10);
+    expect(Math.abs(manualResult.centerWavelengthNm - designWavelengthNm)).toBeGreaterThan(10);
+  });
+
   it('interpolates peak and bandwidth metrics between sampled wavelengths', () => {
     const wavelengthStartNm = 440;
     const wavelengthEndNm = 760;
