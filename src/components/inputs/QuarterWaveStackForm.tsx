@@ -117,7 +117,8 @@ const applyThicknessMode = (inputs: QuarterWaveStackInputs, thicknessMode: Thick
   };
 };
 
-const formatThicknessInput = (value: number | undefined): string => formatNumericInput(value);
+const formatThicknessInput = (value: number | undefined): string =>
+  typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : '';
 
 /** Re-centers the sweep range while preserving the current midpoint. */
 const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): QuarterWaveStackInputs => {
@@ -278,7 +279,12 @@ export function QuarterWaveStackForm({
         });
       }
 
-      updateDraftValue(field, formatNumericInput(nextValue));
+      updateDraftValue(
+        field,
+        field === 'highIndexThicknessNm' || field === 'lowIndexThicknessNm'
+          ? formatThicknessInput(nextValue)
+          : formatNumericInput(nextValue),
+      );
     };
 
   const updateNumberField =
@@ -496,14 +502,6 @@ export function QuarterWaveStackForm({
       {renderMaterialField('lowIndexMaterial', 'Low-index material')}
 
       <div className="field thickness-mode-group">
-        <div className="field-copy">
-          <span>Thickness source</span>
-          <small>
-            Derived mode keeps the quarter-wave workflow, manual mode edits values directly, and
-            acoustic mode reserves room for external control.
-          </small>
-        </div>
-
         <label className="field">
           <span>Thickness mode</span>
           <select value={thicknessMode} onChange={updateThicknessMode}>
@@ -549,7 +547,7 @@ export function QuarterWaveStackForm({
         <>
           <div className="field thickness-readout">
             <span>High-index thickness</span>
-            <strong>{formatWavelengthInput(visibleThicknessHighNm)} nm</strong>
+            <strong>{formatThicknessInput(visibleThicknessHighNm)} nm</strong>
             <small>
               {thicknessMode === 'acoustic'
                 ? 'Reserved for future acoustic control.'
@@ -559,7 +557,7 @@ export function QuarterWaveStackForm({
 
           <div className="field thickness-readout">
             <span>Low-index thickness</span>
-            <strong>{formatWavelengthInput(visibleThicknessLowNm)} nm</strong>
+            <strong>{formatThicknessInput(visibleThicknessLowNm)} nm</strong>
             <small>
               {thicknessMode === 'acoustic'
                 ? 'Reserved for future acoustic control.'

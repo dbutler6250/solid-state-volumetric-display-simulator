@@ -235,12 +235,6 @@ label {
   font-weight: 650;
 }
 
-.field-copy {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.field-copy small,
 .field small {
   color: #8fa0b1;
   font-size: 0.78rem;
