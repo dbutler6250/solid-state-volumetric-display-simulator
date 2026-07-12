@@ -14,7 +14,14 @@ export const formatEditableNumber = (value: number | undefined): string =>
 
 /** Parses complete finite drafts while leaving incomplete editing states untouched. */
 export const parseFiniteNumberDraft = (draft: string): number | undefined => {
-  if (draft === '' || draft === '-' || draft === '.' || draft === '-.') {
+  if (
+    draft === '' ||
+    draft === '-' ||
+    draft === '.' ||
+    draft === '-.' ||
+    draft.endsWith('.') ||
+    /[eE][+-]?$/.test(draft)
+  ) {
     return undefined;
   }
 

@@ -1,4 +1,7 @@
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { FormattedNumberInput } from './FormattedNumberInput';
 import {
   formatEditableNumber,
   formattedNumberInputReducer,
@@ -15,8 +18,25 @@ describe('FormattedNumberInput state', () => {
     expect(formatEditableNumber(105.625)).toBe('105.625');
   });
 
-  it.each(['', '-', '.', '-.'])('does not parse the incomplete draft %j', (draft) => {
-    expect(parseFiniteNumberDraft(draft)).toBeUndefined();
+  it.each(['', '-', '.', '-.', '103.', '1e', '1e-', '1E+'])(
+    'does not parse the incomplete draft %j',
+    (draft) => {
+      expect(parseFiniteNumberDraft(draft)).toBeUndefined();
+    },
+  );
+
+  it('uses a text control so the browser does not sanitize incomplete drafts', () => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 105.625,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      min: 0,
+      step: 'any',
+    }));
+
+    expect(markup).toContain('type="text"');
+    expect(markup).toContain('inputMode="decimal"');
+    expect(markup).toContain('step="any"');
   });
 
   it('parses precise finite values without rounding and rejects invalid values', () => {

@@ -6,7 +6,7 @@ import {
 
 type FormattedNumberInputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  'value' | 'onChange' | 'onFocus' | 'onBlur'
+  'type' | 'inputMode' | 'value' | 'onChange' | 'onFocus' | 'onBlur'
 > & {
   value: number | undefined;
   onValueChange: (value: number) => void;
@@ -40,7 +40,8 @@ export function FormattedNumberInput({
   return (
     <input
       {...inputProps}
-      type="number"
+      type="text"
+      inputMode="decimal"
       min={min}
       max={max}
       value={state.isFocused ? state.draft : formatInactive(value)}
