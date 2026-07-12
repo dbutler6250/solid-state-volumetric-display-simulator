@@ -11,10 +11,11 @@
 - Wavelength Sweep points now sit directly beneath Start/End, with Sweep range occupying the adjacent desktop column.
 - Parameter Sweep Start, End, and Points now use the same formatted text/stepper controls; derived design-wavelength bounds remain read-only.
 - Output tabs and Import/Export Setup actions share one desktop navigation row, with a stacked mobile fallback.
+- Final PR review fixes make steppers honor disabled/read-only state and preserve consumer keyboard handlers.
 
 ## Verification
 
-- `npm.cmd run test` - passed (53 tests).
+- `npm.cmd run test` - passed (55 tests).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
 

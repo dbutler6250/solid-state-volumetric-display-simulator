@@ -35,6 +35,9 @@ export function FormattedNumberInput({
   stepperStep,
   min,
   max,
+  disabled,
+  readOnly,
+  onKeyDown,
   ...inputProps
 }: FormattedNumberInputProps) {
   const [state, dispatch] = useReducer(formattedNumberInputReducer, {
@@ -54,7 +57,7 @@ export function FormattedNumberInput({
   const numericMin = typeof min === 'number' ? min : undefined;
   const numericMax = typeof max === 'number' ? max : undefined;
   const resolvedStep = stepperStep ?? (typeof inputProps.step === 'number' ? inputProps.step : Number(inputProps.step));
-  const canStep = showStepper && typeof value === 'number' && Number.isFinite(value) && typeof resolvedStep === 'number' && Number.isFinite(resolvedStep) && resolvedStep > 0;
+  const canStep = showStepper && !disabled && !readOnly && typeof value === 'number' && Number.isFinite(value) && typeof resolvedStep === 'number' && Number.isFinite(resolvedStep) && resolvedStep > 0;
 
   const commitDraft = () => {
     const parsed = parseFiniteNumberDraft(state.draft);
@@ -85,6 +88,8 @@ export function FormattedNumberInput({
       aria-label={inputProps['aria-label'] ?? (showStepper ? stepperLabel : undefined)}
       min={min}
       max={max}
+      disabled={disabled}
+      readOnly={readOnly}
       value={state.isFocused ? state.draft : formatInactive(value)}
       onFocus={() => dispatch({ type: 'focus', value })}
       onChange={(event) => {
@@ -94,7 +99,8 @@ export function FormattedNumberInput({
         if (parsed !== undefined) onValueChange(parsed);
       }}
       onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-        if (!canStep || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
+        onKeyDown?.(event);
+        if (event.defaultPrevented || !canStep || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
         event.preventDefault();
         applyStep(event.key === 'ArrowUp' ? 1 : -1);
       }}

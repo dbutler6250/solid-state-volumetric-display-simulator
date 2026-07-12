@@ -113,4 +113,21 @@ describe('FormattedNumberInput state', () => {
     expect(stepCommittedNumber(0, -1, 0.1, 0)).toBe(0);
     expect(stepCommittedNumber(89.5, 1, 1, 0, 89.9)).toBe(89.9);
   });
+
+  it.each([
+    { disabled: true },
+    { readOnly: true },
+  ])('disables both steppers for non-editable inputs', (nonEditableProp) => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 12,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      showStepper: true,
+      stepperLabel: 'periods',
+      stepperStep: 1,
+      ...nonEditableProp,
+    }));
+
+    expect(markup.match(/<button[^>]*disabled=""/g)).toHaveLength(2);
+  });
 });
