@@ -98,13 +98,21 @@ function parseParameterSweep(
 ): { ok: true; settings?: ParameterSweepSettings } | ImportFailure {
   if (value === undefined) return { ok: true };
   if (!isRecord(value)) return { ok: false, message: 'The parameter sweep setup is invalid.' };
-  if (value.parameter !== 'designWavelengthNm' && value.parameter !== 'periodCount') {
-    return { ok: false, message: 'Parameter sweep must target design wavelength or periods.' };
+  if (
+    value.parameter !== 'designWavelengthNm' &&
+    value.parameter !== 'incidentAngleDegrees' &&
+    value.parameter !== 'periodCount'
+  ) {
+    return { ok: false, message: 'Parameter sweep must target design wavelength, angle, or periods.' };
   }
   if (
-    !isPositiveFiniteNumber(value.start) ||
-    !isPositiveFiniteNumber(value.end) ||
-    value.end <= value.start
+    value.parameter === 'incidentAngleDegrees'
+      ? !isNonNegativeFiniteNumber(value.start) ||
+        !isAngleFiniteNumber(value.end) ||
+        value.end <= value.start
+      : !isPositiveFiniteNumber(value.start) ||
+        !isPositiveFiniteNumber(value.end) ||
+        value.end <= value.start
   ) {
     return { ok: false, message: 'Parameter sweep end must be greater than start.' };
   }
@@ -121,9 +129,9 @@ function parseParameterSweep(
     ok: true,
     settings: {
       parameter: value.parameter,
-      start: value.start,
-      end: value.end,
-      pointCount: value.pointCount,
+      start: value.start as number,
+      end: value.end as number,
+      pointCount: value.pointCount as number,
     },
   };
 }
@@ -159,4 +167,14 @@ function isNonEmptyString(value: unknown): value is string {
 /** Checks for a positive finite numeric field. */
 function isPositiveFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+/** Checks for a non-negative finite numeric field. */
+function isNonNegativeFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+/** Checks for a finite angle inside the supported open interval below 90 degrees. */
+function isAngleFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < 90;
 }

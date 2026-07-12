@@ -26,9 +26,9 @@ const inputs: QuarterWaveStackInputs = {
 };
 
 const settings: ParameterSweepSettings = {
-  parameter: 'designWavelengthNm',
-  start: 500,
-  end: 700,
+  parameter: 'incidentAngleDegrees',
+  start: 0,
+  end: 89.9,
   pointCount: 2,
 };
 
@@ -36,13 +36,13 @@ const result: ParameterSweepResult = {
   settings,
   points: [
     {
-      parameterValue: 500,
+      parameterValue: 0,
       peakReflectance: 0.8,
       centerWavelengthNm: 510,
       bandwidthNm: 25,
     },
     {
-      parameterValue: 700,
+      parameterValue: 89.9,
       peakReflectance: null,
       centerWavelengthNm: null,
       bandwidthNm: null,
@@ -57,10 +57,10 @@ describe('exportParameterSweepCsv', () => {
     const lines = csv.trimEnd().split('\n');
 
     expect(lines).toContain('# schema: ssvds-parameter-sweep-csv-v1');
-    expect(lines).toContain('# sweep.parameter: designWavelengthNm');
+    expect(lines).toContain('# sweep.parameter: incidentAngleDegrees');
     expect(lines).toContain('# sweep.pointCount: 2');
     expect(lines).toContain('parameter_value,peak_reflectance,center_wavelength_nm,bandwidth_nm');
-    expect(lines[lines.length - 2]).toBe('500,0.8,510,25');
-    expect(lines[lines.length - 1]).toBe('700,,,');
+    expect(lines[lines.length - 2]).toBe('0,0.8,510,25');
+    expect(lines[lines.length - 1]).toBe('89.9,,,');
   });
 });

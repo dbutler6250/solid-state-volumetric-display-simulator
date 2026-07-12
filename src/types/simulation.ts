@@ -27,7 +27,7 @@ export type SimulationResult = {
   bandTouchesBoundary: boolean;
 };
 
-export type SweepParameter = 'designWavelengthNm' | 'periodCount';
+export type SweepParameter = 'designWavelengthNm' | 'incidentAngleDegrees' | 'periodCount';
 
 export type ParameterSweepSettings = {
   parameter: SweepParameter;

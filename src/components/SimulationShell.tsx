@@ -34,6 +34,12 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   end: 750,
   pointCount: 9,
 };
+const DEFAULT_INCIDENT_ANGLE_SWEEP = {
+  start: 0,
+  end: 89,
+  pointCount: 89,
+} as const;
+const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 
 /** Coordinates inputs, solver execution, exports, imports, and chart controls. */
@@ -50,6 +56,10 @@ export function SimulationShell() {
   const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
+  const parameterSweepWarning =
+    parameterSweep.parameter === 'incidentAngleDegrees'
+      ? 'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.'
+      : null;
   const result = useMemo(() => {
     if (validationIssues.length > 0) {
       return null;
@@ -106,6 +116,14 @@ export function SimulationShell() {
   };
 
   const updateParameterSweepParameter = (parameter: ParameterSweepSettings['parameter']) => {
+    if (parameter === 'incidentAngleDegrees') {
+      updateParameterSweep({
+        parameter,
+        ...DEFAULT_INCIDENT_ANGLE_SWEEP,
+      });
+      return;
+    }
+
     updateParameterSweep(
       parameter === 'periodCount'
         ? {
@@ -235,6 +253,7 @@ export function SimulationShell() {
                 }
               >
                 <option value="designWavelengthNm">Design wavelength</option>
+                <option value="incidentAngleDegrees">Incident angle</option>
                 <option value="periodCount">Periods</option>
               </select>
             </label>
@@ -243,8 +262,9 @@ export function SimulationShell() {
                 <span>Start</span>
                 <input
                   type="number"
-                  min="1"
-                  step={parameterSweep.parameter === 'periodCount' ? 1 : 1}
+                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
+                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
+                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
                   value={effectiveParameterSweep.start}
                   readOnly={parameterSweep.parameter === 'designWavelengthNm'}
                   onChange={(event) =>
@@ -259,8 +279,9 @@ export function SimulationShell() {
                 <span>End</span>
                 <input
                   type="number"
-                  min="1"
-                  step={parameterSweep.parameter === 'periodCount' ? 1 : 1}
+                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
+                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
+                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
                   value={effectiveParameterSweep.end}
                   readOnly={parameterSweep.parameter === 'designWavelengthNm'}
                   onChange={(event) =>
@@ -295,6 +316,11 @@ export function SimulationShell() {
             >
               Run Sweep
             </button>
+            {parameterSweepWarning ? (
+              <p className="parameter-sweep-warning" role="status">
+                {parameterSweepWarning}
+              </p>
+            ) : null}
             {parameterSweepError ? (
               <p className="chart-toolbar-message" role="alert">
                 {parameterSweepError}
@@ -398,6 +424,14 @@ function getEffectiveParameterSweep(
 ): ParameterSweepSettings {
   if (settings.parameter === 'periodCount') {
     return settings;
+  }
+
+  if (settings.parameter === 'incidentAngleDegrees') {
+    return {
+      ...settings,
+      start: Math.max(0, settings.start),
+      end: Math.min(MAX_INCIDENT_ANGLE_DEGREES, settings.end),
+    };
   }
 
   return {

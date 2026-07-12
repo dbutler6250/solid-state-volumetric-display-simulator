@@ -673,6 +673,12 @@ label {
   font-size: 0.86rem;
 }
 
+.parameter-sweep-warning {
+  margin: 0.75rem 0 0;
+  color: #e4bf73;
+  font-size: 0.86rem;
+}
+
 @media (max-width: 860px) {
   .workspace {
     grid-template-columns: 1fr;

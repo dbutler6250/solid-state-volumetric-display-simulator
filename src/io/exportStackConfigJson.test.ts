@@ -22,9 +22,9 @@ const inputs: QuarterWaveStackInputs = {
 };
 
 const parameterSweep: ParameterSweepSettings = {
-  parameter: 'designWavelengthNm',
-  start: 450,
-  end: 650,
+  parameter: 'incidentAngleDegrees',
+  start: 0,
+  end: 89.9,
   pointCount: 9,
 };
 

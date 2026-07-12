@@ -11,6 +11,7 @@ import { buildQuarterWaveStack } from '../structures/quarterWaveStack';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
+const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 
 type SolveLayerStackOptions = {
   wavelengthNm: number;
@@ -265,6 +266,18 @@ export function solveQuarterWaveStackParameterSweep(
 
 /** Creates inclusive sweep values while preserving integer period counts. */
 function createParameterSweepValues(settings: ParameterSweepSettings): number[] {
+  if (settings.parameter === 'incidentAngleDegrees') {
+    const start = clampIncidentAngle(settings.start);
+    const end = clampIncidentAngle(settings.end);
+    if (end <= start) throw new Error('Parameter sweep end must be greater than start.');
+    if (settings.pointCount < 2 || !Number.isInteger(settings.pointCount)) {
+      throw new Error('Parameter sweep must include at least two integer points.');
+    }
+
+    const step = (end - start) / (settings.pointCount - 1);
+    return Array.from({ length: settings.pointCount }, (_, index) => start + step * index);
+  }
+
   if (settings.end <= settings.start) throw new Error('Parameter sweep end must be greater than start.');
   if (settings.pointCount < 2 || !Number.isInteger(settings.pointCount)) {
     throw new Error('Parameter sweep must include at least two integer points.');
@@ -282,4 +295,9 @@ function createParameterSweepValues(settings: ParameterSweepSettings): number[] 
 
   const step = (settings.end - settings.start) / (settings.pointCount - 1);
   return Array.from({ length: settings.pointCount }, (_, index) => settings.start + step * index);
+}
+
+/** Clamps angle sweeps to the physically valid open interval below 90 degrees. */
+function clampIncidentAngle(angleDegrees: number): number {
+  return Math.min(MAX_INCIDENT_ANGLE_DEGREES, Math.max(0, angleDegrees));
 }
