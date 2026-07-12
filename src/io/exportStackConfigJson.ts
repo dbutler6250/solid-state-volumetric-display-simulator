@@ -1,4 +1,4 @@
-import type { QuarterWaveStackInputs } from '../types/simulation';
+import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
 
 type StackConfigExport = {
   schema: 'ssvds-stack-config-v1';
@@ -20,9 +20,13 @@ type StackConfigExport = {
     wavelengthEndNm?: number;
     wavelengthPointCount?: number;
   };
+  parameterSweep?: ParameterSweepSettings;
 };
 
-export function exportStackConfigJson(inputs: QuarterWaveStackInputs): string {
+export function exportStackConfigJson(
+  inputs: QuarterWaveStackInputs,
+  parameterSweep?: ParameterSweepSettings,
+): string {
   const payload: StackConfigExport = {
     schema: 'ssvds-stack-config-v1',
     app: 'solid-state-volumetric-display-simulator',
@@ -43,6 +47,7 @@ export function exportStackConfigJson(inputs: QuarterWaveStackInputs): string {
       wavelengthEndNm: inputs.wavelengthEndNm,
       wavelengthPointCount: inputs.wavelengthPointCount,
     },
+    parameterSweep,
   };
 
   return `${JSON.stringify(payload, null, 2)}\n`;

@@ -26,6 +26,7 @@ const result: SimulationResult = {
   centerWavelengthNm: 623.4,
   bandwidthNm: 41.2,
   maxEnergyConservationError: 1.23e-12,
+  bandTouchesBoundary: false,
   spectrum: [
     { wavelengthNm: 500, reflectance: 0.1, transmission: 0.9 },
     { wavelengthNm: 600.5, reflectance: 0.2, transmission: 0.8 },

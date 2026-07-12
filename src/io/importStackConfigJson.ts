@@ -1,6 +1,6 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import type { Material } from '../simulation/materials/material';
-import type { Polarization, QuarterWaveStackInputs } from '../types/simulation';
+import type { ParameterSweepSettings, Polarization, QuarterWaveStackInputs } from '../types/simulation';
 
 const STACK_CONFIG_SCHEMA = 'ssvds-stack-config-v1';
 const LEGACY_BRAGG_CONFIG_SCHEMA = 'ssvds-bragg-config-v1';
@@ -11,6 +11,7 @@ const LEGACY_BRAGG_STRUCTURE_TYPE = 'quarter-wave-bragg-reflector';
 type ImportSuccess = {
   ok: true;
   inputs: QuarterWaveStackInputs;
+  parameterSweep?: ParameterSweepSettings;
 };
 
 type ImportFailure = {
@@ -82,7 +83,49 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     return { ok: false, message: issues[0].message };
   }
 
-  return { ok: true, inputs };
+  const parameterSweep = parseParameterSweep(parsed.parameterSweep);
+  if (!parameterSweep.ok) return parameterSweep;
+
+  return {
+    ok: true,
+    inputs,
+    parameterSweep: parameterSweep.settings,
+  };
+}
+
+function parseParameterSweep(
+  value: unknown,
+): { ok: true; settings?: ParameterSweepSettings } | ImportFailure {
+  if (value === undefined) return { ok: true };
+  if (!isRecord(value)) return { ok: false, message: 'The parameter sweep setup is invalid.' };
+  if (value.parameter !== 'designWavelengthNm' && value.parameter !== 'periodCount') {
+    return { ok: false, message: 'Parameter sweep must target design wavelength or periods.' };
+  }
+  if (
+    !isPositiveFiniteNumber(value.start) ||
+    !isPositiveFiniteNumber(value.end) ||
+    value.end <= value.start
+  ) {
+    return { ok: false, message: 'Parameter sweep end must be greater than start.' };
+  }
+  if (
+    typeof value.pointCount !== 'number' ||
+    !Number.isFinite(value.pointCount) ||
+    value.pointCount < 2 ||
+    !Number.isInteger(value.pointCount)
+  ) {
+    return { ok: false, message: 'Parameter sweep points must be a whole number of at least 2.' };
+  }
+
+  return {
+    ok: true,
+    settings: {
+      parameter: value.parameter,
+      start: value.start,
+      end: value.end,
+      pointCount: value.pointCount,
+    },
+  };
 }
 
 function parseMaterial(

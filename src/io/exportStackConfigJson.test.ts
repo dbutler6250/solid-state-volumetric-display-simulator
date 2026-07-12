@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Material } from '../simulation/materials/material';
-import type { QuarterWaveStackInputs } from '../types/simulation';
+import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
 import { exportStackConfigJson } from './exportStackConfigJson';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
@@ -21,6 +21,13 @@ const inputs: QuarterWaveStackInputs = {
   wavelengthPointCount: 401,
 };
 
+const parameterSweep: ParameterSweepSettings = {
+  parameter: 'designWavelengthNm',
+  start: 450,
+  end: 650,
+  pointCount: 9,
+};
+
 // Verifies the preferred stack config schema stays structurally stable.
 describe('exportStackConfigJson', () => {
   it('exports the expected setup shape and metadata', () => {
@@ -39,9 +46,10 @@ describe('exportStackConfigJson', () => {
   });
 
   it('exports material and sweep inputs', () => {
-    const json = exportStackConfigJson(inputs);
+    const json = exportStackConfigJson(inputs, parameterSweep);
     const exported = JSON.parse(json) as {
       inputs: QuarterWaveStackInputs;
+      parameterSweep: ParameterSweepSettings;
     };
 
     expect(exported.inputs.highIndexMaterial).toEqual(inputs.highIndexMaterial);
@@ -53,5 +61,6 @@ describe('exportStackConfigJson', () => {
     expect(exported.inputs.wavelengthStartNm).toBe(450);
     expect(exported.inputs.wavelengthEndNm).toBe(650);
     expect(exported.inputs.wavelengthPointCount).toBe(401);
+    expect(exported.parameterSweep).toEqual(parameterSweep);
   });
 });
