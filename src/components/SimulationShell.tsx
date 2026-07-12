@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
 import { FormattedNumberInput } from './inputs/FormattedNumberInput';
-import { getInclusivePeriodPointCount } from './parameterSweepSettings';
+import {
+  FIXED_INCIDENT_ANGLE_SWEEP,
+  getInclusivePeriodPointCount,
+} from './parameterSweepSettings';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
@@ -37,11 +40,6 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
 };
 const DEFAULT_PARAMETER_SWEEP_WARNING =
   'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
-const DEFAULT_INCIDENT_ANGLE_SWEEP = {
-  start: 0,
-  end: 89,
-  pointCount: 89,
-} as const;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition'] as const;
@@ -84,7 +82,10 @@ export function SimulationShell() {
   }, [inputs, validationIssues]);
   const effectiveParameterSweep = getEffectiveParameterSweep(inputs, parameterSweep);
   const parameterSweepIsReadOnly = parameterSweep.parameter === 'designWavelengthNm';
+  const parameterSweepIsFixedAngle = parameterSweep.parameter === 'incidentAngleDegrees';
   const parameterSweepIsInteger = parameterSweep.parameter === 'periodCount';
+  const parameterSweepBoundsAreLocked = parameterSweepIsReadOnly || parameterSweepIsFixedAngle;
+  const parameterSweepPointsAreLocked = parameterSweepIsInteger || parameterSweepIsFixedAngle;
   const parameterSweepMinimum = parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1;
   const parameterSweepMaximum = parameterSweep.parameter === 'incidentAngleDegrees'
     ? MAX_INCIDENT_ANGLE_DEGREES
@@ -141,10 +142,7 @@ export function SimulationShell() {
 
   const updateParameterSweepParameter = (parameter: ParameterSweepSettings['parameter']) => {
     if (parameter === 'incidentAngleDegrees') {
-      updateParameterSweep({
-        parameter,
-        ...DEFAULT_INCIDENT_ANGLE_SWEEP,
-      });
+      updateParameterSweep(FIXED_INCIDENT_ANGLE_SWEEP);
       return;
     }
 
@@ -399,6 +397,7 @@ export function SimulationShell() {
                   normalizeOnBlur={parameterSweepIsInteger ? Math.round : undefined}
                   value={effectiveParameterSweep.start}
                   readOnly={parameterSweepIsReadOnly}
+                  disabled={parameterSweepIsFixedAngle}
                   formatInactive={formatParameterSweepInput}
                   onValueChange={(start) =>
                     updateParameterSweep({
@@ -407,7 +406,7 @@ export function SimulationShell() {
                     })
                   }
                   resetKey={parameterSweepResetKey}
-                  showStepper={!parameterSweepIsReadOnly}
+                  showStepper={!parameterSweepBoundsAreLocked}
                   stepperLabel="parameter sweep start"
                 />
               </label>
@@ -421,6 +420,7 @@ export function SimulationShell() {
                   normalizeOnBlur={parameterSweepIsInteger ? Math.round : undefined}
                   value={effectiveParameterSweep.end}
                   readOnly={parameterSweepIsReadOnly}
+                  disabled={parameterSweepIsFixedAngle}
                   formatInactive={formatParameterSweepInput}
                   onValueChange={(end) =>
                     updateParameterSweep({
@@ -429,19 +429,19 @@ export function SimulationShell() {
                     })
                   }
                   resetKey={parameterSweepResetKey}
-                  showStepper={!parameterSweepIsReadOnly}
+                  showStepper={!parameterSweepBoundsAreLocked}
                   stepperLabel="parameter sweep end"
                 />
               </label>
               <label className="field">
-                <span>{parameterSweepIsInteger ? 'Points (derived)' : 'Points'}</span>
+                <span>{parameterSweepIsInteger ? 'Points (derived)' : parameterSweepIsFixedAngle ? 'Points (fixed)' : 'Points'}</span>
                 <FormattedNumberInput
                   min={2}
                   step="1"
                   parseMode="integer"
                   normalizeOnBlur={Math.round}
                   value={effectiveParameterSweep.pointCount}
-                  disabled={parameterSweepIsInteger}
+                  disabled={parameterSweepPointsAreLocked}
                   formatInactive={formatParameterSweepInput}
                   onValueChange={(pointCount) =>
                     updateParameterSweep({
@@ -450,7 +450,7 @@ export function SimulationShell() {
                     })
                   }
                   resetKey={inputResetKey}
-                  showStepper={!parameterSweepIsInteger}
+                  showStepper={!parameterSweepPointsAreLocked}
                   stepperLabel="parameter sweep points"
                 />
               </label>
@@ -513,11 +513,7 @@ function getEffectiveParameterSweep(
   }
 
   if (settings.parameter === 'incidentAngleDegrees') {
-    return {
-      ...settings,
-      start: Math.max(0, settings.start),
-      end: Math.min(MAX_INCIDENT_ANGLE_DEGREES, settings.end),
-    };
+    return FIXED_INCIDENT_ANGLE_SWEEP;
   }
 
   return {

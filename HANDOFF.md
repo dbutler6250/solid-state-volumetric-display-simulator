@@ -13,10 +13,11 @@
 - Output tabs and Import/Export Setup actions share one desktop navigation row, with a stacked mobile fallback.
 - Final PR review fixes make steppers honor disabled/read-only state and preserve consumer keyboard handlers.
 - Design Wavelength parameter sweeps default to 30 points; Period sweep points are disabled and derived inclusively from normalized Start/End bounds.
+- Incident Angle parameter sweeps are fixed and disabled at Start 0, End 89, and 89 points for UI, execution, imports, and exports.
 
 ## Verification
 
-- `npm.cmd run test` - passed (57 tests).
+- `npm.cmd run test` - passed (58 tests).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
 
@@ -29,6 +30,7 @@
 - Verified Parameter Sweep angle/period stepping, read-only wavelength bounds, and responsive sweep-control ordering.
 - Verified output navigation alignment, tab behavior, mobile wrapping, and setup-action accessibility.
 - Verified Design Wavelength defaults to 30 points and a Period sweep from 1 through 20 derives and evaluates 20 points.
+- Verified Incident Angle exposes only disabled 0/89/89 controls and evaluates exactly 89 points.
 
 ## Notes
 
