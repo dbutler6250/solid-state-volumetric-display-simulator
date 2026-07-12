@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
 import { FormattedNumberInput } from './inputs/FormattedNumberInput';
+import { getInclusivePeriodPointCount } from './parameterSweepSettings';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
@@ -32,7 +33,7 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   parameter: 'designWavelengthNm',
   start: 450,
   end: 750,
-  pointCount: 9,
+  pointCount: 30,
 };
 const DEFAULT_PARAMETER_SWEEP_WARNING =
   'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
@@ -158,7 +159,7 @@ export function SimulationShell() {
             parameter,
             start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
             end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
-            pointCount: parameterSweep.pointCount,
+            pointCount: DEFAULT_PARAMETER_SWEEP.pointCount,
           },
     );
   };
@@ -433,13 +434,14 @@ export function SimulationShell() {
                 />
               </label>
               <label className="field">
-                <span>Points</span>
+                <span>{parameterSweepIsInteger ? 'Points (derived)' : 'Points'}</span>
                 <FormattedNumberInput
                   min={2}
                   step="1"
                   parseMode="integer"
                   normalizeOnBlur={Math.round}
                   value={effectiveParameterSweep.pointCount}
+                  disabled={parameterSweepIsInteger}
                   formatInactive={formatParameterSweepInput}
                   onValueChange={(pointCount) =>
                     updateParameterSweep({
@@ -448,7 +450,7 @@ export function SimulationShell() {
                     })
                   }
                   resetKey={inputResetKey}
-                  showStepper
+                  showStepper={!parameterSweepIsInteger}
                   stepperLabel="parameter sweep points"
                 />
               </label>
@@ -504,7 +506,10 @@ function getEffectiveParameterSweep(
   settings: ParameterSweepSettings,
 ): ParameterSweepSettings {
   if (settings.parameter === 'periodCount') {
-    return settings;
+    return {
+      ...settings,
+      pointCount: getInclusivePeriodPointCount(settings.start, settings.end),
+    };
   }
 
   if (settings.parameter === 'incidentAngleDegrees') {
