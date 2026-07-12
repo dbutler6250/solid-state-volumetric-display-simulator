@@ -29,6 +29,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Bragg terminology genericization
 - Code comments
 - Parameter sweep analysis
+- Lazy-loaded Plotly chart chunk
 
 ## Notes
 
@@ -38,4 +39,3 @@ Use this section for quick general brain dumps before cleaning them up into GitH
 - Consider angle sweep support as a future analysis workflow.
 - Consider 2D sweep heatmaps after multiple swept parameters are supported.
 - Improve peak, center, and bandwidth metric extraction with interpolation instead of sampled-point estimates.
-- Split Plotly into a lazy-loaded chunk to address the current Vite large chunk warning.

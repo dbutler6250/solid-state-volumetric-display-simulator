@@ -12,12 +12,13 @@
 - Follow-up: design-wavelength parameter sweeps now reuse the current spectrum analysis start/end wavelengths as read-only bounds.
 - Follow-up: period-count parameter sweeps default to the current period count +/- 100 periods, clamped so the start is at least 1.
 - Follow-up: added parameter sweep CSV export and included parameter sweep setup in exported/imported setup JSON.
+- Follow-up: Plotly now loads through a lazy chart chunk, keeping the main Vite bundle small and removing the large chunk warning.
 
 ## Verification
 
 - `npm.cmd run test` - passed.
 - `npm.cmd run lint` - passed.
-- `npm.cmd run build` - passed; Vite still reports the existing large chunk warning.
+- `npm.cmd run build` - passed; no Vite large chunk warning.
 
 ## Notes
 

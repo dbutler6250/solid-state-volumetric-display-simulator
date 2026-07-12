@@ -1,5 +1,5 @@
-import Plotly from 'plotly.js-basic-dist-min';
-import createPlotlyComponent from 'react-plotly.js/factory';
+import { Suspense } from 'react';
+import { LazyPlot } from './LazyPlot';
 import type { SimulationResult } from '../types/simulation';
 
 type ReflectanceChartProps = {
@@ -7,8 +7,6 @@ type ReflectanceChartProps = {
   showTransmission: boolean;
   xRange?: [number, number] | null;
 };
-
-const Plot = createPlotlyComponent(Plotly);
 
 /** Renders the reflectance spectrum with an optional transmission overlay. */
 export function ReflectanceChart({ result, showTransmission, xRange }: ReflectanceChartProps) {
@@ -51,51 +49,53 @@ export function ReflectanceChart({ result, showTransmission, xRange }: Reflectan
   }
 
   return (
-    <Plot
-      className="reflectance-chart"
-      data={chartData}
-      layout={{
-        autosize: true,
-        paper_bgcolor: '#101720',
-        plot_bgcolor: '#101720',
-        font: {
-          color: '#dce7f2',
-          family: 'Inter, system-ui, sans-serif',
-        },
-        margin: {
-          t: 18,
-          r: 22,
-          b: 56,
-          l: 62,
-        },
-        xaxis: {
-          title: {
-            text: 'Wavelength (nm)',
+    <Suspense fallback={<div className="chart-placeholder" role="status">Loading chart...</div>}>
+      <LazyPlot
+        className="reflectance-chart"
+        data={chartData}
+        layout={{
+          autosize: true,
+          paper_bgcolor: '#101720',
+          plot_bgcolor: '#101720',
+          font: {
+            color: '#dce7f2',
+            family: 'Inter, system-ui, sans-serif',
           },
-          gridcolor: '#263443',
-          zerolinecolor: '#334457',
-          range: xRange ?? undefined,
-        },
-        yaxis: {
-          title: {
-            text: 'Reflectance',
+          margin: {
+            t: 18,
+            r: 22,
+            b: 56,
+            l: 62,
           },
-          range: [0, 1],
-          gridcolor: '#263443',
-          zerolinecolor: '#334457',
-        },
-        showlegend: showTransmission,
-        legend: {
-          orientation: 'h',
-          x: 0,
-          y: 1.12,
-        },
-      }}
-      config={{
-        displaylogo: false,
-        responsive: true,
-      }}
-      useResizeHandler
-    />
+          xaxis: {
+            title: {
+              text: 'Wavelength (nm)',
+            },
+            gridcolor: '#263443',
+            zerolinecolor: '#334457',
+            range: xRange ?? undefined,
+          },
+          yaxis: {
+            title: {
+              text: 'Reflectance',
+            },
+            range: [0, 1],
+            gridcolor: '#263443',
+            zerolinecolor: '#334457',
+          },
+          showlegend: showTransmission,
+          legend: {
+            orientation: 'h',
+            x: 0,
+            y: 1.12,
+          },
+        }}
+        config={{
+          displaylogo: false,
+          responsive: true,
+        }}
+        useResizeHandler
+      />
+    </Suspense>
   );
 }
