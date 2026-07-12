@@ -84,6 +84,11 @@ export function SimulationShell() {
   const parameterSweepIsReadOnly = parameterSweep.parameter === 'designWavelengthNm';
   const parameterSweepIsFixedAngle = parameterSweep.parameter === 'incidentAngleDegrees';
   const parameterSweepIsInteger = parameterSweep.parameter === 'periodCount';
+  const parameterSweepBoundsLabelSuffix = parameterSweepIsReadOnly
+    ? ' (derived)'
+    : parameterSweepIsFixedAngle
+      ? ' (fixed)'
+      : '';
   const parameterSweepBoundsAreLocked = parameterSweepIsReadOnly || parameterSweepIsFixedAngle;
   const parameterSweepPointsAreLocked = parameterSweepIsInteger || parameterSweepIsFixedAngle;
   const parameterSweepMinimum = parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1;
@@ -388,7 +393,7 @@ export function SimulationShell() {
             </label>
             <div className="parameter-sweep-grid">
               <label className="field">
-                <span>Start</span>
+                <span>{`Start${parameterSweepBoundsLabelSuffix}`}</span>
                 <FormattedNumberInput
                   min={parameterSweepMinimum}
                   max={parameterSweepMaximum}
@@ -411,7 +416,7 @@ export function SimulationShell() {
                 />
               </label>
               <label className="field">
-                <span>End</span>
+                <span>{`End${parameterSweepBoundsLabelSuffix}`}</span>
                 <FormattedNumberInput
                   min={parameterSweepMinimum}
                   max={parameterSweepMaximum}

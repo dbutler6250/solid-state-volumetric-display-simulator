@@ -14,6 +14,7 @@
 - Final PR review fixes make steppers honor disabled/read-only state and preserve consumer keyboard handlers.
 - Design Wavelength parameter sweeps default to 30 points; Period sweep points are disabled and derived inclusively from normalized Start/End bounds.
 - Incident Angle parameter sweeps are fixed and disabled at Start 0, End 89, and 89 points for UI, execution, imports, and exports.
+- Parameter Sweep labels identify derived Design Wavelength bounds and fixed Incident Angle bounds explicitly.
 
 ## Verification
 
