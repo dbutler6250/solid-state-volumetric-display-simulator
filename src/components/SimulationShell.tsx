@@ -34,6 +34,11 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   end: 750,
   pointCount: 9,
 };
+const DEFAULT_INCIDENT_ANGLE_SWEEP = {
+  start: 0,
+  end: 89,
+  pointCount: 89,
+} as const;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 
@@ -110,9 +115,7 @@ export function SimulationShell() {
     if (parameter === 'incidentAngleDegrees') {
       updateParameterSweep({
         parameter,
-        start: 0,
-        end: MAX_INCIDENT_ANGLE_DEGREES,
-        pointCount: parameterSweep.pointCount,
+        ...DEFAULT_INCIDENT_ANGLE_SWEEP,
       });
       return;
     }
@@ -257,7 +260,7 @@ export function SimulationShell() {
                   type="number"
                   min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
                   max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
-                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 0.1 : 1}
+                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
                   value={effectiveParameterSweep.start}
                   readOnly={parameterSweep.parameter === 'designWavelengthNm'}
                   onChange={(event) =>
@@ -274,7 +277,7 @@ export function SimulationShell() {
                   type="number"
                   min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
                   max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
-                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 0.1 : 1}
+                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
                   value={effectiveParameterSweep.end}
                   readOnly={parameterSweep.parameter === 'designWavelengthNm'}
                   onChange={(event) =>
