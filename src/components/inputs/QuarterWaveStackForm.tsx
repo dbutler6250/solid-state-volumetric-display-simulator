@@ -117,8 +117,17 @@ const applyThicknessMode = (inputs: QuarterWaveStackInputs, thicknessMode: Thick
   };
 };
 
-const formatThicknessInput = (value: number | undefined): string =>
+const formatThicknessDisplay = (value: number | undefined): string =>
   typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : '';
+
+const formatNumberFieldValue = (field: NumericField, value: number | undefined): string =>
+  field === 'highIndexThicknessNm' || field === 'lowIndexThicknessNm'
+    ? formatThicknessDisplay(value)
+    : formatNumericInput(value);
+
+/** Retains an exact manual draft while formatting externally supplied thickness values. */
+const synchronizeThicknessDraft = (draft: string | undefined, value: number | undefined): string =>
+  draft !== undefined && Number(draft) === value ? draft : formatThicknessDisplay(value);
 
 /** Re-centers the sweep range while preserving the current midpoint. */
 const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): QuarterWaveStackInputs => {
@@ -176,12 +185,18 @@ export function QuarterWaveStackForm({
   const [draftValues, setDraftValues] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setDraftValues({
+    setDraftValues((current) => ({
       periodCount: formatNumericInput(inputs.periodCount),
       designWavelengthNm: formatNumericInput(inputs.designWavelengthNm),
       incidentAngleDegrees: formatNumericInput(inputs.incidentAngleDegrees),
-      highIndexThicknessNm: formatThicknessInput(inputs.highIndexThicknessNm),
-      lowIndexThicknessNm: formatThicknessInput(inputs.lowIndexThicknessNm),
+      highIndexThicknessNm: synchronizeThicknessDraft(
+        current.highIndexThicknessNm,
+        inputs.highIndexThicknessNm,
+      ),
+      lowIndexThicknessNm: synchronizeThicknessDraft(
+        current.lowIndexThicknessNm,
+        inputs.lowIndexThicknessNm,
+      ),
       wavelengthStartNm: formatNumericInput(inputs.wavelengthStartNm),
       wavelengthEndNm: formatNumericInput(inputs.wavelengthEndNm),
       wavelengthPointCount: formatNumericInput(inputs.wavelengthPointCount),
@@ -189,7 +204,7 @@ export function QuarterWaveStackForm({
       highIndexImag: formatMaterialNumber(getRefractiveIndexImag(inputs.highIndexMaterial.refractiveIndex)),
       lowIndexReal: formatMaterialNumber(getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
       lowIndexImag: formatMaterialNumber(getRefractiveIndexImag(inputs.lowIndexMaterial.refractiveIndex)),
-    });
+    }));
   }, [inputs]);
 
   const updateDraftValue = (key: string, value: string) => {
@@ -251,13 +266,13 @@ export function QuarterWaveStackForm({
       const draftValue = draftValues[field];
 
       if (draftValue === '') {
-        updateDraftValue(field, formatNumericInput(currentValue));
+        updateDraftValue(field, formatNumberFieldValue(field, currentValue));
         return;
       }
 
       const parsedValue = parse(draftValue);
       if (!Number.isFinite(parsedValue)) {
-        updateDraftValue(field, formatNumericInput(currentValue));
+        updateDraftValue(field, formatNumberFieldValue(field, currentValue));
         return;
       }
 
@@ -279,13 +294,16 @@ export function QuarterWaveStackForm({
         });
       }
 
-      updateDraftValue(
-        field,
-        field === 'highIndexThicknessNm' || field === 'lowIndexThicknessNm'
-          ? formatThicknessInput(nextValue)
-          : formatNumericInput(nextValue),
-      );
+      updateDraftValue(field, formatNumberFieldValue(field, nextValue));
     };
+
+  const focusThicknessField = (field: ThicknessField) => () => {
+    updateDraftValue(field, formatNumericInput(inputs[field]));
+  };
+
+  const commitThicknessField = (field: ThicknessField) => () => {
+    commitNumberField(field, toNumber, 0)();
+  };
 
   const updateNumberField =
     (field: NumericField) =>
@@ -521,9 +539,10 @@ export function QuarterWaveStackForm({
               type="number"
               min="0"
               step="1"
-              value={draftValues.highIndexThicknessNm ?? formatThicknessInput(inputs.highIndexThicknessNm)}
+              value={draftValues.highIndexThicknessNm ?? formatThicknessDisplay(inputs.highIndexThicknessNm)}
               onChange={updateThicknessField('highIndexThicknessNm')}
-              onBlur={commitNumberField('highIndexThicknessNm', toNumber, 0)}
+              onFocus={focusThicknessField('highIndexThicknessNm')}
+              onBlur={commitThicknessField('highIndexThicknessNm')}
               aria-invalid={isInvalid('highIndexThicknessNm')}
             />
             <FieldError message={getIssueForField(validationIssues, 'highIndexThicknessNm')} />
@@ -535,9 +554,10 @@ export function QuarterWaveStackForm({
               type="number"
               min="0"
               step="1"
-              value={draftValues.lowIndexThicknessNm ?? formatThicknessInput(inputs.lowIndexThicknessNm)}
+              value={draftValues.lowIndexThicknessNm ?? formatThicknessDisplay(inputs.lowIndexThicknessNm)}
               onChange={updateThicknessField('lowIndexThicknessNm')}
-              onBlur={commitNumberField('lowIndexThicknessNm', toNumber, 0)}
+              onFocus={focusThicknessField('lowIndexThicknessNm')}
+              onBlur={commitThicknessField('lowIndexThicknessNm')}
               aria-invalid={isInvalid('lowIndexThicknessNm')}
             />
             <FieldError message={getIssueForField(validationIssues, 'lowIndexThicknessNm')} />
@@ -547,7 +567,7 @@ export function QuarterWaveStackForm({
         <>
           <div className="field thickness-readout">
             <span>High-index thickness</span>
-            <strong>{formatThicknessInput(visibleThicknessHighNm)} nm</strong>
+            <strong>{formatThicknessDisplay(visibleThicknessHighNm)} nm</strong>
             <small>
               {thicknessMode === 'acoustic'
                 ? 'Reserved for future acoustic control.'
@@ -557,7 +577,7 @@ export function QuarterWaveStackForm({
 
           <div className="field thickness-readout">
             <span>Low-index thickness</span>
-            <strong>{formatThicknessInput(visibleThicknessLowNm)} nm</strong>
+            <strong>{formatThicknessDisplay(visibleThicknessLowNm)} nm</strong>
             <small>
               {thicknessMode === 'acoustic'
                 ? 'Reserved for future acoustic control.'
