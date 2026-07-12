@@ -43,6 +43,9 @@ Refresh includes: current status, next steps, test results, artifacts, environme
     - Lint: `npm.cmd run lint`
     - Build: `npm.cmd run build`
 - For local UI work, launch the Vite dev server only if it is not already running, and start it as a hidden background process.
+  - Startup checklist:
+    1. Launch or verify the Vite dev server is running in the background.
+    2. Open the local app in `@Browser`.
 - Be mindful of token usage and act efficiently
     - Carry out normal tasks on your own, only notifying when necessary
     - Do not read full files unless absolutely necessary
