@@ -2,35 +2,35 @@
 
 ## How to use this file
 
-- Skim once at the start of a session to align on policies
+- Mandatory startup context for this repository:
+  - Read this file at the start of every new task in this repo before doing any work.
+  - Treat the repo constraints, preferences, and verification steps here as binding unless the user explicitly overrides them.
+  - If this file changes, re-read it before continuing work in the repository.
 
 ## Project Context
 
 - Read `PROJECT_CONTEXT.md` and `HANDOFF.md` for the summary from prior ChatGPT thread(s). Do not waste tokens reading project context if already known.
+- Treat GitHub Issues as the source of truth for active work. Use `MILESTONES.md` only as a completed-work history.
 
-## Milestone Status
+## GitHub Issue Workflow
 
-- Read `MILESTONES.md` for the latest status of what has been completed and what remains.
+- Before implementation, read the target GitHub Issue and confirm the goal, scope, acceptance criteria, and any linked discussion.
+- If an issue is underspecified, stop before coding and ask concise clarification questions. Do not implement from an unclear issue.
+- Once clarified, prefer updating the issue with the goal, scope, and acceptance criteria before implementation.
+- Work one issue per branch unless the user explicitly groups issues.
+- Use a branch name that includes the issue number and short slug, for example `issue-12-angle-heatmaps`.
+- Keep the diff focused on the issue. Do not include unrelated cleanup.
+- Reference the issue in the PR body with a closing keyword such as `Closes #12` only when the PR fully satisfies the issue.
+- After a PR is merged or an issue is otherwise completed, update `MILESTONES.md` if the work represents durable completed project history.
+- Keep `HANDOFF.md` current after each task with status, verification commands, and remaining follow-up.
 
-## Constraints and Preferences
-
-### Restricted Files
-
-Do not edit the following files unless explicitly asked:
-- `README.md`
-- `MILESTONES.md`
-
-### Living Files
+## Living Files
 
 - `HANDOFF.md` — current status for continuity
 
 Refresh includes: current status, next steps, test results, artifacts, environment details. Keep it brief!
 
-### Project Constraints
-
-- TBD
-
-### Preferences
+## Preferences
 
 - Prefer explicit, highly readable code over clever optimization
 - Keep simulation code reusable so additional optical structures can be added later

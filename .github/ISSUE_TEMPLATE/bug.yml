@@ -1,0 +1,95 @@
+name: Bug report
+description: Report incorrect behavior, regressions, or broken simulator workflows.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the incorrect behavior.
+      placeholder: What is broken or behaving unexpectedly?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the shortest reliable path to the problem.
+      placeholder: |
+        1. Open ...
+        2. Set ...
+        3. Run ...
+        4. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what should happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happens now, including errors or suspicious outputs.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, branch, commit, deployment URL, or local setup details.
+      placeholder: |
+        - Browser:
+        - OS:
+        - Branch/commit:
+        - Local or deployed:
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add screenshots, logs, exports/imports, parameter values, or plots that demonstrate the issue.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Fix acceptance criteria
+      description: Define how the fix should be verified.
+      placeholder: |
+        - Criterion 1
+        - Criterion 2
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Analysis
+        - Optics
+        - Visualization
+        - Volumetric Logic
+        - UI
+        - Docs
+        - Build/Deploy
+        - Unknown
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true

@@ -1,0 +1,74 @@
+name: Feature or implementation task
+description: Define implementation-ready simulator work.
+title: "[Feature]: "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: Describe the user-facing or project-facing outcome.
+      placeholder: What should be true when this issue is complete?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List what is included in this issue.
+      placeholder: What should Codex implement for this issue?
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: List related work that should not be included in this issue.
+      placeholder: What should be deferred to later issues?
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Use concrete, testable criteria.
+      placeholder: |
+        - Criterion 1
+        - Criterion 2
+        - Criterion 3
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Add formulas, dependencies, design constraints, linked discussions, or implementation hints.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Analysis
+        - Optics
+        - Visualization
+        - Volumetric Logic
+        - UI
+        - Docs
+        - Research
+        - Chore
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true

@@ -1,0 +1,56 @@
+name: Research or open question
+description: Capture physics, modeling, or design questions before implementation.
+title: "[Research]: "
+labels:
+  - research
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: State the specific research question or uncertainty.
+      placeholder: What needs to be answered before implementation?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain why this matters to the simulator or display model.
+    validations:
+      required: true
+  - type: textarea
+    id: decision-needed
+    attributes:
+      label: Decision needed
+      description: Describe the decision or implementation path this research should unlock.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Completion criteria
+      description: Define what evidence, equation, source, prototype, or conclusion closes this question.
+      placeholder: |
+        - Criterion 1
+        - Criterion 2
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes and references
+      description: Add links, formulas, assumptions, candidate approaches, or related issues.
+    validations:
+      required: false
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+    validations:
+      required: true
