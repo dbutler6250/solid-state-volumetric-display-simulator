@@ -146,6 +146,26 @@ describe('importStackConfigJson', () => {
     });
   });
 
+  it('preserves precise imported manual thickness values', () => {
+    const manualInputs = {
+      ...inputs,
+      thicknessMode: 'manual' as const,
+      highIndexThicknessNm: 103.25,
+      lowIndexThicknessNm: 105.625,
+    };
+    const payload = {
+      schema: 'ssvds-stack-config-v1',
+      app: 'solid-state-volumetric-display-simulator',
+      structureType: 'quarter-wave-stack',
+      inputs: manualInputs,
+    };
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: true,
+      inputs: manualInputs,
+    });
+  });
+
   it('returns an error for an invalid sweep range', () => {
     const payload = {
       schema: 'ssvds-stack-config-v1',
