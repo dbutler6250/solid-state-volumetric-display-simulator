@@ -2,8 +2,8 @@
 
 ## Latest Task
 
-- Fixed the absorption convention by negating the user-entered extinction coefficient when converting materials into the solver's complex refractive-index form.
-- Added a regression test proving positive `k` reduces transmission instead of acting like gain.
+- Fixed the numeric form inputs so decimal fields can be backspaced/cleared while editing, then snap back to the prior value on blur.
+- Removed trailing zeros from refractive-index display values and lowered refractive-index spinner steps to `0.001`.
 - Branch: `issue-6-complex-refractive-index`.
 
 ## Verification
@@ -14,4 +14,4 @@
 
 ## Notes
 
-- `transferMatrix.ts` keeps the complex-index solver path; the convention fix lives in `src/simulation/materials/material.ts` so UI/import/export can still use positive `k`.
+- The sweep controls were left unchanged as requested.

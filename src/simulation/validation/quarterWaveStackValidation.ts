@@ -115,12 +115,22 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       field: 'wavelengthStartNm',
       message: 'Sweep start must be greater than 0 nm.',
     });
+  } else if (!Number.isInteger(wavelengthStartNm)) {
+    issues.push({
+      field: 'wavelengthStartNm',
+      message: 'Sweep start must be a whole number of nanometers.',
+    });
   }
 
   if (!isFiniteNumber(wavelengthEndNm) || wavelengthEndNm <= wavelengthStartNm) {
     issues.push({
       field: 'wavelengthEndNm',
       message: 'Sweep end must be greater than sweep start.',
+    });
+  } else if (!Number.isInteger(wavelengthEndNm)) {
+    issues.push({
+      field: 'wavelengthEndNm',
+      message: 'Sweep end must be a whole number of nanometers.',
     });
   }
 

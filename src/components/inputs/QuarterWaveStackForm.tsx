@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import { MATERIAL_CATALOG } from '../../simulation/materials/catalog';
 import { formatRefractiveIndex, getRefractiveIndexImag, getRefractiveIndexReal } from '../../simulation/materials/material';
 import type { ValidationIssue } from '../../simulation/validation/quarterWaveStackValidation';
@@ -16,10 +16,11 @@ const CUSTOM_MATERIAL_NAME = 'Custom';
 const SWEEP_RANGE_PRESETS_NM = [10, 50, 100, 200, 300, 600];
 const SWEEP_RANGE_MIN_NM = 10;
 const SWEEP_RANGE_MAX_NM = 1200;
-const SWEEP_RANGE_STEP_NM = 10;
+const SWEEP_RANGE_STEP_NM = 1;
 const SWEEP_ENDPOINT_MIN_NM = 1;
 const SWEEP_ENDPOINT_MAX_NM = 2000;
-const SWEEP_ENDPOINT_STEP_NM = 0.1;
+const SWEEP_ENDPOINT_STEP_NM = 1;
+const REFRACTIVE_INDEX_STEP = 0.001;
 
 type NumericField = keyof Pick<
   QuarterWaveStackInputs,
@@ -36,7 +37,21 @@ const getIssueForField = (
   field: keyof QuarterWaveStackInputs,
 ): string | undefined => issues.find((issue) => issue.field === field)?.message;
 
-const formatMaterialNumber = (value: number): string => (Number.isFinite(value) ? value.toFixed(4) : '');
+const formatMaterialNumber = (value: number): string => {
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+
+  return Number(value.toString()).toString();
+};
+
+const formatNumericInput = (value: number | undefined): string => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return '';
+  }
+
+  return Number(value.toString()).toString();
+};
 
 /** Keeps numeric edits within the supported input range. */
 const clampNumber = (value: number, min: number, max?: number): number => {
@@ -55,24 +70,25 @@ const getSweepRange = (inputs: QuarterWaveStackInputs): number =>
   Math.max(0, (inputs.wavelengthEndNm ?? 0) - (inputs.wavelengthStartNm ?? 0));
 
 const normalizeSweepRange = (rangeNm: number): number =>
-  clampNumber(rangeNm, SWEEP_RANGE_MIN_NM, SWEEP_RANGE_MAX_NM);
+  Math.round(clampNumber(rangeNm, SWEEP_RANGE_MIN_NM, SWEEP_RANGE_MAX_NM));
 
 const formatWavelengthInput = (value: number | undefined): string => {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return '';
   }
 
-  return value.toFixed(4);
+  return Number(value.toString()).toString();
 };
 
-const formatSweepRangeInput = (value: number): string => value.toFixed(4);
+const formatSweepRangeInput = (value: number): string => Number(value.toString()).toString();
 
 /** Re-centers the sweep range while preserving the current midpoint. */
 const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): QuarterWaveStackInputs => {
   const centerNm = getSweepCenter(inputs);
-  const halfRangeNm = Math.max(0, rangeNm) / 2;
-  const nextStartNm = Math.max(1, centerNm - halfRangeNm);
-  const nextEndNm = Math.max(nextStartNm + 1, centerNm + halfRangeNm);
+  const nextRangeNm = normalizeSweepRange(rangeNm);
+  const halfRangeNm = nextRangeNm / 2;
+  const nextStartNm = Math.max(SWEEP_ENDPOINT_MIN_NM, Math.round(centerNm - halfRangeNm));
+  const nextEndNm = Math.max(nextStartNm + 1, Math.round(centerNm + halfRangeNm));
 
   return {
     ...inputs,
@@ -87,9 +103,10 @@ const applyCenteredSweepRange = (
   centerNm: number,
   rangeNm: number,
 ): QuarterWaveStackInputs => {
-  const halfRangeNm = Math.max(0, rangeNm) / 2;
-  const nextStartNm = Math.max(1, centerNm - halfRangeNm);
-  const nextEndNm = Math.max(nextStartNm + 1, centerNm + halfRangeNm);
+  const nextRangeNm = normalizeSweepRange(rangeNm);
+  const halfRangeNm = nextRangeNm / 2;
+  const nextStartNm = Math.max(SWEEP_ENDPOINT_MIN_NM, Math.round(centerNm - halfRangeNm));
+  const nextEndNm = Math.max(nextStartNm + 1, Math.round(centerNm + halfRangeNm));
 
   return {
     ...inputs,
@@ -117,37 +134,130 @@ export function QuarterWaveStackForm({
   validationIssues,
   onChange,
 }: QuarterWaveStackFormProps) {
-  const updateNumberField =
-    (field: NumericField) =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const value = toNumber(event.target.value);
+  const [draftValues, setDraftValues] = useState<Record<string, string>>({});
 
-      if (field === 'designWavelengthNm') {
-        onChange(applyDesignWavelength(inputs, value));
+  useEffect(() => {
+    setDraftValues({
+      periodCount: formatNumericInput(inputs.periodCount),
+      designWavelengthNm: formatNumericInput(inputs.designWavelengthNm),
+      incidentAngleDegrees: formatNumericInput(inputs.incidentAngleDegrees),
+      wavelengthStartNm: formatNumericInput(inputs.wavelengthStartNm),
+      wavelengthEndNm: formatNumericInput(inputs.wavelengthEndNm),
+      wavelengthPointCount: formatNumericInput(inputs.wavelengthPointCount),
+      highIndexReal: formatMaterialNumber(getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
+      highIndexImag: formatMaterialNumber(getRefractiveIndexImag(inputs.highIndexMaterial.refractiveIndex)),
+      lowIndexReal: formatMaterialNumber(getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
+      lowIndexImag: formatMaterialNumber(getRefractiveIndexImag(inputs.lowIndexMaterial.refractiveIndex)),
+    });
+  }, [inputs]);
+
+  const updateDraftValue = (key: string, value: string) => {
+    setDraftValues((current) => ({
+      ...current,
+      [key]: value,
+    }));
+  };
+
+  const commitMaterialField =
+    (field: 'highIndexMaterial' | 'lowIndexMaterial', component: 'real' | 'imag') =>
+    () => {
+      const key = `${field}-${component}`;
+      const material = inputs[field];
+      const currentValue =
+        component === 'real'
+          ? getRefractiveIndexReal(material.refractiveIndex)
+          : getRefractiveIndexImag(material.refractiveIndex);
+      const draftValue = draftValues[key];
+
+      if (draftValue === '') {
+        updateDraftValue(key, formatMaterialNumber(currentValue));
         return;
       }
 
+      const parsedValue = toNumber(draftValue);
+      if (!Number.isFinite(parsedValue)) {
+        updateDraftValue(key, formatMaterialNumber(currentValue));
+        return;
+      }
+
+      const nextRefractiveIndex =
+        component === 'real'
+          ? {
+              ...parseComplexRefractiveIndex(material.refractiveIndex),
+              real: Math.max(0, parsedValue),
+            }
+          : {
+              ...parseComplexRefractiveIndex(material.refractiveIndex),
+              imag: Math.max(0, parsedValue),
+            };
+
       onChange({
         ...inputs,
-        [field]: value,
+        [field]: {
+          ...material,
+          id: CUSTOM_MATERIAL_ID,
+          name: CUSTOM_MATERIAL_NAME,
+          refractiveIndex: nextRefractiveIndex,
+        },
       });
+      updateDraftValue(key, formatMaterialNumber(component === 'real' ? nextRefractiveIndex.real : nextRefractiveIndex.imag));
     };
 
-  const normalizeNumberField =
-    (field: NumericField, min: number, max?: number, integer = false) =>
+  const commitNumberField =
+    (field: NumericField, parse: (value: string) => number, min: number, max?: number, integer = false) =>
     () => {
-      const value = inputs[field] ?? min;
-      const clampedValue = clampNumber(value, min, max);
+      const currentValue = inputs[field] ?? min;
+      const draftValue = draftValues[field];
+
+      if (draftValue === '') {
+        updateDraftValue(field, formatNumericInput(currentValue));
+        return;
+      }
+
+      const parsedValue = parse(draftValue);
+      if (!Number.isFinite(parsedValue)) {
+        updateDraftValue(field, formatNumericInput(currentValue));
+        return;
+      }
+
+      const clampedValue = clampNumber(parsedValue, min, max);
       const nextValue = integer ? Math.round(clampedValue) : clampedValue;
 
       if (field === 'designWavelengthNm') {
         onChange(applyDesignWavelength(inputs, nextValue));
+      } else {
+        onChange({
+          ...inputs,
+          [field]: nextValue,
+        });
+      }
+
+      updateDraftValue(field, formatNumericInput(nextValue));
+    };
+
+  const updateNumberField =
+    (field: NumericField) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      updateDraftValue(field, value);
+
+      if (value === '' || value === '-' || value === '.' || value === '-.') {
+        return;
+      }
+
+      const parsedValue = toNumber(value);
+      if (!Number.isFinite(parsedValue)) {
+        return;
+      }
+
+      if (field === 'designWavelengthNm') {
+        onChange(applyDesignWavelength(inputs, parsedValue));
         return;
       }
 
       onChange({
         ...inputs,
-        [field]: nextValue,
+        [field]: parsedValue,
       });
     };
 
@@ -173,38 +283,6 @@ export function QuarterWaveStackForm({
       });
     };
 
-  const updateCustomRefractiveIndex =
-    (field: 'highIndexMaterial' | 'lowIndexMaterial') =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      onChange({
-        ...inputs,
-        [field]: {
-          ...inputs[field],
-          id: CUSTOM_MATERIAL_ID,
-          name: CUSTOM_MATERIAL_NAME,
-          refractiveIndex: {
-            ...parseComplexRefractiveIndex(inputs[field].refractiveIndex),
-            real: toNumber(event.target.value),
-          },
-        },
-      });
-    };
-  const updateCustomExtinctionCoefficient =
-    (field: 'highIndexMaterial' | 'lowIndexMaterial') =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      onChange({
-        ...inputs,
-        [field]: {
-          ...inputs[field],
-          id: CUSTOM_MATERIAL_ID,
-          name: CUSTOM_MATERIAL_NAME,
-          refractiveIndex: {
-            ...parseComplexRefractiveIndex(inputs[field].refractiveIndex),
-            imag: toNumber(event.target.value),
-          },
-        },
-      });
-    };
   const updateSweepRange = (rangeNm: number) => {
     onChange(applySweepRange(inputs, normalizeSweepRange(rangeNm)));
   };
@@ -223,6 +301,8 @@ export function QuarterWaveStackForm({
     const isCustom = isCustomMaterial(material.id);
     const realIndex = getRefractiveIndexReal(material.refractiveIndex);
     const imagIndex = getRefractiveIndexImag(material.refractiveIndex);
+    const realKey = `${field}-real`;
+    const imagKey = `${field}-imag`;
 
     return (
       <div className="field">
@@ -244,10 +324,35 @@ export function QuarterWaveStackForm({
               <span>{label} n</span>
               <input
                 type="number"
-                step="0.01"
+                step={REFRACTIVE_INDEX_STEP}
                 min="0"
-                value={formatMaterialNumber(realIndex)}
-                onChange={updateCustomRefractiveIndex(field)}
+                value={draftValues[realKey] ?? formatMaterialNumber(realIndex)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  updateDraftValue(realKey, value);
+                  if (value === '' || value === '-' || value === '.' || value === '-.') {
+                    return;
+                  }
+
+                  const parsedValue = toNumber(value);
+                  if (!Number.isFinite(parsedValue)) {
+                    return;
+                  }
+
+                  onChange({
+                    ...inputs,
+                    [field]: {
+                      ...material,
+                      id: CUSTOM_MATERIAL_ID,
+                      name: CUSTOM_MATERIAL_NAME,
+                      refractiveIndex: {
+                        ...parseComplexRefractiveIndex(material.refractiveIndex),
+                        real: Math.max(0, parsedValue),
+                      },
+                    },
+                  });
+                }}
+                onBlur={commitMaterialField(field, 'real')}
                 aria-label={`${label} real refractive index`}
               />
             </label>
@@ -255,10 +360,35 @@ export function QuarterWaveStackForm({
               <span>{label} k</span>
               <input
                 type="number"
-                step="0.01"
+                step={REFRACTIVE_INDEX_STEP}
                 min="0"
-                value={formatMaterialNumber(imagIndex)}
-                onChange={updateCustomExtinctionCoefficient(field)}
+                value={draftValues[imagKey] ?? formatMaterialNumber(imagIndex)}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  updateDraftValue(imagKey, value);
+                  if (value === '' || value === '-' || value === '.' || value === '-.') {
+                    return;
+                  }
+
+                  const parsedValue = toNumber(value);
+                  if (!Number.isFinite(parsedValue)) {
+                    return;
+                  }
+
+                  onChange({
+                    ...inputs,
+                    [field]: {
+                      ...material,
+                      id: CUSTOM_MATERIAL_ID,
+                      name: CUSTOM_MATERIAL_NAME,
+                      refractiveIndex: {
+                        ...parseComplexRefractiveIndex(material.refractiveIndex),
+                        imag: Math.max(0, parsedValue),
+                      },
+                    },
+                  });
+                }}
+                onBlur={commitMaterialField(field, 'imag')}
                 aria-label={`${label} extinction coefficient`}
               />
             </label>
@@ -287,9 +417,9 @@ export function QuarterWaveStackForm({
           type="number"
           min="1"
           step="1"
-          value={inputs.periodCount}
+          value={draftValues.periodCount ?? formatNumericInput(inputs.periodCount)}
           onChange={updateNumberField('periodCount')}
-          onBlur={normalizeNumberField('periodCount', 1, undefined, true)}
+          onBlur={commitNumberField('periodCount', toNumber, 1, undefined, true)}
           aria-invalid={isInvalid('periodCount')}
         />
         <FieldError message={getIssueForField(validationIssues, 'periodCount')} />
@@ -300,9 +430,9 @@ export function QuarterWaveStackForm({
         <input
           type="number"
           min="1"
-          value={inputs.designWavelengthNm}
+          value={draftValues.designWavelengthNm ?? formatNumericInput(inputs.designWavelengthNm)}
           onChange={updateNumberField('designWavelengthNm')}
-          onBlur={normalizeNumberField('designWavelengthNm', 1)}
+          onBlur={commitNumberField('designWavelengthNm', toNumber, 1)}
           aria-invalid={isInvalid('designWavelengthNm')}
         />
         <FieldError message={getIssueForField(validationIssues, 'designWavelengthNm')} />
@@ -314,9 +444,9 @@ export function QuarterWaveStackForm({
           type="number"
           min="0"
           max="89"
-          value={inputs.incidentAngleDegrees}
+          value={draftValues.incidentAngleDegrees ?? formatNumericInput(inputs.incidentAngleDegrees)}
           onChange={updateNumberField('incidentAngleDegrees')}
-          onBlur={normalizeNumberField('incidentAngleDegrees', 0, 89.9)}
+          onBlur={commitNumberField('incidentAngleDegrees', toNumber, 0, 89.9)}
           aria-invalid={isInvalid('incidentAngleDegrees')}
         />
         <FieldError message={getIssueForField(validationIssues, 'incidentAngleDegrees')} />
@@ -354,13 +484,9 @@ export function QuarterWaveStackForm({
           min={SWEEP_ENDPOINT_MIN_NM}
           max={SWEEP_ENDPOINT_MAX_NM}
           step={SWEEP_ENDPOINT_STEP_NM}
-          value={formatWavelengthInput(inputs.wavelengthStartNm)}
+          value={draftValues.wavelengthStartNm ?? formatWavelengthInput(inputs.wavelengthStartNm)}
           onChange={updateNumberField('wavelengthStartNm')}
-          onBlur={normalizeNumberField(
-            'wavelengthStartNm',
-            SWEEP_ENDPOINT_MIN_NM,
-            SWEEP_ENDPOINT_MAX_NM,
-          )}
+          onBlur={commitNumberField('wavelengthStartNm', toNumber, SWEEP_ENDPOINT_MIN_NM, SWEEP_ENDPOINT_MAX_NM, true)}
           aria-invalid={isInvalid('wavelengthStartNm')}
         />
         <input
@@ -383,9 +509,9 @@ export function QuarterWaveStackForm({
           min={SWEEP_ENDPOINT_MIN_NM}
           max={SWEEP_ENDPOINT_MAX_NM}
           step={SWEEP_ENDPOINT_STEP_NM}
-          value={formatWavelengthInput(inputs.wavelengthEndNm)}
+          value={draftValues.wavelengthEndNm ?? formatWavelengthInput(inputs.wavelengthEndNm)}
           onChange={updateNumberField('wavelengthEndNm')}
-          onBlur={normalizeNumberField('wavelengthEndNm', SWEEP_ENDPOINT_MIN_NM, SWEEP_ENDPOINT_MAX_NM)}
+          onBlur={commitNumberField('wavelengthEndNm', toNumber, SWEEP_ENDPOINT_MIN_NM, SWEEP_ENDPOINT_MAX_NM, true)}
           aria-invalid={isInvalid('wavelengthEndNm')}
         />
         <input
@@ -447,9 +573,9 @@ export function QuarterWaveStackForm({
           type="number"
           min="2"
           step="1"
-          value={inputs.wavelengthPointCount}
+          value={draftValues.wavelengthPointCount ?? formatNumericInput(inputs.wavelengthPointCount)}
           onChange={updateNumberField('wavelengthPointCount')}
-          onBlur={normalizeNumberField('wavelengthPointCount', 2, 2001, true)}
+          onBlur={commitNumberField('wavelengthPointCount', toNumber, 2, 2001, true)}
           aria-invalid={isInvalid('wavelengthPointCount')}
         />
         <FieldError message={getIssueForField(validationIssues, 'wavelengthPointCount')} />
