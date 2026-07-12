@@ -87,6 +87,42 @@ describe('transfer matrix solver', () => {
     expect(result.transmission).toBeGreaterThan(0);
   });
 
+  it('treats a positive extinction coefficient as attenuation, not gain', () => {
+    const baseStack: LayerStack = {
+      incidentMedium: AIR,
+      layers: [
+        {
+          material: makeMaterial('base', { real: 2.1, imag: 0 }),
+          thicknessNm: 180,
+        },
+      ],
+      exitMedium: AIR,
+    };
+    const absorbingStack: LayerStack = {
+      ...baseStack,
+      layers: [
+        {
+          material: makeMaterial('absorbing', { real: 2.1, imag: 0.2 }),
+          thicknessNm: 180,
+        },
+      ],
+    };
+
+    const lossless = solveLayerStack(baseStack, {
+      wavelengthNm: 600,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+    });
+    const absorbing = solveLayerStack(absorbingStack, {
+      wavelengthNm: 600,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+    });
+
+    expect(absorbing.transmission).toBeLessThan(lossless.transmission);
+    expect(absorbing.reflectance).toBeLessThan(lossless.reflectance);
+  });
+
   it('computes the center wavelength from the stopband instead of forcing the design wavelength', () => {
     const designWavelengthNm = 600;
     const highIndexMaterial = makeMaterial('nH', 2.4);

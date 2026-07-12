@@ -25,10 +25,14 @@ export const getRefractiveIndexReal = (value: Material['refractiveIndex']): numb
 export const getRefractiveIndexImag = (value: Material['refractiveIndex']): number =>
   isComplexRefractiveIndex(value) ? value.imag : 0;
 
-/** Converts a refractive index to the solver's complex-number representation. */
+/**
+ * Converts the UI/material extinction coefficient into the solver convention.
+ * Positive k is entered by users as an attenuation coefficient, so the solver
+ * receives it as a negative imaginary component.
+ */
 export const toComplexRefractiveIndex = (value: Material['refractiveIndex']): Complex => ({
   re: getRefractiveIndexReal(value),
-  im: getRefractiveIndexImag(value),
+  im: -getRefractiveIndexImag(value),
 });
 
 /** Formats a refractive index for UI labels and exports. */

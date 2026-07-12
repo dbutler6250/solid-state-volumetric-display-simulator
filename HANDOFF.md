@@ -2,7 +2,8 @@
 
 ## Latest Task
 
-- Added complex refractive-index support end-to-end for custom materials, validation, solver math, imports/exports, and summary UI.
+- Fixed the absorption convention by negating the user-entered extinction coefficient when converting materials into the solver's complex refractive-index form.
+- Added a regression test proving positive `k` reduces transmission instead of acting like gain.
 - Branch: `issue-6-complex-refractive-index`.
 
 ## Verification
@@ -13,4 +14,4 @@
 
 ## Notes
 
-- Ready to commit, push, and open a PR from `issue-6-complex-refractive-index`.
+- `transferMatrix.ts` keeps the complex-index solver path; the convention fix lives in `src/simulation/materials/material.ts` so UI/import/export can still use positive `k`.
