@@ -115,7 +115,20 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
         <span>Air | H/L x {formatCount(inputs.periodCount)} | Air</span>
       </div>
       <div className="stack-panel-subtitle">
-        Thickness mode: {thicknessMode === 'derived' ? 'Derived from design wavelength' : thicknessMode === 'manual' ? 'User typed' : 'Acoustic (future)'}
+        <span className={`mode-pill mode-pill-${thicknessMode}`}>
+          {thicknessMode === 'derived'
+            ? 'Derived'
+            : thicknessMode === 'manual'
+              ? 'Manual'
+              : 'Acoustic'}
+        </span>
+        <span>
+          {thicknessMode === 'derived'
+            ? 'Quarter-wave values follow the design wavelength.'
+            : thicknessMode === 'manual'
+              ? 'Thicknesses are editable.'
+              : 'Reserved for future external thickness control.'}
+        </span>
       </div>
 
       <div className="stack-summary-grid">

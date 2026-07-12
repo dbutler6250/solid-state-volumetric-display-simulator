@@ -116,6 +116,18 @@ label {
   font-weight: 650;
 }
 
+.field-copy {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.field-copy small,
+.field small {
+  color: #8fa0b1;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 .field input,
 .field select {
   width: 100%;
@@ -298,6 +310,45 @@ label {
   font-size: 0.86rem;
 }
 
+.stack-panel-subtitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  margin-bottom: 0.85rem;
+  color: #9aa8b7;
+  font-size: 0.88rem;
+}
+
+.mode-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  border: 1px solid #3a495b;
+  border-radius: 999px;
+  padding: 0.1rem 0.65rem;
+  background: #101720;
+  color: #dce7f2;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.mode-pill-derived {
+  border-color: rgba(90, 167, 200, 0.55);
+  background: rgba(90, 167, 200, 0.12);
+}
+
+.mode-pill-manual {
+  border-color: rgba(90, 167, 200, 0.35);
+}
+
+.mode-pill-acoustic {
+  border-color: rgba(228, 191, 115, 0.5);
+  background: rgba(228, 191, 115, 0.12);
+}
+
 .stack-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -325,6 +376,29 @@ label {
   color: #e5edf5;
   font-size: 0.9rem;
   overflow-wrap: anywhere;
+}
+
+.thickness-mode-group {
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(90, 167, 200, 0.05), rgba(16, 23, 32, 0));
+}
+
+.thickness-mode-group > .field {
+  gap: 0.45rem;
+}
+
+.thickness-readout {
+  padding: 0.85rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  background: #101720;
+}
+
+.thickness-readout strong {
+  font-size: 1rem;
 }
 
 .stack-diagram,

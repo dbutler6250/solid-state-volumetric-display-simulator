@@ -491,24 +491,25 @@ export function QuarterWaveStackForm({
       {renderMaterialField('highIndexMaterial', 'High-index material')}
       {renderMaterialField('lowIndexMaterial', 'Low-index material')}
 
-      <div className="field">
-        <span>Layer thicknesses</span>
-        <small>
-          Choose how the stack thicknesses are sourced. Derived mode keeps the current quarter-wave
-          workflow, manual mode allows arbitrary values, and acoustic mode is reserved for future
-          external thickness control.
-        </small>
-      </div>
+      <div className="field thickness-mode-group">
+        <div className="field-copy">
+          <span>Thickness source</span>
+          <small>
+            Derived mode keeps the quarter-wave workflow, manual mode edits values directly, and
+            acoustic mode reserves room for external control.
+          </small>
+        </div>
 
-      <label className="field">
-        <span>Thickness mode</span>
-        <select value={thicknessMode} onChange={updateThicknessMode}>
-          <option value="derived">Derived from design wavelength</option>
-          <option value="manual">User typed</option>
-          <option value="acoustic">Acoustic (future)</option>
-        </select>
-        <FieldError message={getIssueForField(validationIssues, 'thicknessMode')} />
-      </label>
+        <label className="field">
+          <span>Thickness mode</span>
+          <select value={thicknessMode} onChange={updateThicknessMode}>
+            <option value="derived">Derived from design wavelength</option>
+            <option value="manual">User typed</option>
+            <option value="acoustic">Acoustic (future)</option>
+          </select>
+          <FieldError message={getIssueForField(validationIssues, 'thicknessMode')} />
+        </label>
+      </div>
 
       {thicknessMode === 'manual' ? (
         <>
@@ -542,23 +543,23 @@ export function QuarterWaveStackForm({
         </>
       ) : (
         <>
-          <div className="field">
+          <div className="field thickness-readout">
             <span>High-index thickness</span>
             <strong>{formatWavelengthInput(visibleThicknessHighNm)} nm</strong>
             <small>
               {thicknessMode === 'acoustic'
-                ? 'Placeholder thickness for future acoustic logic.'
-                : 'Derived from the design wavelength and the high-index refractive index.'}
+                ? 'Reserved for future acoustic control.'
+                : 'Quarter-wave value from the design wavelength and material index.'}
             </small>
           </div>
 
-          <div className="field">
+          <div className="field thickness-readout">
             <span>Low-index thickness</span>
             <strong>{formatWavelengthInput(visibleThicknessLowNm)} nm</strong>
             <small>
               {thicknessMode === 'acoustic'
-                ? 'Placeholder thickness for future acoustic logic.'
-                : 'Derived from the design wavelength and the low-index refractive index.'}
+                ? 'Reserved for future acoustic control.'
+                : 'Quarter-wave value from the design wavelength and material index.'}
             </small>
           </div>
         </>
