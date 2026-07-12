@@ -5,7 +5,10 @@ import { FormattedNumberInput } from './FormattedNumberInput';
 import {
   formatEditableNumber,
   formattedNumberInputReducer,
+  normalizeCommittedNumber,
   parseFiniteNumberDraft,
+  parseFiniteIntegerDraft,
+  stepCommittedNumber,
   type FormattedNumberInputState,
 } from './formattedNumberInputState';
 
@@ -42,7 +45,19 @@ describe('FormattedNumberInput state', () => {
   it('parses precise finite values without rounding and rejects invalid values', () => {
     expect(parseFiniteNumberDraft('103.25')).toBe(103.25);
     expect(parseFiniteNumberDraft('105.625')).toBe(105.625);
+    expect(parseFiniteNumberDraft('+1.25e2')).toBe(125);
     expect(parseFiniteNumberDraft('not-a-number')).toBeUndefined();
+    expect(parseFiniteNumberDraft('   ')).toBeUndefined();
+    expect(parseFiniteNumberDraft('0x10')).toBeUndefined();
+    expect(parseFiniteNumberDraft('0b10')).toBeUndefined();
+  });
+
+  it('commits only complete integers and preserves existing blur rounding and bounds', () => {
+    expect(parseFiniteIntegerDraft('12')).toBe(12);
+    expect(parseFiniteIntegerDraft('12.5')).toBeUndefined();
+    expect(parseFiniteIntegerDraft('1e')).toBeUndefined();
+    expect(normalizeCommittedNumber(1.4, 2, 2001, Math.round)).toBe(2);
+    expect(normalizeCommittedNumber(2001.6, 2, 2001, Math.round)).toBe(2001);
   });
 
   it('preserves an active draft independently of external values until blur', () => {
@@ -55,5 +70,64 @@ describe('FormattedNumberInput state', () => {
       isFocused: false,
       draft: '105.6250',
     });
+  });
+
+  it('replaces an active draft only for an intentional reset', () => {
+    const editing: FormattedNumberInputState = { isFocused: true, draft: '105.6250' };
+
+    expect(formattedNumberInputReducer(editing, { type: 'change', draft: '105.6250' }))
+      .toEqual(editing);
+    expect(formattedNumberInputReducer(editing, { type: 'reset', value: 120.125 }))
+      .toEqual({ isFocused: true, draft: '120.125' });
+  });
+
+  it('uses the integer keyboard hint when requested', () => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 12,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      parseMode: 'integer',
+    }));
+
+    expect(markup).toContain('inputMode="numeric"');
+  });
+
+  it('renders accessible compact steppers when enabled', () => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 12,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      showStepper: true,
+      stepperLabel: 'periods',
+      stepperStep: 1,
+    }));
+
+    expect(markup).toContain('aria-label="Decrease periods"');
+    expect(markup).toContain('aria-label="Increase periods"');
+    expect(markup).toContain('class="formatted-number-input"');
+  });
+
+  it('steps committed values precisely and respects bounds', () => {
+    expect(stepCommittedNumber(2.4, 1, 0.001)).toBe(2.401);
+    expect(stepCommittedNumber(2.401, -1, 0.001)).toBe(2.4);
+    expect(stepCommittedNumber(0, -1, 0.1, 0)).toBe(0);
+    expect(stepCommittedNumber(89.5, 1, 1, 0, 89.9)).toBe(89.9);
+  });
+
+  it.each([
+    { disabled: true },
+    { readOnly: true },
+  ])('disables both steppers for non-editable inputs', (nonEditableProp) => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 12,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      showStepper: true,
+      stepperLabel: 'periods',
+      stepperStep: 1,
+      ...nonEditableProp,
+    }));
+
+    expect(markup.match(/<button[^>]*disabled=""/g)).toHaveLength(2);
   });
 });

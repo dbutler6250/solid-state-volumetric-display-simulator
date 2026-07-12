@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
+import { FormattedNumberInput } from './inputs/FormattedNumberInput';
+import {
+  FIXED_INCIDENT_ANGLE_SWEEP,
+  getInclusivePeriodPointCount,
+} from './parameterSweepSettings';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
@@ -31,19 +36,17 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   parameter: 'designWavelengthNm',
   start: 450,
   end: 750,
-  pointCount: 9,
+  pointCount: 30,
 };
 const DEFAULT_PARAMETER_SWEEP_WARNING =
   'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
-const DEFAULT_INCIDENT_ANGLE_SWEEP = {
-  start: 0,
-  end: 89,
-  pointCount: 89,
-} as const;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
+
+const formatParameterSweepInput = (value: number | undefined): string =>
+  typeof value === 'number' && Number.isFinite(value) ? value.toString() : '';
 
 /** Coordinates inputs, solver execution, exports, imports, and chart controls. */
 export function SimulationShell() {
@@ -52,6 +55,7 @@ export function SimulationShell() {
   const [activeTab, setActiveTab] = useState<OutputTab>('spectrum');
   const [xRange, setXRange] = useState<[number, number] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [inputResetKey, setInputResetKey] = useState(0);
   const [parameterSweep, setParameterSweep] =
     useState<ParameterSweepSettings>(DEFAULT_PARAMETER_SWEEP);
   const [parameterSweepResult, setParameterSweepResult] = useState<ParameterSweepResult | null>(
@@ -77,6 +81,23 @@ export function SimulationShell() {
     return solveQuarterWaveStack(inputs);
   }, [inputs, validationIssues]);
   const effectiveParameterSweep = getEffectiveParameterSweep(inputs, parameterSweep);
+  const parameterSweepIsReadOnly = parameterSweep.parameter === 'designWavelengthNm';
+  const parameterSweepIsFixedAngle = parameterSweep.parameter === 'incidentAngleDegrees';
+  const parameterSweepIsInteger = parameterSweep.parameter === 'periodCount';
+  const parameterSweepBoundsLabelSuffix = parameterSweepIsReadOnly
+    ? ' (derived)'
+    : parameterSweepIsFixedAngle
+      ? ' (fixed)'
+      : '';
+  const parameterSweepBoundsAreLocked = parameterSweepIsReadOnly || parameterSweepIsFixedAngle;
+  const parameterSweepPointsAreLocked = parameterSweepIsInteger || parameterSweepIsFixedAngle;
+  const parameterSweepMinimum = parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1;
+  const parameterSweepMaximum = parameterSweep.parameter === 'incidentAngleDegrees'
+    ? MAX_INCIDENT_ANGLE_DEGREES
+    : undefined;
+  const parameterSweepResetKey = `${inputResetKey}:${parameterSweep.parameter}:${
+    parameterSweepIsInteger ? inputs.periodCount : ''
+  }`;
 
   useEffect(() => {
     if (parameterSweep.parameter !== 'periodCount') {
@@ -126,10 +147,7 @@ export function SimulationShell() {
 
   const updateParameterSweepParameter = (parameter: ParameterSweepSettings['parameter']) => {
     if (parameter === 'incidentAngleDegrees') {
-      updateParameterSweep({
-        parameter,
-        ...DEFAULT_INCIDENT_ANGLE_SWEEP,
-      });
+      updateParameterSweep(FIXED_INCIDENT_ANGLE_SWEEP);
       return;
     }
 
@@ -144,7 +162,7 @@ export function SimulationShell() {
             parameter,
             start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
             end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
-            pointCount: parameterSweep.pointCount,
+            pointCount: DEFAULT_PARAMETER_SWEEP.pointCount,
           },
     );
   };
@@ -219,6 +237,7 @@ export function SimulationShell() {
       }
 
       setInputs(imported.inputs);
+      setInputResetKey((current) => current + 1);
       if (imported.parameterSweep) {
         setParameterSweep(imported.parameterSweep);
       }
@@ -266,54 +285,57 @@ export function SimulationShell() {
             inputs={inputs}
             validationIssues={validationIssues}
             onChange={setInputs}
+            externalResetKey={inputResetKey}
           />
         </aside>
 
         <section className="output-area" aria-label="Simulation outputs">
-          <div className="global-toolbar" role="group" aria-label="Setup actions">
-            <button type="button" onClick={openImportPicker}>
-              Import Setup
-            </button>
-            <button type="button" onClick={exportSetup} disabled={validationIssues.length > 0}>
-              Export Setup
-            </button>
-            <input
-              ref={importInputRef}
-              type="file"
-              accept="application/json,.json"
-              onChange={importSetup}
-              hidden
-            />
+          <div className="output-navigation">
+            <div className="output-tabs" role="tablist" aria-label="Simulation output views">
+              {OUTPUT_TABS.map((tab) => {
+                const label =
+                  tab === 'spectrum'
+                    ? 'Spectrum'
+                    : tab === 'parameter-sweep'
+                      ? 'Parameter Sweep'
+                      : 'Stack Definition';
+                return (
+                  <button
+                    key={tab}
+                    ref={(node) => {
+                      tabRefs.current[tab] = node;
+                    }}
+                    id={`${tab}-tab`}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab}
+                    aria-controls={`${tab}-panel`}
+                    tabIndex={activeTab === tab ? 0 : -1}
+                    onClick={() => setActiveTab(tab)}
+                    onKeyDown={(event) => handleTabKeyDown(event, tab)}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="global-toolbar" role="group" aria-label="Setup actions">
+              <button type="button" onClick={openImportPicker}>
+                Import Setup
+              </button>
+              <button type="button" onClick={exportSetup} disabled={validationIssues.length > 0}>
+                Export Setup
+              </button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                onChange={importSetup}
+                hidden
+              />
+            </div>
           </div>
           {importError ? <p className="chart-toolbar-message" role="alert">{importError}</p> : null}
-          <div className="output-tabs" role="tablist" aria-label="Simulation output views">
-            {OUTPUT_TABS.map((tab) => {
-              const label =
-                tab === 'spectrum'
-                  ? 'Spectrum'
-                  : tab === 'parameter-sweep'
-                    ? 'Parameter Sweep'
-                    : 'Stack Definition';
-              return (
-                <button
-                  key={tab}
-                  ref={(node) => {
-                    tabRefs.current[tab] = node;
-                  }}
-                  id={`${tab}-tab`}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab}
-                  aria-controls={`${tab}-panel`}
-                  tabIndex={activeTab === tab ? 0 : -1}
-                  onClick={() => setActiveTab(tab)}
-                  onKeyDown={(event) => handleTabKeyDown(event, tab)}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
 
           <section
             className="chart-panel"
@@ -342,6 +364,7 @@ export function SimulationShell() {
                 validationIssues={validationIssues}
                 onChange={setInputs}
                 section="sweep"
+                externalResetKey={inputResetKey}
               />
             </section>
           </section>
@@ -370,52 +393,70 @@ export function SimulationShell() {
             </label>
             <div className="parameter-sweep-grid">
               <label className="field">
-                <span>Start</span>
-                <input
-                  type="number"
-                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
-                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
-                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
-                  value={effectiveParameterSweep.start}
-                  readOnly={parameterSweep.parameter === 'designWavelengthNm'}
-                  onChange={(event) =>
-                    updateParameterSweep({
-                      ...parameterSweep,
-                      start: Number(event.target.value),
-                    })
-                  }
-                />
-              </label>
-              <label className="field">
-                <span>End</span>
-                <input
-                  type="number"
-                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
-                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
-                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
-                  value={effectiveParameterSweep.end}
-                  readOnly={parameterSweep.parameter === 'designWavelengthNm'}
-                  onChange={(event) =>
-                    updateParameterSweep({
-                      ...parameterSweep,
-                      end: Number(event.target.value),
-                    })
-                  }
-                />
-              </label>
-              <label className="field">
-                <span>Points</span>
-                <input
-                  type="number"
-                  min="2"
+                <span>{`Start${parameterSweepBoundsLabelSuffix}`}</span>
+                <FormattedNumberInput
+                  min={parameterSweepMinimum}
+                  max={parameterSweepMaximum}
                   step="1"
-                  value={effectiveParameterSweep.pointCount}
-                  onChange={(event) =>
+                  parseMode={parameterSweepIsInteger ? 'integer' : 'decimal'}
+                  normalizeOnBlur={parameterSweepIsInteger ? Math.round : undefined}
+                  value={effectiveParameterSweep.start}
+                  readOnly={parameterSweepIsReadOnly}
+                  disabled={parameterSweepIsFixedAngle}
+                  formatInactive={formatParameterSweepInput}
+                  onValueChange={(start) =>
                     updateParameterSweep({
                       ...parameterSweep,
-                      pointCount: Number(event.target.value),
+                      start,
                     })
                   }
+                  resetKey={parameterSweepResetKey}
+                  showStepper={!parameterSweepBoundsAreLocked}
+                  stepperLabel="parameter sweep start"
+                />
+              </label>
+              <label className="field">
+                <span>{`End${parameterSweepBoundsLabelSuffix}`}</span>
+                <FormattedNumberInput
+                  min={parameterSweepMinimum}
+                  max={parameterSweepMaximum}
+                  step="1"
+                  parseMode={parameterSweepIsInteger ? 'integer' : 'decimal'}
+                  normalizeOnBlur={parameterSweepIsInteger ? Math.round : undefined}
+                  value={effectiveParameterSweep.end}
+                  readOnly={parameterSweepIsReadOnly}
+                  disabled={parameterSweepIsFixedAngle}
+                  formatInactive={formatParameterSweepInput}
+                  onValueChange={(end) =>
+                    updateParameterSweep({
+                      ...parameterSweep,
+                      end,
+                    })
+                  }
+                  resetKey={parameterSweepResetKey}
+                  showStepper={!parameterSweepBoundsAreLocked}
+                  stepperLabel="parameter sweep end"
+                />
+              </label>
+              <label className="field">
+                <span>{parameterSweepIsInteger ? 'Points (derived)' : parameterSweepIsFixedAngle ? 'Points (fixed)' : 'Points'}</span>
+                <FormattedNumberInput
+                  min={2}
+                  step="1"
+                  parseMode="integer"
+                  normalizeOnBlur={Math.round}
+                  value={effectiveParameterSweep.pointCount}
+                  disabled={parameterSweepPointsAreLocked}
+                  formatInactive={formatParameterSweepInput}
+                  onValueChange={(pointCount) =>
+                    updateParameterSweep({
+                      ...parameterSweep,
+                      pointCount,
+                    })
+                  }
+                  resetKey={inputResetKey}
+                  showStepper={!parameterSweepPointsAreLocked}
+                  stepperLabel="parameter sweep points"
                 />
               </label>
             </div>
@@ -470,15 +511,14 @@ function getEffectiveParameterSweep(
   settings: ParameterSweepSettings,
 ): ParameterSweepSettings {
   if (settings.parameter === 'periodCount') {
-    return settings;
+    return {
+      ...settings,
+      pointCount: getInclusivePeriodPointCount(settings.start, settings.end),
+    };
   }
 
   if (settings.parameter === 'incidentAngleDegrees') {
-    return {
-      ...settings,
-      start: Math.max(0, settings.start),
-      end: Math.min(MAX_INCIDENT_ANGLE_DEGREES, settings.end),
-    };
+    return FIXED_INCIDENT_ANGLE_SWEEP;
   }
 
   return {
