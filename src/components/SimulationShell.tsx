@@ -23,9 +23,11 @@ import type {
   QuarterWaveStackInputs,
 } from '../types/simulation';
 
+/*
 const MIN_WAVELENGTH_NM = 1;
 const MIN_VIEW_MULTIPLIER = 0.5;
 const MAX_VIEW_MULTIPLIER = 5;
+*/
 const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   parameter: 'designWavelengthNm',
   start: 450,
@@ -73,6 +75,7 @@ export function SimulationShell() {
     setParameterSweepError(null);
   }, [inputs]);
 
+  /*
   const centerOnBandwidth = () => {
     if (!result || result.bandwidthNm <= 0) {
       return;
@@ -94,6 +97,7 @@ export function SimulationShell() {
   const resetView = () => {
     setXRange(null);
   };
+  */
 
   const updateParameterSweep = (nextSettings: ParameterSweepSettings) => {
     setParameterSweep(nextSettings);
@@ -308,6 +312,7 @@ export function SimulationShell() {
             <h2>Spectrum</h2>
             <div className="chart-toolbar">
               <div className="chart-button-group" role="group" aria-label="Chart Controls">
+                {/*
                 <button
                   type="button"
                   onClick={centerOnBandwidth}
@@ -318,8 +323,9 @@ export function SimulationShell() {
                 <button type="button" onClick={resetView} disabled={!xRange}>
                   Reset View
                 </button>
+                */}
                 <button type="button" onClick={exportCsv} disabled={!result}>
-                  Export CSV
+                  Export Spectrum CSV
                 </button>
                 <button type="button" onClick={openImportPicker}>
                   Import Setup
@@ -379,9 +385,11 @@ export function SimulationShell() {
   );
 }
 
+/*
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
+*/
 
 /** Derives non-editable design-wavelength sweep bounds from the spectrum analysis range. */
 function getEffectiveParameterSweep(
