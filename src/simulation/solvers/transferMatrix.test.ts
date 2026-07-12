@@ -86,6 +86,31 @@ describe('transfer matrix solver', () => {
     expect(result.bandwidthNm).toBeGreaterThan(0);
   });
 
+  it('interpolates peak and bandwidth metrics between sampled wavelengths', () => {
+    const wavelengthStartNm = 440;
+    const wavelengthEndNm = 760;
+    const wavelengthPointCount = 41;
+    const inputs: QuarterWaveStackInputs = {
+      highIndexMaterial: makeMaterial('nH', 2.4),
+      lowIndexMaterial: makeMaterial('nL', 1.45),
+      periodCount: 6,
+      designWavelengthNm: 603,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+      wavelengthStartNm,
+      wavelengthEndNm,
+      wavelengthPointCount,
+    };
+
+    const result = solveQuarterWaveStack(inputs);
+    const sampledPeakReflectance = Math.max(...result.spectrum.map((point) => point.reflectance));
+    const sampleStepNm = (wavelengthEndNm - wavelengthStartNm) / (wavelengthPointCount - 1);
+    const nearestSampleStepCount = Math.round(result.bandwidthNm / sampleStepNm);
+
+    expect(result.peakReflectance).toBeGreaterThanOrEqual(sampledPeakReflectance);
+    expect(Math.abs(result.bandwidthNm - nearestSampleStepCount * sampleStepNm)).toBeGreaterThan(1e-6);
+  });
+
   it('conserves energy for a lossless quarter-wave stack sweep', () => {
     const designWavelengthNm = 600;
     const highIndexMaterial = makeMaterial('nH', 2.4);

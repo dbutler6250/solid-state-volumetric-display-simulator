@@ -138,20 +138,71 @@ const createWavelengthSweep = ({
   return wavelengths.sort((a, b) => a - b);
 };
 
-/** Finds the half-maximum band edges around the spectral peak. */
+type InterpolatedPeak = {
+  wavelengthNm: number;
+  reflectance: number;
+};
+
+/** Estimates the smooth local maximum from the peak sample and its neighbors. */
+const interpolatePeak = (spectrum: LayerStackPointResult[], peakIndex: number): InterpolatedPeak => {
+  const peak = spectrum[peakIndex];
+  if (peakIndex === 0 || peakIndex === spectrum.length - 1) {
+    return { wavelengthNm: peak.wavelengthNm, reflectance: peak.reflectance };
+  }
+
+  const left = spectrum[peakIndex - 1];
+  const right = spectrum[peakIndex + 1];
+  const denominator = left.reflectance - 2 * peak.reflectance + right.reflectance;
+  if (Math.abs(denominator) < 1e-12) {
+    return { wavelengthNm: peak.wavelengthNm, reflectance: peak.reflectance };
+  }
+
+  // Parabolic interpolation is a local, lightweight refinement for smooth spectra near the sampled maximum.
+  const offset = 0.5 * (left.reflectance - right.reflectance) / denominator;
+  if (Math.abs(offset) > 1) {
+    return { wavelengthNm: peak.wavelengthNm, reflectance: peak.reflectance };
+  }
+
+  const leftStepNm = peak.wavelengthNm - left.wavelengthNm;
+  const rightStepNm = right.wavelengthNm - peak.wavelengthNm;
+  const wavelengthNm = peak.wavelengthNm + (offset < 0 ? offset * leftStepNm : offset * rightStepNm);
+  const reflectance = peak.reflectance - 0.25 * (left.reflectance - right.reflectance) * offset;
+  return { wavelengthNm, reflectance: clampUnitInterval(reflectance) };
+};
+
+const interpolateThresholdWavelength = (
+  innerPoint: LayerStackPointResult,
+  outerPoint: LayerStackPointResult,
+  thresholdReflectance: number,
+): number => {
+  const reflectanceDelta = outerPoint.reflectance - innerPoint.reflectance;
+  if (Math.abs(reflectanceDelta) < 1e-12) return innerPoint.wavelengthNm;
+  const fraction = (thresholdReflectance - innerPoint.reflectance) / reflectanceDelta;
+  return innerPoint.wavelengthNm + fraction * (outerPoint.wavelengthNm - innerPoint.wavelengthNm);
+};
+
+/** Finds interpolated half-maximum band edges around the spectral peak. */
 const findHalfMaximumBand = (spectrum: LayerStackPointResult[], peakIndex: number, halfPeakReflectance: number): [number, number] | null => {
   let lowerIndex = peakIndex;
   let upperIndex = peakIndex;
   while (lowerIndex > 0 && spectrum[lowerIndex - 1].reflectance >= halfPeakReflectance) lowerIndex -= 1;
   while (upperIndex < spectrum.length - 1 && spectrum[upperIndex + 1].reflectance >= halfPeakReflectance) upperIndex += 1;
-  if (lowerIndex === upperIndex) return null;
-  return [spectrum[lowerIndex].wavelengthNm, spectrum[upperIndex].wavelengthNm];
+  const lowerEdge =
+    lowerIndex === 0
+      ? spectrum[lowerIndex].wavelengthNm
+      : interpolateThresholdWavelength(spectrum[lowerIndex], spectrum[lowerIndex - 1], halfPeakReflectance);
+  const upperEdge =
+    upperIndex === spectrum.length - 1
+      ? spectrum[upperIndex].wavelengthNm
+      : interpolateThresholdWavelength(spectrum[upperIndex], spectrum[upperIndex + 1], halfPeakReflectance);
+
+  return upperEdge > lowerEdge ? [lowerEdge, upperEdge] : null;
 };
 
 /** Derives peak, center, bandwidth, and energy-conservation metrics from the spectrum. */
 const calculateMetrics = (spectrum: LayerStackPointResult[]) => {
   const peakIndex = spectrum.reduce((bestIndex, point, index, points) => (point.reflectance > points[bestIndex].reflectance ? index : bestIndex), 0);
-  const peak = spectrum[peakIndex];
+  const peak = interpolatePeak(spectrum, peakIndex);
   const halfPeakReflectance = peak.reflectance / 2;
   const halfMaximumBand = findHalfMaximumBand(spectrum, peakIndex, halfPeakReflectance);
   const maxEnergyConservationError = spectrum.reduce((worstError, point) => Math.max(worstError, Math.abs(point.reflectance + point.transmission - 1)), 0);
