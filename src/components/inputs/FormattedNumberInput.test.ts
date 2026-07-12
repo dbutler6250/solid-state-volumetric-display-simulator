@@ -44,7 +44,11 @@ describe('FormattedNumberInput state', () => {
   it('parses precise finite values without rounding and rejects invalid values', () => {
     expect(parseFiniteNumberDraft('103.25')).toBe(103.25);
     expect(parseFiniteNumberDraft('105.625')).toBe(105.625);
+    expect(parseFiniteNumberDraft('+1.25e2')).toBe(125);
     expect(parseFiniteNumberDraft('not-a-number')).toBeUndefined();
+    expect(parseFiniteNumberDraft('   ')).toBeUndefined();
+    expect(parseFiniteNumberDraft('0x10')).toBeUndefined();
+    expect(parseFiniteNumberDraft('0b10')).toBeUndefined();
   });
 
   it('commits only complete integers and preserves existing blur rounding and bounds', () => {

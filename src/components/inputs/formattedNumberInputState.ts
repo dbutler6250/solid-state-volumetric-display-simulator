@@ -26,6 +26,10 @@ export const parseFiniteNumberDraft = (draft: string): number | undefined => {
     return undefined;
   }
 
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(draft)) {
+    return undefined;
+  }
+
   const parsed = Number(draft);
   return Number.isFinite(parsed) ? parsed : undefined;
 };

@@ -264,6 +264,7 @@ export function QuarterWaveStackForm({
                 thicknessMode: 'manual',
                 highIndexThicknessNm,
               })}
+              resetKey={externalResetKey}
               aria-invalid={isInvalid('highIndexThicknessNm')}
             />
             <FieldError message={getIssueForField(validationIssues, 'highIndexThicknessNm')} />
@@ -281,6 +282,7 @@ export function QuarterWaveStackForm({
                 thicknessMode: 'manual',
                 lowIndexThicknessNm,
               })}
+              resetKey={externalResetKey}
               aria-invalid={isInvalid('lowIndexThicknessNm')}
             />
             <FieldError message={getIssueForField(validationIssues, 'lowIndexThicknessNm')} />

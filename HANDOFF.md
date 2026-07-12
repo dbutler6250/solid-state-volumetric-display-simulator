@@ -6,6 +6,7 @@
 - Added explicit integer parsing, blur normalization/bounds, numeric keyboard hints, and intentional reset keys.
 - Removed the form-wide `draftValues` synchronization so unrelated parent updates cannot overwrite active drafts.
 - Slider, preset, centering, and import updates intentionally reset linked drafts while committed values remain parent-owned.
+- PR #40 review fixes restrict parsing to decimal/exponent syntax and apply import resets to manual thickness drafts.
 
 ## Verification
 
