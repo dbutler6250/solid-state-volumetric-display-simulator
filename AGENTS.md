@@ -21,6 +21,9 @@
 - Use a branch name that includes the issue number and short slug, for example `issue-12-angle-heatmaps`.
 - Keep the diff focused on the issue. Do not include unrelated cleanup.
 - Reference the issue in the PR body with a closing keyword such as `Closes #12` only when the PR fully satisfies the issue.
+- Before branch cleanup or wrapping up a merged PR, fetch with `--prune` so stale remote-tracking refs do not block local cleanup.
+- If this repo uses a separate worktree for `main`, use that worktree for `main` pulls and keep the feature worktree on its feature branch or detached at the merged commit.
+- If git reports a stale rebase in a worktree, clear the leftover rebase metadata only after confirming no active rebase is actually in progress.
 - After a PR is merged or an issue is otherwise completed, update `MILESTONES.md` if the work represents durable completed project history.
 - Keep `HANDOFF.md` current after each task with status, verification commands, and remaining follow-up.
 

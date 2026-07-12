@@ -2,16 +2,15 @@
 
 ## Latest Task
 
-- Moved the derived layer thickness values out of the material rows and into the H/L optical-thickness rows in the stack definition summary.
-- Removed the fractional-`λ` suffix from the optical-thickness display in that summary.
-- Branch: `issue-7-stack-definition-cleanup`.
+- Merged PR `#36`, pruned stale remote-tracking refs, and cleaned up the merged feature branch.
+- Updated the workflow notes to reflect the separate `main` worktree and the `fetch --prune` / stale-rebase cleanup steps we actually use.
+- Branch: `main`.
 
 ## Verification
 
-- `npm.cmd run test` - passed.
-- `npm.cmd run lint` - passed.
-- `npm.cmd run build` - passed.
+- `git fetch --prune origin` - passed.
+- `git pull --ff-only origin main` - passed in the `main` worktree.
 
 ## Notes
 
-- Scope stayed within the stack definition section.
+- `main` is current; the feature worktree is detached at the merged commit and the remote feature branch has been deleted.
