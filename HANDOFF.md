@@ -2,11 +2,11 @@
 
 ## Latest Task
 
-- Reorganized simulator outputs on branch `codex/output-tabs-layout` into accessible Spectrum, Parameter Sweep, and Stack Definition tabs.
-- Moved global setup actions above the tabs and colocated wavelength and parameter sweep controls with their charts.
-- Widened the desktop workspace and added responsive tab/control layouts without changing solver or import/export behavior.
-- Simplified the thickness-mode section and standardized thickness displays to one decimal place.
-- Preserved exact user-typed thickness values while keeping inactive thickness displays concise.
+- Added a reusable `FormattedNumberInput` abstraction on branch `codex/formatted-number-input`.
+- Manual high- and low-index thickness fields now use explicit focused draft state instead of form-wide numeric-equality synchronization.
+- Inactive thicknesses remain one-decimal displays while focused fields reveal and preserve the exact parent value.
+- Thickness inputs intentionally accept fractional values with `step="any"`; solver, validation, and import/export behavior are unchanged.
+- Focused thickness controls retain incomplete decimal and exponent drafts instead of allowing native number-input sanitization.
 
 ## Verification
 
@@ -16,12 +16,13 @@
 
 ## Browser Verification
 
-- Verified tab selection, Arrow/Home/End navigation, completed sweep persistence, and zero console errors.
-- Verified no page-level horizontal overflow at approximately 1440 px, 1024 px, 900 px, 768 px, and 390 px.
-- Verified derived, user-typed, and acoustic thickness values render with concise one-decimal formatting.
-- Verified a precise manual value remains exact during editing and continues to drive the spectrum.
+- Verified derived, user-typed, and acoustic thickness values render concisely.
+- Verified `105.6250` remains intact while editing, blurs to `105.6`, and refocuses as exact `105.625`.
+- Automated coverage verifies raw drafts such as `103.`, `1e`, and `1e-` remain uncommitted until complete.
+- Verified mode switching preserves the exact manual value, fractional edits update the spectrum, and no console errors occur.
+- Verified no page-level horizontal overflow at a 390 px mobile viewport.
 
 ## Notes
 
-- The narrow-screen tab bar scrolls horizontally while the page remains within the viewport.
-- The single-column workspace breakpoint is 1160 px so intermediate tablet widths do not overflow.
+- Active drafts win over external prop updates until blur; mode changes unmount the manual inputs and explicitly reset drafts.
+- Precise manual import behavior is covered by automated tests because the in-app browser API does not expose file upload.
