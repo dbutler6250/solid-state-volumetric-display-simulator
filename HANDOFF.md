@@ -2,15 +2,14 @@
 
 ## Latest Task
 
-- Merged PR `#36`, pruned stale remote-tracking refs, and cleaned up the merged feature branch.
-- Updated the workflow notes to reflect the separate `main` worktree and the `fetch --prune` / stale-rebase cleanup steps we actually use.
-- Branch: `main`.
+- Made the local UI startup note more explicit so new tasks should launch or verify the Vite dev server, then open the app in `@Browser`.
+- Branch: `codex/clarify-dev-browser`.
 
 ## Verification
 
-- `git fetch --prune origin` - passed.
-- `git pull --ff-only origin main` - passed in the `main` worktree.
+- Not run; documentation-only change.
 
 ## Notes
 
-- `main` is current; the feature worktree is detached at the merged commit and the remote feature branch has been deleted.
+- `AGENTS.md` now contains a two-step startup checklist for local UI work.
+- `main` is tracked from the separate `Simulation Tool-main` worktree.
