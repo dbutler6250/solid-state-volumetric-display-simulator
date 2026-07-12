@@ -21,6 +21,10 @@ Keep this section as the historical record. Do not create issues for these items
 - Documentation cleanup
 - Custom refractive index values
 - Thickness values derived from design wavelength
+- Thickness mode selection with derived, manual, and acoustic states
+- Thickness-mode UI refinement and stack-definition status treatment
+- Manual thickness solver coverage
+- Manual thickness peak shift coverage
 - Plot centering around bandwidth
 - FWHM / peak reflectance corrections
 - Fast sweep range slider
