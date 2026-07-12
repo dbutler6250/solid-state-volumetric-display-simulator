@@ -18,7 +18,7 @@ const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
   ),
 });
 
-const getResolvedThicknesses = (inputs: QuarterWaveStackInputs) => {
+export const getResolvedThicknesses = (inputs: QuarterWaveStackInputs) => {
   if (inputs.thicknessMode === 'manual') {
     return {
       highIndexThicknessNm: inputs.highIndexThicknessNm ?? 0,

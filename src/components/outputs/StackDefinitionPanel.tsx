@@ -1,5 +1,6 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
-import { formatRefractiveIndex, getRefractiveIndexReal } from '../../simulation/materials/material';
+import { formatRefractiveIndex } from '../../simulation/materials/material';
+import { getResolvedThicknesses } from '../../simulation/structures/quarterWaveStack';
 
 type StackDefinitionPanelProps = {
   inputs: QuarterWaveStackInputs;
@@ -25,34 +26,28 @@ const formatCount = (value: number): string => (Number.isFinite(value) ? `${Math
 const formatMaterialLabel = (name: string, refractiveIndex: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex']): string =>
   `${name}${name === 'Custom' ? ' material' : ''} (${formatRefractiveIndex(refractiveIndex)})`;
 
-const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): DiagramSegment[] => [
+const createPeriodSegments = (
+  highIndexThicknessNm: number,
+  lowIndexThicknessNm: number,
+  period: number,
+): DiagramSegment[] => [
   {
     key: `h-${period}`,
     label: 'H',
-    detail: `${formatNumber(
-      inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
-      1,
-    )} nm`,
+    detail: `${formatNumber(highIndexThicknessNm, 1)} nm`,
     kind: 'high',
   },
   {
     key: `l-${period}`,
     label: 'L',
-    detail: `${formatNumber(
-      inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
-      1,
-    )} nm`,
+    detail: `${formatNumber(lowIndexThicknessNm, 1)} nm`,
     kind: 'low',
   },
 ];
 
-const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
-  highIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
-  lowIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
-});
-
 /** Builds a compact layer sequence for the stack preview. */
 const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
+  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
   const incidentMedium: DiagramSegment = {
     key: 'incident',
     label: 'Air',
@@ -70,7 +65,7 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
     return [
       incidentMedium,
       ...Array.from({ length: inputs.periodCount }, (_, index) =>
-        createPeriodSegments(inputs, index + 1),
+        createPeriodSegments(highIndexThicknessNm, lowIndexThicknessNm, index + 1),
       ).flat(),
       exitMedium,
     ];
@@ -79,7 +74,7 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
   return [
     incidentMedium,
     ...Array.from({ length: LEADING_PERIODS }, (_, index) =>
-      createPeriodSegments(inputs, index + 1),
+      createPeriodSegments(highIndexThicknessNm, lowIndexThicknessNm, index + 1),
     ).flat(),
     {
       key: 'ellipsis',
@@ -88,7 +83,11 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
       kind: 'ellipsis',
     },
     ...Array.from({ length: TRAILING_PERIODS }, (_, index) =>
-      createPeriodSegments(inputs, inputs.periodCount - TRAILING_PERIODS + index + 1),
+      createPeriodSegments(
+        highIndexThicknessNm,
+        lowIndexThicknessNm,
+        inputs.periodCount - TRAILING_PERIODS + index + 1,
+      ),
     ).flat(),
     exitMedium,
   ];
@@ -97,11 +96,7 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
 /** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
   const thicknessMode = inputs.thicknessMode ?? 'derived';
-  const derivedThicknesses = getDerivedThicknesses(inputs);
-  const highIndexThicknessNm =
-    thicknessMode === 'manual' ? inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm : derivedThicknesses.highIndexThicknessNm;
-  const lowIndexThicknessNm =
-    thicknessMode === 'manual' ? inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm : derivedThicknesses.lowIndexThicknessNm;
+  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
   const totalLayerCount = Number.isFinite(inputs.periodCount)
     ? Math.max(0, Math.round(inputs.periodCount) * 2)
     : Number.NaN;
@@ -148,8 +143,8 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
             inputs.lowIndexMaterial.refractiveIndex,
           )}
         />
-        <StackSummaryItem label="H optical thickness" value={`d=${formatNumber(highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm, 1)} nm`} />
-        <StackSummaryItem label="L optical thickness" value={`d=${formatNumber(lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm, 1)} nm`} />
+        <StackSummaryItem label="H optical thickness" value={`d=${formatNumber(highIndexThicknessNm, 1)} nm`} />
+        <StackSummaryItem label="L optical thickness" value={`d=${formatNumber(lowIndexThicknessNm, 1)} nm`} />
       </div>
 
       {isValid ? (
