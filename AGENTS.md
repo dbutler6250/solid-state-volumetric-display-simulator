@@ -39,6 +39,10 @@ Refresh includes: current status, next steps, test results, artifacts, environme
     - Test: `npm.cmd run test`
     - Lint: `npm.cmd run lint`
     - Build: `npm.cmd run build`
+- Always open the ChatGPT browser to `http://127.0.0.1:5173/` when starting a new task in this project
+    - This is the local vite dev server
+    - Powershell commands to start the dev server are in `README.md`
+    - This dev server should always be started when working in this project
 - Be mindful of token usage and act efficiently
     - Carry out normal tasks on your own, only notifying when necessary
     - Do not read full files unless absolutely necessary
