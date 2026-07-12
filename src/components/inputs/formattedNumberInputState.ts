@@ -52,6 +52,27 @@ export const normalizeCommittedNumber = (
   return typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
 };
 
+const getDecimalPlaces = (value: number): number => {
+  const [coefficient, exponentText] = value.toString().toLowerCase().split('e');
+  const decimalPlaces = coefficient.split('.')[1]?.length ?? 0;
+  const exponent = Number(exponentText ?? 0);
+  return Math.max(0, decimalPlaces - exponent);
+};
+
+/** Steps a committed value without introducing binary floating-point display artifacts. */
+export const stepCommittedNumber = (
+  value: number,
+  direction: -1 | 1,
+  step: number,
+  min?: number,
+  max?: number,
+): number => {
+  const decimalPlaces = Math.min(12, Math.max(getDecimalPlaces(value), getDecimalPlaces(step)));
+  const scale = 10 ** decimalPlaces;
+  const stepped = Math.round((value + direction * step) * scale) / scale;
+  return normalizeCommittedNumber(stepped, min, max);
+};
+
 /** Tracks focus explicitly so external prop updates cannot replace an active draft. */
 export function formattedNumberInputReducer(
   state: FormattedNumberInputState,

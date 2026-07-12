@@ -8,6 +8,7 @@ import {
   normalizeCommittedNumber,
   parseFiniteNumberDraft,
   parseFiniteIntegerDraft,
+  stepCommittedNumber,
   type FormattedNumberInputState,
 } from './formattedNumberInputState';
 
@@ -89,5 +90,27 @@ describe('FormattedNumberInput state', () => {
     }));
 
     expect(markup).toContain('inputMode="numeric"');
+  });
+
+  it('renders accessible compact steppers when enabled', () => {
+    const markup = renderToStaticMarkup(createElement(FormattedNumberInput, {
+      value: 12,
+      onValueChange: () => undefined,
+      formatInactive: inactiveFormat,
+      showStepper: true,
+      stepperLabel: 'periods',
+      stepperStep: 1,
+    }));
+
+    expect(markup).toContain('aria-label="Decrease periods"');
+    expect(markup).toContain('aria-label="Increase periods"');
+    expect(markup).toContain('class="formatted-number-input"');
+  });
+
+  it('steps committed values precisely and respects bounds', () => {
+    expect(stepCommittedNumber(2.4, 1, 0.001)).toBe(2.401);
+    expect(stepCommittedNumber(2.401, -1, 0.001)).toBe(2.4);
+    expect(stepCommittedNumber(0, -1, 0.1, 0)).toBe(0);
+    expect(stepCommittedNumber(89.5, 1, 1, 0, 89.9)).toBe(89.9);
   });
 });

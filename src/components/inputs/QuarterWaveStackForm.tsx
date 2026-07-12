@@ -210,6 +210,8 @@ export function QuarterWaveStackForm({
                 formatInactive={formatMaterialNumber}
                 onValueChange={(value) => updateComponent('real', value)}
                 resetKey={externalResetKey}
+                showStepper
+                stepperLabel={`${label} real refractive index`}
                 aria-label={`${label} real refractive index`}
               />
             </label>
@@ -222,6 +224,8 @@ export function QuarterWaveStackForm({
                 formatInactive={formatMaterialNumber}
                 onValueChange={(value) => updateComponent('imag', value)}
                 resetKey={externalResetKey}
+                showStepper
+                stepperLabel={`${label} extinction coefficient`}
                 aria-label={`${label} extinction coefficient`}
               />
             </label>
@@ -265,6 +269,9 @@ export function QuarterWaveStackForm({
                 highIndexThicknessNm,
               })}
               resetKey={externalResetKey}
+              showStepper
+              stepperLabel="high-index thickness"
+              stepperStep={0.1}
               aria-invalid={isInvalid('highIndexThicknessNm')}
             />
             <FieldError message={getIssueForField(validationIssues, 'highIndexThicknessNm')} />
@@ -283,6 +290,9 @@ export function QuarterWaveStackForm({
                 lowIndexThicknessNm,
               })}
               resetKey={externalResetKey}
+              showStepper
+              stepperLabel="low-index thickness"
+              stepperStep={0.1}
               aria-invalid={isInvalid('lowIndexThicknessNm')}
             />
             <FieldError message={getIssueForField(validationIssues, 'lowIndexThicknessNm')} />
@@ -323,6 +333,8 @@ export function QuarterWaveStackForm({
           formatInactive={formatNumericInput}
           onValueChange={(periodCount) => onChange({ ...inputs, periodCount })}
           resetKey={externalResetKey}
+          showStepper
+          stepperLabel="periods"
           aria-invalid={isInvalid('periodCount')}
         />
         <FieldError message={getIssueForField(validationIssues, 'periodCount')} />
@@ -336,6 +348,9 @@ export function QuarterWaveStackForm({
           formatInactive={formatNumericInput}
           onValueChange={(value) => onChange(applyDesignWavelength(inputs, value))}
           resetKey={externalResetKey}
+          showStepper
+          stepperLabel="design wavelength"
+          stepperStep={1}
           aria-invalid={isInvalid('designWavelengthNm')}
         />
         <FieldError message={getIssueForField(validationIssues, 'designWavelengthNm')} />
@@ -350,6 +365,9 @@ export function QuarterWaveStackForm({
           formatInactive={formatNumericInput}
           onValueChange={(incidentAngleDegrees) => onChange({ ...inputs, incidentAngleDegrees })}
           resetKey={externalResetKey}
+          showStepper
+          stepperLabel="incident angle"
+          stepperStep={1}
           aria-invalid={isInvalid('incidentAngleDegrees')}
         />
         <FieldError message={getIssueForField(validationIssues, 'incidentAngleDegrees')} />
@@ -394,6 +412,8 @@ export function QuarterWaveStackForm({
           formatInactive={formatWavelengthInput}
           onValueChange={(wavelengthStartNm) => onChange({ ...inputs, wavelengthStartNm })}
           resetKey={`${externalResetKey}:${sweepResetKeys.start}`}
+          showStepper
+          stepperLabel="start wavelength"
           aria-invalid={isInvalid('wavelengthStartNm')}
         />
         <input
@@ -424,6 +444,8 @@ export function QuarterWaveStackForm({
           formatInactive={formatWavelengthInput}
           onValueChange={(wavelengthEndNm) => onChange({ ...inputs, wavelengthEndNm })}
           resetKey={`${externalResetKey}:${sweepResetKeys.end}`}
+          showStepper
+          stepperLabel="end wavelength"
           aria-invalid={isInvalid('wavelengthEndNm')}
         />
         <input
@@ -455,6 +477,8 @@ export function QuarterWaveStackForm({
             formatInactive={formatSweepRangeInput}
             onValueChange={updateSweepRange}
             resetKey={`${externalResetKey}:${sweepResetKeys.range}`}
+            showStepper
+            stepperLabel="sweep range"
             aria-label="Sweep range in nanometers"
           />
           <span>Centered on the current start/end midpoint</span>
@@ -502,6 +526,8 @@ export function QuarterWaveStackForm({
           formatInactive={formatNumericInput}
           onValueChange={(wavelengthPointCount) => onChange({ ...inputs, wavelengthPointCount })}
           resetKey={externalResetKey}
+          showStepper
+          stepperLabel="sweep points"
           aria-invalid={isInvalid('wavelengthPointCount')}
         />
         <FieldError message={getIssueForField(validationIssues, 'wavelengthPointCount')} />
