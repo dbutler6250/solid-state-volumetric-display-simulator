@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
@@ -42,11 +42,14 @@ const DEFAULT_INCIDENT_ANGLE_SWEEP = {
 } as const;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
+const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition'] as const;
+type OutputTab = (typeof OUTPUT_TABS)[number];
 
 /** Coordinates inputs, solver execution, exports, imports, and chart controls. */
 export function SimulationShell() {
   const [inputs, setInputs] = useState(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
   const [showTransmission, setShowTransmission] = useState(false);
+  const [activeTab, setActiveTab] = useState<OutputTab>('spectrum');
   const [xRange, setXRange] = useState<[number, number] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [parameterSweep, setParameterSweep] =
@@ -56,6 +59,11 @@ export function SimulationShell() {
   );
   const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const tabRefs = useRef<Record<OutputTab, HTMLButtonElement | null>>({
+    spectrum: null,
+    'parameter-sweep': null,
+    'stack-definition': null,
+  });
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
   const parameterSweepWarning =
     parameterSweep.parameter === 'incidentAngleDegrees'
@@ -223,6 +231,25 @@ export function SimulationShell() {
     }
   };
 
+  /** Selects and focuses tabs using the standard ARIA keyboard pattern. */
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>, tab: OutputTab) => {
+    const currentIndex = OUTPUT_TABS.indexOf(tab);
+    let nextIndex: number | null = null;
+
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % OUTPUT_TABS.length;
+    if (event.key === 'ArrowLeft') {
+      nextIndex = (currentIndex - 1 + OUTPUT_TABS.length) % OUTPUT_TABS.length;
+    }
+    if (event.key === 'Home') nextIndex = 0;
+    if (event.key === 'End') nextIndex = OUTPUT_TABS.length - 1;
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextTab = OUTPUT_TABS[nextIndex];
+    setActiveTab(nextTab);
+    tabRefs.current[nextTab]?.focus();
+  };
+
   return (
     <main className="app-shell">
       <header className="app-header">
@@ -240,8 +267,92 @@ export function SimulationShell() {
             validationIssues={validationIssues}
             onChange={setInputs}
           />
-          <section className="parameter-sweep-panel" aria-label="Parameter sweep controls">
-            <h2>Parameter Sweep</h2>
+        </aside>
+
+        <section className="output-area" aria-label="Simulation outputs">
+          <div className="global-toolbar" role="group" aria-label="Setup actions">
+            <button type="button" onClick={openImportPicker}>
+              Import Setup
+            </button>
+            <button type="button" onClick={exportSetup} disabled={validationIssues.length > 0}>
+              Export Setup
+            </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={importSetup}
+              hidden
+            />
+          </div>
+          {importError ? <p className="chart-toolbar-message" role="alert">{importError}</p> : null}
+          <div className="output-tabs" role="tablist" aria-label="Simulation output views">
+            {OUTPUT_TABS.map((tab) => {
+              const label =
+                tab === 'spectrum'
+                  ? 'Spectrum'
+                  : tab === 'parameter-sweep'
+                    ? 'Parameter Sweep'
+                    : 'Stack Definition';
+              return (
+                <button
+                  key={tab}
+                  ref={(node) => {
+                    tabRefs.current[tab] = node;
+                  }}
+                  id={`${tab}-tab`}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab}
+                  aria-controls={`${tab}-panel`}
+                  tabIndex={activeTab === tab ? 0 : -1}
+                  onClick={() => setActiveTab(tab)}
+                  onKeyDown={(event) => handleTabKeyDown(event, tab)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <section
+            className="chart-panel"
+            id="spectrum-panel"
+            role="tabpanel"
+            aria-labelledby="spectrum-tab"
+            hidden={activeTab !== 'spectrum'}
+          >
+            <div className="chart-heading">
+              <h2>Spectrum</h2>
+              <div className="chart-toolbar">
+                <button type="button" className="action-button" onClick={exportCsv} disabled={!result}>
+                  Export Spectrum CSV
+                </button>
+                <label className="toggle-control">
+                  <input type="checkbox" checked={showTransmission} onChange={(event) => setShowTransmission(event.target.checked)} />
+                  <span>Transmission</span>
+                </label>
+              </div>
+            </div>
+            <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
+            <MetricsPanel result={result} />
+            <section className="tab-controls" aria-label="Wavelength sweep controls">
+              <QuarterWaveStackForm
+                inputs={inputs}
+                validationIssues={validationIssues}
+                onChange={setInputs}
+                section="sweep"
+              />
+            </section>
+          </section>
+
+          <section className="chart-panel" id="parameter-sweep-panel" role="tabpanel" aria-labelledby="parameter-sweep-tab" hidden={activeTab !== 'parameter-sweep'}>
+            <div className="chart-heading">
+              <h2>Parameter Sweep</h2>
+              <button type="button" className="action-button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>Export Sweep CSV</button>
+            </div>
+            <ParameterSweepChart result={parameterSweepResult} />
+            <section className="parameter-sweep-panel tab-controls" aria-label="Parameter sweep controls">
             <label className="field">
               <span>Parameter</span>
               <select
@@ -331,75 +442,11 @@ export function SimulationShell() {
               </p>
             ) : null}
           </section>
-        </aside>
-
-        <section className="chart-panel" aria-label="Simulation outputs">
-          <div className="chart-heading">
-            <h2>Spectrum</h2>
-            <div className="chart-toolbar">
-              <div className="chart-button-group" role="group" aria-label="Chart Controls">
-                {/*
-                <button
-                  type="button"
-                  onClick={centerOnBandwidth}
-                  disabled={!result || result.bandwidthNm <= 0}
-                >
-                  Center on Bandwidth
-                </button>
-                <button type="button" onClick={resetView} disabled={!xRange}>
-                  Reset View
-                </button>
-                */}
-                <button type="button" onClick={exportCsv} disabled={!result}>
-                  Export Spectrum CSV
-                </button>
-                <button type="button" onClick={openImportPicker}>
-                  Import Setup
-                </button>
-                <button
-                  type="button"
-                  onClick={exportSetup}
-                  disabled={validationIssues.length > 0}
-                >
-                  Export Setup
-                </button>
-                <input
-                  ref={importInputRef}
-                  type="file"
-                  accept="application/json,.json"
-                  onChange={importSetup}
-                  hidden
-                />
-              </div>
-              <label className="toggle-control">
-                <input
-                  type="checkbox"
-                  checked={showTransmission}
-                  onChange={(event) => setShowTransmission(event.target.checked)}
-                />
-                <span>Transmission</span>
-              </label>
-            </div>
-          </div>
-          {importError ? (
-            <p className="chart-toolbar-message" role="alert">
-              {importError}
-            </p>
-          ) : validationIssues.length > 0 ? (
-            <p className="chart-toolbar-message">Fix highlighted inputs before exporting setup.</p>
-          ) : null}
-          <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
-          <section className="sweep-chart-section" aria-label="Parameter sweep results">
-            <div className="sweep-chart-heading">
-              <h2>Parameter Sweep Results</h2>
-              <button type="button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>
-                Export Sweep CSV
-              </button>
-            </div>
-            <ParameterSweepChart result={parameterSweepResult} />
           </section>
-          <MetricsPanel result={result} />
-          <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />
+
+          <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
+            <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />
+          </section>
         </section>
       </section>
 

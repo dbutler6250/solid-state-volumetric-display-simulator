@@ -8,6 +8,7 @@ type QuarterWaveStackFormProps = {
   inputs: QuarterWaveStackInputs;
   validationIssues: ValidationIssue[];
   onChange: (inputs: QuarterWaveStackInputs) => void;
+  section?: 'global' | 'sweep';
 };
 
 const toNumber = (value: string): number => Number(value);
@@ -169,6 +170,7 @@ export function QuarterWaveStackForm({
   inputs,
   validationIssues,
   onChange,
+  section = 'global',
 }: QuarterWaveStackFormProps) {
   const [draftValues, setDraftValues] = useState<Record<string, string>>({});
 
@@ -487,7 +489,9 @@ export function QuarterWaveStackForm({
   };
 
   return (
-    <form className="form-grid">
+    <form className={`form-grid form-grid-${section}`}>
+      {section === 'global' ? (
+        <>
       {renderMaterialField('highIndexMaterial', 'High-index material')}
       {renderMaterialField('lowIndexMaterial', 'Low-index material')}
 
@@ -618,8 +622,10 @@ export function QuarterWaveStackForm({
           <option value="TM">TM</option>
         </select>
       </label>
-
-      <div className="form-section-title sweep-section-title">
+        </>
+      ) : (
+        <>
+      <div className="sweep-section-title">
         <span>Wavelength Sweep</span>
         <button
           type="button"
@@ -734,6 +740,8 @@ export function QuarterWaveStackForm({
         />
         <FieldError message={getIssueForField(validationIssues, 'wavelengthPointCount')} />
       </label>
+        </>
+      )}
     </form>
   );
 }
