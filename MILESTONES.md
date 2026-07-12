@@ -35,6 +35,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Parameter sweep analysis
 - Lazy-loaded Plotly chart chunk
 - Accessible output tabs and responsive simulator workspace layout
+- Reusable precision-preserving formatted numeric input for manual layer thicknesses
 
 ## Notes
 

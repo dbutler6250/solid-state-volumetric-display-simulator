@@ -2,7 +2,7 @@
 
 ## Latest Task
 
-- Added a reusable `FormattedNumberInput` abstraction on branch `codex/formatted-number-input`.
+- Merged PR #39 with a reusable `FormattedNumberInput` abstraction.
 - Manual high- and low-index thickness fields now use explicit focused draft state instead of form-wide numeric-equality synchronization.
 - Inactive thicknesses remain one-decimal displays while focused fields reveal and preserve the exact parent value.
 - Thickness inputs intentionally accept fractional values with `step="any"`; solver, validation, and import/export behavior are unchanged.
@@ -26,3 +26,4 @@
 
 - Active drafts win over external prop updates until blur; mode changes unmount the manual inputs and explicitly reset drafts.
 - Precise manual import behavior is covered by automated tests because the in-app browser API does not expose file upload.
+- Follow-up: migrate suitable decimal, integer, and slider-linked fields to the abstraction in a separate focused PR.
