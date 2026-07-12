@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { exportStackConfigJson } from './exportStackConfigJson';
 import { importStackConfigJson } from './importStackConfigJson';
 import type { Material } from '../simulation/materials/material';
-import type { QuarterWaveStackInputs } from '../types/simulation';
+import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
   id,
@@ -22,15 +22,23 @@ const inputs: QuarterWaveStackInputs = {
   wavelengthPointCount: 401,
 };
 
+const parameterSweep: ParameterSweepSettings = {
+  parameter: 'periodCount',
+  start: 2,
+  end: 20,
+  pointCount: 10,
+};
+
 // Covers the preferred schema and the retained legacy Bragg aliases.
 describe('importStackConfigJson', () => {
   it('round-trips a valid exported JSON setup', () => {
-    const json = exportStackConfigJson(inputs);
+    const json = exportStackConfigJson(inputs, parameterSweep);
     const imported = importStackConfigJson(json);
 
     expect(imported).toEqual({
       ok: true,
       inputs,
+      parameterSweep,
     });
   });
 
@@ -150,6 +158,26 @@ describe('importStackConfigJson', () => {
     expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
       ok: true,
       inputs,
+    });
+  });
+
+  it('rejects invalid parameter sweep setup', () => {
+    const payload = {
+      schema: 'ssvds-stack-config-v1',
+      app: 'solid-state-volumetric-display-simulator',
+      structureType: 'quarter-wave-stack',
+      inputs,
+      parameterSweep: {
+        parameter: 'periodCount',
+        start: 10,
+        end: 10,
+        pointCount: 5,
+      },
+    };
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: false,
+      message: 'Parameter sweep end must be greater than start.',
     });
   });
 });

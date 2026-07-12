@@ -6,7 +6,6 @@ import type { Polarization, QuarterWaveStackInputs } from '../../types/simulatio
 type QuarterWaveStackFormProps = {
   inputs: QuarterWaveStackInputs;
   validationIssues: ValidationIssue[];
-  centerWavelengthNm?: number;
   onChange: (inputs: QuarterWaveStackInputs) => void;
 };
 
@@ -96,18 +95,38 @@ const applyCenteredSweepRange = (
   };
 };
 
+/** Updates the design wavelength and keeps the analysis sweep centered on it. */
+const applyDesignWavelength = (
+  inputs: QuarterWaveStackInputs,
+  designWavelengthNm: number,
+): QuarterWaveStackInputs =>
+  applyCenteredSweepRange(
+    {
+      ...inputs,
+      designWavelengthNm,
+    },
+    designWavelengthNm,
+    getSweepRange(inputs),
+  );
+
 export function QuarterWaveStackForm({
   inputs,
   validationIssues,
-  centerWavelengthNm,
   onChange,
 }: QuarterWaveStackFormProps) {
   const updateNumberField =
     (field: NumericField) =>
     (event: ChangeEvent<HTMLInputElement>) => {
+      const value = toNumber(event.target.value);
+
+      if (field === 'designWavelengthNm') {
+        onChange(applyDesignWavelength(inputs, value));
+        return;
+      }
+
       onChange({
         ...inputs,
-        [field]: toNumber(event.target.value),
+        [field]: value,
       });
     };
 
@@ -116,10 +135,16 @@ export function QuarterWaveStackForm({
     () => {
       const value = inputs[field] ?? min;
       const clampedValue = clampNumber(value, min, max);
+      const nextValue = integer ? Math.round(clampedValue) : clampedValue;
+
+      if (field === 'designWavelengthNm') {
+        onChange(applyDesignWavelength(inputs, nextValue));
+        return;
+      }
 
       onChange({
         ...inputs,
-        [field]: integer ? Math.round(clampedValue) : clampedValue,
+        [field]: nextValue,
       });
     };
 
@@ -162,11 +187,11 @@ export function QuarterWaveStackForm({
     onChange(applySweepRange(inputs, normalizeSweepRange(rangeNm)));
   };
   const centerSweepOnDesignLambda = () => {
-    if (centerWavelengthNm === undefined || !Number.isFinite(centerWavelengthNm)) {
+    if (!Number.isFinite(inputs.designWavelengthNm)) {
       return;
     }
 
-    onChange(applyCenteredSweepRange(inputs, centerWavelengthNm, getSweepRange(inputs)));
+    onChange(applyCenteredSweepRange(inputs, inputs.designWavelengthNm, getSweepRange(inputs)));
   };
   const isInvalid = (field: keyof QuarterWaveStackInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;
@@ -279,7 +304,7 @@ export function QuarterWaveStackForm({
           type="button"
           className="sweep-center-button"
           onClick={centerSweepOnDesignLambda}
-          disabled={!Number.isFinite(centerWavelengthNm)}
+          disabled={!Number.isFinite(inputs.designWavelengthNm)}
         >
           Center on Design λ
         </button>

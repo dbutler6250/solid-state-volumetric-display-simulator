@@ -139,6 +139,12 @@ label {
   outline: none;
 }
 
+.field input[readonly] {
+  color: #aebdcc;
+  background: #151d27;
+  cursor: default;
+}
+
 .field-error {
   color: #f0aaaa;
   font-size: 0.78rem;
@@ -490,6 +496,98 @@ label {
   height: 26rem;
 }
 
+.sweep-chart-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
+.sweep-chart-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 1rem;
+}
+
+.sweep-chart-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.sweep-chart-heading button {
+  min-height: 2.2rem;
+  border: 1px solid #3a495b;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  color: #e5edf5;
+  background: #16202b;
+  cursor: pointer;
+}
+
+.sweep-chart-heading button:hover:not(:disabled) {
+  border-color: #5aa7c8;
+  background: #1b2734;
+}
+
+.sweep-chart-heading button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.parameter-sweep-chart-frame {
+  position: relative;
+  border: 1px dashed #46586d;
+  border-radius: 8px;
+  background: #101720;
+  overflow: hidden;
+}
+
+.parameter-sweep-chart {
+  display: block;
+  width: 100%;
+  min-height: 20rem;
+}
+
+.parameter-sweep-chart,
+.parameter-sweep-chart .plot-container,
+.parameter-sweep-chart .svg-container {
+  height: 20rem;
+}
+
+.parameter-sweep-legend {
+  position: absolute;
+  z-index: 2;
+  top: 0.85rem;
+  display: flex;
+  gap: 0.75rem;
+  color: #dce7f2;
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+
+.parameter-sweep-legend-left {
+  left: 4rem;
+}
+
+.parameter-sweep-legend-right {
+  right: 4.4rem;
+}
+
+.parameter-sweep-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.parameter-sweep-legend-line {
+  display: inline-block;
+  width: 1.45rem;
+  height: 0.16rem;
+  border-radius: 999px;
+}
+
 .chart-placeholder {
   display: grid;
   width: 100%;
@@ -501,6 +599,10 @@ label {
   background: #101720;
   text-align: center;
   padding: 1rem;
+}
+
+.chart-placeholder-compact {
+  min-height: 20rem;
 }
 
 .assumptions-panel {
@@ -525,6 +627,52 @@ label {
   margin-top: 0.35rem;
 }
 
+.parameter-sweep-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
+.parameter-sweep-panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.parameter-sweep-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.parameter-sweep-run {
+  width: 100%;
+  min-height: 2.35rem;
+  margin-top: 0.85rem;
+  border: 1px solid #3a495b;
+  border-radius: 6px;
+  color: #e5edf5;
+  background: #245f78;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.parameter-sweep-run:hover:not(:disabled) {
+  border-color: #5aa7c8;
+  background: #2c718e;
+}
+
+.parameter-sweep-run:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.parameter-sweep-status {
+  margin: 0.75rem 0 0;
+  color: #9fcfaf;
+  font-size: 0.86rem;
+}
+
 @media (max-width: 860px) {
   .workspace {
     grid-template-columns: 1fr;
@@ -536,6 +684,10 @@ label {
 
   .stack-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .parameter-sweep-grid {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -1,21 +1,38 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
 import { AssumptionsPanel } from './outputs/AssumptionsPanel';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
+import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
-import { solveQuarterWaveStack } from '../simulation/solvers/transferMatrix';
+import {
+  solveQuarterWaveStack,
+  solveQuarterWaveStackParameterSweep,
+} from '../simulation/solvers/transferMatrix';
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import { exportStackConfigJson } from '../io/exportStackConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
+import { exportParameterSweepCsv } from '../io/exportParameterSweepCsv';
 import { downloadTextFile } from '../io/download';
 import { importStackConfigJson } from '../io/importStackConfigJson';
+import type {
+  ParameterSweepResult,
+  ParameterSweepSettings,
+  QuarterWaveStackInputs,
+} from '../types/simulation';
 
 const MIN_WAVELENGTH_NM = 1;
 const MIN_VIEW_MULTIPLIER = 0.5;
 const MAX_VIEW_MULTIPLIER = 5;
+const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
+  parameter: 'designWavelengthNm',
+  start: 450,
+  end: 750,
+  pointCount: 9,
+};
+const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 
 /** Coordinates inputs, solver execution, exports, imports, and chart controls. */
 export function SimulationShell() {
@@ -23,6 +40,12 @@ export function SimulationShell() {
   const [showTransmission, setShowTransmission] = useState(false);
   const [xRange, setXRange] = useState<[number, number] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [parameterSweep, setParameterSweep] =
+    useState<ParameterSweepSettings>(DEFAULT_PARAMETER_SWEEP);
+  const [parameterSweepResult, setParameterSweepResult] = useState<ParameterSweepResult | null>(
+    null,
+  );
+  const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
   const result = useMemo(() => {
@@ -32,6 +55,23 @@ export function SimulationShell() {
 
     return solveQuarterWaveStack(inputs);
   }, [inputs, validationIssues]);
+  const effectiveParameterSweep = getEffectiveParameterSweep(inputs, parameterSweep);
+
+  useEffect(() => {
+    if (parameterSweep.parameter !== 'periodCount') {
+      return;
+    }
+
+    setParameterSweep((currentSettings) => ({
+      ...currentSettings,
+      ...getDefaultPeriodSweepBounds(inputs.periodCount),
+    }));
+  }, [inputs.periodCount, parameterSweep.parameter]);
+
+  useEffect(() => {
+    setParameterSweepResult(null);
+    setParameterSweepError(null);
+  }, [inputs]);
 
   const centerOnBandwidth = () => {
     if (!result || result.bandwidthNm <= 0) {
@@ -55,6 +95,48 @@ export function SimulationShell() {
     setXRange(null);
   };
 
+  const updateParameterSweep = (nextSettings: ParameterSweepSettings) => {
+    setParameterSweep(nextSettings);
+    setParameterSweepResult(null);
+    setParameterSweepError(null);
+  };
+
+  const updateParameterSweepParameter = (parameter: ParameterSweepSettings['parameter']) => {
+    updateParameterSweep(
+      parameter === 'periodCount'
+        ? {
+            parameter,
+            ...getDefaultPeriodSweepBounds(inputs.periodCount),
+            pointCount: parameterSweep.pointCount,
+          }
+        : {
+            parameter,
+            start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
+            end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
+            pointCount: parameterSweep.pointCount,
+          },
+    );
+  };
+
+  const runParameterSweep = () => {
+    if (validationIssues.length > 0) {
+      setParameterSweepError('Fix highlighted inputs before running a parameter sweep.');
+      return;
+    }
+
+    try {
+      setParameterSweepResult(
+        solveQuarterWaveStackParameterSweep(inputs, effectiveParameterSweep),
+      );
+      setParameterSweepError(null);
+    } catch (error) {
+      setParameterSweepResult(null);
+      setParameterSweepError(
+        error instanceof Error ? error.message : 'The parameter sweep could not be completed.',
+      );
+    }
+  };
+
   const exportCsv = () => {
     if (!result) {
       return;
@@ -65,12 +147,22 @@ export function SimulationShell() {
     downloadTextFile(filename, csv);
   };
 
+  const exportSweepCsv = () => {
+    if (!parameterSweepResult) {
+      return;
+    }
+
+    const csv = exportParameterSweepCsv(inputs, effectiveParameterSweep, parameterSweepResult);
+    const filename = `parameter-sweep-${formatDateStamp(new Date())}.csv`;
+    downloadTextFile(filename, csv);
+  };
+
   const exportSetup = () => {
     if (validationIssues.length > 0) {
       return;
     }
 
-    const json = exportStackConfigJson(inputs);
+    const json = exportStackConfigJson(inputs, effectiveParameterSweep);
     const filename = `stack-setup-${formatDateStamp(new Date())}.json`;
     downloadTextFile(filename, json, 'application/json');
   };
@@ -96,6 +188,9 @@ export function SimulationShell() {
       }
 
       setInputs(imported.inputs);
+      if (imported.parameterSweep) {
+        setParameterSweep(imported.parameterSweep);
+      }
       setXRange(null);
       setImportError(null);
     } catch {
@@ -120,10 +215,92 @@ export function SimulationShell() {
           <QuarterWaveStackForm
             inputs={inputs}
             validationIssues={validationIssues}
-            centerWavelengthNm={result?.centerWavelengthNm}
             onChange={setInputs}
           />
           <AssumptionsPanel />
+          <section className="parameter-sweep-panel" aria-label="Parameter sweep controls">
+            <h2>Parameter Sweep</h2>
+            <label className="field">
+              <span>Parameter</span>
+              <select
+                value={parameterSweep.parameter}
+                onChange={(event) =>
+                  updateParameterSweepParameter(
+                    event.target.value as ParameterSweepSettings['parameter'],
+                  )
+                }
+              >
+                <option value="designWavelengthNm">Design wavelength</option>
+                <option value="periodCount">Periods</option>
+              </select>
+            </label>
+            <div className="parameter-sweep-grid">
+              <label className="field">
+                <span>Start</span>
+                <input
+                  type="number"
+                  min="1"
+                  step={parameterSweep.parameter === 'periodCount' ? 1 : 1}
+                  value={effectiveParameterSweep.start}
+                  readOnly={parameterSweep.parameter === 'designWavelengthNm'}
+                  onChange={(event) =>
+                    updateParameterSweep({
+                      ...parameterSweep,
+                      start: Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label className="field">
+                <span>End</span>
+                <input
+                  type="number"
+                  min="1"
+                  step={parameterSweep.parameter === 'periodCount' ? 1 : 1}
+                  value={effectiveParameterSweep.end}
+                  readOnly={parameterSweep.parameter === 'designWavelengthNm'}
+                  onChange={(event) =>
+                    updateParameterSweep({
+                      ...parameterSweep,
+                      end: Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label className="field">
+                <span>Points</span>
+                <input
+                  type="number"
+                  min="2"
+                  step="1"
+                  value={effectiveParameterSweep.pointCount}
+                  onChange={(event) =>
+                    updateParameterSweep({
+                      ...parameterSweep,
+                      pointCount: Number(event.target.value),
+                    })
+                  }
+                />
+              </label>
+            </div>
+            <button
+              type="button"
+              className="parameter-sweep-run"
+              onClick={runParameterSweep}
+              disabled={validationIssues.length > 0}
+            >
+              Run Sweep
+            </button>
+            {parameterSweepError ? (
+              <p className="chart-toolbar-message" role="alert">
+                {parameterSweepError}
+              </p>
+            ) : parameterSweepResult ? (
+              <p className="parameter-sweep-status" role="status">
+                Sweep complete: {parameterSweepResult.points.length} points evaluated.
+              </p>
+            ) : null}
+          </section>
         </aside>
 
         <section className="chart-panel" aria-label="Simulation outputs">
@@ -180,6 +357,15 @@ export function SimulationShell() {
             <p className="chart-toolbar-message">Fix highlighted inputs before exporting setup.</p>
           ) : null}
           <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
+          <section className="sweep-chart-section" aria-label="Parameter sweep results">
+            <div className="sweep-chart-heading">
+              <h2>Parameter Sweep Results</h2>
+              <button type="button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>
+                Export Sweep CSV
+              </button>
+            </div>
+            <ParameterSweepChart result={parameterSweepResult} />
+          </section>
           <MetricsPanel result={result} />
           <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />
         </section>
@@ -195,6 +381,33 @@ export function SimulationShell() {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+/** Derives non-editable design-wavelength sweep bounds from the spectrum analysis range. */
+function getEffectiveParameterSweep(
+  inputs: QuarterWaveStackInputs,
+  settings: ParameterSweepSettings,
+): ParameterSweepSettings {
+  if (settings.parameter === 'periodCount') {
+    return settings;
+  }
+
+  return {
+    ...settings,
+    start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
+    end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
+  };
+}
+
+/** Centers period-count sweep bounds around the current optical stack period count. */
+function getDefaultPeriodSweepBounds(periodCount: number) {
+  const currentPeriodCount =
+    Number.isFinite(periodCount) && periodCount > 0 ? Math.round(periodCount) : 1;
+
+  return {
+    start: Math.max(1, currentPeriodCount - DEFAULT_PERIOD_SWEEP_HALF_RANGE),
+    end: Math.max(2, currentPeriodCount + DEFAULT_PERIOD_SWEEP_HALF_RANGE),
+  };
 }
 
 /** Formats a date stamp for exported filenames. */
