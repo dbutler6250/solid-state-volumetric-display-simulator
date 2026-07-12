@@ -3,6 +3,7 @@ import type {
   ParameterSweepSettings,
   QuarterWaveStackInputs,
 } from '../types/simulation';
+import { formatRefractiveIndex } from '../simulation/materials/material';
 import { formatCsvRow } from './csv';
 
 const formatNumber = (value: number | null): string => {
@@ -35,10 +36,16 @@ export function exportParameterSweepCsv(
     formatCommentLine('sweep.pointCount', settings.pointCount),
     formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
     formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
-    formatCommentLine('highIndexMaterial.refractiveIndex', inputs.highIndexMaterial.refractiveIndex),
+    formatCommentLine(
+      'highIndexMaterial.refractiveIndex',
+      formatRefractiveIndex(inputs.highIndexMaterial.refractiveIndex),
+    ),
     formatCommentLine('lowIndexMaterial.name', inputs.lowIndexMaterial.name),
     formatCommentLine('lowIndexMaterial.id', inputs.lowIndexMaterial.id),
-    formatCommentLine('lowIndexMaterial.refractiveIndex', inputs.lowIndexMaterial.refractiveIndex),
+    formatCommentLine(
+      'lowIndexMaterial.refractiveIndex',
+      formatRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex),
+    ),
     formatCommentLine('periodCount', inputs.periodCount),
     formatCommentLine('designWavelengthNm', inputs.designWavelengthNm),
     formatCommentLine('incidentAngleDegrees', inputs.incidentAngleDegrees),

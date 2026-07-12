@@ -3,7 +3,7 @@ import { exportResultsCsv } from './exportResultsCsv';
 import type { QuarterWaveStackInputs, SimulationResult } from '../types/simulation';
 import type { Material } from '../simulation/materials/material';
 
-const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
+const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
   name,
   refractiveIndex,
@@ -54,5 +54,17 @@ describe('exportResultsCsv', () => {
 
     expect(csv).toContain('# highIndexMaterial.id: hi, \\"quoted\\"');
     expect(csv).toContain('# highIndexMaterial.name: High\\nIndex');
+  });
+
+  it('formats complex refractive-index metadata for CSV comments', () => {
+    const complexCsv = exportResultsCsv(
+      {
+        ...inputs,
+        highIndexMaterial: makeMaterial('absorber', 'Absorber', { real: 2.2, imag: 0.12 }),
+      },
+      result,
+    );
+
+    expect(complexCsv).toContain('# highIndexMaterial.refractiveIndex: n=2.200 + i0.120');
   });
 });

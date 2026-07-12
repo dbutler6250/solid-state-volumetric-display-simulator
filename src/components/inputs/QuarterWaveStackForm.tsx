@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { MATERIAL_CATALOG } from '../../simulation/materials/catalog';
+import { formatRefractiveIndex, getRefractiveIndexImag, getRefractiveIndexReal } from '../../simulation/materials/material';
 import type { ValidationIssue } from '../../simulation/validation/quarterWaveStackValidation';
 import type { Polarization, QuarterWaveStackInputs } from '../../types/simulation';
 
@@ -34,6 +35,8 @@ const getIssueForField = (
   issues: ValidationIssue[],
   field: keyof QuarterWaveStackInputs,
 ): string | undefined => issues.find((issue) => issue.field === field)?.message;
+
+const formatMaterialNumber = (value: number): string => (Number.isFinite(value) ? value.toFixed(4) : '');
 
 /** Keeps numeric edits within the supported input range. */
 const clampNumber = (value: number, min: number, max?: number): number => {
@@ -179,7 +182,26 @@ export function QuarterWaveStackForm({
           ...inputs[field],
           id: CUSTOM_MATERIAL_ID,
           name: CUSTOM_MATERIAL_NAME,
-          refractiveIndex: toNumber(event.target.value),
+          refractiveIndex: {
+            ...parseComplexRefractiveIndex(inputs[field].refractiveIndex),
+            real: toNumber(event.target.value),
+          },
+        },
+      });
+    };
+  const updateCustomExtinctionCoefficient =
+    (field: 'highIndexMaterial' | 'lowIndexMaterial') =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onChange({
+        ...inputs,
+        [field]: {
+          ...inputs[field],
+          id: CUSTOM_MATERIAL_ID,
+          name: CUSTOM_MATERIAL_NAME,
+          refractiveIndex: {
+            ...parseComplexRefractiveIndex(inputs[field].refractiveIndex),
+            imag: toNumber(event.target.value),
+          },
         },
       });
     };
@@ -199,6 +221,8 @@ export function QuarterWaveStackForm({
   const renderMaterialField = (field: 'highIndexMaterial' | 'lowIndexMaterial', label: string) => {
     const material = inputs[field];
     const isCustom = isCustomMaterial(material.id);
+    const realIndex = getRefractiveIndexReal(material.refractiveIndex);
+    const imagIndex = getRefractiveIndexImag(material.refractiveIndex);
 
     return (
       <div className="field">
@@ -209,22 +233,35 @@ export function QuarterWaveStackForm({
         >
           {MATERIAL_CATALOG.map((catalogMaterial) => (
             <option key={catalogMaterial.id} value={catalogMaterial.id}>
-              {catalogMaterial.name} (n={catalogMaterial.refractiveIndex})
+              {catalogMaterial.name} ({formatRefractiveIndex(catalogMaterial.refractiveIndex)})
             </option>
           ))}
           <option value={CUSTOM_MATERIAL_ID}>Custom refractive index</option>
         </select>
         {isCustom ? (
-          <div className="field">
-            <span>{label} n</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={material.refractiveIndex}
-              onChange={updateCustomRefractiveIndex(field)}
-              aria-label={`${label} refractive index`}
-            />
+          <div className="custom-material-fields">
+            <label className="field">
+              <span>{label} n</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formatMaterialNumber(realIndex)}
+                onChange={updateCustomRefractiveIndex(field)}
+                aria-label={`${label} real refractive index`}
+              />
+            </label>
+            <label className="field">
+              <span>{label} k</span>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={formatMaterialNumber(imagIndex)}
+                onChange={updateCustomExtinctionCoefficient(field)}
+                aria-label={`${label} extinction coefficient`}
+              />
+            </label>
           </div>
         ) : null}
       </div>
@@ -420,6 +457,16 @@ export function QuarterWaveStackForm({
     </form>
   );
 }
+
+const parseComplexRefractiveIndex = (
+  value: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex'],
+) =>
+  typeof value === 'number'
+    ? { real: value, imag: 0 }
+    : {
+        real: value.real,
+        imag: value.imag,
+      };
 
 function FieldError({ message }: { message?: string }) {
   if (!message) {

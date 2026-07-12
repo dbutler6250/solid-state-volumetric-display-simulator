@@ -2,8 +2,8 @@
 
 ## Latest Task
 
-- Centralized the angle-sweep warning text in `SimulationShell.tsx`.
-- Updated local dev-server guidance to start Vite in the background only when it is not already running.
+- Added complex refractive-index support end-to-end for custom materials, validation, solver math, imports/exports, and summary UI.
+- Branch: `issue-6-complex-refractive-index`.
 
 ## Verification
 
@@ -13,4 +13,4 @@
 
 ## Notes
 
-- Ready to commit and push from `main`.
+- Ready to commit, push, and open a PR from `issue-6-complex-refractive-index`.

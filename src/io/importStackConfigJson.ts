@@ -1,5 +1,5 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
-import type { Material } from '../simulation/materials/material';
+import type { Material, ComplexRefractiveIndex } from '../simulation/materials/material';
 import type { ParameterSweepSettings, Polarization, QuarterWaveStackInputs } from '../types/simulation';
 
 const STACK_CONFIG_SCHEMA = 'ssvds-stack-config-v1';
@@ -144,16 +144,57 @@ function parseMaterial(
   if (!isNonEmptyString(value.id) || !isNonEmptyString(value.name)) {
     return { ok: false, message: `The ${label} material must include a string id and name.` };
   }
-  if (!isPositiveFiniteNumber(value.refractiveIndex)) {
-    return {
-      ok: false,
-      message: `The ${label} material refractive index must be a finite number greater than 0.`,
-    };
-  }
+  const refractiveIndex = parseRefractiveIndex(value.refractiveIndex);
+  if (!refractiveIndex.ok) return refractiveIndex;
   return {
     ok: true,
-    material: { id: value.id, name: value.name, refractiveIndex: value.refractiveIndex },
+    material: { id: value.id, name: value.name, refractiveIndex: refractiveIndex.value },
   };
+}
+
+function parseRefractiveIndex(
+  value: unknown,
+): { ok: true; value: Material['refractiveIndex'] } | ImportFailure {
+  if (typeof value === 'number') {
+    if (isPositiveFiniteNumber(value)) {
+      return { ok: true, value };
+    }
+
+    return {
+      ok: false,
+      message: 'The material refractive index must be a finite number greater than 0.',
+    };
+  }
+
+  if (!isRecord(value)) {
+    return {
+      ok: false,
+      message: 'The material refractive index must be a finite number greater than 0.',
+    };
+  }
+
+  if (!isFiniteNumber(value.real) || value.real <= 0 || !isFiniteNumber(value.imag) || value.imag < 0) {
+    return {
+      ok: false,
+      message: 'The material refractive index object must include a positive real part and a non-negative imaginary part.',
+    };
+  }
+
+  return {
+    ok: true,
+    value: {
+      real: value.real,
+      imag: value.imag,
+    } satisfies ComplexRefractiveIndex,
+  };
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isPositiveFiniteNumber(value: unknown): value is number {
+  return isFiniteNumber(value) && value > 0;
 }
 
 /** Narrows unknown values to plain JSON objects. */
@@ -164,11 +205,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
-/** Checks for a positive finite numeric field. */
-function isPositiveFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value) && value > 0;
-}
-
 /** Checks for a non-negative finite numeric field. */
 function isNonNegativeFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0;

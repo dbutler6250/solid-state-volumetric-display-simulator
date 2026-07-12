@@ -1,6 +1,7 @@
 import type { OpticalLayer } from '../layers/layer';
 import type { LayerStack } from '../layers/stack';
 import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
+import { getRefractiveIndexReal } from '../materials/material';
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 
 const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
@@ -23,11 +24,11 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
 export function buildQuarterWaveStackLayers(inputs: QuarterWaveStackInputs): OpticalLayer[] {
   const highIndexThicknessNm = getQuarterWaveThickness(
     inputs.designWavelengthNm,
-    inputs.highIndexMaterial.refractiveIndex,
+    getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex),
   );
   const lowIndexThicknessNm = getQuarterWaveThickness(
     inputs.designWavelengthNm,
-    inputs.lowIndexMaterial.refractiveIndex,
+    getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex),
   );
   const layers: OpticalLayer[] = [];
 

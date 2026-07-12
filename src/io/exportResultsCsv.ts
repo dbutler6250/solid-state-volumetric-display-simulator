@@ -1,5 +1,6 @@
 import type { QuarterWaveStackInputs, SimulationResult } from '../types/simulation';
 import { formatCsvRow } from './csv';
+import { formatRefractiveIndex } from '../simulation/materials/material';
 
 const formatNumber = (value: number): string => {
   if (Number.isInteger(value)) {
@@ -23,10 +24,16 @@ export function exportResultsCsv(inputs: QuarterWaveStackInputs, result: Simulat
     '# schema: ssvds-results-csv-v1',
     formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
     formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
-    formatCommentLine('highIndexMaterial.refractiveIndex', inputs.highIndexMaterial.refractiveIndex),
+    formatCommentLine(
+      'highIndexMaterial.refractiveIndex',
+      formatRefractiveIndex(inputs.highIndexMaterial.refractiveIndex),
+    ),
     formatCommentLine('lowIndexMaterial.name', inputs.lowIndexMaterial.name),
     formatCommentLine('lowIndexMaterial.id', inputs.lowIndexMaterial.id),
-    formatCommentLine('lowIndexMaterial.refractiveIndex', inputs.lowIndexMaterial.refractiveIndex),
+    formatCommentLine(
+      'lowIndexMaterial.refractiveIndex',
+      formatRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex),
+    ),
     formatCommentLine('periodCount', inputs.periodCount),
     formatCommentLine('designWavelengthNm', inputs.designWavelengthNm),
     formatCommentLine('incidentAngleDegrees', inputs.incidentAngleDegrees),

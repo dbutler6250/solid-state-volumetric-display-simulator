@@ -3,7 +3,7 @@ import type { Material } from '../simulation/materials/material';
 import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
 import { exportStackConfigJson } from './exportStackConfigJson';
 
-const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
+const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
   name,
   refractiveIndex,
@@ -62,5 +62,18 @@ describe('exportStackConfigJson', () => {
     expect(exported.inputs.wavelengthEndNm).toBe(650);
     expect(exported.inputs.wavelengthPointCount).toBe(401);
     expect(exported.parameterSweep).toEqual(parameterSweep);
+  });
+
+  it('preserves complex refractive-index objects in exported JSON', () => {
+    const complexInputs: QuarterWaveStackInputs = {
+      ...inputs,
+      highIndexMaterial: makeMaterial('absorber', 'Absorber', { real: 2.2, imag: 0.12 }),
+    };
+
+    const exported = JSON.parse(exportStackConfigJson(complexInputs)) as {
+      inputs: QuarterWaveStackInputs;
+    };
+
+    expect(exported.inputs.highIndexMaterial.refractiveIndex).toEqual({ real: 2.2, imag: 0.12 });
   });
 });

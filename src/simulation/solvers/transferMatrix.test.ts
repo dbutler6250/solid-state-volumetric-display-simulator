@@ -16,7 +16,7 @@ const expectCloseTo = (actual: number, expected: number, tolerance: number) => {
 const maxEnergyError = (result: SimulationResult): number =>
   Math.max(...result.spectrum.map((point) => Math.abs(point.reflectance + point.transmission - 1)));
 
-const makeMaterial = (id: string, refractiveIndex: number): Material => ({
+const makeMaterial = (id: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
   name: id,
   refractiveIndex,
@@ -61,6 +61,30 @@ describe('transfer matrix solver', () => {
 
     expectCloseTo(result.reflectance, 0, 1e-12);
     expectCloseTo(result.transmission, 1, 1e-12);
+  });
+
+  it('handles an absorbing layer without breaking the real-index solver path', () => {
+    const stack: LayerStack = {
+      incidentMedium: AIR,
+      layers: [
+        {
+          material: makeMaterial('absorber', { real: 2.1, imag: 0.2 }),
+          thicknessNm: 180,
+        },
+      ],
+      exitMedium: AIR,
+    };
+
+    const result = solveLayerStack(stack, {
+      wavelengthNm: 600,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+    });
+
+    expect(Number.isFinite(result.reflectance)).toBe(true);
+    expect(Number.isFinite(result.transmission)).toBe(true);
+    expect(result.reflectance).toBeGreaterThan(0);
+    expect(result.transmission).toBeGreaterThan(0);
   });
 
   it('computes the center wavelength from the stopband instead of forcing the design wavelength', () => {

@@ -1,4 +1,5 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
+import { formatRefractiveIndex, getRefractiveIndexReal } from '../../simulation/materials/material';
 
 type StackDefinitionPanelProps = {
   inputs: QuarterWaveStackInputs;
@@ -21,8 +22,8 @@ const formatNumber = (value: number, digits = 2): string =>
 
 const formatCount = (value: number): string => (Number.isFinite(value) ? `${Math.round(value)}` : 'Invalid');
 
-const formatMaterialLabel = (name: string, refractiveIndex: number): string =>
-  `${name}${name === 'Custom' ? ' material' : ''} (n=${formatNumber(refractiveIndex)})`;
+const formatMaterialLabel = (name: string, refractiveIndex: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex']): string =>
+  `${name}${name === 'Custom' ? ' material' : ''} (${formatRefractiveIndex(refractiveIndex)})`;
 
 /** Expresses optical thickness in design-wavelength units. */
 const formatOpticalThickness = (refractiveIndex: number, thicknessNm: number, wavelengthNm: number) => {
@@ -38,7 +39,7 @@ const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): D
     key: `h-${period}`,
     label: 'H',
     detail: `${formatNumber(
-      inputs.designWavelengthNm / (4 * inputs.highIndexMaterial.refractiveIndex),
+      inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
       1,
     )} nm`,
     kind: 'high',
@@ -47,7 +48,7 @@ const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): D
     key: `l-${period}`,
     label: 'L',
     detail: `${formatNumber(
-      inputs.designWavelengthNm / (4 * inputs.lowIndexMaterial.refractiveIndex),
+      inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
       1,
     )} nm`,
     kind: 'low',
@@ -100,20 +101,20 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
 /** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
   const highIndexThicknessNm =
-    inputs.designWavelengthNm / (4 * inputs.highIndexMaterial.refractiveIndex);
+    inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex));
   const lowIndexThicknessNm =
-    inputs.designWavelengthNm / (4 * inputs.lowIndexMaterial.refractiveIndex);
+    inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex));
   const totalLayerCount = Number.isFinite(inputs.periodCount)
     ? Math.max(0, Math.round(inputs.periodCount) * 2)
     : Number.NaN;
   const totalPhysicalThicknessNm = inputs.periodCount * (highIndexThicknessNm + lowIndexThicknessNm);
   const highOpticalThickness = formatOpticalThickness(
-    inputs.highIndexMaterial.refractiveIndex,
+    getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex),
     highIndexThicknessNm,
     inputs.designWavelengthNm,
   );
   const lowOpticalThickness = formatOpticalThickness(
-    inputs.lowIndexMaterial.refractiveIndex,
+    getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex),
     lowIndexThicknessNm,
     inputs.designWavelengthNm,
   );
