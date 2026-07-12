@@ -10,6 +10,7 @@
 - Optional compact steppers restore precise mouse and Arrow-key adjustments without sacrificing focused raw drafts; wavelength sliders remain in place.
 - Wavelength Sweep points now sit directly beneath Start/End, with Sweep range occupying the adjacent desktop column.
 - Parameter Sweep Start, End, and Points now use the same formatted text/stepper controls; derived design-wavelength bounds remain read-only.
+- Output tabs and Import/Export Setup actions share one desktop navigation row, with a stacked mobile fallback.
 
 ## Verification
 
@@ -24,6 +25,7 @@
 - Verified a clean reload has no console errors and no horizontal overflow at a 390 px viewport.
 - Verified stepper labels, bounds, keyboard operation, and wavelength text/slider synchronization.
 - Verified Parameter Sweep angle/period stepping, read-only wavelength bounds, and responsive sweep-control ordering.
+- Verified output navigation alignment, tab behavior, mobile wrapping, and setup-action accessibility.
 
 ## Notes
 

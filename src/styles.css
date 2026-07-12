@@ -94,11 +94,20 @@ label {
   min-width: 0;
 }
 
+.output-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
 .global-toolbar {
   display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  margin-bottom: 0.65rem;
+  flex: 0 0 auto;
+  order: 2;
 }
 
 .global-toolbar button,
@@ -110,6 +119,10 @@ label {
   color: #e5edf5;
   background: #16202b;
   cursor: pointer;
+}
+
+.output-navigation .global-toolbar button {
+  min-height: 2.55rem;
 }
 
 .global-toolbar button:hover:not(:disabled),
@@ -128,7 +141,8 @@ label {
   display: flex;
   gap: 0.35rem;
   overflow-x: auto;
-  margin-bottom: 0.65rem;
+  min-width: 0;
+  order: 1;
   scrollbar-width: thin;
 }
 
@@ -947,6 +961,11 @@ label {
 }
 
 @media (max-width: 540px) {
+  .output-navigation {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .chart-heading {
     align-items: flex-start;
     flex-direction: column;

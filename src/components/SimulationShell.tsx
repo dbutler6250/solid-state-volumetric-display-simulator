@@ -286,50 +286,52 @@ export function SimulationShell() {
         </aside>
 
         <section className="output-area" aria-label="Simulation outputs">
-          <div className="global-toolbar" role="group" aria-label="Setup actions">
-            <button type="button" onClick={openImportPicker}>
-              Import Setup
-            </button>
-            <button type="button" onClick={exportSetup} disabled={validationIssues.length > 0}>
-              Export Setup
-            </button>
-            <input
-              ref={importInputRef}
-              type="file"
-              accept="application/json,.json"
-              onChange={importSetup}
-              hidden
-            />
+          <div className="output-navigation">
+            <div className="output-tabs" role="tablist" aria-label="Simulation output views">
+              {OUTPUT_TABS.map((tab) => {
+                const label =
+                  tab === 'spectrum'
+                    ? 'Spectrum'
+                    : tab === 'parameter-sweep'
+                      ? 'Parameter Sweep'
+                      : 'Stack Definition';
+                return (
+                  <button
+                    key={tab}
+                    ref={(node) => {
+                      tabRefs.current[tab] = node;
+                    }}
+                    id={`${tab}-tab`}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === tab}
+                    aria-controls={`${tab}-panel`}
+                    tabIndex={activeTab === tab ? 0 : -1}
+                    onClick={() => setActiveTab(tab)}
+                    onKeyDown={(event) => handleTabKeyDown(event, tab)}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="global-toolbar" role="group" aria-label="Setup actions">
+              <button type="button" onClick={openImportPicker}>
+                Import Setup
+              </button>
+              <button type="button" onClick={exportSetup} disabled={validationIssues.length > 0}>
+                Export Setup
+              </button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                onChange={importSetup}
+                hidden
+              />
+            </div>
           </div>
           {importError ? <p className="chart-toolbar-message" role="alert">{importError}</p> : null}
-          <div className="output-tabs" role="tablist" aria-label="Simulation output views">
-            {OUTPUT_TABS.map((tab) => {
-              const label =
-                tab === 'spectrum'
-                  ? 'Spectrum'
-                  : tab === 'parameter-sweep'
-                    ? 'Parameter Sweep'
-                    : 'Stack Definition';
-              return (
-                <button
-                  key={tab}
-                  ref={(node) => {
-                    tabRefs.current[tab] = node;
-                  }}
-                  id={`${tab}-tab`}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeTab === tab}
-                  aria-controls={`${tab}-panel`}
-                  tabIndex={activeTab === tab ? 0 : -1}
-                  onClick={() => setActiveTab(tab)}
-                  onKeyDown={(event) => handleTabKeyDown(event, tab)}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
 
           <section
             className="chart-panel"
