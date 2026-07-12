@@ -56,6 +56,10 @@ export function SimulationShell() {
   const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
+  const parameterSweepWarning =
+    parameterSweep.parameter === 'incidentAngleDegrees'
+      ? 'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.'
+      : null;
   const result = useMemo(() => {
     if (validationIssues.length > 0) {
       return null;
@@ -312,6 +316,11 @@ export function SimulationShell() {
             >
               Run Sweep
             </button>
+            {parameterSweepWarning ? (
+              <p className="parameter-sweep-warning" role="status">
+                {parameterSweepWarning}
+              </p>
+            ) : null}
             {parameterSweepError ? (
               <p className="chart-toolbar-message" role="alert">
                 {parameterSweepError}
