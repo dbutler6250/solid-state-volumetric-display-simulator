@@ -25,15 +25,6 @@ const formatCount = (value: number): string => (Number.isFinite(value) ? `${Math
 const formatMaterialLabel = (name: string, refractiveIndex: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex']): string =>
   `${name}${name === 'Custom' ? ' material' : ''} (${formatRefractiveIndex(refractiveIndex)})`;
 
-/** Expresses optical thickness in design-wavelength units. */
-const formatOpticalThickness = (refractiveIndex: number, thicknessNm: number, wavelengthNm: number) => {
-  if (!Number.isFinite(wavelengthNm) || wavelengthNm <= 0) {
-    return 'Invalid';
-  }
-
-  return formatNumber((refractiveIndex * thicknessNm) / wavelengthNm, 3);
-};
-
 const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): DiagramSegment[] => [
   {
     key: `h-${period}`,
@@ -108,16 +99,6 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
     ? Math.max(0, Math.round(inputs.periodCount) * 2)
     : Number.NaN;
   const totalPhysicalThicknessNm = inputs.periodCount * (highIndexThicknessNm + lowIndexThicknessNm);
-  const highOpticalThickness = formatOpticalThickness(
-    getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex),
-    highIndexThicknessNm,
-    inputs.designWavelengthNm,
-  );
-  const lowOpticalThickness = formatOpticalThickness(
-    getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex),
-    lowIndexThicknessNm,
-    inputs.designWavelengthNm,
-  );
   const segments = isValid ? createLayerSegments(inputs) : [];
 
   return (
@@ -132,20 +113,20 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
         <StackSummaryItem label="Total thickness" value={`${formatNumber(totalPhysicalThicknessNm, 1)} nm`} />
         <StackSummaryItem
           label="High layer"
-          value={`${formatMaterialLabel(
+          value={formatMaterialLabel(
             inputs.highIndexMaterial.name,
             inputs.highIndexMaterial.refractiveIndex,
-          )}; d=${formatNumber(highIndexThicknessNm, 1)} nm`}
+          )}
         />
         <StackSummaryItem
           label="Low layer"
-          value={`${formatMaterialLabel(
+          value={formatMaterialLabel(
             inputs.lowIndexMaterial.name,
             inputs.lowIndexMaterial.refractiveIndex,
-          )}; d=${formatNumber(lowIndexThicknessNm, 1)} nm`}
+          )}
         />
-        <StackSummaryItem label="H optical thickness" value={`${highOpticalThickness} \u03bb`} />
-        <StackSummaryItem label="L optical thickness" value={`${lowOpticalThickness} \u03bb`} />
+        <StackSummaryItem label="H optical thickness" value={`d=${formatNumber(highIndexThicknessNm, 1)} nm`} />
+        <StackSummaryItem label="L optical thickness" value={`d=${formatNumber(lowIndexThicknessNm, 1)} nm`} />
       </div>
 
       {isValid ? (

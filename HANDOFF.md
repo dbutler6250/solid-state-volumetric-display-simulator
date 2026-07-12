@@ -2,9 +2,9 @@
 
 ## Latest Task
 
-- Fixed the numeric form inputs so decimal fields can be backspaced/cleared while editing, then snap back to the prior value on blur.
-- Removed trailing zeros from refractive-index display values and lowered refractive-index spinner steps to `0.001`.
-- Branch: `issue-6-complex-refractive-index`.
+- Moved the derived layer thickness values out of the material rows and into the H/L optical-thickness rows in the stack definition summary.
+- Removed the fractional-`λ` suffix from the optical-thickness display in that summary.
+- Branch: `issue-7-stack-definition-cleanup`.
 
 ## Verification
 
@@ -14,4 +14,4 @@
 
 ## Notes
 
-- The sweep controls were left unchanged as requested.
+- Scope stayed within the stack definition section.
