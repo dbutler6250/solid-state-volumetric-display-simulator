@@ -23,9 +23,9 @@ const inputs: QuarterWaveStackInputs = {
 };
 
 const parameterSweep: ParameterSweepSettings = {
-  parameter: 'periodCount',
-  start: 2,
-  end: 20,
+  parameter: 'incidentAngleDegrees',
+  start: 0,
+  end: 89.9,
   pointCount: 10,
 };
 
@@ -168,7 +168,7 @@ describe('importStackConfigJson', () => {
       structureType: 'quarter-wave-stack',
       inputs,
       parameterSweep: {
-        parameter: 'periodCount',
+        parameter: 'incidentAngleDegrees',
         start: 10,
         end: 10,
         pointCount: 5,

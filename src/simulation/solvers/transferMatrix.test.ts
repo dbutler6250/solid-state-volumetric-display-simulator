@@ -164,6 +164,31 @@ describe('transfer matrix solver', () => {
     ).toBe(true);
   });
 
+  it('sweeps incident angle with bounded values and returns summary metrics for each point', () => {
+    const inputs: QuarterWaveStackInputs = {
+      highIndexMaterial: makeMaterial('nH', 2.4),
+      lowIndexMaterial: makeMaterial('nL', 1.45),
+      periodCount: 6,
+      designWavelengthNm: 600,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+      wavelengthStartNm: 400,
+      wavelengthEndNm: 900,
+      wavelengthPointCount: 101,
+    };
+
+    const result = solveQuarterWaveStackParameterSweep(inputs, {
+      parameter: 'incidentAngleDegrees',
+      start: -10,
+      end: 100,
+      pointCount: 3,
+    });
+
+    expect(result.points.map((point) => point.parameterValue)).toEqual([0, 44.95, 89.9]);
+    expect(result.points[0].peakReflectance).not.toBeNull();
+    expect(result.points.some((point) => point.centerWavelengthNm !== null)).toBe(true);
+  });
+
   it('includes a required wavelength in the sampled spectrum', () => {
     const result = solveQuarterWaveStack(
       {

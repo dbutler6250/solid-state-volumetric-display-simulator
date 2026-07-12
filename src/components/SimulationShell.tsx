@@ -34,6 +34,7 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
   end: 750,
   pointCount: 9,
 };
+const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 
 /** Coordinates inputs, solver execution, exports, imports, and chart controls. */
@@ -106,6 +107,16 @@ export function SimulationShell() {
   };
 
   const updateParameterSweepParameter = (parameter: ParameterSweepSettings['parameter']) => {
+    if (parameter === 'incidentAngleDegrees') {
+      updateParameterSweep({
+        parameter,
+        start: 0,
+        end: MAX_INCIDENT_ANGLE_DEGREES,
+        pointCount: parameterSweep.pointCount,
+      });
+      return;
+    }
+
     updateParameterSweep(
       parameter === 'periodCount'
         ? {
@@ -235,6 +246,7 @@ export function SimulationShell() {
                 }
               >
                 <option value="designWavelengthNm">Design wavelength</option>
+                <option value="incidentAngleDegrees">Incident angle</option>
                 <option value="periodCount">Periods</option>
               </select>
             </label>
@@ -243,8 +255,9 @@ export function SimulationShell() {
                 <span>Start</span>
                 <input
                   type="number"
-                  min="1"
-                  step={parameterSweep.parameter === 'periodCount' ? 1 : 1}
+                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
+                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
+                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 0.1 : 1}
                   value={effectiveParameterSweep.start}
                   readOnly={parameterSweep.parameter === 'designWavelengthNm'}
                   onChange={(event) =>
@@ -259,8 +272,9 @@ export function SimulationShell() {
                 <span>End</span>
                 <input
                   type="number"
-                  min="1"
-                  step={parameterSweep.parameter === 'periodCount' ? 1 : 1}
+                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
+                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
+                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 0.1 : 1}
                   value={effectiveParameterSweep.end}
                   readOnly={parameterSweep.parameter === 'designWavelengthNm'}
                   onChange={(event) =>
@@ -398,6 +412,14 @@ function getEffectiveParameterSweep(
 ): ParameterSweepSettings {
   if (settings.parameter === 'periodCount') {
     return settings;
+  }
+
+  if (settings.parameter === 'incidentAngleDegrees') {
+    return {
+      ...settings,
+      start: Math.max(0, settings.start),
+      end: Math.min(MAX_INCIDENT_ANGLE_DEGREES, settings.end),
+    };
   }
 
   return {

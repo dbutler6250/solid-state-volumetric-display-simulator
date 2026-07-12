@@ -13,7 +13,11 @@ const SERIES_COLORS = {
 };
 
 const getParameterLabel = (result: ParameterSweepResult): string =>
-  result.settings.parameter === 'periodCount' ? 'Periods' : 'Design wavelength (nm)';
+  result.settings.parameter === 'periodCount'
+    ? 'Periods'
+    : result.settings.parameter === 'incidentAngleDegrees'
+      ? 'Incident angle (deg)'
+      : 'Design wavelength (nm)';
 
 /** Renders sweep metrics against the selected swept parameter. */
 export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
