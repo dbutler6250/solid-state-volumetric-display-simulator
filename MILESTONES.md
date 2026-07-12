@@ -36,6 +36,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Lazy-loaded Plotly chart chunk
 - Accessible output tabs and responsive simulator workspace layout
 - Reusable precision-preserving formatted numeric input for manual layer thicknesses
+- Consistent precision-preserving numeric controls with compact steppers, explicit reset behavior, and constrained parameter-sweep inputs
 
 ## Notes
 

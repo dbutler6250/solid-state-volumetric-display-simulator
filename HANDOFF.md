@@ -2,6 +2,7 @@
 
 ## Latest Task
 
+- Merged PR #40 with the completed formatted-number-input expansion and UI refinements.
 - Extended `FormattedNumberInput` to the remaining suitable global, wavelength-sweep, and custom-material numeric fields.
 - Added explicit integer parsing, blur normalization/bounds, numeric keyboard hints, and intentional reset keys.
 - Removed the form-wide `draftValues` synchronization so unrelated parent updates cannot overwrite active drafts.
@@ -36,4 +37,4 @@
 ## Notes
 
 - No matching GitHub issue existed; work continued directly from the supplied focused scope.
-- `MILESTONES.md` is unchanged because this work is not merged project history yet.
+- `MILESTONES.md` now records the merged numeric-control and constrained parameter-sweep work.
