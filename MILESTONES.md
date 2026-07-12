@@ -39,3 +39,4 @@ Use this section for quick general brain dumps before cleaning them up into GitH
 - Consider angle sweep support as a future analysis workflow.
 - Consider 2D sweep heatmaps after multiple swept parameters are supported.
 - Improve peak, center, and bandwidth metric extraction with interpolation instead of sampled-point estimates.
+- Manual thickness tuning should be expected to shift the stopband peak before it sharply reduces reflectance, so reflectance at the design wavelength and peak reflectance across a sweep are different checks. The manual thickness path is now covered by regression tests.

@@ -1,5 +1,6 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
-import { formatRefractiveIndex, getRefractiveIndexReal } from '../../simulation/materials/material';
+import { formatRefractiveIndex } from '../../simulation/materials/material';
+import { getResolvedThicknesses } from '../../simulation/structures/quarterWaveStack';
 
 type StackDefinitionPanelProps = {
   inputs: QuarterWaveStackInputs;
@@ -25,29 +26,28 @@ const formatCount = (value: number): string => (Number.isFinite(value) ? `${Math
 const formatMaterialLabel = (name: string, refractiveIndex: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex']): string =>
   `${name}${name === 'Custom' ? ' material' : ''} (${formatRefractiveIndex(refractiveIndex)})`;
 
-const createPeriodSegments = (inputs: QuarterWaveStackInputs, period: number): DiagramSegment[] => [
+const createPeriodSegments = (
+  highIndexThicknessNm: number,
+  lowIndexThicknessNm: number,
+  period: number,
+): DiagramSegment[] => [
   {
     key: `h-${period}`,
     label: 'H',
-    detail: `${formatNumber(
-      inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
-      1,
-    )} nm`,
+    detail: `${formatNumber(highIndexThicknessNm, 1)} nm`,
     kind: 'high',
   },
   {
     key: `l-${period}`,
     label: 'L',
-    detail: `${formatNumber(
-      inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
-      1,
-    )} nm`,
+    detail: `${formatNumber(lowIndexThicknessNm, 1)} nm`,
     kind: 'low',
   },
 ];
 
 /** Builds a compact layer sequence for the stack preview. */
 const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
+  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
   const incidentMedium: DiagramSegment = {
     key: 'incident',
     label: 'Air',
@@ -65,7 +65,7 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
     return [
       incidentMedium,
       ...Array.from({ length: inputs.periodCount }, (_, index) =>
-        createPeriodSegments(inputs, index + 1),
+        createPeriodSegments(highIndexThicknessNm, lowIndexThicknessNm, index + 1),
       ).flat(),
       exitMedium,
     ];
@@ -74,7 +74,7 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
   return [
     incidentMedium,
     ...Array.from({ length: LEADING_PERIODS }, (_, index) =>
-      createPeriodSegments(inputs, index + 1),
+      createPeriodSegments(highIndexThicknessNm, lowIndexThicknessNm, index + 1),
     ).flat(),
     {
       key: 'ellipsis',
@@ -83,7 +83,11 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
       kind: 'ellipsis',
     },
     ...Array.from({ length: TRAILING_PERIODS }, (_, index) =>
-      createPeriodSegments(inputs, inputs.periodCount - TRAILING_PERIODS + index + 1),
+      createPeriodSegments(
+        highIndexThicknessNm,
+        lowIndexThicknessNm,
+        inputs.periodCount - TRAILING_PERIODS + index + 1,
+      ),
     ).flat(),
     exitMedium,
   ];
@@ -91,10 +95,8 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
 
 /** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
-  const highIndexThicknessNm =
-    inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex));
-  const lowIndexThicknessNm =
-    inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex));
+  const thicknessMode = inputs.thicknessMode ?? 'derived';
+  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
   const totalLayerCount = Number.isFinite(inputs.periodCount)
     ? Math.max(0, Math.round(inputs.periodCount) * 2)
     : Number.NaN;
@@ -106,6 +108,22 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
       <div className="stack-panel-heading">
         <h2>Stack Definition</h2>
         <span>Air | H/L x {formatCount(inputs.periodCount)} | Air</span>
+      </div>
+      <div className="stack-panel-subtitle">
+        <span className={`mode-pill mode-pill-${thicknessMode}`}>
+          {thicknessMode === 'derived'
+            ? 'Derived'
+            : thicknessMode === 'manual'
+              ? 'Manual'
+              : 'Acoustic'}
+        </span>
+        <span>
+          {thicknessMode === 'derived'
+            ? 'Quarter-wave values follow the design wavelength.'
+            : thicknessMode === 'manual'
+              ? 'Thicknesses are editable.'
+              : 'Reserved for future external thickness control.'}
+        </span>
       </div>
 
       <div className="stack-summary-grid">

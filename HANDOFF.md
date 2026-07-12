@@ -2,14 +2,16 @@
 
 ## Latest Task
 
-- Made the local UI startup note more explicit so new tasks should launch or verify the Vite dev server, then open the app in `@Browser`.
-- Branch: `codex/clarify-dev-browser`.
+- Refined issue `#8` on branch `codex/issue-8-thickness-modes`.
+- Tightened the thickness-mode copy and readout styling to make the derived/manual/acoustic states read more intentionally.
+- Preserved the current derived quarter-wave workflow as the default and kept solver/import/export paths intact.
 
 ## Verification
 
-- Not run; documentation-only change.
+- `npm.cmd run test` - passed.
+- `npm.cmd run lint` - passed.
+- `npm.cmd run build` - passed.
 
 ## Notes
 
-- `AGENTS.md` now contains a two-step startup checklist for local UI work.
-- `main` is tracked from the separate `Simulation Tool-main` worktree.
+- Switching away from derived thickness still seeds the editable values from the last derived thicknesses.

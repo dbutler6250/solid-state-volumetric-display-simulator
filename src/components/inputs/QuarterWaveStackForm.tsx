@@ -2,7 +2,7 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import { MATERIAL_CATALOG } from '../../simulation/materials/catalog';
 import { formatRefractiveIndex, getRefractiveIndexImag, getRefractiveIndexReal } from '../../simulation/materials/material';
 import type { ValidationIssue } from '../../simulation/validation/quarterWaveStackValidation';
-import type { Polarization, QuarterWaveStackInputs } from '../../types/simulation';
+import type { Polarization, QuarterWaveStackInputs, ThicknessMode } from '../../types/simulation';
 
 type QuarterWaveStackFormProps = {
   inputs: QuarterWaveStackInputs;
@@ -27,10 +27,14 @@ type NumericField = keyof Pick<
   | 'periodCount'
   | 'designWavelengthNm'
   | 'incidentAngleDegrees'
+  | 'highIndexThicknessNm'
+  | 'lowIndexThicknessNm'
   | 'wavelengthStartNm'
   | 'wavelengthEndNm'
   | 'wavelengthPointCount'
 >;
+
+type ThicknessField = 'highIndexThicknessNm' | 'lowIndexThicknessNm';
 
 const getIssueForField = (
   issues: ValidationIssue[],
@@ -81,6 +85,38 @@ const formatWavelengthInput = (value: number | undefined): string => {
 };
 
 const formatSweepRangeInput = (value: number): string => Number(value.toString()).toString();
+
+const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
+  highIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
+  lowIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
+});
+
+const normalizeThicknessMode = (mode: ThicknessMode): ThicknessMode =>
+  mode === 'manual' || mode === 'acoustic' ? mode : 'derived';
+
+/** Keeps the active thickness mode and stored thickness values aligned. */
+const applyThicknessMode = (inputs: QuarterWaveStackInputs, thicknessMode: ThicknessMode): QuarterWaveStackInputs => {
+  const nextMode = normalizeThicknessMode(thicknessMode);
+  const derivedThicknesses = getDerivedThicknesses(inputs);
+
+  if (nextMode === 'derived' || nextMode === 'acoustic') {
+    return {
+      ...inputs,
+      thicknessMode: nextMode,
+      highIndexThicknessNm: nextMode === 'acoustic' ? inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm : inputs.highIndexThicknessNm,
+      lowIndexThicknessNm: nextMode === 'acoustic' ? inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm : inputs.lowIndexThicknessNm,
+    };
+  }
+
+  return {
+    ...inputs,
+    thicknessMode: nextMode,
+    highIndexThicknessNm: inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm,
+    lowIndexThicknessNm: inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm,
+  };
+};
+
+const formatThicknessInput = (value: number | undefined): string => formatNumericInput(value);
 
 /** Re-centers the sweep range while preserving the current midpoint. */
 const applySweepRange = (inputs: QuarterWaveStackInputs, rangeNm: number): QuarterWaveStackInputs => {
@@ -141,6 +177,8 @@ export function QuarterWaveStackForm({
       periodCount: formatNumericInput(inputs.periodCount),
       designWavelengthNm: formatNumericInput(inputs.designWavelengthNm),
       incidentAngleDegrees: formatNumericInput(inputs.incidentAngleDegrees),
+      highIndexThicknessNm: formatThicknessInput(inputs.highIndexThicknessNm),
+      lowIndexThicknessNm: formatThicknessInput(inputs.lowIndexThicknessNm),
       wavelengthStartNm: formatNumericInput(inputs.wavelengthStartNm),
       wavelengthEndNm: formatNumericInput(inputs.wavelengthEndNm),
       wavelengthPointCount: formatNumericInput(inputs.wavelengthPointCount),
@@ -225,6 +263,12 @@ export function QuarterWaveStackForm({
 
       if (field === 'designWavelengthNm') {
         onChange(applyDesignWavelength(inputs, nextValue));
+      } else if (field === 'highIndexThicknessNm' || field === 'lowIndexThicknessNm') {
+        onChange({
+          ...inputs,
+          thicknessMode: 'manual',
+          [field]: nextValue,
+        });
       } else {
         onChange({
           ...inputs,
@@ -255,8 +299,39 @@ export function QuarterWaveStackForm({
         return;
       }
 
+      if (field === 'highIndexThicknessNm' || field === 'lowIndexThicknessNm') {
+        onChange({
+          ...inputs,
+          thicknessMode: 'manual',
+          [field]: parsedValue,
+        });
+        return;
+      }
+
       onChange({
         ...inputs,
+        [field]: parsedValue,
+      });
+    };
+
+  const updateThicknessField =
+    (field: ThicknessField) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value;
+      updateDraftValue(field, value);
+
+      if (value === '' || value === '-' || value === '.' || value === '-.') {
+        return;
+      }
+
+      const parsedValue = toNumber(value);
+      if (!Number.isFinite(parsedValue)) {
+        return;
+      }
+
+      onChange({
+        ...inputs,
+        thicknessMode: 'manual',
         [field]: parsedValue,
       });
     };
@@ -293,8 +368,21 @@ export function QuarterWaveStackForm({
 
     onChange(applyCenteredSweepRange(inputs, inputs.designWavelengthNm, getSweepRange(inputs)));
   };
+  const updateThicknessMode = (event: ChangeEvent<HTMLSelectElement>) => {
+    onChange(applyThicknessMode(inputs, event.target.value as ThicknessMode));
+  };
   const isInvalid = (field: keyof QuarterWaveStackInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;
+  const thicknessMode = inputs.thicknessMode ?? 'derived';
+  const derivedThicknesses = getDerivedThicknesses(inputs);
+  const visibleThicknessHighNm =
+    thicknessMode === 'manual'
+      ? inputs.highIndexThicknessNm
+      : derivedThicknesses.highIndexThicknessNm;
+  const visibleThicknessLowNm =
+    thicknessMode === 'manual'
+      ? inputs.lowIndexThicknessNm
+      : derivedThicknesses.lowIndexThicknessNm;
 
   const renderMaterialField = (field: 'highIndexMaterial' | 'lowIndexMaterial', label: string) => {
     const material = inputs[field];
@@ -403,13 +491,79 @@ export function QuarterWaveStackForm({
       {renderMaterialField('highIndexMaterial', 'High-index material')}
       {renderMaterialField('lowIndexMaterial', 'Low-index material')}
 
-      <div className="field">
-        <span>Layer thicknesses</span>
-        <small>
-          Quarter-wave stack values are derived automatically from the design wavelength and each
-          layer&apos;s refractive index.
-        </small>
+      <div className="field thickness-mode-group">
+        <div className="field-copy">
+          <span>Thickness source</span>
+          <small>
+            Derived mode keeps the quarter-wave workflow, manual mode edits values directly, and
+            acoustic mode reserves room for external control.
+          </small>
+        </div>
+
+        <label className="field">
+          <span>Thickness mode</span>
+          <select value={thicknessMode} onChange={updateThicknessMode}>
+            <option value="derived">Derived from design wavelength</option>
+            <option value="manual">User typed</option>
+            <option value="acoustic">Acoustic (future)</option>
+          </select>
+          <FieldError message={getIssueForField(validationIssues, 'thicknessMode')} />
+        </label>
       </div>
+
+      {thicknessMode === 'manual' ? (
+        <>
+          <label className="field">
+            <span>High-index thickness (nm)</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={draftValues.highIndexThicknessNm ?? formatThicknessInput(inputs.highIndexThicknessNm)}
+              onChange={updateThicknessField('highIndexThicknessNm')}
+              onBlur={commitNumberField('highIndexThicknessNm', toNumber, 0)}
+              aria-invalid={isInvalid('highIndexThicknessNm')}
+            />
+            <FieldError message={getIssueForField(validationIssues, 'highIndexThicknessNm')} />
+          </label>
+
+          <label className="field">
+            <span>Low-index thickness (nm)</span>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={draftValues.lowIndexThicknessNm ?? formatThicknessInput(inputs.lowIndexThicknessNm)}
+              onChange={updateThicknessField('lowIndexThicknessNm')}
+              onBlur={commitNumberField('lowIndexThicknessNm', toNumber, 0)}
+              aria-invalid={isInvalid('lowIndexThicknessNm')}
+            />
+            <FieldError message={getIssueForField(validationIssues, 'lowIndexThicknessNm')} />
+          </label>
+        </>
+      ) : (
+        <>
+          <div className="field thickness-readout">
+            <span>High-index thickness</span>
+            <strong>{formatWavelengthInput(visibleThicknessHighNm)} nm</strong>
+            <small>
+              {thicknessMode === 'acoustic'
+                ? 'Reserved for future acoustic control.'
+                : 'Quarter-wave value from the design wavelength and material index.'}
+            </small>
+          </div>
+
+          <div className="field thickness-readout">
+            <span>Low-index thickness</span>
+            <strong>{formatWavelengthInput(visibleThicknessLowNm)} nm</strong>
+            <small>
+              {thicknessMode === 'acoustic'
+                ? 'Reserved for future acoustic control.'
+                : 'Quarter-wave value from the design wavelength and material index.'}
+            </small>
+          </div>
+        </>
+      )}
 
       <label className="field">
         <span>Periods</span>

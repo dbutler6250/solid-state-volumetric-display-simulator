@@ -44,6 +44,7 @@ const validateRefractiveIndex = (
 /** Validates the stack inputs used by the form, importer, and solver. */
 export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+  const thicknessMode = inputs.thicknessMode ?? 'derived';
   const wavelengthStartNm = inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5;
   const wavelengthEndNm = inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5;
   const wavelengthPointCount = inputs.wavelengthPointCount ?? 401;
@@ -108,6 +109,32 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       field: 'polarization',
       message: 'Polarization must be TE or TM.',
     });
+  }
+
+  if (thicknessMode !== 'derived' && thicknessMode !== 'manual' && thicknessMode !== 'acoustic') {
+    issues.push({
+      field: 'thicknessMode',
+      message: 'Thickness mode must be derived, manual, or acoustic.',
+    });
+  }
+
+  if (thicknessMode === 'manual') {
+    const highIndexThicknessNm = inputs.highIndexThicknessNm;
+    const lowIndexThicknessNm = inputs.lowIndexThicknessNm;
+
+    if (typeof highIndexThicknessNm !== 'number' || !Number.isFinite(highIndexThicknessNm) || highIndexThicknessNm <= 0) {
+      issues.push({
+        field: 'highIndexThicknessNm',
+        message: 'High-index thickness must be greater than 0 nm in manual mode.',
+      });
+    }
+
+    if (typeof lowIndexThicknessNm !== 'number' || !Number.isFinite(lowIndexThicknessNm) || lowIndexThicknessNm <= 0) {
+      issues.push({
+        field: 'lowIndexThicknessNm',
+        message: 'Low-index thickness must be greater than 0 nm in manual mode.',
+      });
+    }
   }
 
   if (!isFiniteNumber(wavelengthStartNm) || wavelengthStartNm <= 0) {
