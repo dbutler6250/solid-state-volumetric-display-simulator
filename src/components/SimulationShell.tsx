@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import { QuarterWaveStackForm } from './inputs/QuarterWaveStackForm';
+import { FormattedNumberInput } from './inputs/FormattedNumberInput';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
@@ -45,6 +46,9 @@ const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
 
+const formatParameterSweepInput = (value: number | undefined): string =>
+  typeof value === 'number' && Number.isFinite(value) ? value.toString() : '';
+
 /** Coordinates inputs, solver execution, exports, imports, and chart controls. */
 export function SimulationShell() {
   const [inputs, setInputs] = useState(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
@@ -78,6 +82,15 @@ export function SimulationShell() {
     return solveQuarterWaveStack(inputs);
   }, [inputs, validationIssues]);
   const effectiveParameterSweep = getEffectiveParameterSweep(inputs, parameterSweep);
+  const parameterSweepIsReadOnly = parameterSweep.parameter === 'designWavelengthNm';
+  const parameterSweepIsInteger = parameterSweep.parameter === 'periodCount';
+  const parameterSweepMinimum = parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1;
+  const parameterSweepMaximum = parameterSweep.parameter === 'incidentAngleDegrees'
+    ? MAX_INCIDENT_ANGLE_DEGREES
+    : undefined;
+  const parameterSweepResetKey = `${inputResetKey}:${parameterSweep.parameter}:${
+    parameterSweepIsInteger ? inputs.periodCount : ''
+  }`;
 
   useEffect(() => {
     if (parameterSweep.parameter !== 'periodCount') {
@@ -375,51 +388,66 @@ export function SimulationShell() {
             <div className="parameter-sweep-grid">
               <label className="field">
                 <span>Start</span>
-                <input
-                  type="number"
-                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
-                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
-                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
+                <FormattedNumberInput
+                  min={parameterSweepMinimum}
+                  max={parameterSweepMaximum}
+                  step="1"
+                  parseMode={parameterSweepIsInteger ? 'integer' : 'decimal'}
+                  normalizeOnBlur={parameterSweepIsInteger ? Math.round : undefined}
                   value={effectiveParameterSweep.start}
-                  readOnly={parameterSweep.parameter === 'designWavelengthNm'}
-                  onChange={(event) =>
+                  readOnly={parameterSweepIsReadOnly}
+                  formatInactive={formatParameterSweepInput}
+                  onValueChange={(start) =>
                     updateParameterSweep({
                       ...parameterSweep,
-                      start: Number(event.target.value),
+                      start,
                     })
                   }
+                  resetKey={parameterSweepResetKey}
+                  showStepper={!parameterSweepIsReadOnly}
+                  stepperLabel="parameter sweep start"
                 />
               </label>
               <label className="field">
                 <span>End</span>
-                <input
-                  type="number"
-                  min={parameterSweep.parameter === 'incidentAngleDegrees' ? 0 : 1}
-                  max={parameterSweep.parameter === 'incidentAngleDegrees' ? MAX_INCIDENT_ANGLE_DEGREES : undefined}
-                  step={parameterSweep.parameter === 'incidentAngleDegrees' ? 1 : 1}
+                <FormattedNumberInput
+                  min={parameterSweepMinimum}
+                  max={parameterSweepMaximum}
+                  step="1"
+                  parseMode={parameterSweepIsInteger ? 'integer' : 'decimal'}
+                  normalizeOnBlur={parameterSweepIsInteger ? Math.round : undefined}
                   value={effectiveParameterSweep.end}
-                  readOnly={parameterSweep.parameter === 'designWavelengthNm'}
-                  onChange={(event) =>
+                  readOnly={parameterSweepIsReadOnly}
+                  formatInactive={formatParameterSweepInput}
+                  onValueChange={(end) =>
                     updateParameterSweep({
                       ...parameterSweep,
-                      end: Number(event.target.value),
+                      end,
                     })
                   }
+                  resetKey={parameterSweepResetKey}
+                  showStepper={!parameterSweepIsReadOnly}
+                  stepperLabel="parameter sweep end"
                 />
               </label>
               <label className="field">
                 <span>Points</span>
-                <input
-                  type="number"
-                  min="2"
+                <FormattedNumberInput
+                  min={2}
                   step="1"
+                  parseMode="integer"
+                  normalizeOnBlur={Math.round}
                   value={effectiveParameterSweep.pointCount}
-                  onChange={(event) =>
+                  formatInactive={formatParameterSweepInput}
+                  onValueChange={(pointCount) =>
                     updateParameterSweep({
                       ...parameterSweep,
-                      pointCount: Number(event.target.value),
+                      pointCount,
                     })
                   }
+                  resetKey={inputResetKey}
+                  showStepper
+                  stepperLabel="parameter sweep points"
                 />
               </label>
             </div>

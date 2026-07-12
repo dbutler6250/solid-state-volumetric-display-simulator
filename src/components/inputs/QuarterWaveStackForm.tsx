@@ -400,7 +400,7 @@ export function QuarterWaveStackForm({
         </button>
       </div>
 
-      <label className="field">
+      <label className="field sweep-start-field">
         <span>Start wavelength (nm)</span>
         <FormattedNumberInput
           min={SWEEP_ENDPOINT_MIN_NM}
@@ -432,7 +432,7 @@ export function QuarterWaveStackForm({
         <FieldError message={getIssueForField(validationIssues, 'wavelengthStartNm')} />
       </label>
 
-      <label className="field">
+      <label className="field sweep-end-field">
         <span>End wavelength (nm)</span>
         <FormattedNumberInput
           min={SWEEP_ENDPOINT_MIN_NM}
@@ -464,7 +464,26 @@ export function QuarterWaveStackForm({
         <FieldError message={getIssueForField(validationIssues, 'wavelengthEndNm')} />
       </label>
 
-      <div className="field">
+      <label className="field sweep-points-field">
+        <span>Sweep points</span>
+        <FormattedNumberInput
+          min={2}
+          max={2001}
+          step="1"
+          parseMode="integer"
+          normalizeOnBlur={Math.round}
+          value={inputs.wavelengthPointCount}
+          formatInactive={formatNumericInput}
+          onValueChange={(wavelengthPointCount) => onChange({ ...inputs, wavelengthPointCount })}
+          resetKey={externalResetKey}
+          showStepper
+          stepperLabel="sweep points"
+          aria-invalid={isInvalid('wavelengthPointCount')}
+        />
+        <FieldError message={getIssueForField(validationIssues, 'wavelengthPointCount')} />
+      </label>
+
+      <div className="field sweep-range-field">
         <span>Sweep range</span>
         <div className="sweep-range-summary">
           <FormattedNumberInput
@@ -514,24 +533,6 @@ export function QuarterWaveStackForm({
         </div>
       </div>
 
-      <label className="field">
-        <span>Sweep points</span>
-        <FormattedNumberInput
-          min={2}
-          max={2001}
-          step="1"
-          parseMode="integer"
-          normalizeOnBlur={Math.round}
-          value={inputs.wavelengthPointCount}
-          formatInactive={formatNumericInput}
-          onValueChange={(wavelengthPointCount) => onChange({ ...inputs, wavelengthPointCount })}
-          resetKey={externalResetKey}
-          showStepper
-          stepperLabel="sweep points"
-          aria-invalid={isInvalid('wavelengthPointCount')}
-        />
-        <FieldError message={getIssueForField(validationIssues, 'wavelengthPointCount')} />
-      </label>
         </>
       )}
     </form>

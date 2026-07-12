@@ -171,16 +171,21 @@ label {
 
 .form-grid-sweep {
   grid-template-columns: repeat(3, minmax(9rem, 1fr));
+  grid-template-areas:
+    'title title title'
+    'start end range'
+    'points points range';
   align-items: start;
 }
 
 .form-grid-sweep .sweep-section-title {
-  grid-column: 1 / -1;
+  grid-area: title;
 }
 
-.form-grid-sweep .field:nth-of-type(3) {
-  grid-column: span 2;
-}
+.form-grid-sweep .sweep-start-field { grid-area: start; }
+.form-grid-sweep .sweep-end-field { grid-area: end; }
+.form-grid-sweep .sweep-points-field { grid-area: points; }
+.form-grid-sweep .sweep-range-field { grid-area: range; }
 
 .parameter-sweep-panel.tab-controls {
   display: grid;
@@ -925,6 +930,11 @@ label {
 
   .form-grid-sweep {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'title title'
+      'start end'
+      'points points'
+      'range range';
   }
 
   .parameter-sweep-panel.tab-controls {
@@ -982,7 +992,12 @@ label {
     grid-template-columns: 1fr;
   }
 
-  .form-grid-sweep .field:nth-of-type(3) {
-    grid-column: auto;
+  .form-grid-sweep {
+    grid-template-areas:
+      'title'
+      'start'
+      'end'
+      'points'
+      'range';
   }
 }
