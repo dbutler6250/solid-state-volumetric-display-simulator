@@ -15,8 +15,9 @@
 ## Browser Verification
 
 - Verified tab selection, Arrow/Home/End navigation, completed sweep persistence, and zero console errors.
-- Verified no page-level horizontal overflow at approximately 1440 px, 768 px, and 390 px.
+- Verified no page-level horizontal overflow at approximately 1440 px, 1024 px, 900 px, 768 px, and 390 px.
 
 ## Notes
 
 - The narrow-screen tab bar scrolls horizontally while the page remains within the viewport.
+- The single-column workspace breakpoint is 1160 px so intermediate tablet widths do not overflow.

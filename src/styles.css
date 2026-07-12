@@ -872,7 +872,7 @@ label {
   font-size: 0.86rem;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1160px) {
   .workspace {
     grid-template-columns: 1fr;
   }
