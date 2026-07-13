@@ -1,5 +1,11 @@
 # Handoff
 
+## Repository Status
+
+- PR #44 was merged into `main` at `d9405d2`.
+- The merged `codex/issue-43-unified-structure-resolution` branch was deleted locally and from `origin` after fetching with pruning.
+- `main` is the only local branch and tracks `origin/main`.
+
 ## Latest Task
 
 - PR #44 / issue #43 now uses one canonical `SimulationDocument` and one shared `ResolvedStructure` for solving, Stack Definition, and result metadata.
