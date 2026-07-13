@@ -19,6 +19,7 @@ type StackConfigExport = {
     thicknessMode: QuarterWaveStackInputs['thicknessMode'];
     highIndexThicknessNm?: number;
     lowIndexThicknessNm?: number;
+    acousticDesign?: QuarterWaveStackInputs['acousticDesign'];
     wavelengthStartNm?: number;
     wavelengthEndNm?: number;
     wavelengthPointCount?: number;
@@ -49,6 +50,7 @@ export function exportStackConfigJson(
       thicknessMode: inputs.thicknessMode,
       highIndexThicknessNm: inputs.highIndexThicknessNm,
       lowIndexThicknessNm: inputs.lowIndexThicknessNm,
+      acousticDesign: inputs.acousticDesign,
       wavelengthStartNm: inputs.wavelengthStartNm,
       wavelengthEndNm: inputs.wavelengthEndNm,
       wavelengthPointCount: inputs.wavelengthPointCount,

@@ -642,6 +642,50 @@ label {
   text-align: center;
 }
 
+.acoustic-actions {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.5rem 0 0.85rem;
+}
+
+.acoustic-helper {
+  margin: 0;
+  color: #8fa0b1;
+  font-size: 0.8rem;
+}
+
+.acoustic-progress {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+}
+
+.acoustic-progress progress {
+  width: 100%;
+  height: 0.85rem;
+  accent-color: #5aa7c8;
+}
+
+.acoustic-progress span {
+  color: #9aa8b7;
+  font-size: 0.8rem;
+}
+
+.acoustic-future-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.acoustic-future-modes .stack-summary-item small {
+  display: block;
+  margin-top: 0.2rem;
+  color: #8fa0b1;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
 .chart-panel {
   min-width: 0;
   padding: 1rem;
@@ -938,6 +982,10 @@ label {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .acoustic-future-modes {
+    grid-template-columns: 1fr;
+  }
+
   .parameter-sweep-grid {
     grid-template-columns: 1fr;
   }
@@ -987,6 +1035,10 @@ label {
 
   .stack-summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .acoustic-actions {
+    margin-top: 0.65rem;
   }
 
   .stack-diagram {

@@ -19,7 +19,7 @@ import {
   type Complex,
 } from '../math/complex';
 import { identityMatrix2, multiplyMatrix2, type Matrix2 } from '../math/matrix2';
-import { buildQuarterWaveStack } from '../structures/quarterWaveStack';
+import { buildQuarterWaveStack, getResolvedStackInputs } from '../structures/quarterWaveStack';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 import { toComplexRefractiveIndex } from '../materials/material';
 
@@ -45,11 +45,15 @@ type SweepSettings = {
   requiredWavelengthNm?: number;
 };
 
-const getSweepSettings = (inputs: QuarterWaveStackInputs): SweepSettings => ({
-  startNm: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
-  endNm: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
-  pointCount: inputs.wavelengthPointCount ?? 500,
-});
+const getSweepSettings = (inputs: QuarterWaveStackInputs): SweepSettings => {
+  const resolvedInputs = getResolvedStackInputs(inputs);
+
+  return {
+    startNm: inputs.wavelengthStartNm ?? resolvedInputs.designWavelengthNm * 0.5,
+    endNm: inputs.wavelengthEndNm ?? resolvedInputs.designWavelengthNm * 1.5,
+    pointCount: inputs.wavelengthPointCount ?? 500,
+  };
+};
 
 /** Validates the input bundle before any solver work begins. */
 const assertValidInputs = (inputs: QuarterWaveStackInputs) => {

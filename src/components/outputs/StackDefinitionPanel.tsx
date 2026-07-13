@@ -1,6 +1,6 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 import { formatRefractiveIndex } from '../../simulation/materials/material';
-import { getResolvedThicknesses } from '../../simulation/structures/quarterWaveStack';
+import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveStack';
 
 type StackDefinitionPanelProps = {
   inputs: QuarterWaveStackInputs;
@@ -47,7 +47,7 @@ const createPeriodSegments = (
 
 /** Builds a compact layer sequence for the stack preview. */
 const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
-  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
+  const { highIndexThicknessNm, lowIndexThicknessNm, periodCount } = getResolvedStackInputs(inputs);
   const incidentMedium: DiagramSegment = {
     key: 'incident',
     label: 'Air',
@@ -61,10 +61,10 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
     kind: 'ambient',
   };
 
-  if (inputs.periodCount <= MAX_VISIBLE_PERIODS) {
+  if (periodCount <= MAX_VISIBLE_PERIODS) {
     return [
       incidentMedium,
-      ...Array.from({ length: inputs.periodCount }, (_, index) =>
+      ...Array.from({ length: periodCount }, (_, index) =>
         createPeriodSegments(highIndexThicknessNm, lowIndexThicknessNm, index + 1),
       ).flat(),
       exitMedium,
@@ -79,14 +79,14 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
     {
       key: 'ellipsis',
       label: '...',
-      detail: `${inputs.periodCount - LEADING_PERIODS - TRAILING_PERIODS} periods hidden`,
+      detail: `${periodCount - LEADING_PERIODS - TRAILING_PERIODS} periods hidden`,
       kind: 'ellipsis',
     },
     ...Array.from({ length: TRAILING_PERIODS }, (_, index) =>
       createPeriodSegments(
         highIndexThicknessNm,
         lowIndexThicknessNm,
-        inputs.periodCount - TRAILING_PERIODS + index + 1,
+        periodCount - TRAILING_PERIODS + index + 1,
       ),
     ).flat(),
     exitMedium,
@@ -96,23 +96,24 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
 /** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
   const thicknessMode = inputs.thicknessMode ?? 'derived';
-  const { highIndexThicknessNm, lowIndexThicknessNm } = getResolvedThicknesses(inputs);
-  const totalLayerCount = Number.isFinite(inputs.periodCount)
-    ? Math.max(0, Math.round(inputs.periodCount) * 2)
+  const resolvedStackInputs = getResolvedStackInputs(inputs);
+  const { highIndexThicknessNm, lowIndexThicknessNm } = resolvedStackInputs;
+  const totalLayerCount = Number.isFinite(resolvedStackInputs.periodCount)
+    ? Math.max(0, Math.round(resolvedStackInputs.periodCount) * 2)
     : Number.NaN;
-  const totalPhysicalThicknessNm = inputs.periodCount * (highIndexThicknessNm + lowIndexThicknessNm);
+  const totalPhysicalThicknessNm = resolvedStackInputs.periodCount * (highIndexThicknessNm + lowIndexThicknessNm);
   const segments = isValid ? createLayerSegments(inputs) : [];
 
   return (
     <section className="stack-panel" aria-label="Quarter-wave stack definition">
       <div className="stack-panel-heading">
         <h2>Stack Definition</h2>
-        <span>Air | H/L x {formatCount(inputs.periodCount)} | Air</span>
+        <span>Air | H/L x {formatCount(resolvedStackInputs.periodCount)} | Air</span>
       </div>
       <div className="stack-panel-subtitle">
         <span className={`mode-pill mode-pill-${thicknessMode}`}>
           {thicknessMode === 'derived'
-            ? 'Derived'
+            ? 'Optical'
             : thicknessMode === 'manual'
               ? 'Manual'
               : 'Acoustic'}
@@ -122,7 +123,7 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
             ? 'Quarter-wave values follow the design wavelength.'
             : thicknessMode === 'manual'
               ? 'Thicknesses are editable.'
-              : 'Reserved for future external thickness control.'}
+              : 'Acoustic inputs drive the stack thicknesses.'}
         </span>
       </div>
 
