@@ -68,6 +68,10 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
     };
 
   const generateStack = async () => {
+    if (!isActiveMode || !summary) {
+      return;
+    }
+
     generationAbortRef.current?.abort();
     const controller = new AbortController();
     generationAbortRef.current = controller;
@@ -222,11 +226,13 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
       </div>
 
       <div className="acoustic-actions">
-        <button type="button" className="parameter-sweep-run" onClick={generateStack} disabled={!summary}>
+        <button type="button" className="parameter-sweep-run" onClick={generateStack} disabled={!summary || !isActiveMode}>
           Generate Equivalent Stack
         </button>
         <p className="acoustic-helper">
-          Generation runs in chunks so large period counts can report progress instead of freezing the UI.
+          {isActiveMode
+            ? 'Generation runs in chunks so large period counts can report progress instead of freezing the UI.'
+            : 'Switch the shared input mode to Acoustic before generating an equivalent stack.'}
         </p>
       </div>
 
