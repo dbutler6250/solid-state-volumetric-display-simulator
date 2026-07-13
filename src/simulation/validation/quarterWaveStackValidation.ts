@@ -114,7 +114,7 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
   if (thicknessMode !== 'derived' && thicknessMode !== 'manual' && thicknessMode !== 'acoustic') {
     issues.push({
       field: 'thicknessMode',
-      message: 'Thickness mode must be derived, manual, or acoustic.',
+      message: 'Input mode must be optical, manual, or acoustic.',
     });
   }
 
@@ -142,7 +142,7 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
     if (!design) {
       issues.push({
         field: 'thicknessMode',
-        message: 'Acoustic thickness mode requires acoustic design inputs.',
+        message: 'Acoustic input mode requires acoustic design inputs.',
       });
     } else {
       if (!isFiniteNumber(design.acousticVelocityMps) || design.acousticVelocityMps <= 0) {

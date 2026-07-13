@@ -4,6 +4,7 @@ import type { LayerStack } from '../layers/stack';
 import { AIR } from '../materials/catalog';
 import type { Material } from '../materials/material';
 import { buildQuarterWaveStack } from '../structures/quarterWaveStack';
+import { getResolvedStackInputs } from '../structures/quarterWaveStack';
 import {
   solveLayerStack,
   solveQuarterWaveStack,
@@ -295,6 +296,35 @@ describe('transfer matrix solver', () => {
         (point) => point.centerWavelengthNm !== null && point.centerWavelengthNm > 0,
       ),
     ).toBe(true);
+  });
+
+  it('uses resolved acoustic inputs when solving the spectrum', () => {
+    const inputs: QuarterWaveStackInputs = {
+      highIndexMaterial: makeMaterial('nH', 2.4),
+      lowIndexMaterial: makeMaterial('nL', 1.45),
+      periodCount: 1,
+      designWavelengthNm: 600,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+      thicknessMode: 'acoustic',
+      acousticDesign: {
+        acousticMaterial: makeMaterial('fused-silica', 1.45),
+        acousticVelocityMps: 5970,
+        acousticFrequencyHz: 1e9,
+        acousticPeriodCount: 4,
+        braggOrder: 1,
+        acousticIndexModulation: 0.002,
+        acousticRepresentationMode: 'accurate',
+      },
+    };
+
+    const resolved = getResolvedStackInputs(inputs);
+    const result = solveQuarterWaveStack(inputs);
+
+    expect(resolved.periodCount).toBe(4);
+    expect(result.spectrum[0].wavelengthNm).toBeGreaterThan(0);
+    expect(result.centerWavelengthNm).toBeGreaterThan(0);
+    expect(result.bandwidthNm).toBeGreaterThan(0);
   });
 
   it('sweeps incident angle with bounded values and returns summary metrics for each point', () => {

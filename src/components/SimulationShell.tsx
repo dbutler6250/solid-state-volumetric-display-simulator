@@ -12,6 +12,7 @@ import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
+import { getResolvedStackInputs } from '../simulation/structures/quarterWaveStack';
 import {
   solveQuarterWaveStack,
   solveQuarterWaveStackParameterSweep,
@@ -518,6 +519,8 @@ function getEffectiveParameterSweep(
   inputs: QuarterWaveStackInputs,
   settings: ParameterSweepSettings,
 ): ParameterSweepSettings {
+  const resolvedStackInputs = getResolvedStackInputs(inputs);
+
   if (settings.parameter === 'periodCount') {
     return {
       ...settings,
@@ -531,8 +534,8 @@ function getEffectiveParameterSweep(
 
   return {
     ...settings,
-    start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
-    end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
+    start: inputs.wavelengthStartNm ?? resolvedStackInputs.designWavelengthNm * 0.5,
+    end: inputs.wavelengthEndNm ?? resolvedStackInputs.designWavelengthNm * 1.5,
   };
 }
 

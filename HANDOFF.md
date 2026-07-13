@@ -2,10 +2,11 @@
 
 ## Latest Task
 
-- Expanded the acoustic generator work to include a progress-aware explicit stack build, future-mode stubs, and large-period handling groundwork.
-- Added chunked acoustic stack generation so large runs can report progress instead of freezing the UI.
-- Added generator tests for synchronous and asynchronous stack building plus derived layer-count coverage.
-- Updated README and living notes to reflect the new acoustic mode and progress workflow.
+- Refined the shared input model so `Input mode` now controls editable state while inactive values stay visible as reference.
+- Added a resolver layer that propagates acoustic inputs into the solver-facing stack values, stack definition, and parameter-sweep defaults.
+- Kept the acoustic generator as a convenience layer that seeds and updates the shared stack state without removing the manual/optical workflows.
+- Removed the stale helper copy from the thickness readouts and cleaned up the acoustic/stack mode wording.
+- Added tests for the resolver behavior plus the existing acoustic stack generation coverage.
 
 ## Verification
 
@@ -15,8 +16,10 @@
 
 ## Browser Verification
 
-- Verified the acoustic tab renders and is selectable on desktop and mobile Chrome.
+- Verified the input-mode selector, shared read-only reference values, acoustic resolver sync, and stack definition updates on desktop Chrome.
+- Verified the acoustic tab remains selectable on mobile Chrome.
 
 ## Notes
 
-- The acoustic generator now has explicit progress reporting for large materializations and future-mode stubs for standing-wave, traveling-wave, and coupled-mode / Floquet paths.
+- The acoustic generator now feeds the shared solver-facing stack state when active, but manual and optical workflows remain available.
+- Remaining follow-up is the broader tab redesign to reduce duplication further if you want the acoustic workflow to become the dominant path visually.

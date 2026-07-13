@@ -93,8 +93,9 @@ export async function buildAcousticGratingStackAsync(
     }
 
     layers.push(buildAcousticLayer(design, sliceIndex, sliceThicknessNm, slicesPerPeriod));
-    if (sliceIndex > 0 && sliceIndex % ACOUSTIC_LAYER_YIELD_INTERVAL === 0) {
-      onProgress?.({ completedLayers: sliceIndex, totalLayers: totalSlices });
+    const completedLayers = sliceIndex + 1;
+    if (completedLayers % ACOUSTIC_LAYER_YIELD_INTERVAL === 0) {
+      onProgress?.({ completedLayers, totalLayers: totalSlices });
       await yieldToBrowser();
     }
   }
@@ -157,9 +158,9 @@ function buildAcousticLayer(
   thicknessNm: number,
   slicesPerPeriod: number,
 ): OpticalLayer {
-  const sample = Math.cos((2 * Math.PI * (sliceIndex + 0.5)) / slicesPerPeriod);
   const refractiveIndex = design.acousticMaterial.refractiveIndex;
   const baseIndex = typeof refractiveIndex === 'number' ? refractiveIndex : refractiveIndex.real;
+  const sample = getAcousticWaveSample(design.acousticRepresentationMode, sliceIndex, slicesPerPeriod);
 
   return {
     material: {
@@ -170,6 +171,19 @@ function buildAcousticLayer(
     },
     thicknessNm,
   };
+}
+
+function getAcousticWaveSample(
+  mode: AcousticDesignInputs['acousticRepresentationMode'],
+  sliceIndex: number,
+  slicesPerPeriod: number,
+): number {
+  if (mode === 'binary') {
+    const halfwaySlice = Math.floor(slicesPerPeriod / 2);
+    return sliceIndex % slicesPerPeriod < halfwaySlice ? 1 : -1;
+  }
+
+  return Math.cos((2 * Math.PI * (sliceIndex + 0.5)) / slicesPerPeriod);
 }
 
 async function yieldToBrowser() {

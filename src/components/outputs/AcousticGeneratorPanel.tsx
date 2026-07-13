@@ -39,24 +39,33 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
   const stackInput = useMemo(() => ({ ...inputs, acousticDesign }), [inputs, acousticDesign]);
   const summary = getAcousticDesignSummary(stackInput);
   const estimatedLayerCount = getAcousticEstimatedLayerCount(stackInput);
-  const [generatedStack, setGeneratedStack] = useState<ReturnType<typeof buildAcousticGratingStack> | null>(null);
   const [generationProgress, setGenerationProgress] = useState<AcousticGenerationProgress | null>(null);
   const [generationMessage, setGenerationMessage] = useState<string | null>(null);
   const generationAbortRef = useRef<AbortController | null>(null);
+  const isActiveMode = inputs.thicknessMode === 'acoustic';
 
   useEffect(() => {
     generationAbortRef.current?.abort();
-    setGeneratedStack(null);
     setGenerationProgress(null);
     setGenerationMessage(null);
   }, [stackInput]);
 
   const updateDesign = (patch: Partial<AcousticDesignInputs>) =>
-    onChange({
-      ...inputs,
-      thicknessMode: 'acoustic',
-      acousticDesign: { ...acousticDesign, ...patch },
-    });
+    {
+      const nextDesign = { ...acousticDesign, ...patch };
+      const nextInputs = {
+        ...inputs,
+        thicknessMode: 'acoustic' as const,
+        acousticDesign: nextDesign,
+      };
+      const nextSummary = getAcousticDesignSummary(nextInputs);
+
+      onChange({
+        ...nextInputs,
+        periodCount: nextDesign.acousticPeriodCount,
+        designWavelengthNm: nextSummary?.braggWavelengthNm ?? inputs.designWavelengthNm,
+      });
+    };
 
   const generateStack = async () => {
     generationAbortRef.current?.abort();
@@ -72,7 +81,6 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
       return;
     }
     setGenerationProgress({ completedLayers: estimatedLayerCount, totalLayers: estimatedLayerCount });
-    setGeneratedStack(stack);
     setGenerationMessage(stack ? 'Acoustic stack generation complete.' : 'Acoustic stack generation could not be completed.');
   };
 
@@ -80,7 +88,7 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
     <section className="acoustic-panel" aria-label="Acousto-optic grating generator">
       <div className="stack-panel-heading">
         <h2>Acoustic Generator</h2>
-        <span>Equivalent stack is generated from frequency, velocity, and period count.</span>
+        <span>Equivalent stack is generated from acoustic frequency, velocity, and period count.</span>
       </div>
       <div className="stack-panel-subtitle">
         <span className="mode-pill mode-pill-acoustic">Acoustic</span>
@@ -103,6 +111,7 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
           <span>Acoustic medium</span>
           <select
             value={acousticDesign.acousticMaterial.id}
+            disabled={!isActiveMode}
             onChange={(event) => {
               const material = MATERIAL_CATALOG.find((item) => item.id === event.target.value) ?? MATERIAL_CATALOG[1];
               updateDesign({ acousticMaterial: material });
@@ -123,6 +132,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
             parseMode="integer"
             normalizeOnBlur={Math.round}
             value={acousticDesign.acousticVelocityMps}
+            readOnly={!isActiveMode}
+            disabled={!isActiveMode}
             formatInactive={(value: number | undefined) => (typeof value === 'number' && Number.isFinite(value) ? String(Math.round(value)) : '')}
             onValueChange={(acousticVelocityMps) => updateDesign({ acousticVelocityMps })}
             showStepper
@@ -137,6 +148,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
             parseMode="integer"
             normalizeOnBlur={Math.round}
             value={acousticDesign.acousticFrequencyHz}
+            readOnly={!isActiveMode}
+            disabled={!isActiveMode}
             formatInactive={(value: number | undefined) => (typeof value === 'number' && Number.isFinite(value) ? String(Math.round(value)) : '')}
             onValueChange={(acousticFrequencyHz) => updateDesign({ acousticFrequencyHz })}
             showStepper
@@ -151,6 +164,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
             parseMode="integer"
             normalizeOnBlur={Math.round}
             value={acousticDesign.acousticPeriodCount}
+            readOnly={!isActiveMode}
+            disabled={!isActiveMode}
             formatInactive={(value: number | undefined) => (typeof value === 'number' && Number.isFinite(value) ? String(Math.round(value)) : '')}
             onValueChange={(acousticPeriodCount) => updateDesign({ acousticPeriodCount })}
             showStepper
@@ -165,6 +180,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
             parseMode="integer"
             normalizeOnBlur={Math.round}
             value={acousticDesign.braggOrder}
+            readOnly={!isActiveMode}
+            disabled={!isActiveMode}
             formatInactive={(value: number | undefined) => (typeof value === 'number' && Number.isFinite(value) ? String(Math.round(value)) : '')}
             onValueChange={(braggOrder) => updateDesign({ braggOrder })}
             showStepper
@@ -177,6 +194,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
             min={0}
             step="0.001"
             value={acousticDesign.acousticIndexModulation}
+            readOnly={!isActiveMode}
+            disabled={!isActiveMode}
             formatInactive={(value: number | undefined) => (typeof value === 'number' && Number.isFinite(value) ? value.toFixed(3) : '')}
             onValueChange={(acousticIndexModulation) => updateDesign({ acousticIndexModulation })}
             showStepper
@@ -188,6 +207,7 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
           <span>Representation</span>
           <select
             value={acousticDesign.acousticRepresentationMode}
+            disabled={!isActiveMode}
             onChange={(event) =>
               updateDesign({ acousticRepresentationMode: event.target.value as AcousticDesignInputs['acousticRepresentationMode'] })
             }
@@ -226,14 +246,6 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
         <Summary label="Predicted Bragg wavelength" value={summary ? `${summary.braggWavelengthNm.toFixed(2)} nm` : 'Invalid'} />
       </div>
 
-      <div className="stack-diagram" aria-label="Acoustic slice diagram">
-        {generatedStack ? generatedStack.layers.slice(0, 16).map((layer, index) => (
-          <div className="stack-segment stack-segment-high" key={layer.material.id}>
-            <strong>{index + 1}</strong>
-            <span>{layer.thicknessNm.toFixed(2)} nm</span>
-          </div>
-        )) : <div className="stack-diagram-placeholder">Acoustic stack preview will appear when the inputs are valid.</div>}
-      </div>
       <div className="acoustic-future-modes">
         <div className="stack-summary-item">
           <span>Standing-wave</span>

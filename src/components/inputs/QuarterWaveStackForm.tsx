@@ -10,6 +10,8 @@ import {
   applyDesignWavelength,
   applySweepRange,
 } from './quarterWaveStackFormState';
+import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveStack';
+import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../../simulation/structures/acoustoOpticGrating';
 
 type QuarterWaveStackFormProps = {
   inputs: QuarterWaveStackInputs;
@@ -87,17 +89,32 @@ const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
 const normalizeThicknessMode = (mode: ThicknessMode): ThicknessMode =>
   mode === 'manual' || mode === 'acoustic' ? mode : 'derived';
 
-/** Keeps the active thickness mode and stored thickness values aligned. */
+/** Keeps the active input mode and stored thickness values aligned. */
 const applyThicknessMode = (inputs: QuarterWaveStackInputs, thicknessMode: ThicknessMode): QuarterWaveStackInputs => {
   const nextMode = normalizeThicknessMode(thicknessMode);
   const derivedThicknesses = getDerivedThicknesses(inputs);
 
-  if (nextMode === 'derived' || nextMode === 'acoustic') {
+  if (nextMode === 'acoustic') {
+    const acousticInputs = { ...inputs, thicknessMode: 'acoustic' as const };
+    const resolvedAcousticInputs = getResolvedStackInputs(acousticInputs);
+
     return {
       ...inputs,
       thicknessMode: nextMode,
-      highIndexThicknessNm: nextMode === 'acoustic' ? inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm : inputs.highIndexThicknessNm,
-      lowIndexThicknessNm: nextMode === 'acoustic' ? inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm : inputs.lowIndexThicknessNm,
+      acousticDesign: inputs.acousticDesign ?? DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+      periodCount: resolvedAcousticInputs.periodCount,
+      designWavelengthNm: resolvedAcousticInputs.designWavelengthNm,
+      highIndexThicknessNm: inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm,
+      lowIndexThicknessNm: inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm,
+    };
+  }
+
+  if (nextMode === 'derived') {
+    return {
+      ...inputs,
+      thicknessMode: nextMode,
+      highIndexThicknessNm: inputs.highIndexThicknessNm,
+      lowIndexThicknessNm: inputs.lowIndexThicknessNm,
     };
   }
 
@@ -167,15 +184,19 @@ export function QuarterWaveStackForm({
   const isInvalid = (field: keyof QuarterWaveStackInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;
   const thicknessMode = inputs.thicknessMode ?? 'derived';
-  const derivedThicknesses = getDerivedThicknesses(inputs);
+  const resolvedStackInputs = getResolvedStackInputs(inputs);
   const visibleThicknessHighNm =
     thicknessMode === 'manual'
       ? inputs.highIndexThicknessNm
-      : derivedThicknesses.highIndexThicknessNm;
+      : resolvedStackInputs.highIndexThicknessNm;
   const visibleThicknessLowNm =
     thicknessMode === 'manual'
       ? inputs.lowIndexThicknessNm
-      : derivedThicknesses.lowIndexThicknessNm;
+      : resolvedStackInputs.lowIndexThicknessNm;
+  const canEditModeInputs = thicknessMode !== 'acoustic';
+  const visiblePeriodCount = thicknessMode === 'acoustic' ? resolvedStackInputs.periodCount : inputs.periodCount;
+  const visibleDesignWavelengthNm =
+    thicknessMode === 'acoustic' ? resolvedStackInputs.designWavelengthNm : inputs.designWavelengthNm;
 
   const renderMaterialField = (field: 'highIndexMaterial' | 'lowIndexMaterial', label: string) => {
     const material = inputs[field];
@@ -244,11 +265,11 @@ export function QuarterWaveStackForm({
 
       <div className="field thickness-mode-group">
         <label className="field">
-          <span>Thickness mode</span>
+          <span>Input mode</span>
           <select value={thicknessMode} onChange={updateThicknessMode}>
-            <option value="derived">Derived from design wavelength</option>
-            <option value="manual">User typed</option>
-            <option value="acoustic">Acoustic (future)</option>
+            <option value="derived">Optical</option>
+            <option value="manual">Manual</option>
+            <option value="acoustic">Acoustic</option>
           </select>
           <FieldError message={getIssueForField(validationIssues, 'thicknessMode')} />
         </label>
@@ -263,6 +284,8 @@ export function QuarterWaveStackForm({
               step="any"
               value={inputs.highIndexThicknessNm}
               formatInactive={formatThicknessDisplay}
+              readOnly={thicknessMode !== 'manual'}
+              disabled={thicknessMode !== 'manual'}
               onValueChange={(highIndexThicknessNm) => onChange({
                 ...inputs,
                 thicknessMode: 'manual',
@@ -284,6 +307,8 @@ export function QuarterWaveStackForm({
               step="any"
               value={inputs.lowIndexThicknessNm}
               formatInactive={formatThicknessDisplay}
+              readOnly={thicknessMode !== 'manual'}
+              disabled={thicknessMode !== 'manual'}
               onValueChange={(lowIndexThicknessNm) => onChange({
                 ...inputs,
                 thicknessMode: 'manual',
@@ -303,21 +328,11 @@ export function QuarterWaveStackForm({
           <div className="field thickness-readout">
             <span>High-index thickness</span>
             <strong>{formatThicknessDisplay(visibleThicknessHighNm)} nm</strong>
-            <small>
-              {thicknessMode === 'acoustic'
-                ? 'Reserved for future acoustic control.'
-                : 'Quarter-wave value from the design wavelength and material index.'}
-            </small>
           </div>
 
           <div className="field thickness-readout">
             <span>Low-index thickness</span>
             <strong>{formatThicknessDisplay(visibleThicknessLowNm)} nm</strong>
-            <small>
-              {thicknessMode === 'acoustic'
-                ? 'Reserved for future acoustic control.'
-                : 'Quarter-wave value from the design wavelength and material index.'}
-            </small>
           </div>
         </>
       )}
@@ -329,8 +344,10 @@ export function QuarterWaveStackForm({
           step="1"
           parseMode="integer"
           normalizeOnBlur={Math.round}
-          value={inputs.periodCount}
+          value={visiblePeriodCount}
           formatInactive={formatNumericInput}
+          readOnly={!canEditModeInputs}
+          disabled={!canEditModeInputs}
           onValueChange={(periodCount) => onChange({ ...inputs, periodCount })}
           resetKey={externalResetKey}
           showStepper
@@ -344,8 +361,10 @@ export function QuarterWaveStackForm({
         <span>Design wavelength (nm)</span>
         <FormattedNumberInput
           min={1}
-          value={inputs.designWavelengthNm}
+          value={visibleDesignWavelengthNm}
           formatInactive={formatNumericInput}
+          readOnly={!canEditModeInputs}
+          disabled={!canEditModeInputs}
           onValueChange={(value) => onChange(applyDesignWavelength(inputs, value))}
           resetKey={externalResetKey}
           showStepper
