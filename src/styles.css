@@ -82,6 +82,23 @@ label {
   background: #101720;
 }
 
+.reference-range-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid #c98b16;
+  border-radius: 0.5rem;
+  background: #fff6dd;
+  color: #5f4100;
+}
+
+.reference-range-warning button {
+  flex: 0 0 auto;
+}
+
 .panel,
 .chart-panel {
   border: 1px solid #2d3a4b;
@@ -1031,6 +1048,22 @@ label {
 }
 
 @media (max-width: 540px) {
+  .output-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .output-tabs button {
+    min-width: 0;
+    padding-inline: 0.45rem;
+    font-size: 0.78rem;
+  }
+
+  .reference-range-warning {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .output-navigation {
     align-items: stretch;
     flex-direction: column;

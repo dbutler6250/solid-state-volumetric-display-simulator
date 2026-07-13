@@ -11,12 +11,12 @@ import {
   applySweepRange,
 } from './quarterWaveStackFormState';
 import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveStack';
-import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../../simulation/structures/acoustoOpticGrating';
 
 type QuarterWaveStackFormProps = {
   inputs: QuarterWaveStackInputs;
   validationIssues: ValidationIssue[];
   onChange: (inputs: QuarterWaveStackInputs) => void;
+  onModeChange?: (mode: ThicknessMode) => void;
   section?: 'global' | 'sweep';
   externalResetKey?: number;
 };
@@ -81,51 +81,6 @@ const formatWavelengthInput = (value: number | undefined): string => {
 const formatSweepRangeInput = (value: number | undefined): string =>
   typeof value === 'number' && Number.isFinite(value) ? Number(value.toString()).toString() : '';
 
-const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
-  highIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.highIndexMaterial.refractiveIndex)),
-  lowIndexThicknessNm: inputs.designWavelengthNm / (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex)),
-});
-
-const normalizeThicknessMode = (mode: ThicknessMode): ThicknessMode =>
-  mode === 'manual' || mode === 'acoustic' ? mode : 'derived';
-
-/** Keeps the active input mode and stored thickness values aligned. */
-const applyThicknessMode = (inputs: QuarterWaveStackInputs, thicknessMode: ThicknessMode): QuarterWaveStackInputs => {
-  const nextMode = normalizeThicknessMode(thicknessMode);
-  const derivedThicknesses = getDerivedThicknesses(inputs);
-
-  if (nextMode === 'acoustic') {
-    const acousticInputs = { ...inputs, thicknessMode: 'acoustic' as const };
-    const resolvedAcousticInputs = getResolvedStackInputs(acousticInputs);
-
-    return {
-      ...inputs,
-      thicknessMode: nextMode,
-      acousticDesign: inputs.acousticDesign ?? DEFAULT_ACOUSTIC_DESIGN_INPUTS,
-      periodCount: resolvedAcousticInputs.periodCount,
-      designWavelengthNm: resolvedAcousticInputs.designWavelengthNm,
-      highIndexThicknessNm: inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm,
-      lowIndexThicknessNm: inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm,
-    };
-  }
-
-  if (nextMode === 'derived') {
-    return {
-      ...inputs,
-      thicknessMode: nextMode,
-      highIndexThicknessNm: inputs.highIndexThicknessNm,
-      lowIndexThicknessNm: inputs.lowIndexThicknessNm,
-    };
-  }
-
-  return {
-    ...inputs,
-    thicknessMode: nextMode,
-    highIndexThicknessNm: inputs.highIndexThicknessNm ?? derivedThicknesses.highIndexThicknessNm,
-    lowIndexThicknessNm: inputs.lowIndexThicknessNm ?? derivedThicknesses.lowIndexThicknessNm,
-  };
-};
-
 const formatThicknessDisplay = (value: number | undefined): string =>
   typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : '';
 
@@ -133,6 +88,7 @@ export function QuarterWaveStackForm({
   inputs,
   validationIssues,
   onChange,
+  onModeChange,
   section = 'global',
   externalResetKey = 0,
 }: QuarterWaveStackFormProps) {
@@ -179,7 +135,9 @@ export function QuarterWaveStackForm({
     resetSweepDrafts('start', 'end', 'range');
   };
   const updateThicknessMode = (event: ChangeEvent<HTMLSelectElement>) => {
-    onChange(applyThicknessMode(inputs, event.target.value as ThicknessMode));
+    const mode = event.target.value as ThicknessMode;
+    if (onModeChange) onModeChange(mode);
+    else onChange({ ...inputs, thicknessMode: mode });
   };
   const isInvalid = (field: keyof QuarterWaveStackInputs): boolean =>
     getIssueForField(validationIssues, field) !== undefined;

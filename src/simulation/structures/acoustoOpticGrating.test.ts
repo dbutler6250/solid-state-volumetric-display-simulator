@@ -7,7 +7,8 @@ import {
 } from './acoustoOpticGrating';
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 import type { Material } from '../materials/material';
-import { buildQuarterWaveStackLayers, getResolvedStackInputs } from './quarterWaveStack';
+import { getResolvedStackInputs } from './quarterWaveStack';
+import { createSimulationDocument, resolveSimulationDocument } from './structureResolver';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
@@ -107,13 +108,14 @@ describe('acoustoOpticGrating', () => {
     expect(resolved.lowIndexThicknessNm).toBeCloseTo(5970 / 16);
   });
 
-  it('builds layers using the resolved acoustic period count', () => {
-    const stack = buildQuarterWaveStackLayers({
+  it('resolves acoustic periods into slices rather than quarter-wave H/L pairs', () => {
+    const resolved = resolveSimulationDocument(createSimulationDocument({
       ...inputs,
       periodCount: 1,
       thicknessMode: 'acoustic',
-    });
+    }));
 
-    expect(stack).toHaveLength(8);
+    expect(resolved.stack.layers).toHaveLength(64);
+    expect(resolved.summary.type).toBe('acousto-optic-grating');
   });
 });

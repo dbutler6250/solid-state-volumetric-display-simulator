@@ -161,13 +161,17 @@ function buildAcousticLayer(
   const refractiveIndex = design.acousticMaterial.refractiveIndex;
   const baseIndex = typeof refractiveIndex === 'number' ? refractiveIndex : refractiveIndex.real;
   const sample = getAcousticWaveSample(design.acousticRepresentationMode, sliceIndex, slicesPerPeriod);
+  const modulatedRealIndex = baseIndex + design.acousticIndexModulation * sample;
 
   return {
     material: {
       ...design.acousticMaterial,
       id: `${design.acousticMaterial.id}-${sliceIndex + 1}`,
       name: `${design.acousticMaterial.name} slice ${sliceIndex + 1}`,
-      refractiveIndex: baseIndex + design.acousticIndexModulation * sample,
+      refractiveIndex:
+        typeof refractiveIndex === 'number'
+          ? modulatedRealIndex
+          : { real: modulatedRealIndex, imag: refractiveIndex.imag },
     },
     thicknessNm,
   };

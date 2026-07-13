@@ -2,6 +2,7 @@ import type {
   ParameterSweepResult,
   ParameterSweepSettings,
   QuarterWaveStackInputs,
+  SimulationDocument,
   SimulationResult,
 } from '../../types/simulation';
 import type { LayerStack } from '../layers/stack';
@@ -19,7 +20,12 @@ import {
   type Complex,
 } from '../math/complex';
 import { identityMatrix2, multiplyMatrix2, type Matrix2 } from '../math/matrix2';
-import { buildQuarterWaveStack, getResolvedStackInputs } from '../structures/quarterWaveStack';
+import {
+  applySweepValue,
+  createSimulationDocument,
+  resolveSimulationDocument,
+  type ResolvedStructure,
+} from '../structures/structureResolver';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 import { toComplexRefractiveIndex } from '../materials/material';
 
@@ -38,21 +44,11 @@ type LayerStackPointResult = {
   transmission: number;
 };
 
-type SweepSettings = {
+type WavelengthSweepSettings = {
   startNm: number;
   endNm: number;
   pointCount: number;
   requiredWavelengthNm?: number;
-};
-
-const getSweepSettings = (inputs: QuarterWaveStackInputs): SweepSettings => {
-  const resolvedInputs = getResolvedStackInputs(inputs);
-
-  return {
-    startNm: inputs.wavelengthStartNm ?? resolvedInputs.designWavelengthNm * 0.5,
-    endNm: inputs.wavelengthEndNm ?? resolvedInputs.designWavelengthNm * 1.5,
-    pointCount: inputs.wavelengthPointCount ?? 500,
-  };
 };
 
 /** Validates the input bundle before any solver work begins. */
@@ -146,7 +142,7 @@ const createWavelengthSweep = ({
   endNm,
   pointCount,
   requiredWavelengthNm,
-}: SweepSettings): number[] => {
+}: WavelengthSweepSettings): number[] => {
   if (startNm <= 0 || endNm <= startNm) throw new Error('Wavelength sweep must have a positive start and an end greater than start.');
   if (pointCount < 2 || !Number.isInteger(pointCount)) throw new Error('Wavelength sweep must include at least two integer points.');
   const step = (endNm - startNm) / (pointCount - 1);
@@ -240,26 +236,45 @@ const calculateMetrics = (spectrum: LayerStackPointResult[]) => {
   return { peakReflectance: peak.reflectance, centerWavelengthNm: (lowerEdge + upperEdge) / 2, bandwidthNm: upperEdge - lowerEdge, maxEnergyConservationError, bandTouchesBoundary };
 };
 
-/** Runs the quarter-wave stack sweep and returns the plotted spectrum and summary metrics. */
+/** Solves the exact resolved layer stack using shared analysis settings. */
+export function solveResolvedStructure(
+  resolved: ResolvedStructure,
+  analysis: SimulationDocument['analysis'],
+  options: { requiredWavelengthNm?: number } = {},
+): SimulationResult {
+  const wavelengths = createWavelengthSweep({
+    startNm: analysis.wavelengthStartNm,
+    endNm: analysis.wavelengthEndNm,
+    pointCount: analysis.wavelengthPointCount,
+    requiredWavelengthNm: options.requiredWavelengthNm,
+  });
+  const spectrum = wavelengths.map((wavelengthNm) =>
+    solveLayerStack(resolved.stack, {
+      wavelengthNm,
+      incidentAngleDegrees: analysis.incidentAngleDegrees,
+      polarization: analysis.polarization,
+    }),
+  );
+  const metrics = calculateMetrics(spectrum);
+  return { spectrum, ...metrics };
+}
+
+/** Resolves and solves one canonical simulation document. */
+export function solveSimulationDocument(
+  document: SimulationDocument,
+  options: { requiredWavelengthNm?: number } = {},
+): SimulationResult {
+  const resolved = resolveSimulationDocument(document);
+  return solveResolvedStructure(resolved, document.analysis, options);
+}
+
+/** Backward-compatible adapter for existing flat inputs. */
 export function solveQuarterWaveStack(
   inputs: QuarterWaveStackInputs,
   options: { requiredWavelengthNm?: number } = {},
 ): SimulationResult {
   assertValidInputs(inputs);
-  const stack = buildQuarterWaveStack(inputs);
-  const wavelengths = createWavelengthSweep({
-    ...getSweepSettings(inputs),
-    requiredWavelengthNm: options.requiredWavelengthNm,
-  });
-  const spectrum = wavelengths.map((wavelengthNm) =>
-    solveLayerStack(stack, {
-      wavelengthNm,
-      incidentAngleDegrees: inputs.incidentAngleDegrees,
-      polarization: inputs.polarization,
-    }),
-  );
-  const metrics = calculateMetrics(spectrum);
-  return { spectrum, ...metrics };
+  return solveSimulationDocument(createSimulationDocument(inputs), options);
 }
 
 /** Runs a parameter sweep across the current quarter-wave stack model. */
@@ -267,19 +282,32 @@ export function solveQuarterWaveStackParameterSweep(
   inputs: QuarterWaveStackInputs,
   settings: ParameterSweepSettings,
 ): ParameterSweepResult {
+  assertValidInputs(inputs);
+  return solveSimulationDocumentParameterSweep(createSimulationDocument(inputs), settings);
+}
+
+/** Resolves every sweep point after updating the active discriminated structure field. */
+export function solveSimulationDocumentParameterSweep(
+  document: SimulationDocument,
+  settings: ParameterSweepSettings,
+): ParameterSweepResult {
+  const supported = resolveSimulationDocument(document).sweepParameters;
+  if (!supported.includes(settings.parameter)) {
+    throw new Error(`Sweep parameter ${settings.parameter} is not supported by the active structure.`);
+  }
   const values = createParameterSweepValues(settings);
   const points = values.map((parameterValue) => {
-    const result = solveQuarterWaveStack({
-      ...inputs,
-      [settings.parameter]:
-        settings.parameter === 'periodCount' ? Math.round(parameterValue) : parameterValue,
-    }, {
+    const sweptDocument = applySweepValue(document, settings, parameterValue);
+    const result = solveSimulationDocument(sweptDocument, {
       requiredWavelengthNm:
         settings.parameter === 'designWavelengthNm' ? parameterValue : undefined,
     });
 
     return {
-      parameterValue: settings.parameter === 'periodCount' ? Math.round(parameterValue) : parameterValue,
+      parameterValue:
+        settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount'
+          ? Math.round(parameterValue)
+          : parameterValue,
       peakReflectance: result.bandTouchesBoundary ? null : result.peakReflectance,
       centerWavelengthNm: result.bandTouchesBoundary ? null : result.centerWavelengthNm,
       bandwidthNm: result.bandTouchesBoundary ? null : result.bandwidthNm,
@@ -308,7 +336,7 @@ function createParameterSweepValues(settings: ParameterSweepSettings): number[] 
     throw new Error('Parameter sweep must include at least two integer points.');
   }
 
-  if (settings.parameter === 'periodCount') {
+  if (settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount') {
     const start = Math.max(1, Math.round(settings.start));
     const end = Math.max(start + 1, Math.round(settings.end));
     const count = Math.min(settings.pointCount, end - start + 1);

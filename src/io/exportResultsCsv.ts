@@ -18,24 +18,12 @@ const formatCommentLine = (label: string, value: string | number): string =>
 
 /** Exports the current simulation setup and spectrum as a self-describing CSV file. */
 export function exportResultsCsv(inputs: QuarterWaveStackInputs, result: SimulationResult): string {
+  const structureLines = getStructureLines(inputs);
   const lines = [
     '# Solid State Volumetric Display Simulator',
     '# Optical stack spectrum export',
     '# schema: ssvds-results-csv-v1',
-    formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
-    formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
-    formatCommentLine(
-      'highIndexMaterial.refractiveIndex',
-      formatRefractiveIndex(inputs.highIndexMaterial.refractiveIndex),
-    ),
-    formatCommentLine('lowIndexMaterial.name', inputs.lowIndexMaterial.name),
-    formatCommentLine('lowIndexMaterial.id', inputs.lowIndexMaterial.id),
-    formatCommentLine(
-      'lowIndexMaterial.refractiveIndex',
-      formatRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex),
-    ),
-    formatCommentLine('periodCount', inputs.periodCount),
-    formatCommentLine('designWavelengthNm', inputs.designWavelengthNm),
+    ...structureLines,
     formatCommentLine('incidentAngleDegrees', inputs.incidentAngleDegrees),
     formatCommentLine('polarization', inputs.polarization),
     formatCommentLine('wavelengthStartNm', inputs.wavelengthStartNm ?? ''),
@@ -56,4 +44,37 @@ export function exportResultsCsv(inputs: QuarterWaveStackInputs, result: Simulat
   ];
 
   return `${lines.join('\n')}\n`;
+}
+
+function getStructureLines(inputs: QuarterWaveStackInputs): string[] {
+  if (inputs.thicknessMode === 'acoustic' && inputs.acousticDesign) {
+    const design = inputs.acousticDesign;
+    return [
+      formatCommentLine('structureType', 'acousto-optic-grating'),
+      formatCommentLine('acousticMaterial.name', design.acousticMaterial.name),
+      formatCommentLine('acousticMaterial.id', design.acousticMaterial.id),
+      formatCommentLine('acousticMaterial.refractiveIndex', formatRefractiveIndex(design.acousticMaterial.refractiveIndex)),
+      formatCommentLine('acousticFrequencyHz', design.acousticFrequencyHz),
+      formatCommentLine('acousticPeriodCount', design.acousticPeriodCount),
+      formatCommentLine('acousticIndexModulation', design.acousticIndexModulation),
+      formatCommentLine('acousticRepresentationMode', design.acousticRepresentationMode),
+    ];
+  }
+  return [
+    formatCommentLine('structureType', 'quarter-wave-stack'),
+    formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
+    formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
+    formatCommentLine(
+      'highIndexMaterial.refractiveIndex',
+      formatRefractiveIndex(inputs.highIndexMaterial.refractiveIndex),
+    ),
+    formatCommentLine('lowIndexMaterial.name', inputs.lowIndexMaterial.name),
+    formatCommentLine('lowIndexMaterial.id', inputs.lowIndexMaterial.id),
+    formatCommentLine(
+      'lowIndexMaterial.refractiveIndex',
+      formatRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex),
+    ),
+    formatCommentLine('periodCount', inputs.periodCount),
+    formatCommentLine('designWavelengthNm', inputs.designWavelengthNm),
+  ];
 }

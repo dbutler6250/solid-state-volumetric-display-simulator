@@ -1,6 +1,12 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 import { formatRefractiveIndex } from '../../simulation/materials/material';
 import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveStack';
+import {
+  createSimulationDocument,
+  resolveSimulationDocument,
+  type AcousticResolvedSummary,
+  type QuarterWaveResolvedSummary,
+} from '../../simulation/structures/structureResolver';
 
 type StackDefinitionPanelProps = {
   inputs: QuarterWaveStackInputs;
@@ -46,8 +52,8 @@ const createPeriodSegments = (
 ];
 
 /** Builds a compact layer sequence for the stack preview. */
-const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] => {
-  const { highIndexThicknessNm, lowIndexThicknessNm, periodCount } = getResolvedStackInputs(inputs);
+const createLayerSegments = (summary: QuarterWaveResolvedSummary): DiagramSegment[] => {
+  const { highIndexThicknessNm, lowIndexThicknessNm, periodCount } = summary;
   const incidentMedium: DiagramSegment = {
     key: 'incident',
     label: 'Air',
@@ -95,14 +101,26 @@ const createLayerSegments = (inputs: QuarterWaveStackInputs): DiagramSegment[] =
 
 /** Shows the derived stack geometry and a concise layer diagram. */
 export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
+  const resolvedStructure = isValid
+    ? resolveSimulationDocument(createSimulationDocument(inputs))
+    : null;
+  if (resolvedStructure?.summary.type === 'acousto-optic-grating') {
+    return <AcousticStackDefinition inputs={inputs} summary={resolvedStructure.summary} />;
+  }
   const thicknessMode = inputs.thicknessMode ?? 'derived';
-  const resolvedStackInputs = getResolvedStackInputs(inputs);
+  const resolvedStackInputs =
+    resolvedStructure?.summary.type === 'quarter-wave-stack'
+      ? resolvedStructure.summary
+      : getResolvedStackInputs(inputs);
   const { highIndexThicknessNm, lowIndexThicknessNm } = resolvedStackInputs;
   const totalLayerCount = Number.isFinite(resolvedStackInputs.periodCount)
     ? Math.max(0, Math.round(resolvedStackInputs.periodCount) * 2)
     : Number.NaN;
   const totalPhysicalThicknessNm = resolvedStackInputs.periodCount * (highIndexThicknessNm + lowIndexThicknessNm);
-  const segments = isValid ? createLayerSegments(inputs) : [];
+  const segments =
+    isValid && resolvedStructure?.summary.type === 'quarter-wave-stack'
+      ? createLayerSegments(resolvedStructure.summary)
+      : [];
 
   return (
     <section className="stack-panel" aria-label="Quarter-wave stack definition">
@@ -163,59 +181,70 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
         </div>
       )}
 
-      {thicknessMode === 'acoustic' ? (
-        <AcousticStackOutputs inputs={inputs} />
-      ) : null}
     </section>
   );
 }
 
-/** Shows acoustic-derived quantities beside the resolved stack geometry. */
-function AcousticStackOutputs({ inputs }: { inputs: QuarterWaveStackInputs }) {
+/** Reports the exact acoustic slice stack consumed by the solver. */
+function AcousticStackDefinition({
+  inputs,
+  summary,
+}: {
+  inputs: QuarterWaveStackInputs;
+  summary: AcousticResolvedSummary;
+}) {
   const design = inputs.acousticDesign;
-  const summary = getResolvedStackInputs(inputs).acousticSummary;
 
   if (!design) {
     return null;
   }
 
   return (
-    <section className="stack-panel acoustic-stack-outputs" aria-label="Acoustic stack outputs">
+    <section className="stack-panel acoustic-stack-outputs" aria-label="Acoustic stack definition">
       <div className="stack-panel-heading">
-        <h2>Acoustic Outputs</h2>
-        <span>Derived from the active acoustic input mode.</span>
+        <h2>Stack Definition</h2>
+        <span>Air | {formatCount(summary.layerCount)} modulated slices | Air</span>
+      </div>
+      <div className="stack-panel-subtitle">
+        <span className="mode-pill mode-pill-acoustic">Acoustic</span>
+        <span>The spectrum and this preview use the same resolved slice stack.</span>
       </div>
       <div className="stack-summary-grid">
         <StackSummaryItem label="Acoustic medium" value={design.acousticMaterial.name} />
         <StackSummaryItem label="Velocity" value={`${design.acousticVelocityMps.toFixed(0)} m/s`} />
         <StackSummaryItem label="Frequency" value={`${(design.acousticFrequencyHz / 1e9).toFixed(3)} GHz`} />
-        <StackSummaryItem label="Driven periods" value={`${Math.round(design.acousticPeriodCount)}`} />
+        <StackSummaryItem label="Acoustic periods" value={`${Math.round(design.acousticPeriodCount)}`} />
         <StackSummaryItem label="Bragg order" value={`${Math.round(design.braggOrder)}`} />
         <StackSummaryItem label="Representation" value={design.acousticRepresentationMode} />
         <StackSummaryItem
           label="Acoustic wavelength"
-          value={summary ? `${formatNumber(summary.acousticWavelengthNm, 2)} nm` : 'Invalid'}
+          value={`${formatNumber(summary.acousticWavelengthNm, 2)} nm`}
         />
         <StackSummaryItem
-          label="Resolved design wavelength"
-          value={summary ? `${formatNumber(summary.braggWavelengthNm, 2)} nm` : 'Invalid'}
+          label="Reference wavelength"
+          value={`${formatNumber(summary.referenceWavelengthNm, 2)} nm`}
         />
         <StackSummaryItem
-          label="Acoustic period length"
-          value={summary ? `${formatNumber(summary.periodLengthNm, 2)} nm` : 'Invalid'}
+          label="Slice thickness"
+          value={`${formatNumber(summary.sliceThicknessNm, 3)} nm`}
         />
         <StackSummaryItem
-          label="Predicted Bragg wavelength"
-          value={summary ? `${formatNumber(summary.braggWavelengthNm, 2)} nm` : 'Invalid'}
+          label="Resolved slices"
+          value={formatCount(summary.layerCount)}
         />
         <StackSummaryItem
-          label="Total length"
-          value={summary ? `${formatNumber(summary.totalLengthNm, 2)} nm` : 'Invalid'}
+          label="Total thickness"
+          value={`${formatNumber(summary.totalThicknessNm, 2)} nm`}
         />
-        <StackSummaryItem
-          label="Estimated layers"
-          value={summary ? formatCount(summary.estimatedLayers) : 'Invalid'}
-        />
+        <StackSummaryItem label="Peak index modulation" value={formatNumber(summary.indexModulation, 4)} />
+      </div>
+      <div className="stack-diagram acoustic-slice-diagram" aria-label="Acoustic slice profile preview">
+        {Array.from({ length: Math.min(summary.slicesPerPeriod, 16) }, (_, index) => (
+          <div className="stack-segment stack-segment-high" key={index}>
+            <strong>{index + 1}</strong>
+            <span>slice</span>
+          </div>
+        ))}
       </div>
       <div className="acoustic-future-modes">
         <div className="stack-summary-item">

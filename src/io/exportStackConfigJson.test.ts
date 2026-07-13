@@ -87,4 +87,22 @@ describe('exportStackConfigJson', () => {
 
     expect(exported.inputs.highIndexMaterial.refractiveIndex).toEqual({ real: 2.2, imag: 0.12 });
   });
+
+  it('identifies acoustic exports and preserves a complex acoustic index', () => {
+    const acousticInputs: QuarterWaveStackInputs = {
+      ...inputs,
+      thicknessMode: 'acoustic',
+      acousticDesign: {
+        ...inputs.acousticDesign!,
+        acousticMaterial: makeMaterial('lossy', 'Lossy medium', { real: 1.5, imag: 0.02 }),
+      },
+    };
+    const exported = JSON.parse(exportStackConfigJson(acousticInputs));
+
+    expect(exported.structureType).toBe('acousto-optic-grating');
+    expect(exported.inputs.acousticDesign.acousticMaterial.refractiveIndex).toEqual({
+      real: 1.5,
+      imag: 0.02,
+    });
+  });
 });
