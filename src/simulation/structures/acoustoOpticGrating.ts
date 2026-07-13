@@ -10,7 +10,7 @@ const DEFAULT_ACOUSTIC_REPRESENTATION_SLICES: Record<AcousticDesignInputs['acous
   reference: 32,
 };
 
-const ACOUSTIC_LAYER_YIELD_INTERVAL = 4096;
+const ACOUSTIC_LAYER_YIELD_INTERVAL = 256;
 
 /** Default acoustic design values used when the acoustic generator is enabled. */
 export const DEFAULT_ACOUSTIC_DESIGN_INPUTS: AcousticDesignInputs = {

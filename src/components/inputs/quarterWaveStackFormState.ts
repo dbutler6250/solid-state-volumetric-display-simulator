@@ -28,9 +28,17 @@ export const applyCenteredSweepRange = (
   centerNm: number,
   rangeNm: number,
 ): QuarterWaveStackInputs => {
+  if (!Number.isFinite(centerNm) || centerNm <= 0 || !Number.isFinite(rangeNm)) {
+    throw new Error('The reference wavelength and analysis range must be finite positive values.');
+  }
   const halfRangeNm = normalizeSweepRange(rangeNm) / 2;
   const nextStartNm = Math.max(SWEEP_ENDPOINT_MIN_NM, Math.round(centerNm - halfRangeNm));
-  const nextEndNm = Math.max(nextStartNm + 1, Math.round(centerNm + halfRangeNm));
+  const nextEndNm = Math.round(centerNm + halfRangeNm);
+  if (!Number.isFinite(nextStartNm) || !Number.isFinite(nextEndNm) || nextEndNm <= nextStartNm) {
+    throw new Error(
+      'The reference wavelength is too large to represent a safe 10–1,200 nm analysis interval.',
+    );
+  }
   return { ...inputs, wavelengthStartNm: nextStartNm, wavelengthEndNm: nextEndNm };
 };
 

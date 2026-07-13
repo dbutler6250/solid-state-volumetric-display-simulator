@@ -45,4 +45,49 @@ describe('simulation workspace state', () => {
       lowIndexThicknessNm: 121,
     });
   });
+
+  it('imports only the targeted structure draft while sharing analysis settings', () => {
+    let state = createSimulationWorkspaceState(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
+    state = simulationWorkspaceReducer(state, { type: 'switch-mode', mode: 'manual' });
+    state = simulationWorkspaceReducer(state, {
+      type: 'update-active',
+      inputs: {
+        ...getActiveInputs(state),
+        highIndexThicknessNm: 77,
+        lowIndexThicknessNm: 123,
+      },
+    });
+    state = simulationWorkspaceReducer(state, {
+      type: 'import',
+      inputs: {
+        ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+        thicknessMode: 'acoustic',
+        wavelengthStartNm: 1000,
+        wavelengthEndNm: 2000,
+        acousticDesign: {
+          acousticMaterial: { id: 'imported', name: 'Imported glass', refractiveIndex: 1.6 },
+          acousticVelocityMps: 5000,
+          acousticFrequencyHz: 2e9,
+          acousticPeriodCount: 5,
+          braggOrder: 1,
+          acousticIndexModulation: 0.001,
+          acousticRepresentationMode: 'fast',
+        },
+      },
+    });
+
+    expect(state.activeMode).toBe('acoustic');
+    expect(state.drafts.acoustic.acousticDesign?.acousticMaterial.id).toBe('imported');
+    expect(state.drafts.manual).toMatchObject({
+      highIndexThicknessNm: 77,
+      lowIndexThicknessNm: 123,
+      wavelengthStartNm: 1000,
+      wavelengthEndNm: 2000,
+    });
+    expect(state.drafts.derived).toMatchObject({
+      designWavelengthNm: DEFAULT_QUARTER_WAVE_STACK_INPUTS.designWavelengthNm,
+      wavelengthStartNm: 1000,
+      wavelengthEndNm: 2000,
+    });
+  });
 });

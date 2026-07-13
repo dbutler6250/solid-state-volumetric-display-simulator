@@ -1,7 +1,6 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 import { getAcousticSlicesPerPeriod } from '../structures/acoustoOpticGrating';
-
-const MAX_AUTOMATIC_ACOUSTIC_LAYERS = 4096;
+import { MAX_AUTOMATIC_ACOUSTIC_LAYERS } from '../simulationLimits';
 import { getRefractiveIndexImag, getRefractiveIndexReal, isComplexRefractiveIndex } from '../materials/material';
 
 export type ValidationIssue = {

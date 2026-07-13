@@ -2,38 +2,37 @@
 
 ## Latest Task
 
-- Issue #43 refactors simulation data flow around a canonical `SimulationDocument` with discriminated `quarter-wave-stack` and `acousto-optic-grating` definitions plus shared analysis settings.
-- `resolveSimulationDocument` is the single physical-structure factory. It returns the exact `LayerStack`, structure summary, reference wavelength, and supported sweep parameters used by solving and Stack Definition.
-- Spectrum and parameter sweeps now solve the resolved stack. Acoustic frequency, period count, index modulation, material, and representation therefore affect the active spectrum.
-- A focused workspace reducer preserves independent Optical, Manual, and Acoustic drafts while propagating shared analysis settings atomically.
-- Acoustic generation is automatic. The obsolete Generate Equivalent Stack action was removed; automatic work is limited to 4,096 slices to avoid large synchronous solves on edits.
-- Stack Definition is structure-aware and reports the exact acoustic slice count/profile/thickness instead of H/L layers.
-- Acoustic reference wavelengths outside the analysis range show a warning with a one-action recenter control.
-- Acoustic exports identify `acousto-optic-grating`; schema v1 and legacy Bragg imports remain supported. Complex acoustic indices now use the shared material parser and survive resolution/import/export.
-- Parameter sweep choices are capability-driven: optical derived supports design wavelength, periods, and angle; acoustic supports frequency, acoustic periods, modulation, and angle.
+- PR #44 / issue #43 now uses one canonical `SimulationDocument` and one shared `ResolvedStructure` for solving, Stack Definition, and result metadata.
+- Fixed all six review findings:
+  - only derived design-wavelength sweeps inherit analysis-range bounds; acoustic frequency and modulation retain configured bounds;
+  - every acoustic sweep point is preflighted against the 4,096-slice limit, 200-point cap, and 25,000,000 aggregate layer-wavelength work cap before any spectrum runs;
+  - acoustic resolution and spectrum solving are debounced, chunk-yielding, abortable, and protected from stale result ordering, while optical solving remains direct;
+  - result and parameter-sweep CSV metadata comes from the canonical document plus the exact shared resolved stack and includes manual/acoustic physical geometry;
+  - recentering rejects non-finite or unrepresentable reference intervals without applying invalid bounds and shows a clear UI error;
+  - zero modulation is verified against an equivalent homogeneous layer across wavelength, polarization, and angle cases, with field-specific acoustic geometry/physics assertions.
+- `solveResolvedStructure` is explicitly tested with supplied layers, and `StackDefinitionPanel` no longer resolves or materializes a second stack.
+- Import resets stale sweep/result UI state, targets only the imported structure draft, shares analysis fields, and preserves the other drafts.
+- Complex acoustic indices, schema-v1 imports, legacy Bragg imports, setup structure identity, and the fixed 0–89 degree angle sweep remain covered.
 
 ## Verification
 
-- `npm.cmd run test` - passed (74 tests).
+- `npm.cmd run test` - passed (89 tests after the final focused additions).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
 - `git diff --check` - passed (line-ending conversion notices only).
 
 ## Browser Verification
 
-- Verified default optical and manual thickness workflows.
-- Verified Optical (550 nm, 12 periods) -> Acoustic -> Optical draft preservation.
-- Verified acoustic modulation 0 versus 0.002 changes spectrum metrics.
-- Verified Binary/Fast/Accurate/Reference resolve to 20/80/160/320 slices for 10 periods and Stack Definition reports the same active count.
-- Ran all optical and acoustic supported parameter sweeps.
-- Verified the default 17,313 nm acoustic reference warning and recentered the analysis range to 17,013-17,613 nm in one action.
-- Verified acoustic Stack Definition uses slice/profile terminology and no TiO2/SiO2 H/L diagram.
-- Verified the populated How To Use panel.
-- Verified at 390 px that all three output tabs fit without horizontal document overflow.
-- Import/export compatibility and complex acoustic round trips are covered by focused unit tests; Export Setup remains available in the UI.
+- Verified acoustic frequency defaults remain 500,000,000–1,500,000,000 Hz and modulation remains 0–0.004.
+- Verified Reference representation constrains acoustic-period sweeps to 128 periods (4,096 slices) and excessive aggregate sweep work returns a clear error.
+- Verified a 4,096-slice automatic acoustic solve remains editable and completes through the deferred path; Stack Definition reports the same 4,096 slices and resolved geometry used by the spectrum.
+- Verified a roughly `1e20 nm` reference remains out of range and the recenter action reports that a safe 10–1,200 nm interval is not representable without corrupting the analysis range.
+- Verified Optical → Manual → Acoustic → Optical/Manual preserves independent structure drafts while the analysis range is shared.
+- Verified spectrum export controls enable for resolved manual and acoustic results; CSV content/metadata is covered by focused unit tests because programmatic Blob downloads were not captured by the in-app Browser download event.
+- Verified desktop layout and 390 px width with all three output tabs visible and no horizontal document overflow.
 
 ## Remaining Limitations
 
-- Acoustic resolution is a static discretized-index TMM approximation; standing/traveling-wave dynamics and coupled-mode/Floquet physics remain future work.
-- The UI intentionally blocks automatic acoustic structures above 4,096 slices. A worker-backed explicit solve path would be needed to support larger reference stacks without blocking edits.
-- Incident-angle sweeps retain the existing fixed 0-89 degree, 89-point behavior and are covered by existing tests/browser verification.
+- Acoustic solving is still a discretized-index TMM approximation; standing/traveling-wave dynamics and coupled-mode/Floquet physics remain future work.
+- Acoustic work is cooperatively chunked on the main thread rather than moved to a Web Worker. Cancellation prevents stale commits and yielding preserves input responsiveness, but a worker remains the preferred future path for workloads beyond the enforced limits.
+- Parameter sweeps remain explicit synchronous actions and are therefore guarded by per-point and aggregate limits.

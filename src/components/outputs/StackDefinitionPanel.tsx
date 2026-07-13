@@ -2,8 +2,7 @@ import type { QuarterWaveStackInputs } from '../../types/simulation';
 import { formatRefractiveIndex } from '../../simulation/materials/material';
 import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveStack';
 import {
-  createSimulationDocument,
-  resolveSimulationDocument,
+  type ResolvedStructure,
   type AcousticResolvedSummary,
   type QuarterWaveResolvedSummary,
 } from '../../simulation/structures/structureResolver';
@@ -11,6 +10,7 @@ import {
 type StackDefinitionPanelProps = {
   inputs: QuarterWaveStackInputs;
   isValid: boolean;
+  resolvedStructure: ResolvedStructure | null;
 };
 
 type DiagramSegment = {
@@ -100,12 +100,19 @@ const createLayerSegments = (summary: QuarterWaveResolvedSummary): DiagramSegmen
 };
 
 /** Shows the derived stack geometry and a concise layer diagram. */
-export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelProps) {
-  const resolvedStructure = isValid
-    ? resolveSimulationDocument(createSimulationDocument(inputs))
-    : null;
+export function StackDefinitionPanel({ inputs, isValid, resolvedStructure }: StackDefinitionPanelProps) {
   if (resolvedStructure?.summary.type === 'acousto-optic-grating') {
     return <AcousticStackDefinition inputs={inputs} summary={resolvedStructure.summary} />;
+  }
+  if (inputs.thicknessMode === 'acoustic') {
+    return (
+      <section className="stack-panel" aria-label="Acousto-optic grating stack definition">
+        <div className="stack-panel-heading">
+          <h2>Stack Definition</h2>
+          <span>{isValid ? 'Resolving acoustic slices…' : 'Fix highlighted acoustic inputs.'}</span>
+        </div>
+      </section>
+    );
   }
   const thicknessMode = inputs.thicknessMode ?? 'derived';
   const resolvedStackInputs =

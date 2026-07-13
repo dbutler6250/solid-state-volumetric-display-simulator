@@ -11,6 +11,7 @@ import type {
 import { buildQuarterWaveStack } from './quarterWaveStack';
 import {
   buildAcousticGratingStack,
+  buildAcousticGratingStackAsync,
   getAcousticDesignSummary,
 } from './acoustoOpticGrating';
 
@@ -88,28 +89,7 @@ export function resolveSimulationDocument(document: SimulationDocument): Resolve
     const stack = buildAcousticGratingStack(legacyInputs);
     const acoustic = getAcousticDesignSummary(legacyInputs);
     if (!stack || !acoustic) throw new Error('The acoustic grating could not be resolved.');
-    return {
-      stack,
-      referenceWavelengthNm: acoustic.braggWavelengthNm,
-      sweepParameters: [
-        'acousticFrequencyHz',
-        'acousticPeriodCount',
-        'acousticIndexModulation',
-        'incidentAngleDegrees',
-      ],
-      summary: {
-        type: 'acousto-optic-grating',
-        layerCount: stack.layers.length,
-        slicesPerPeriod: acoustic.slicesPerPeriod,
-        sliceThicknessNm: acoustic.acousticWavelengthNm / acoustic.slicesPerPeriod,
-        totalThicknessNm: stack.layers.reduce((total, layer) => total + layer.thicknessNm, 0),
-        acousticWavelengthNm: acoustic.acousticWavelengthNm,
-        referenceWavelengthNm: acoustic.braggWavelengthNm,
-        representation: document.structure.design.acousticRepresentationMode,
-        materialName: document.structure.design.acousticMaterial.name,
-        indexModulation: document.structure.design.acousticIndexModulation,
-      },
-    };
+    return createAcousticResolvedStructure(document.structure, stack, acoustic);
   }
 
   const legacyInputs = documentToLegacyInputs(document);
@@ -145,6 +125,60 @@ export function resolveSimulationDocument(document: SimulationDocument): Resolve
       referenceWavelengthNm,
     },
   };
+}
+
+/** Resolves acoustic layers cooperatively so edits can cancel stale materialization work. */
+export async function resolveSimulationDocumentAsync(
+  document: SimulationDocument,
+  signal?: AbortSignal,
+): Promise<ResolvedStructure> {
+  if (document.structure.type !== 'acousto-optic-grating') {
+    return resolveSimulationDocument(document);
+  }
+
+  const legacyInputs = documentToLegacyInputs(document);
+  const [stack, acoustic] = await Promise.all([
+    buildAcousticGratingStackAsync(legacyInputs, undefined, signal),
+    Promise.resolve(getAcousticDesignSummary(legacyInputs)),
+  ]);
+  if (signal?.aborted) throw createAbortError();
+  if (!stack || !acoustic) throw new Error('The acoustic grating could not be resolved.');
+  return createAcousticResolvedStructure(document.structure, stack, acoustic);
+}
+
+function createAcousticResolvedStructure(
+  structure: Extract<StructureDefinition, { type: 'acousto-optic-grating' }>,
+  stack: LayerStack,
+  acoustic: NonNullable<ReturnType<typeof getAcousticDesignSummary>>,
+): ResolvedStructure {
+  return {
+    stack,
+    referenceWavelengthNm: acoustic.braggWavelengthNm,
+    sweepParameters: [
+      'acousticFrequencyHz',
+      'acousticPeriodCount',
+      'acousticIndexModulation',
+      'incidentAngleDegrees',
+    ],
+    summary: {
+      type: 'acousto-optic-grating',
+      layerCount: stack.layers.length,
+      slicesPerPeriod: acoustic.slicesPerPeriod,
+      sliceThicknessNm: acoustic.acousticWavelengthNm / acoustic.slicesPerPeriod,
+      totalThicknessNm: stack.layers.reduce((total, layer) => total + layer.thicknessNm, 0),
+      acousticWavelengthNm: acoustic.acousticWavelengthNm,
+      referenceWavelengthNm: acoustic.braggWavelengthNm,
+      representation: structure.design.acousticRepresentationMode,
+      materialName: structure.design.acousticMaterial.name,
+      indexModulation: structure.design.acousticIndexModulation,
+    },
+  };
+}
+
+function createAbortError(): Error {
+  const error = new Error('The stale acoustic calculation was cancelled.');
+  error.name = 'AbortError';
+  return error;
 }
 
 /** Applies one supported sweep value to its discriminated source field. */

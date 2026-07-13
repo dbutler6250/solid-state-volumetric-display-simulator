@@ -3,8 +3,9 @@ import type {
   ParameterSweepSettings,
   QuarterWaveStackInputs,
 } from '../types/simulation';
-import { formatRefractiveIndex } from '../simulation/materials/material';
+import type { ResolvedStructure } from '../simulation/structures/structureResolver';
 import { formatCsvRow } from './csv';
+import { getSimulationCsvMetadata } from './simulationCsvMetadata';
 
 const formatNumber = (value: number | null): string => {
   if (value === null || !Number.isFinite(value)) {
@@ -25,8 +26,11 @@ export function exportParameterSweepCsv(
   inputs: QuarterWaveStackInputs,
   settings: ParameterSweepSettings,
   result: ParameterSweepResult,
+  resolved?: ResolvedStructure,
 ): string {
-  const structureLines = getStructureLines(inputs);
+  const structureLines = getSimulationCsvMetadata(inputs, resolved).map(([label, value]) =>
+    formatCommentLine(label, value),
+  );
   const lines = [
     '# Solid State Volumetric Display Simulator',
     '# Optical stack parameter sweep export',
@@ -53,37 +57,4 @@ export function exportParameterSweepCsv(
   ];
 
   return `${lines.join('\n')}\n`;
-}
-
-function getStructureLines(inputs: QuarterWaveStackInputs): string[] {
-  if (inputs.thicknessMode === 'acoustic' && inputs.acousticDesign) {
-    const design = inputs.acousticDesign;
-    return [
-      formatCommentLine('structureType', 'acousto-optic-grating'),
-      formatCommentLine('acousticMaterial.name', design.acousticMaterial.name),
-      formatCommentLine('acousticMaterial.id', design.acousticMaterial.id),
-      formatCommentLine('acousticMaterial.refractiveIndex', formatRefractiveIndex(design.acousticMaterial.refractiveIndex)),
-      formatCommentLine('acousticFrequencyHz', design.acousticFrequencyHz),
-      formatCommentLine('acousticPeriodCount', design.acousticPeriodCount),
-      formatCommentLine('acousticIndexModulation', design.acousticIndexModulation),
-      formatCommentLine('acousticRepresentationMode', design.acousticRepresentationMode),
-    ];
-  }
-  return [
-    formatCommentLine('structureType', 'quarter-wave-stack'),
-    formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
-    formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
-    formatCommentLine(
-      'highIndexMaterial.refractiveIndex',
-      formatRefractiveIndex(inputs.highIndexMaterial.refractiveIndex),
-    ),
-    formatCommentLine('lowIndexMaterial.name', inputs.lowIndexMaterial.name),
-    formatCommentLine('lowIndexMaterial.id', inputs.lowIndexMaterial.id),
-    formatCommentLine(
-      'lowIndexMaterial.refractiveIndex',
-      formatRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex),
-    ),
-    formatCommentLine('periodCount', inputs.periodCount),
-    formatCommentLine('designWavelengthNm', inputs.designWavelengthNm),
-  ];
 }

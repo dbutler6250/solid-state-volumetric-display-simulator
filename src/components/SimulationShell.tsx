@@ -5,7 +5,8 @@ import { applyCenteredSweepRange } from './inputs/quarterWaveStackFormState';
 import { FormattedNumberInput } from './inputs/FormattedNumberInput';
 import {
   FIXED_INCIDENT_ANGLE_SWEEP,
-  getInclusivePeriodPointCount,
+  getEffectiveParameterSweep,
+  getMaximumAcousticPeriodCount,
 } from './parameterSweepSettings';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { AcousticGeneratorPanel } from './outputs/AcousticGeneratorPanel';
@@ -13,14 +14,16 @@ import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
-import { getResolvedStackInputs } from '../simulation/structures/quarterWaveStack';
 import {
-  solveQuarterWaveStack,
   solveQuarterWaveStackParameterSweep,
+  solveResolvedStructure,
+  solveResolvedStructureAsync,
 } from '../simulation/solvers/transferMatrix';
 import {
   createSimulationDocument,
   resolveSimulationDocument,
+  resolveSimulationDocumentAsync,
+  type ResolvedStructure,
 } from '../simulation/structures/structureResolver';
 import {
   createSimulationWorkspaceState,
@@ -37,6 +40,8 @@ import type {
   ParameterSweepResult,
   ParameterSweepSettings,
   QuarterWaveStackInputs,
+  SimulationDocument,
+  SimulationResult,
 } from '../types/simulation';
 
 /*
@@ -54,6 +59,7 @@ const DEFAULT_PARAMETER_SWEEP_WARNING =
   'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
+const ACOUSTIC_SOLVE_DEBOUNCE_MS = 150;
 const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
 
@@ -81,6 +87,14 @@ export function SimulationShell() {
     null,
   );
   const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
+  const [referenceRangeError, setReferenceRangeError] = useState<string | null>(null);
+  const [acousticSolveError, setAcousticSolveError] = useState<string | null>(null);
+  const [acousticOutput, setAcousticOutput] = useState<{
+    document: SimulationDocument;
+    resolved: ResolvedStructure;
+    result: SimulationResult | null;
+  } | null>(null);
+  const acousticRequestId = useRef(0);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const tabRefs = useRef<Record<OutputTab, HTMLButtonElement | null>>({
     spectrum: null,
@@ -88,13 +102,19 @@ export function SimulationShell() {
     'stack-definition': null,
   });
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
-  const resolvedStructure = useMemo(
-    () =>
-      validationIssues.length === 0
-        ? resolveSimulationDocument(createSimulationDocument(inputs))
-        : null,
+  const simulationDocument = useMemo(
+    () => validationIssues.length === 0 ? createSimulationDocument(inputs) : null,
     [inputs, validationIssues],
   );
+  const opticalResolvedStructure = useMemo(
+    () => simulationDocument?.structure.type === 'quarter-wave-stack'
+      ? resolveSimulationDocument(simulationDocument)
+      : null,
+    [simulationDocument],
+  );
+  const resolvedStructure = simulationDocument?.structure.type === 'acousto-optic-grating'
+    ? acousticOutput?.document === simulationDocument ? acousticOutput.resolved : null
+    : opticalResolvedStructure;
   const parameterSweepWarning =
     parameterSweep.parameter === 'incidentAngleDegrees'
       ? DEFAULT_PARAMETER_SWEEP_WARNING
@@ -103,13 +123,15 @@ export function SimulationShell() {
     resolvedStructure !== null &&
     (resolvedStructure.referenceWavelengthNm < (inputs.wavelengthStartNm ?? 0) ||
       resolvedStructure.referenceWavelengthNm > (inputs.wavelengthEndNm ?? Number.POSITIVE_INFINITY));
-  const result = useMemo(() => {
-    if (validationIssues.length > 0) {
-      return null;
-    }
-
-    return solveQuarterWaveStack(inputs);
-  }, [inputs, validationIssues]);
+  const opticalResult = useMemo(
+    () => opticalResolvedStructure && simulationDocument
+      ? solveResolvedStructure(opticalResolvedStructure, simulationDocument.analysis)
+      : null,
+    [opticalResolvedStructure, simulationDocument],
+  );
+  const result = simulationDocument?.structure.type === 'acousto-optic-grating'
+    ? acousticOutput?.document === simulationDocument ? acousticOutput.result : null
+    : opticalResult;
   const effectiveParameterSweep = getEffectiveParameterSweep(inputs, parameterSweep);
   const parameterSweepIsReadOnly = parameterSweep.parameter === 'designWavelengthNm';
   const parameterSweepIsFixedAngle = parameterSweep.parameter === 'incidentAngleDegrees';
@@ -127,23 +149,82 @@ export function SimulationShell() {
     parameterSweep.parameter === 'acousticIndexModulation'
       ? 0
       : 1;
+  const maximumAcousticPeriodCount = getMaximumAcousticPeriodCount(inputs);
   const parameterSweepMaximum = parameterSweep.parameter === 'incidentAngleDegrees'
     ? MAX_INCIDENT_ANGLE_DEGREES
-    : undefined;
+    : parameterSweep.parameter === 'acousticPeriodCount'
+      ? maximumAcousticPeriodCount
+      : undefined;
   const parameterSweepResetKey = `${inputResetKey}:${parameterSweep.parameter}:${
-    parameterSweepIsInteger ? inputs.periodCount : ''
+    parameterSweep.parameter === 'periodCount'
+      ? inputs.periodCount
+      : parameterSweep.parameter === 'acousticPeriodCount'
+        ? `${inputs.acousticDesign?.acousticPeriodCount}:${inputs.acousticDesign?.acousticRepresentationMode}`
+        : ''
   }`;
 
   useEffect(() => {
-    if (parameterSweep.parameter !== 'periodCount') {
+    if (simulationDocument?.structure.type !== 'acousto-optic-grating') return;
+
+    const requestId = ++acousticRequestId.current;
+    const controller = new AbortController();
+    setAcousticSolveError(null);
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const resolved = await resolveSimulationDocumentAsync(
+            simulationDocument,
+            controller.signal,
+          );
+          if (controller.signal.aborted || requestId !== acousticRequestId.current) return;
+          setAcousticOutput({ document: simulationDocument, resolved, result: null });
+          const nextResult = await solveResolvedStructureAsync(
+            resolved,
+            simulationDocument.analysis,
+            { signal: controller.signal },
+          );
+          if (controller.signal.aborted || requestId !== acousticRequestId.current) return;
+          setAcousticOutput({ document: simulationDocument, resolved, result: nextResult });
+        } catch (error) {
+          if (controller.signal.aborted || (error instanceof Error && error.name === 'AbortError')) {
+            return;
+          }
+          setAcousticSolveError(
+            error instanceof Error ? error.message : 'The acoustic spectrum could not be calculated.',
+          );
+        }
+      })();
+    }, ACOUSTIC_SOLVE_DEBOUNCE_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [simulationDocument]);
+
+  useEffect(() => {
+    if (parameterSweep.parameter !== 'periodCount' && parameterSweep.parameter !== 'acousticPeriodCount') {
       return;
     }
 
+    const isAcoustic = parameterSweep.parameter === 'acousticPeriodCount';
+    const periodCount = isAcoustic
+      ? inputs.acousticDesign?.acousticPeriodCount ?? 1
+      : inputs.periodCount;
     setParameterSweep((currentSettings) => ({
       ...currentSettings,
-      ...getDefaultPeriodSweepBounds(inputs.periodCount),
+      ...getDefaultPeriodSweepBounds(
+        periodCount,
+        isAcoustic ? maximumAcousticPeriodCount : undefined,
+      ),
     }));
-  }, [inputs.periodCount, parameterSweep.parameter]);
+  }, [
+    inputs.periodCount,
+    inputs.acousticDesign?.acousticPeriodCount,
+    inputs.acousticDesign?.acousticRepresentationMode,
+    maximumAcousticPeriodCount,
+    parameterSweep.parameter,
+  ]);
 
   useEffect(() => {
     if (!resolvedStructure || resolvedStructure.sweepParameters.includes(parameterSweep.parameter)) {
@@ -157,6 +238,7 @@ export function SimulationShell() {
   useEffect(() => {
     setParameterSweepResult(null);
     setParameterSweepError(null);
+    setReferenceRangeError(null);
   }, [inputs]);
 
   /*
@@ -222,7 +304,7 @@ export function SimulationShell() {
       return;
     }
 
-    const csv = exportResultsCsv(inputs, result);
+    const csv = exportResultsCsv(inputs, result, resolvedStructure ?? undefined);
     const filename = `stack-results-${formatDateStamp(new Date())}.csv`;
     downloadTextFile(filename, csv);
   };
@@ -232,7 +314,12 @@ export function SimulationShell() {
       return;
     }
 
-    const csv = exportParameterSweepCsv(inputs, effectiveParameterSweep, parameterSweepResult);
+    const csv = exportParameterSweepCsv(
+      inputs,
+      effectiveParameterSweep,
+      parameterSweepResult,
+      resolvedStructure ?? undefined,
+    );
     const filename = `parameter-sweep-${formatDateStamp(new Date())}.csv`;
     downloadTextFile(filename, csv);
   };
@@ -245,6 +332,24 @@ export function SimulationShell() {
     const json = exportStackConfigJson(inputs, effectiveParameterSweep);
     const filename = `stack-setup-${formatDateStamp(new Date())}.json`;
     downloadTextFile(filename, json, 'application/json');
+  };
+
+  const recenterAnalysisRange = () => {
+    if (!resolvedStructure) return;
+    try {
+      setInputs(
+        applyCenteredSweepRange(
+          inputs,
+          resolvedStructure.referenceWavelengthNm,
+          Math.max(10, (inputs.wavelengthEndNm ?? 900) - (inputs.wavelengthStartNm ?? 300)),
+        ),
+      );
+      setReferenceRangeError(null);
+    } catch (error) {
+      setReferenceRangeError(
+        error instanceof Error ? error.message : 'The reference wavelength cannot be represented safely.',
+      );
+    }
   };
 
   const openImportPicker = () => {
@@ -271,8 +376,18 @@ export function SimulationShell() {
       setInputResetKey((current) => current + 1);
       if (imported.parameterSweep) {
         setParameterSweep(imported.parameterSweep);
+      } else {
+        const defaultParameter = imported.inputs.thicknessMode === 'acoustic'
+          ? 'acousticFrequencyHz'
+          : imported.inputs.thicknessMode === 'manual'
+            ? 'periodCount'
+            : 'designWavelengthNm';
+        setParameterSweep(getDefaultSweepSettings(imported.inputs, defaultParameter));
       }
+      setParameterSweepResult(null);
+      setParameterSweepError(null);
       setXRange(null);
+      setReferenceRangeError(null);
       setImportError(null);
     } catch {
       setImportError('The selected file could not be read.');
@@ -392,27 +507,22 @@ export function SimulationShell() {
               </div>
             </div>
             <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
+            {acousticSolveError ? (
+              <p className="chart-toolbar-message" role="alert">{acousticSolveError}</p>
+            ) : null}
             {referenceOutsideRange && resolvedStructure ? (
               <div className="reference-range-warning" role="alert">
                 <span>
                   The resolved reference wavelength ({resolvedStructure.referenceWavelengthNm.toFixed(1)} nm)
                   is outside the analysis range.
                 </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setInputs(
-                      applyCenteredSweepRange(
-                        inputs,
-                        resolvedStructure.referenceWavelengthNm,
-                        Math.max(10, (inputs.wavelengthEndNm ?? 900) - (inputs.wavelengthStartNm ?? 300)),
-                      ),
-                    )
-                  }
-                >
+                <button type="button" onClick={recenterAnalysisRange}>
                   Center analysis range
                 </button>
               </div>
+            ) : null}
+            {referenceRangeError ? (
+              <p className="chart-toolbar-message" role="alert">{referenceRangeError}</p>
             ) : null}
             <MetricsPanel result={result} />
             <section className="tab-controls" aria-label="Wavelength sweep controls">
@@ -543,7 +653,11 @@ export function SimulationShell() {
           </section>
 
           <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
-            <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />
+            <StackDefinitionPanel
+              inputs={inputs}
+              isValid={validationIssues.length === 0}
+              resolvedStructure={resolvedStructure}
+            />
           </section>
         </section>
       </section>
@@ -566,31 +680,6 @@ function clamp(value: number, min: number, max: number): number {
 }
 */
 
-/** Derives non-editable design-wavelength sweep bounds from the spectrum analysis range. */
-function getEffectiveParameterSweep(
-  inputs: QuarterWaveStackInputs,
-  settings: ParameterSweepSettings,
-): ParameterSweepSettings {
-  const resolvedStackInputs = getResolvedStackInputs(inputs);
-
-  if (settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount') {
-    return {
-      ...settings,
-      pointCount: getInclusivePeriodPointCount(settings.start, settings.end),
-    };
-  }
-
-  if (settings.parameter === 'incidentAngleDegrees') {
-    return FIXED_INCIDENT_ANGLE_SWEEP;
-  }
-
-  return {
-    ...settings,
-    start: inputs.wavelengthStartNm ?? resolvedStackInputs.designWavelengthNm * 0.5,
-    end: inputs.wavelengthEndNm ?? resolvedStackInputs.designWavelengthNm * 1.5,
-  };
-}
-
 /** Chooses useful initial bounds for a supported structure-specific sweep. */
 function getDefaultSweepSettings(
   inputs: QuarterWaveStackInputs,
@@ -602,7 +691,11 @@ function getDefaultSweepSettings(
   }
   if (parameter === 'acousticPeriodCount') {
     const periods = inputs.acousticDesign?.acousticPeriodCount ?? 10;
-    return { parameter, ...getDefaultPeriodSweepBounds(periods), pointCount: 30 };
+    return {
+      parameter,
+      ...getDefaultPeriodSweepBounds(periods, getMaximumAcousticPeriodCount(inputs)),
+      pointCount: 30,
+    };
   }
   if (parameter === 'acousticFrequencyHz') {
     const frequency = inputs.acousticDesign?.acousticFrequencyHz ?? 1e9;
@@ -633,13 +726,16 @@ function getSweepParameterLabel(parameter: ParameterSweepSettings['parameter']):
 }
 
 /** Centers period-count sweep bounds around the current optical stack period count. */
-function getDefaultPeriodSweepBounds(periodCount: number) {
+function getDefaultPeriodSweepBounds(periodCount: number, maximum?: number) {
   const currentPeriodCount =
     Number.isFinite(periodCount) && periodCount > 0 ? Math.round(periodCount) : 1;
 
   return {
     start: Math.max(1, currentPeriodCount - DEFAULT_PERIOD_SWEEP_HALF_RANGE),
-    end: Math.max(2, currentPeriodCount + DEFAULT_PERIOD_SWEEP_HALF_RANGE),
+    end: Math.min(
+      maximum ?? Number.POSITIVE_INFINITY,
+      Math.max(2, currentPeriodCount + DEFAULT_PERIOD_SWEEP_HALF_RANGE),
+    ),
   };
 }
 

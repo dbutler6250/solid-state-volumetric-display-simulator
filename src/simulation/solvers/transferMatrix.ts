@@ -23,9 +23,16 @@ import { identityMatrix2, multiplyMatrix2, type Matrix2 } from '../math/matrix2'
 import {
   applySweepValue,
   createSimulationDocument,
+  documentToLegacyInputs,
   resolveSimulationDocument,
   type ResolvedStructure,
 } from '../structures/structureResolver';
+import { getAcousticSlicesPerPeriod } from '../structures/acoustoOpticGrating';
+import {
+  MAX_AUTOMATIC_ACOUSTIC_LAYERS,
+  MAX_PARAMETER_SWEEP_POINTS,
+  MAX_PARAMETER_SWEEP_WORK,
+} from '../simulationLimits';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 import { toComplexRefractiveIndex } from '../materials/material';
 
@@ -259,6 +266,41 @@ export function solveResolvedStructure(
   return { spectrum, ...metrics };
 }
 
+type AsyncSolveOptions = {
+  requiredWavelengthNm?: number;
+  signal?: AbortSignal;
+};
+
+/** Solves a resolved stack in cancellable wavelength chunks for responsive acoustic editing. */
+export async function solveResolvedStructureAsync(
+  resolved: ResolvedStructure,
+  analysis: SimulationDocument['analysis'],
+  options: AsyncSolveOptions = {},
+): Promise<SimulationResult> {
+  const wavelengths = createWavelengthSweep({
+    startNm: analysis.wavelengthStartNm,
+    endNm: analysis.wavelengthEndNm,
+    pointCount: analysis.wavelengthPointCount,
+    requiredWavelengthNm: options.requiredWavelengthNm,
+  });
+  const spectrum: LayerStackPointResult[] = [];
+
+  for (const wavelengthNm of wavelengths) {
+    throwIfAborted(options.signal);
+    spectrum.push(
+      solveLayerStack(resolved.stack, {
+        wavelengthNm,
+        incidentAngleDegrees: analysis.incidentAngleDegrees,
+        polarization: analysis.polarization,
+      }),
+    );
+    await yieldToBrowser();
+  }
+
+  throwIfAborted(options.signal);
+  return { spectrum, ...calculateMetrics(spectrum) };
+}
+
 /** Resolves and solves one canonical simulation document. */
 export function solveSimulationDocument(
   document: SimulationDocument,
@@ -296,6 +338,7 @@ export function solveSimulationDocumentParameterSweep(
     throw new Error(`Sweep parameter ${settings.parameter} is not supported by the active structure.`);
   }
   const values = createParameterSweepValues(settings);
+  assertParameterSweepIsSafe(document, settings, values);
   const points = values.map((parameterValue) => {
     const sweptDocument = applySweepValue(document, settings, parameterValue);
     const result = solveSimulationDocument(sweptDocument, {
@@ -348,6 +391,57 @@ function createParameterSweepValues(settings: ParameterSweepSettings): number[] 
 
   const step = (settings.end - settings.start) / (settings.pointCount - 1);
   return Array.from({ length: settings.pointCount }, (_, index) => settings.start + step * index);
+}
+
+/** Rejects the entire sweep before resolving any over-limit stack or excessive workload. */
+function assertParameterSweepIsSafe(
+  document: SimulationDocument,
+  settings: ParameterSweepSettings,
+  values: number[],
+): void {
+  if (values.length > MAX_PARAMETER_SWEEP_POINTS) {
+    throw new Error(
+      `Parameter sweeps are limited to ${MAX_PARAMETER_SWEEP_POINTS.toLocaleString()} points. Reduce the bounds or point count.`,
+    );
+  }
+
+  let aggregateWork = 0;
+  for (const value of values) {
+    const sweptDocument = applySweepValue(document, settings, value);
+    const sweptInputs = documentToLegacyInputs(sweptDocument);
+    const issues = validateQuarterWaveStackInputs(sweptInputs);
+    if (issues.length > 0) {
+      throw new Error(`Invalid sweep value ${value}: ${issues.map((issue) => issue.message).join(' ')}`);
+    }
+
+    const layerCount = sweptDocument.structure.type === 'acousto-optic-grating'
+      ? sweptDocument.structure.design.acousticPeriodCount *
+        getAcousticSlicesPerPeriod(sweptDocument.structure.design.acousticRepresentationMode)
+      : sweptDocument.structure.periodCount * 2;
+    if (layerCount > MAX_AUTOMATIC_ACOUSTIC_LAYERS && sweptDocument.structure.type === 'acousto-optic-grating') {
+      throw new Error(
+        `Acoustic sweep value ${value} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
+      );
+    }
+    aggregateWork += layerCount * sweptDocument.analysis.wavelengthPointCount;
+  }
+
+  if (aggregateWork > MAX_PARAMETER_SWEEP_WORK) {
+    throw new Error(
+      `This sweep requires approximately ${aggregateWork.toLocaleString()} layer-wavelength evaluations; the synchronous sweep limit is ${MAX_PARAMETER_SWEEP_WORK.toLocaleString()}. Reduce the bounds, points, wavelength samples, or representation detail.`,
+    );
+  }
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  const error = new Error('The stale acoustic calculation was cancelled.');
+  error.name = 'AbortError';
+  throw error;
+}
+
+async function yieldToBrowser(): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
 }
 
 /** Clamps angle sweeps to the physically valid open interval below 90 degrees. */
