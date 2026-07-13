@@ -242,4 +242,35 @@ describe('importStackConfigJson', () => {
       message: 'Parameter sweep end must be greater than start.',
     });
   });
+
+  it('imports an acoustic structure with a complex material index', () => {
+    const acousticInputs = {
+      ...inputs,
+      thicknessMode: 'acoustic' as const,
+      acousticDesign: {
+        acousticMaterial: {
+          id: 'lossy-medium',
+          name: 'Lossy medium',
+          refractiveIndex: { real: 1.52, imag: 0.015 },
+        },
+        acousticVelocityMps: 5970,
+        acousticFrequencyHz: 1e9,
+        acousticPeriodCount: 10,
+        braggOrder: 1,
+        acousticIndexModulation: 0.002,
+        acousticRepresentationMode: 'accurate' as const,
+      },
+    };
+    const payload = {
+      schema: 'ssvds-stack-config-v1',
+      app: 'solid-state-volumetric-display-simulator',
+      structureType: 'acousto-optic-grating',
+      inputs: acousticInputs,
+    };
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: true,
+      inputs: acousticInputs,
+    });
+  });
 });

@@ -6,6 +6,7 @@ const STACK_CONFIG_SCHEMA = 'ssvds-stack-config-v1';
 const LEGACY_BRAGG_CONFIG_SCHEMA = 'ssvds-bragg-config-v1';
 const STACK_CONFIG_APP = 'solid-state-volumetric-display-simulator';
 const STACK_CONFIG_STRUCTURE_TYPE = 'quarter-wave-stack';
+const ACOUSTIC_STRUCTURE_TYPE = 'acousto-optic-grating';
 const LEGACY_BRAGG_STRUCTURE_TYPE = 'quarter-wave-bragg-reflector';
 
 type ImportSuccess = {
@@ -45,9 +46,10 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
 
   if (
     parsed.structureType !== STACK_CONFIG_STRUCTURE_TYPE &&
+    parsed.structureType !== ACOUSTIC_STRUCTURE_TYPE &&
     parsed.structureType !== LEGACY_BRAGG_STRUCTURE_TYPE
   ) {
-    return { ok: false, message: 'This setup file is not a quarter-wave stack configuration.' };
+    return { ok: false, message: 'This setup file uses an unsupported structure type.' };
   }
 
   if (!isRecord(parsed.inputs)) {
@@ -116,7 +118,10 @@ function parseParameterSweep(
   if (
     value.parameter !== 'designWavelengthNm' &&
     value.parameter !== 'incidentAngleDegrees' &&
-    value.parameter !== 'periodCount'
+    value.parameter !== 'periodCount' &&
+    value.parameter !== 'acousticFrequencyHz' &&
+    value.parameter !== 'acousticPeriodCount' &&
+    value.parameter !== 'acousticIndexModulation'
   ) {
     return { ok: false, message: 'Parameter sweep must target design wavelength, angle, or periods.' };
   }
@@ -125,6 +130,10 @@ function parseParameterSweep(
       ? !isNonNegativeFiniteNumber(value.start) ||
         !isAngleFiniteNumber(value.end) ||
         value.end <= value.start
+      : value.parameter === 'acousticIndexModulation'
+        ? !isNonNegativeFiniteNumber(value.start) ||
+          !isNonNegativeFiniteNumber(value.end) ||
+          value.end <= value.start
       : !isPositiveFiniteNumber(value.start) ||
         !isPositiveFiniteNumber(value.end) ||
         value.end <= value.start
@@ -153,7 +162,7 @@ function parseParameterSweep(
 
 function parseMaterial(
   value: unknown,
-  label: 'high-index' | 'low-index',
+  label: 'high-index' | 'low-index' | 'acoustic',
 ): { ok: true; material: Material } | ImportFailure {
   if (!isRecord(value)) return { ok: false, message: `The ${label} material is missing or invalid.` };
   if (!isNonEmptyString(value.id) || !isNonEmptyString(value.name)) {
@@ -248,6 +257,8 @@ function parseAcousticDesign(
   if (!isNonEmptyString(value.acousticMaterial.id) || !isNonEmptyString(value.acousticMaterial.name)) {
     return { ok: false, message: 'The acoustic material must include a string id and name.' };
   }
+  const acousticMaterial = parseMaterial(value.acousticMaterial, 'acoustic');
+  if (!acousticMaterial.ok) return acousticMaterial;
 
   if (!isFiniteNumber(value.acousticVelocityMps) || value.acousticVelocityMps <= 0) {
     return { ok: false, message: 'The acoustic velocity must be greater than 0 m/s.' };
@@ -280,13 +291,7 @@ function parseAcousticDesign(
   return {
     ok: true,
     design: {
-      acousticMaterial: {
-        id: value.acousticMaterial.id,
-        name: value.acousticMaterial.name,
-        refractiveIndex: isFiniteNumber(value.acousticMaterial.refractiveIndex)
-          ? value.acousticMaterial.refractiveIndex
-          : 1.45,
-      },
+      acousticMaterial: acousticMaterial.material,
       acousticVelocityMps: value.acousticVelocityMps,
       acousticFrequencyHz: value.acousticFrequencyHz,
       acousticPeriodCount: value.acousticPeriodCount,

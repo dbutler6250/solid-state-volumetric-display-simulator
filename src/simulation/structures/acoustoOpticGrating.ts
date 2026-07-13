@@ -10,7 +10,7 @@ const DEFAULT_ACOUSTIC_REPRESENTATION_SLICES: Record<AcousticDesignInputs['acous
   reference: 32,
 };
 
-const ACOUSTIC_LAYER_YIELD_INTERVAL = 4096;
+const ACOUSTIC_LAYER_YIELD_INTERVAL = 256;
 
 /** Default acoustic design values used when the acoustic generator is enabled. */
 export const DEFAULT_ACOUSTIC_DESIGN_INPUTS: AcousticDesignInputs = {
@@ -161,13 +161,17 @@ function buildAcousticLayer(
   const refractiveIndex = design.acousticMaterial.refractiveIndex;
   const baseIndex = typeof refractiveIndex === 'number' ? refractiveIndex : refractiveIndex.real;
   const sample = getAcousticWaveSample(design.acousticRepresentationMode, sliceIndex, slicesPerPeriod);
+  const modulatedRealIndex = baseIndex + design.acousticIndexModulation * sample;
 
   return {
     material: {
       ...design.acousticMaterial,
       id: `${design.acousticMaterial.id}-${sliceIndex + 1}`,
       name: `${design.acousticMaterial.name} slice ${sliceIndex + 1}`,
-      refractiveIndex: baseIndex + design.acousticIndexModulation * sample,
+      refractiveIndex:
+        typeof refractiveIndex === 'number'
+          ? modulatedRealIndex
+          : { real: modulatedRealIndex, imag: refractiveIndex.imag },
     },
     thicknessNm,
   };

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { exportResultsCsv } from './exportResultsCsv';
 import type { QuarterWaveStackInputs, SimulationResult } from '../types/simulation';
 import type { Material } from '../simulation/materials/material';
+import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../simulation/structures/acoustoOpticGrating';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
@@ -67,5 +68,47 @@ describe('exportResultsCsv', () => {
     );
 
     expect(complexCsv).toContain('# highIndexMaterial.refractiveIndex: n=2.200 + i0.120');
+  });
+
+  it('distinguishes manual stacks by their resolved physical thicknesses', () => {
+    const first = exportResultsCsv({
+      ...inputs,
+      thicknessMode: 'manual',
+      highIndexThicknessNm: 70,
+      lowIndexThicknessNm: 100,
+    }, result);
+    const second = exportResultsCsv({
+      ...inputs,
+      thicknessMode: 'manual',
+      highIndexThicknessNm: 90,
+      lowIndexThicknessNm: 130,
+    }, result);
+
+    expect(first).toContain('# thicknessStrategy: manual');
+    expect(first).toContain('# highIndexThicknessNm: 70');
+    expect(first).toContain('# lowIndexThicknessNm: 100');
+    expect(first).toContain('# resolvedTotalThicknessNm: 1360');
+    expect(second).toContain('# resolvedTotalThicknessNm: 1760');
+    expect(first).not.toBe(second);
+  });
+
+  it('exports resolved acoustic geometry and preserves a complex material index', () => {
+    const csv = exportResultsCsv({
+      ...inputs,
+      thicknessMode: 'acoustic',
+      acousticDesign: {
+        ...DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+        acousticMaterial: makeMaterial('lossy', 'Lossy glass', { real: 1.5, imag: 0.02 }),
+        acousticPeriodCount: 3,
+        acousticRepresentationMode: 'fast',
+      },
+    }, result);
+
+    expect(csv).toContain('# acousticMaterial.refractiveIndex: n=1.500 + i0.020');
+    expect(csv).toContain('# acousticVelocityMps: 5970');
+    expect(csv).toContain('# resolvedLayerCount: 24');
+    expect(csv).toContain('# slicesPerPeriod: 8');
+    expect(csv).toContain('# sliceThicknessNm:');
+    expect(csv).toContain('# resolvedTotalThicknessNm:');
   });
 });

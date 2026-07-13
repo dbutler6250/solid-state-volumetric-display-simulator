@@ -4,7 +4,7 @@ type StackConfigExport = {
   schema: 'ssvds-stack-config-v1';
   app: 'solid-state-volumetric-display-simulator';
   exportedAt: string;
-  structureType: 'quarter-wave-stack';
+  structureType: 'quarter-wave-stack' | 'acousto-optic-grating';
   units: {
     wavelength: 'nm';
     angle: 'deg';
@@ -35,7 +35,8 @@ export function exportStackConfigJson(
     schema: 'ssvds-stack-config-v1',
     app: 'solid-state-volumetric-display-simulator',
     exportedAt: new Date().toISOString(),
-    structureType: 'quarter-wave-stack',
+    structureType:
+      inputs.thicknessMode === 'acoustic' ? 'acousto-optic-grating' : 'quarter-wave-stack',
     units: {
       wavelength: 'nm',
       angle: 'deg',

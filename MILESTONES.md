@@ -39,6 +39,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Consistent precision-preserving numeric controls with compact steppers, explicit reset behavior, and constrained parameter-sweep inputs
 - Acoustic generator tab with discretized sinusoid layer generation, acoustic-material inputs, and acoustic config round-tripping
 - Progress-aware explicit acoustic stack generation with large-period handling groundwork and future-mode stubs
+- Unified discriminated structure resolution so quarter-wave and acoustic stacks share one solver, stack-definition, sweep, and export data path
 
 ## Notes
 

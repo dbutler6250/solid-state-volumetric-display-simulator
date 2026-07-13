@@ -1,16 +1,12 @@
 import { MATERIAL_CATALOG } from '../../simulation/materials/catalog';
 import { formatRefractiveIndex } from '../../simulation/materials/material';
 import {
-  buildAcousticGratingStack,
-  buildAcousticGratingStackAsync,
-  getAcousticDesignSummary,
   getAcousticEstimatedLayerCount,
   DEFAULT_ACOUSTIC_DESIGN_INPUTS,
-  type AcousticGenerationProgress,
 } from '../../simulation/structures/acoustoOpticGrating';
 import type { AcousticDesignInputs, QuarterWaveStackInputs } from '../../types/simulation';
 import { FormattedNumberInput } from '../inputs/FormattedNumberInput';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 
 type AcousticGeneratorPanelProps = {
   inputs: QuarterWaveStackInputs;
@@ -41,18 +37,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
   const acousticDesign = inputs.acousticDesign ?? DEFAULT_ACOUSTIC_DESIGN_INPUTS;
   const acousticMaterialOptions = getAcousticMaterialOptions(acousticDesign.acousticMaterial);
   const stackInput = useMemo(() => ({ ...inputs, acousticDesign }), [inputs, acousticDesign]);
-  const summary = getAcousticDesignSummary(stackInput);
   const estimatedLayerCount = getAcousticEstimatedLayerCount(stackInput);
-  const [generationProgress, setGenerationProgress] = useState<AcousticGenerationProgress | null>(null);
-  const [generationMessage, setGenerationMessage] = useState<string | null>(null);
-  const generationAbortRef = useRef<AbortController | null>(null);
   const isActiveMode = inputs.thicknessMode === 'acoustic';
-
-  useEffect(() => {
-    generationAbortRef.current?.abort();
-    setGenerationProgress(null);
-    setGenerationMessage(null);
-  }, [stackInput]);
 
   const updateDesign = (patch: Partial<AcousticDesignInputs>) =>
     {
@@ -62,35 +48,8 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
         thicknessMode: 'acoustic' as const,
         acousticDesign: nextDesign,
       };
-      const nextSummary = getAcousticDesignSummary(nextInputs);
-
-      onChange({
-        ...nextInputs,
-        periodCount: nextDesign.acousticPeriodCount,
-        designWavelengthNm: nextSummary?.braggWavelengthNm ?? inputs.designWavelengthNm,
-      });
+      onChange(nextInputs);
     };
-
-  const generateStack = async () => {
-    if (!isActiveMode || !summary) {
-      return;
-    }
-
-    generationAbortRef.current?.abort();
-    const controller = new AbortController();
-    generationAbortRef.current = controller;
-    setGenerationMessage('Generating acoustic stack...');
-    setGenerationProgress({ completedLayers: 0, totalLayers: estimatedLayerCount });
-    const stack =
-      estimatedLayerCount <= 2048
-        ? buildAcousticGratingStack(stackInput)
-        : await buildAcousticGratingStackAsync(stackInput, setGenerationProgress, controller.signal);
-    if (controller.signal.aborted) {
-      return;
-    }
-    setGenerationProgress({ completedLayers: estimatedLayerCount, totalLayers: estimatedLayerCount });
-    setGenerationMessage(stack ? 'Acoustic stack generation complete.' : 'Acoustic stack generation could not be completed.');
-  };
 
   return (
     <section className="acoustic-panel" aria-label="Acousto-optic grating generator">
@@ -221,25 +180,12 @@ export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPa
       </div>
 
       <div className="acoustic-actions">
-        <button type="button" className="parameter-sweep-run" onClick={generateStack} disabled={!summary || !isActiveMode}>
-          Generate Equivalent Stack
-        </button>
         <p className="acoustic-helper">
           {isActiveMode
-            ? 'Generation runs in chunks so large period counts can report progress.'
-            : 'Switch Input mode to Acoustic before generating an equivalent stack.'}
+            ? `The active solver stack updates automatically (${estimatedLayerCount.toLocaleString()} slices).`
+            : 'Switch Input mode to Acoustic to resolve this grating.'}
         </p>
       </div>
-
-      {generationProgress ? (
-        <div className="acoustic-progress" aria-live="polite">
-          <progress max={generationProgress.totalLayers} value={generationProgress.completedLayers} />
-          <span>
-            {generationProgress.completedLayers.toLocaleString()} / {generationProgress.totalLayers.toLocaleString()} layers
-          </span>
-        </div>
-      ) : null}
-      {generationMessage ? <p className="parameter-sweep-status">{generationMessage}</p> : null}
     </section>
   );
 }

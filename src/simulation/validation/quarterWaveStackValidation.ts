@@ -1,4 +1,6 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
+import { getAcousticSlicesPerPeriod } from '../structures/acoustoOpticGrating';
+import { MAX_AUTOMATIC_ACOUSTIC_LAYERS } from '../simulationLimits';
 import { getRefractiveIndexImag, getRefractiveIndexReal, isComplexRefractiveIndex } from '../materials/material';
 
 export type ValidationIssue = {
@@ -161,6 +163,17 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
         issues.push({
           field: 'thicknessMode',
           message: 'Acoustic period count must be a whole number greater than 0.',
+        });
+      }
+      if (
+        isFiniteNumber(design.acousticPeriodCount) &&
+        Number.isInteger(design.acousticPeriodCount) &&
+        design.acousticPeriodCount * getAcousticSlicesPerPeriod(design.acousticRepresentationMode) >
+          MAX_AUTOMATIC_ACOUSTIC_LAYERS
+      ) {
+        issues.push({
+          field: 'thicknessMode',
+          message: `Automatic acoustic solving is limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices. Reduce periods or representation detail.`,
         });
       }
       if (!isFiniteNumber(design.braggOrder) || design.braggOrder < 1 || !Number.isInteger(design.braggOrder)) {

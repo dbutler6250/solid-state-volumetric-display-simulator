@@ -6,6 +6,7 @@ import type {
 } from '../types/simulation';
 import type { Material } from '../simulation/materials/material';
 import { exportParameterSweepCsv } from './exportParameterSweepCsv';
+import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../simulation/structures/acoustoOpticGrating';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: number): Material => ({
   id,
@@ -63,5 +64,31 @@ describe('exportParameterSweepCsv', () => {
     expect(lines).toContain('parameter_value,peak_reflectance,center_wavelength_nm,bandwidth_nm');
     expect(lines[lines.length - 2]).toBe('0,0.8,510,25');
     expect(lines[lines.length - 1]).toBe('89.9,,,');
+  });
+
+  it('includes canonical manual and acoustic geometry metadata', () => {
+    const manualCsv = exportParameterSweepCsv({
+      ...inputs,
+      thicknessMode: 'manual',
+      highIndexThicknessNm: 75,
+      lowIndexThicknessNm: 125,
+    }, settings, result);
+    const acousticCsv = exportParameterSweepCsv({
+      ...inputs,
+      thicknessMode: 'acoustic',
+      acousticDesign: {
+        ...DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+        acousticPeriodCount: 4,
+        acousticRepresentationMode: 'binary',
+      },
+    }, settings, result);
+
+    expect(manualCsv).toContain('# thicknessMode: manual');
+    expect(manualCsv).toContain('# highIndexThicknessNm: 75');
+    expect(manualCsv).toContain('# lowIndexThicknessNm: 125');
+    expect(acousticCsv).toContain('# structureType: acousto-optic-grating');
+    expect(acousticCsv).toContain('# resolvedLayerCount: 8');
+    expect(acousticCsv).toContain('# slicesPerPeriod: 2');
+    expect(acousticCsv).toContain('# acousticVelocityMps: 5970');
   });
 });

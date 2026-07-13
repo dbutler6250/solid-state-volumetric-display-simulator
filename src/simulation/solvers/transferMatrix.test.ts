@@ -3,12 +3,20 @@ import type { QuarterWaveStackInputs, SimulationResult } from '../../types/simul
 import type { LayerStack } from '../layers/stack';
 import { AIR } from '../materials/catalog';
 import type { Material } from '../materials/material';
-import { buildQuarterWaveStack } from '../structures/quarterWaveStack';
+import { buildQuarterWaveStack, DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../structures/quarterWaveStack';
 import { getResolvedStackInputs } from '../structures/quarterWaveStack';
+import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../structures/acoustoOpticGrating';
+import {
+  createSimulationDocument,
+  resolveSimulationDocument,
+  type ResolvedStructure,
+} from '../structures/structureResolver';
 import {
   solveLayerStack,
   solveQuarterWaveStack,
   solveQuarterWaveStackParameterSweep,
+  solveResolvedStructure,
+  solveResolvedStructureAsync,
 } from './transferMatrix';
 
 const expectCloseTo = (actual: number, expected: number, tolerance: number) => {
@@ -26,6 +34,33 @@ const makeMaterial = (id: string, refractiveIndex: Material['refractiveIndex']):
 
 // Exercises solver accuracy, energy conservation, and band metrics.
 describe('transfer matrix solver', () => {
+  it('solves supplied resolved layers without rebuilding a quarter-wave structure', () => {
+    const resolved: ResolvedStructure = {
+      stack: { incidentMedium: AIR, layers: [], exitMedium: AIR },
+      referenceWavelengthNm: 600,
+      sweepParameters: [],
+      summary: {
+        type: 'quarter-wave-stack',
+        thicknessStrategy: 'manual',
+        periodCount: 0,
+        layerCount: 0,
+        highIndexThicknessNm: 0,
+        lowIndexThicknessNm: 0,
+        totalThicknessNm: 0,
+        referenceWavelengthNm: 600,
+      },
+    };
+    const result = solveResolvedStructure(resolved, {
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+      wavelengthStartNm: 500,
+      wavelengthEndNm: 700,
+      wavelengthPointCount: 3,
+    });
+
+    expect(result.spectrum.every((point) => point.reflectance === 0 && point.transmission === 1)).toBe(true);
+  });
+
   it('returns zero reflectance and unit transmission for an empty air-to-air stack', () => {
     const stack: LayerStack = {
       incidentMedium: AIR,
@@ -430,6 +465,104 @@ describe('transfer matrix solver', () => {
     const lastPeakReflectance = result.points[result.points.length - 1].peakReflectance ?? 0;
 
     expect(lastPeakReflectance).toBeGreaterThan(firstPeakReflectance);
+  });
+
+  it('applies configured acoustic frequency and modulation sweep bounds', () => {
+    const inputs: QuarterWaveStackInputs = {
+      highIndexMaterial: makeMaterial('nH', 2.4),
+      lowIndexMaterial: makeMaterial('nL', 1.45),
+      periodCount: 1,
+      designWavelengthNm: 600,
+      incidentAngleDegrees: 0,
+      polarization: 'TE',
+      thicknessMode: 'acoustic',
+      wavelengthStartNm: 400,
+      wavelengthEndNm: 800,
+      wavelengthPointCount: 11,
+      acousticDesign: {
+        ...DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+        acousticFrequencyHz: 30e9,
+        acousticPeriodCount: 2,
+      },
+    };
+    const frequency = solveQuarterWaveStackParameterSweep(inputs, {
+      parameter: 'acousticFrequencyHz',
+      start: 20e9,
+      end: 40e9,
+      pointCount: 3,
+    });
+    const modulation = solveQuarterWaveStackParameterSweep(inputs, {
+      parameter: 'acousticIndexModulation',
+      start: 0,
+      end: 0.004,
+      pointCount: 3,
+    });
+
+    expect(frequency.points.map((point) => point.parameterValue)).toEqual([20e9, 30e9, 40e9]);
+    expect(modulation.points.map((point) => point.parameterValue)).toEqual([0, 0.002, 0.004]);
+  });
+
+  it('accepts exactly 4,096 acoustic slices and rejects the first period above it', () => {
+    const inputs: QuarterWaveStackInputs = {
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      thicknessMode: 'acoustic',
+      wavelengthStartNm: 500,
+      wavelengthEndNm: 501,
+      wavelengthPointCount: 2,
+      acousticDesign: {
+        ...DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+        acousticPeriodCount: 128,
+        acousticRepresentationMode: 'reference',
+      },
+    };
+
+    expect(solveQuarterWaveStackParameterSweep(inputs, {
+      parameter: 'acousticPeriodCount',
+      start: 127,
+      end: 128,
+      pointCount: 2,
+    }).points.map((point) => point.parameterValue)).toEqual([127, 128]);
+    expect(() => solveQuarterWaveStackParameterSweep(inputs, {
+      parameter: 'acousticPeriodCount',
+      start: 128,
+      end: 129,
+      pointCount: 2,
+    })).toThrow(/4,096 slices/i);
+  });
+
+  it('rejects excessive sweep point counts before running any spectra', () => {
+    const inputs: QuarterWaveStackInputs = {
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      thicknessMode: 'acoustic',
+      acousticDesign: DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+    };
+    expect(() => solveQuarterWaveStackParameterSweep(inputs, {
+      parameter: 'acousticFrequencyHz',
+      start: 5e8,
+      end: 1.5e9,
+      pointCount: 201,
+    })).toThrow(/limited to 200 points/i);
+  });
+
+  it('cancels a stale asynchronous acoustic result while allowing the newer solve to finish', async () => {
+    const document = createSimulationDocument({
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      thicknessMode: 'acoustic',
+      wavelengthStartNm: 500,
+      wavelengthEndNm: 700,
+      wavelengthPointCount: 5,
+      acousticDesign: { ...DEFAULT_ACOUSTIC_DESIGN_INPUTS, acousticPeriodCount: 2 },
+    });
+    const resolved = resolveSimulationDocument(document);
+    const staleController = new AbortController();
+    const stale = solveResolvedStructureAsync(resolved, document.analysis, {
+      signal: staleController.signal,
+    });
+    staleController.abort();
+    const current = solveResolvedStructureAsync(resolved, document.analysis);
+
+    await expect(stale).rejects.toMatchObject({ name: 'AbortError' });
+    await expect(current).resolves.toMatchObject({ spectrum: expect.any(Array) });
   });
 });
 

@@ -3,8 +3,9 @@ import type {
   ParameterSweepSettings,
   QuarterWaveStackInputs,
 } from '../types/simulation';
-import { formatRefractiveIndex } from '../simulation/materials/material';
+import type { ResolvedStructure } from '../simulation/structures/structureResolver';
 import { formatCsvRow } from './csv';
+import { getSimulationCsvMetadata } from './simulationCsvMetadata';
 
 const formatNumber = (value: number | null): string => {
   if (value === null || !Number.isFinite(value)) {
@@ -25,7 +26,11 @@ export function exportParameterSweepCsv(
   inputs: QuarterWaveStackInputs,
   settings: ParameterSweepSettings,
   result: ParameterSweepResult,
+  resolved?: ResolvedStructure,
 ): string {
+  const structureLines = getSimulationCsvMetadata(inputs, resolved).map(([label, value]) =>
+    formatCommentLine(label, value),
+  );
   const lines = [
     '# Solid State Volumetric Display Simulator',
     '# Optical stack parameter sweep export',
@@ -34,20 +39,7 @@ export function exportParameterSweepCsv(
     formatCommentLine('sweep.start', settings.start),
     formatCommentLine('sweep.end', settings.end),
     formatCommentLine('sweep.pointCount', settings.pointCount),
-    formatCommentLine('highIndexMaterial.name', inputs.highIndexMaterial.name),
-    formatCommentLine('highIndexMaterial.id', inputs.highIndexMaterial.id),
-    formatCommentLine(
-      'highIndexMaterial.refractiveIndex',
-      formatRefractiveIndex(inputs.highIndexMaterial.refractiveIndex),
-    ),
-    formatCommentLine('lowIndexMaterial.name', inputs.lowIndexMaterial.name),
-    formatCommentLine('lowIndexMaterial.id', inputs.lowIndexMaterial.id),
-    formatCommentLine(
-      'lowIndexMaterial.refractiveIndex',
-      formatRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex),
-    ),
-    formatCommentLine('periodCount', inputs.periodCount),
-    formatCommentLine('designWavelengthNm', inputs.designWavelengthNm),
+    ...structureLines,
     formatCommentLine('incidentAngleDegrees', inputs.incidentAngleDegrees),
     formatCommentLine('polarization', inputs.polarization),
     formatCommentLine('wavelengthStartNm', inputs.wavelengthStartNm ?? ''),

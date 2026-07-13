@@ -38,6 +38,43 @@ export type QuarterWaveStackInputs = {
   wavelengthPointCount?: number;
 };
 
+/** Settings shared by every optical structure and solver. */
+export type AnalysisSettings = {
+  incidentAngleDegrees: number;
+  polarization: Polarization;
+  wavelengthStartNm: number;
+  wavelengthEndNm: number;
+  wavelengthPointCount: number;
+};
+
+export type QuarterWaveStructureDefinition = {
+  type: 'quarter-wave-stack';
+  highIndexMaterial: Material;
+  lowIndexMaterial: Material;
+  periodCount: number;
+  thickness:
+    | { type: 'derived'; designWavelengthNm: number }
+    | {
+        type: 'manual';
+        referenceWavelengthNm: number;
+        highIndexThicknessNm: number;
+        lowIndexThicknessNm: number;
+      };
+};
+
+export type AcoustoOpticGratingDefinition = {
+  type: 'acousto-optic-grating';
+  design: AcousticDesignInputs;
+};
+
+export type StructureDefinition = QuarterWaveStructureDefinition | AcoustoOpticGratingDefinition;
+
+/** Canonical simulation document consumed by resolution and solving. */
+export type SimulationDocument = {
+  structure: StructureDefinition;
+  analysis: AnalysisSettings;
+};
+
 /** Summary result returned by the spectrum solver. */
 export type SimulationResult = {
   spectrum: SpectrumPoint[];
@@ -48,7 +85,13 @@ export type SimulationResult = {
   bandTouchesBoundary: boolean;
 };
 
-export type SweepParameter = 'designWavelengthNm' | 'incidentAngleDegrees' | 'periodCount';
+export type SweepParameter =
+  | 'designWavelengthNm'
+  | 'incidentAngleDegrees'
+  | 'periodCount'
+  | 'acousticFrequencyHz'
+  | 'acousticPeriodCount'
+  | 'acousticIndexModulation';
 
 export type ParameterSweepSettings = {
   parameter: SweepParameter;
