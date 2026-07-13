@@ -162,6 +162,78 @@ export function StackDefinitionPanel({ inputs, isValid }: StackDefinitionPanelPr
           The stack diagram will update when the inputs are valid.
         </div>
       )}
+
+      {thicknessMode === 'acoustic' ? (
+        <AcousticStackOutputs inputs={inputs} />
+      ) : null}
+    </section>
+  );
+}
+
+/** Shows acoustic-derived quantities beside the resolved stack geometry. */
+function AcousticStackOutputs({ inputs }: { inputs: QuarterWaveStackInputs }) {
+  const design = inputs.acousticDesign;
+  const summary = getResolvedStackInputs(inputs).acousticSummary;
+
+  if (!design) {
+    return null;
+  }
+
+  return (
+    <section className="stack-panel acoustic-stack-outputs" aria-label="Acoustic stack outputs">
+      <div className="stack-panel-heading">
+        <h2>Acoustic Outputs</h2>
+        <span>Derived from the active acoustic input mode.</span>
+      </div>
+      <div className="stack-summary-grid">
+        <StackSummaryItem label="Acoustic medium" value={design.acousticMaterial.name} />
+        <StackSummaryItem label="Velocity" value={`${design.acousticVelocityMps.toFixed(0)} m/s`} />
+        <StackSummaryItem label="Frequency" value={`${(design.acousticFrequencyHz / 1e9).toFixed(3)} GHz`} />
+        <StackSummaryItem label="Driven periods" value={`${Math.round(design.acousticPeriodCount)}`} />
+        <StackSummaryItem label="Bragg order" value={`${Math.round(design.braggOrder)}`} />
+        <StackSummaryItem label="Representation" value={design.acousticRepresentationMode} />
+        <StackSummaryItem
+          label="Acoustic wavelength"
+          value={summary ? `${formatNumber(summary.acousticWavelengthNm, 2)} nm` : 'Invalid'}
+        />
+        <StackSummaryItem
+          label="Resolved design wavelength"
+          value={summary ? `${formatNumber(summary.braggWavelengthNm, 2)} nm` : 'Invalid'}
+        />
+        <StackSummaryItem
+          label="Acoustic period length"
+          value={summary ? `${formatNumber(summary.periodLengthNm, 2)} nm` : 'Invalid'}
+        />
+        <StackSummaryItem
+          label="Predicted Bragg wavelength"
+          value={summary ? `${formatNumber(summary.braggWavelengthNm, 2)} nm` : 'Invalid'}
+        />
+        <StackSummaryItem
+          label="Total length"
+          value={summary ? `${formatNumber(summary.totalLengthNm, 2)} nm` : 'Invalid'}
+        />
+        <StackSummaryItem
+          label="Estimated layers"
+          value={summary ? formatCount(summary.estimatedLayers) : 'Invalid'}
+        />
+      </div>
+      <div className="acoustic-future-modes">
+        <div className="stack-summary-item">
+          <span>Standing-wave</span>
+          <strong>Planned</strong>
+          <small>Future mode stub for fixed-node acoustic gratings.</small>
+        </div>
+        <div className="stack-summary-item">
+          <span>Traveling-wave</span>
+          <strong>Planned</strong>
+          <small>Future mode stub for propagating acoustic gratings.</small>
+        </div>
+        <div className="stack-summary-item">
+          <span>Coupled-mode / Floquet</span>
+          <strong>Planned</strong>
+          <small>Future solver path stub for higher-fidelity analysis.</small>
+        </div>
+      </div>
     </section>
   );
 }

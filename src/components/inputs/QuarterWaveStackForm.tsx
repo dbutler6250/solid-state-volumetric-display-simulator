@@ -337,43 +337,58 @@ export function QuarterWaveStackForm({
         </>
       )}
 
-      <label className="field">
-        <span>Periods</span>
-        <FormattedNumberInput
-          min={1}
-          step="1"
-          parseMode="integer"
-          normalizeOnBlur={Math.round}
-          value={visiblePeriodCount}
-          formatInactive={formatNumericInput}
-          readOnly={!canEditModeInputs}
-          disabled={!canEditModeInputs}
-          onValueChange={(periodCount) => onChange({ ...inputs, periodCount })}
-          resetKey={externalResetKey}
-          showStepper
-          stepperLabel="periods"
-          aria-invalid={isInvalid('periodCount')}
-        />
-        <FieldError message={getIssueForField(validationIssues, 'periodCount')} />
-      </label>
+      {thicknessMode === 'acoustic' ? (
+        <div className="acoustic-resolved-readout" aria-label="Resolved acoustic stack values">
+          <div className="thickness-readout">
+            <span>Resolved periods</span>
+            <strong>{formatNumericInput(visiblePeriodCount)}</strong>
+          </div>
+          <div className="thickness-readout">
+            <span>Resolved design wavelength</span>
+            <strong>{formatNumericInput(visibleDesignWavelengthNm)} nm</strong>
+          </div>
+        </div>
+      ) : (
+        <>
+          <label className="field">
+            <span>Periods</span>
+            <FormattedNumberInput
+              min={1}
+              step="1"
+              parseMode="integer"
+              normalizeOnBlur={Math.round}
+              value={visiblePeriodCount}
+              formatInactive={formatNumericInput}
+              readOnly={!canEditModeInputs}
+              disabled={!canEditModeInputs}
+              onValueChange={(periodCount) => onChange({ ...inputs, periodCount })}
+              resetKey={externalResetKey}
+              showStepper
+              stepperLabel="periods"
+              aria-invalid={isInvalid('periodCount')}
+            />
+            <FieldError message={getIssueForField(validationIssues, 'periodCount')} />
+          </label>
 
-      <label className="field">
-        <span>Design wavelength (nm)</span>
-        <FormattedNumberInput
-          min={1}
-          value={visibleDesignWavelengthNm}
-          formatInactive={formatNumericInput}
-          readOnly={!canEditModeInputs}
-          disabled={!canEditModeInputs}
-          onValueChange={(value) => onChange(applyDesignWavelength(inputs, value))}
-          resetKey={externalResetKey}
-          showStepper
-          stepperLabel="design wavelength"
-          stepperStep={1}
-          aria-invalid={isInvalid('designWavelengthNm')}
-        />
-        <FieldError message={getIssueForField(validationIssues, 'designWavelengthNm')} />
-      </label>
+          <label className="field">
+            <span>Design wavelength (nm)</span>
+            <FormattedNumberInput
+              min={1}
+              value={visibleDesignWavelengthNm}
+              formatInactive={formatNumericInput}
+              readOnly={!canEditModeInputs}
+              disabled={!canEditModeInputs}
+              onValueChange={(value) => onChange(applyDesignWavelength(inputs, value))}
+              resetKey={externalResetKey}
+              showStepper
+              stepperLabel="design wavelength"
+              stepperStep={1}
+              aria-invalid={isInvalid('designWavelengthNm')}
+            />
+            <FieldError message={getIssueForField(validationIssues, 'designWavelengthNm')} />
+          </label>
+        </>
+      )}
 
       <label className="field">
         <span>Incident angle (degrees)</span>

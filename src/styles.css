@@ -238,6 +238,22 @@ label {
   font-size: 1rem;
 }
 
+.panel .acoustic-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
+.panel .acoustic-panel .stack-panel-heading {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.panel .acoustic-panel .stack-panel-heading h2 {
+  margin: 0;
+}
+
 .form-grid {
   display: grid;
   gap: 0.85rem;
@@ -571,6 +587,12 @@ label {
 
 .thickness-readout strong {
   font-size: 1rem;
+}
+
+.acoustic-resolved-readout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
 }
 
 .stack-diagram,
