@@ -37,6 +37,8 @@ Keep this section as the historical record. Do not create issues for these items
 - Accessible output tabs and responsive simulator workspace layout
 - Reusable precision-preserving formatted numeric input for manual layer thicknesses
 - Consistent precision-preserving numeric controls with compact steppers, explicit reset behavior, and constrained parameter-sweep inputs
+- Acoustic generator tab with discretized sinusoid layer generation, acoustic-material inputs, and acoustic config round-tripping
+- Progress-aware explicit acoustic stack generation with large-period handling groundwork and future-mode stubs
 
 ## Notes
 

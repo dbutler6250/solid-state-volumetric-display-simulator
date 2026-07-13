@@ -7,7 +7,7 @@ Last Updated 6/29/26
 
 Browser-based optics simulation platform for solid-state volumetric display design.
 
-Uses a Transfer Matrix Method (TMM) solver to simulate quarter-wave optical stacks and their reflectance/transmission performance metrics. Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
+Uses a Transfer Matrix Method (TMM) solver to simulate quarter-wave optical stacks and their reflectance/transmission performance metrics. The simulator now also includes an acoustic generator tab that converts an acoustic drive into an equivalent discretized optical stack with derived acoustic outputs and progress-aware stack generation. Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
 
 ## Demonstration
 

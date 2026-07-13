@@ -17,6 +17,15 @@ const inputs: QuarterWaveStackInputs = {
   incidentAngleDegrees: 17.5,
   polarization: 'TM',
   thicknessMode: 'derived',
+  acousticDesign: {
+    acousticMaterial: makeMaterial('fused-silica', 'Fused silica', 1.45),
+    acousticVelocityMps: 5970,
+    acousticFrequencyHz: 1e9,
+    acousticPeriodCount: 10,
+    braggOrder: 1,
+    acousticIndexModulation: 0.002,
+    acousticRepresentationMode: 'accurate',
+  },
   wavelengthStartNm: 450,
   wavelengthEndNm: 650,
   wavelengthPointCount: 401,
@@ -62,6 +71,7 @@ describe('exportStackConfigJson', () => {
     expect(exported.inputs.wavelengthStartNm).toBe(450);
     expect(exported.inputs.wavelengthEndNm).toBe(650);
     expect(exported.inputs.wavelengthPointCount).toBe(401);
+    expect(exported.inputs.acousticDesign).toEqual(inputs.acousticDesign);
     expect(exported.parameterSweep).toEqual(parameterSweep);
   });
 

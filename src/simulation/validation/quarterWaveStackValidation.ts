@@ -137,6 +137,47 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
     }
   }
 
+  if (thicknessMode === 'acoustic') {
+    const design = inputs.acousticDesign;
+    if (!design) {
+      issues.push({
+        field: 'thicknessMode',
+        message: 'Acoustic thickness mode requires acoustic design inputs.',
+      });
+    } else {
+      if (!isFiniteNumber(design.acousticVelocityMps) || design.acousticVelocityMps <= 0) {
+        issues.push({
+          field: 'thicknessMode',
+          message: 'Acoustic velocity must be greater than 0 m/s.',
+        });
+      }
+      if (!isFiniteNumber(design.acousticFrequencyHz) || design.acousticFrequencyHz <= 0) {
+        issues.push({
+          field: 'thicknessMode',
+          message: 'Acoustic frequency must be greater than 0 Hz.',
+        });
+      }
+      if (!isFiniteNumber(design.acousticPeriodCount) || design.acousticPeriodCount < 1 || !Number.isInteger(design.acousticPeriodCount)) {
+        issues.push({
+          field: 'thicknessMode',
+          message: 'Acoustic period count must be a whole number greater than 0.',
+        });
+      }
+      if (!isFiniteNumber(design.braggOrder) || design.braggOrder < 1 || !Number.isInteger(design.braggOrder)) {
+        issues.push({
+          field: 'thicknessMode',
+          message: 'Bragg order must be a whole number greater than 0.',
+        });
+      }
+      if (!isFiniteNumber(design.acousticIndexModulation) || design.acousticIndexModulation < 0) {
+        issues.push({
+          field: 'thicknessMode',
+          message: 'Acoustic index modulation must be 0 or greater.',
+        });
+      }
+    }
+  }
+
   if (!isFiniteNumber(wavelengthStartNm) || wavelengthStartNm <= 0) {
     issues.push({
       field: 'wavelengthStartNm',

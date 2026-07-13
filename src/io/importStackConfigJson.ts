@@ -87,6 +87,12 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     inputs.lowIndexThicknessNm = rawInputs.lowIndexThicknessNm;
   }
 
+  if (isRecord(rawInputs.acousticDesign)) {
+    const acousticDesign = parseAcousticDesign(rawInputs.acousticDesign);
+    if (!acousticDesign.ok) return acousticDesign;
+    inputs.acousticDesign = acousticDesign.design;
+  }
+
   const issues = validateQuarterWaveStackInputs(inputs);
   if (issues.length > 0) {
     return { ok: false, message: issues[0].message };
@@ -230,4 +236,63 @@ function normalizeThicknessMode(value: unknown): QuarterWaveStackInputs['thickne
   }
 
   return 'derived';
+}
+
+function parseAcousticDesign(
+  value: Record<string, unknown>,
+): { ok: true; design: QuarterWaveStackInputs['acousticDesign'] } | ImportFailure {
+  if (!isRecord(value.acousticMaterial)) {
+    return { ok: false, message: 'The acoustic material is missing or invalid.' };
+  }
+
+  if (!isNonEmptyString(value.acousticMaterial.id) || !isNonEmptyString(value.acousticMaterial.name)) {
+    return { ok: false, message: 'The acoustic material must include a string id and name.' };
+  }
+
+  if (!isFiniteNumber(value.acousticVelocityMps) || value.acousticVelocityMps <= 0) {
+    return { ok: false, message: 'The acoustic velocity must be greater than 0 m/s.' };
+  }
+
+  if (!isFiniteNumber(value.acousticFrequencyHz) || value.acousticFrequencyHz <= 0) {
+    return { ok: false, message: 'The acoustic frequency must be greater than 0 Hz.' };
+  }
+
+  if (!isFiniteNumber(value.acousticPeriodCount) || value.acousticPeriodCount < 1 || !Number.isInteger(value.acousticPeriodCount)) {
+    return { ok: false, message: 'The acoustic period count must be a whole number greater than 0.' };
+  }
+
+  if (!isFiniteNumber(value.braggOrder) || value.braggOrder < 1 || !Number.isInteger(value.braggOrder)) {
+    return { ok: false, message: 'The Bragg order must be a whole number greater than 0.' };
+  }
+
+  if (!isFiniteNumber(value.acousticIndexModulation) || value.acousticIndexModulation < 0) {
+    return { ok: false, message: 'The acoustic index modulation must be 0 or greater.' };
+  }
+
+  const mode =
+    value.acousticRepresentationMode === 'binary' ||
+    value.acousticRepresentationMode === 'fast' ||
+    value.acousticRepresentationMode === 'accurate' ||
+    value.acousticRepresentationMode === 'reference'
+      ? value.acousticRepresentationMode
+      : 'accurate';
+
+  return {
+    ok: true,
+    design: {
+      acousticMaterial: {
+        id: value.acousticMaterial.id,
+        name: value.acousticMaterial.name,
+        refractiveIndex: isFiniteNumber(value.acousticMaterial.refractiveIndex)
+          ? value.acousticMaterial.refractiveIndex
+          : 1.45,
+      },
+      acousticVelocityMps: value.acousticVelocityMps,
+      acousticFrequencyHz: value.acousticFrequencyHz,
+      acousticPeriodCount: value.acousticPeriodCount,
+      braggOrder: value.braggOrder,
+      acousticIndexModulation: value.acousticIndexModulation,
+      acousticRepresentationMode: mode,
+    },
+  };
 }

@@ -2,6 +2,7 @@ import type { OpticalLayer } from '../layers/layer';
 import type { LayerStack } from '../layers/stack';
 import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
 import { getRefractiveIndexReal } from '../materials/material';
+import { getAcousticSlicesPerPeriod, getAcousticWavelengthNm } from './acoustoOpticGrating';
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 
 const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
@@ -19,6 +20,19 @@ const getDerivedThicknesses = (inputs: QuarterWaveStackInputs) => ({
 });
 
 export const getResolvedThicknesses = (inputs: QuarterWaveStackInputs) => {
+  if (inputs.thicknessMode === 'acoustic' && inputs.acousticDesign) {
+    const acousticWavelengthNm = getAcousticWavelengthNm(inputs.acousticDesign);
+    const slicesPerPeriod = getAcousticSlicesPerPeriod(inputs.acousticDesign.acousticRepresentationMode);
+
+    if (Number.isFinite(acousticWavelengthNm) && acousticWavelengthNm > 0) {
+      const sliceThicknessNm = acousticWavelengthNm / slicesPerPeriod;
+      return {
+        highIndexThicknessNm: sliceThicknessNm,
+        lowIndexThicknessNm: sliceThicknessNm,
+      };
+    }
+  }
+
   if (inputs.thicknessMode === 'manual') {
     return {
       highIndexThicknessNm: inputs.highIndexThicknessNm ?? 0,
@@ -38,6 +52,7 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   incidentAngleDegrees: 0,
   polarization: 'TE',
   thicknessMode: 'derived',
+  acousticDesign: undefined,
   wavelengthStartNm: 300,
   wavelengthEndNm: 900,
   wavelengthPointCount: 500,

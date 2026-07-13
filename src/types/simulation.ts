@@ -7,6 +7,20 @@ export type Polarization = 'TE' | 'TM';
 /** Selects how layer thicknesses are sourced for the current stack. */
 export type ThicknessMode = 'derived' | 'manual' | 'acoustic';
 
+/** Selects how the acoustic waveform is approximated when generating layers. */
+export type AcousticRepresentationMode = 'binary' | 'fast' | 'accurate' | 'reference';
+
+/** Describes the acoustic material and drive parameters used for acoustic stack generation. */
+export type AcousticDesignInputs = {
+  acousticMaterial: Material;
+  acousticVelocityMps: number;
+  acousticFrequencyHz: number;
+  acousticPeriodCount: number;
+  braggOrder: number;
+  acousticIndexModulation: number;
+  acousticRepresentationMode: AcousticRepresentationMode;
+};
+
 /** Input bundle shared by the form, importer, solver, and exports. */
 export type QuarterWaveStackInputs = {
   highIndexMaterial: Material;
@@ -18,6 +32,7 @@ export type QuarterWaveStackInputs = {
   thicknessMode?: ThicknessMode;
   highIndexThicknessNm?: number;
   lowIndexThicknessNm?: number;
+  acousticDesign?: AcousticDesignInputs;
   wavelengthStartNm?: number;
   wavelengthEndNm?: number;
   wavelengthPointCount?: number;

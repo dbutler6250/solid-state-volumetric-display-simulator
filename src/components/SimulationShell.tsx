@@ -7,6 +7,7 @@ import {
   getInclusivePeriodPointCount,
 } from './parameterSweepSettings';
 import { MetricsPanel } from './outputs/MetricsPanel';
+import { AcousticGeneratorPanel } from './outputs/AcousticGeneratorPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
@@ -42,7 +43,7 @@ const DEFAULT_PARAMETER_SWEEP_WARNING =
   'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
-const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition'] as const;
+const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition', 'acoustic-generator'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
 
 const formatParameterSweepInput = (value: number | undefined): string =>
@@ -67,6 +68,7 @@ export function SimulationShell() {
     spectrum: null,
     'parameter-sweep': null,
     'stack-definition': null,
+    'acoustic-generator': null,
   });
   const validationIssues = useMemo(() => validateQuarterWaveStackInputs(inputs), [inputs]);
   const parameterSweepWarning =
@@ -298,7 +300,9 @@ export function SimulationShell() {
                     ? 'Spectrum'
                     : tab === 'parameter-sweep'
                       ? 'Parameter Sweep'
-                      : 'Stack Definition';
+                      : tab === 'stack-definition'
+                        ? 'Stack Definition'
+                        : 'Acoustic Generator';
                 return (
                   <button
                     key={tab}
@@ -487,6 +491,10 @@ export function SimulationShell() {
 
           <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
             <StackDefinitionPanel inputs={inputs} isValid={validationIssues.length === 0} />
+          </section>
+
+          <section className="chart-panel" id="acoustic-generator-panel" role="tabpanel" aria-labelledby="acoustic-generator-tab" hidden={activeTab !== 'acoustic-generator'}>
+            <AcousticGeneratorPanel inputs={inputs} onChange={setInputs} />
           </section>
         </section>
       </section>
