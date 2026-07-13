@@ -24,14 +24,22 @@ const REPRESENTATION_OPTIONS: Array<{ value: AcousticDesignInputs['acousticRepre
   { value: 'reference', label: 'Reference', detail: '32 slices per period' },
 ];
 
+const getAcousticMaterialOptions = (
+  acousticMaterial: AcousticDesignInputs['acousticMaterial'],
+) => {
+  const options = [DEFAULT_ACOUSTIC_DESIGN_INPUTS.acousticMaterial, ...MATERIAL_CATALOG];
+
+  if (!options.some((material) => material.id === acousticMaterial.id)) {
+    options.unshift(acousticMaterial);
+  }
+
+  return options;
+};
+
 /** Shows the acoustic generator inputs and the generated equivalent optical stack. */
 export function AcousticGeneratorPanel({ inputs, onChange }: AcousticGeneratorPanelProps) {
   const acousticDesign = inputs.acousticDesign ?? DEFAULT_ACOUSTIC_DESIGN_INPUTS;
-  const acousticMaterialOptions = MATERIAL_CATALOG.some(
-    (material) => material.id === acousticDesign.acousticMaterial.id,
-  )
-    ? MATERIAL_CATALOG
-    : [acousticDesign.acousticMaterial, ...MATERIAL_CATALOG];
+  const acousticMaterialOptions = getAcousticMaterialOptions(acousticDesign.acousticMaterial);
   const stackInput = useMemo(() => ({ ...inputs, acousticDesign }), [inputs, acousticDesign]);
   const summary = getAcousticDesignSummary(stackInput);
   const estimatedLayerCount = getAcousticEstimatedLayerCount(stackInput);
