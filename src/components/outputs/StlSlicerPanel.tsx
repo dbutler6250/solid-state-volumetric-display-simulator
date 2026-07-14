@@ -68,6 +68,9 @@ export function StlSlicerPanel() {
     : 0;
   const planeY = activeFrame ? 8 + activeFrame.planeCoordinate * 84 : 8;
   const projectionPreview = playbackStep?.state.projection.projectedSamples[0] ?? null;
+  const previewSteps = playbackTimeline
+    ? playbackTimeline.steps.slice(Math.max(0, stepIndex - 2), Math.min(playbackTimeline.steps.length, stepIndex + 3))
+    : [];
 
   useEffect(() => {
     setStepInput(String(stepIndex));
@@ -431,6 +434,31 @@ export function StlSlicerPanel() {
                 {step.projectedFrame.occupancyMask.some((row) => row.some(Boolean)) ? '*' : ''}
               </button>
             ))}
+          </div>
+          <div className="stl-slicer-preview-rail" aria-label="Compact slice preview">
+            {previewSteps.map((step) => {
+              const totalCells = step.projectedFrame.occupancyMask.length * (step.projectedFrame.occupancyMask[0]?.length ?? 0);
+              const activeCells = step.projectedFrame.occupancyMask.reduce(
+                (count, row) => count + row.reduce((rowCount, active) => rowCount + (active ? 1 : 0), 0),
+                0,
+              );
+              const fillPercent = totalCells > 0 ? (activeCells / totalCells) * 100 : 0;
+              return (
+                <button
+                  key={step.stepIndex}
+                  type="button"
+                  className={step.stepIndex === playbackStep?.step ? 'stl-slicer-preview-card stl-slicer-preview-card-active' : 'stl-slicer-preview-card'}
+                  onClick={() => goToStep(step.stepIndex)}
+                  aria-label={`Preview step ${step.stepIndex}`}
+                >
+                  <span className="stl-slicer-preview-card-index">#{step.stepIndex}</span>
+                  <span className="stl-slicer-preview-card-meter">
+                    <span className="stl-slicer-preview-card-meter-fill" style={{ width: `${fillPercent}%` }} />
+                  </span>
+                  <span className="stl-slicer-preview-card-label">{fillPercent.toFixed(0)}%</span>
+                </button>
+              );
+            })}
           </div>
           <label className="field">
             <span>Playback step <strong>{playbackStep?.step ?? 0}</strong></span>

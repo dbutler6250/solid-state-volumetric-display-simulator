@@ -44,6 +44,7 @@ Keep this section as the historical record. Do not create issues for these items
 - STL slicer and playback foundation with deterministic transport controls, axis selection, richer slice diagnostics, export helpers, hollow-sphere sample mesh, mesh validation, coverage sampling, slice timeline strip, and explicit display-projection mapping
 - STL slicer boundary hardening with reusable output contracts and source metadata for sample meshes and uploaded files
 - STL slicer fidelity follow-up with axis-aware display-plane mapping, mesh topology diagnostics, and denser stratified coverage sampling
+- STL slicer compact preview rail with neighboring-slice occupancy thumbnails for lightweight at-a-glance inspection
 
 ## Notes
 

@@ -903,6 +903,57 @@ label {
   background: rgba(11, 16, 23, 0.65);
 }
 
+.stl-slicer-preview-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.2rem, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.stl-slicer-preview-card {
+  display: grid;
+  gap: 0.28rem;
+  min-height: 3.1rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: #101720;
+  color: #dce7f2;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stl-slicer-preview-card:hover {
+  border-color: #5aa7c8;
+  background: #17212d;
+}
+
+.stl-slicer-preview-card-active {
+  border-color: #5aa7c8;
+  background: rgba(90, 167, 200, 0.12);
+}
+
+.stl-slicer-preview-card-index,
+.stl-slicer-preview-card-label {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.stl-slicer-preview-card-meter {
+  display: block;
+  height: 0.45rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #243142;
+}
+
+.stl-slicer-preview-card-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5aa7c8, #f0bf58);
+}
+
 .stl-slicer-timeline-cell {
   min-height: 1.6rem;
   padding: 0;
@@ -1332,6 +1383,10 @@ label {
     grid-template-columns: 1fr;
   }
 
+  .stl-slicer-preview-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .reflectance-volume-stage,
   .reflectance-volume-canvas {
     min-height: 24rem;
@@ -1392,6 +1447,10 @@ label {
 
   .stl-slicer-preview {
     gap: 0.12rem;
+  }
+
+  .stl-slicer-preview-rail {
+    grid-template-columns: 1fr;
   }
 
   .metric-grid {
