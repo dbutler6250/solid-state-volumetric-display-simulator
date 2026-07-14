@@ -44,6 +44,8 @@ describe('playback', () => {
     expect(step.step).toBe(2);
     expect(step.state.projectedFrame.index).toBe(2);
     expect(step.state.visibleVoxels.length).toBeGreaterThan(0);
+    expect(step.state.projection.projectedSamples.length).toBeGreaterThan(0);
+    expect(step.state.projection.axis).toBe('z');
   });
 });
 

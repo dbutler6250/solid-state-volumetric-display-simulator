@@ -6,6 +6,7 @@ import type {
   SliceFrame,
   SliceDiagnostics,
   SliceStack,
+  DisplayProjection,
   VisibleVoxel,
   VolumeBounds,
 } from './types';
@@ -125,6 +126,7 @@ export function buildPlaybackTimeline(stack: SliceStack): PlaybackTimeline {
       planePosition: slice.planePosition,
       projectedFrame: slice,
       visibleVoxels: buildVisibleVoxels(stack, slice),
+      projection: buildDisplayProjection(stack, slice),
     })),
   };
 }
@@ -140,6 +142,7 @@ export function getPlaybackStep(stack: SliceStack, stepIndex: number): { step: n
       planePosition: projectedFrame.planePosition,
       projectedFrame,
       visibleVoxels: buildVisibleVoxels(stack, projectedFrame),
+      projection: buildDisplayProjection(stack, projectedFrame),
     },
   };
 }
@@ -246,6 +249,26 @@ function buildVisibleVoxels(stack: SliceStack, slice: SliceFrame): VisibleVoxel[
     }
   }
   return voxels;
+}
+
+/** Maps visible voxels into deterministic display-plane coordinates for downstream engines. */
+function buildDisplayProjection(stack: SliceStack, slice: SliceFrame): DisplayProjection {
+  const projectedSamples = buildVisibleVoxels(stack, slice).map((voxel) => ({
+    sliceIndex: voxel.sliceIndex,
+    row: voxel.row,
+    column: voxel.column,
+    sourceCenter: voxel.center,
+    displayX: voxel.center[0],
+    displayY: voxel.center[1],
+    depth: voxel.center[2],
+    intensity: voxel.intensity,
+  }));
+
+  return {
+    axis: stack.axis,
+    planePosition: slice.planePosition,
+    projectedSamples,
+  };
 }
 
 function isPointInsideMesh(mesh: MeshGeometry, point: MeshPoint3D, axis: 'x' | 'y' | 'z'): boolean {

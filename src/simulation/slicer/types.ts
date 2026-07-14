@@ -68,12 +68,32 @@ export type VisibleVoxel = VoxelCell & {
   column: number;
 };
 
+/** Display-plane projection for a single visible voxel. */
+export type DisplayProjectionSample = {
+  sliceIndex: number;
+  row: number;
+  column: number;
+  sourceCenter: MeshPoint3D;
+  displayX: number;
+  displayY: number;
+  depth: number;
+  intensity: number;
+};
+
+/** Explicit mapping from slice-space voxels into display-plane coordinates. */
+export type DisplayProjection = {
+  axis: 'x' | 'y' | 'z';
+  planePosition: number;
+  projectedSamples: DisplayProjectionSample[];
+};
+
 /** Instantaneous display playback state. */
 export type PlaybackStep = {
   stepIndex: number;
   planePosition: number;
   projectedFrame: SliceFrame;
   visibleVoxels: VisibleVoxel[];
+  projection: DisplayProjection;
 };
 
 /** Deterministic time-ordered playback timeline. */

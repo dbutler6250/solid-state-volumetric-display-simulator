@@ -67,6 +67,7 @@ export function StlSlicerPanel() {
     ? activeFrame.occupancyMask.length * (activeFrame.occupancyMask[0]?.length ?? 0)
     : 0;
   const planeY = activeFrame ? 8 + activeFrame.planeCoordinate * 84 : 8;
+  const projectionPreview = playbackStep?.state.projection.projectedSamples[0] ?? null;
 
   useEffect(() => {
     setStepInput(String(stepIndex));
@@ -467,6 +468,14 @@ export function StlSlicerPanel() {
           <p className="reflectance-volume-summary">
             Coverage averages {(sliceStack.diagnostics.averageSliceCoverage * 100).toFixed(1)}% with a peak slice coverage of {(sliceStack.diagnostics.peakSliceCoverage * 100).toFixed(1)}%.
           </p>
+          <p className="reflectance-volume-summary">
+            Projection map keeps {playbackStep?.state.projection.projectedSamples.length ?? 0} visible voxels in display-space coordinates for downstream engines.
+          </p>
+          {projectionPreview ? (
+            <p className="reflectance-volume-summary">
+              First projected sample lands at ({projectionPreview.displayX.toFixed(3)}, {projectionPreview.displayY.toFixed(3)}) with depth {projectionPreview.depth.toFixed(3)} and intensity {projectionPreview.intensity.toFixed(2)}.
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>
