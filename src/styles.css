@@ -849,6 +849,228 @@ label {
   font-size: 0.88rem;
 }
 
+.stl-slicer-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.stl-slicer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(16rem, 0.9fr);
+  gap: 0.85rem;
+}
+
+.stl-slicer-upload {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.stl-slicer-actions {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.stl-slicer-playback {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.8rem;
+  border: 1px solid #273142;
+  border-radius: 8px;
+  background: rgba(16, 23, 32, 0.8);
+}
+
+.stl-slicer-playback-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.stl-slicer-export {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.stl-slicer-timeline-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(1.1rem, 1fr));
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  padding: 0.55rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 10px;
+  background: rgba(11, 16, 23, 0.65);
+}
+
+.stl-slicer-preview-rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.2rem, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.stl-slicer-preview-card {
+  display: grid;
+  gap: 0.28rem;
+  min-height: 3.1rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: #101720;
+  color: #dce7f2;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stl-slicer-preview-card:hover {
+  border-color: #5aa7c8;
+  background: #17212d;
+}
+
+.stl-slicer-preview-card-active {
+  border-color: #5aa7c8;
+  background: rgba(90, 167, 200, 0.12);
+}
+
+.stl-slicer-preview-card-index,
+.stl-slicer-preview-card-label {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.stl-slicer-preview-card-meter {
+  display: block;
+  height: 0.45rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #243142;
+}
+
+.stl-slicer-preview-card-meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5aa7c8, #f0bf58);
+}
+
+.stl-slicer-timeline-cell {
+  min-height: 1.6rem;
+  padding: 0;
+  border: 1px solid #344456;
+  border-radius: 999px;
+  background: #18222f;
+  color: #8eb9d1;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.stl-slicer-timeline-cell-active {
+  border-color: #5aa7c8;
+  background: #285873;
+  color: #eff8fd;
+}
+
+.stl-slicer-loop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d7e0ea;
+  font-size: 0.84rem;
+}
+
+.stl-slicer-loop input {
+  width: auto;
+}
+
+.stl-slicer-actions .action-button {
+  width: 100%;
+}
+
+.stl-slicer-dropzone {
+  border: 1px dashed #46586d;
+  border-radius: 8px;
+  padding: 0.9rem;
+  background: #101720;
+}
+
+.stl-slicer-dropzone-active {
+  border-color: #5aa7c8;
+  background: rgba(90, 167, 200, 0.12);
+  box-shadow: 0 0 0 3px rgba(90, 167, 200, 0.12) inset;
+}
+
+.stl-slicer-dropzone strong {
+  display: block;
+  color: #eef5fb;
+}
+
+.stl-slicer-dropzone p,
+.stl-slicer-status {
+  margin: 0.35rem 0 0;
+  color: #9aa8b7;
+  font-size: 0.84rem;
+}
+
+.stl-slicer-progress {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.stl-slicer-progress progress {
+  width: 100%;
+  height: 0.85rem;
+  accent-color: #5aa7c8;
+}
+
+.stl-slicer-progress span {
+  color: #9aa8b7;
+  font-size: 0.84rem;
+}
+
+.stl-slicer-results {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.stack-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.stl-slicer-preview {
+  width: 100%;
+  min-height: 18rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  background: #101720;
+}
+
+.stl-slicer-frame {
+  fill: rgba(16, 23, 32, 0.8);
+  stroke: #46586d;
+  stroke-width: 0.8;
+}
+
+.stl-slicer-cell {
+  fill: rgba(34, 48, 65, 0.82);
+  stroke: rgba(102, 119, 138, 0.2);
+  stroke-width: 0.2;
+}
+
+.stl-slicer-cell-active {
+  fill: url(#stlSliceGradient);
+  stroke: rgba(255, 255, 255, 0.22);
+}
+
+.stl-slicer-plane-line {
+  stroke: #f0bf58;
+  stroke-width: 0.7;
+  stroke-dasharray: 2 1;
+}
+
 .chart-toolbar-message {
   margin: 0 0 1rem;
   color: #f0aaaa;
@@ -1149,6 +1371,22 @@ label {
     grid-template-columns: 1fr;
   }
 
+  .stl-slicer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stack-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stl-slicer-export {
+    grid-template-columns: 1fr;
+  }
+
+  .stl-slicer-preview-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .reflectance-volume-stage,
   .reflectance-volume-canvas {
     min-height: 24rem;
@@ -1205,6 +1443,14 @@ label {
   .reflectance-volume-canvas {
     min-height: 20rem;
     height: 20rem;
+  }
+
+  .stl-slicer-preview {
+    gap: 0.12rem;
+  }
+
+  .stl-slicer-preview-rail {
+    grid-template-columns: 1fr;
   }
 
   .metric-grid {
