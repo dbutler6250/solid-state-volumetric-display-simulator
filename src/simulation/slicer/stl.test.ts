@@ -47,12 +47,26 @@ endfacet
 endsolid cube`),
     ).toThrow('three vertices');
   });
+
+  it('rejects degenerate triangle geometry', () => {
+    expect(() =>
+      parseAsciiStl(`solid flat
+facet normal 0 0 1
+  outer loop
+    vertex 0 0 0
+    vertex 0 0 0
+    vertex 1 0 0
+  endloop
+endfacet
+endsolid flat`),
+    ).toThrow('degenerate triangle');
+  });
 });
 
 describe('createSampleHollowSphereMesh', () => {
   it('returns a reusable hollow sphere approximation', () => {
     const mesh = createSampleHollowSphereMesh();
-    expect(mesh.vertices).toHaveLength(182);
-    expect(mesh.triangles).toHaveLength(288);
+    expect(mesh.vertices).toHaveLength(124);
+    expect(mesh.triangles).toHaveLength(240);
   });
 });

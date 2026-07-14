@@ -10,6 +10,13 @@ export type MeshGeometry = {
   triangles: MeshTriangle[];
 };
 
+/** Optional provenance metadata describing where a mesh came from. */
+export type MeshSourceMetadata = {
+  label: string;
+  kind: 'sample' | 'file-upload';
+  fileName?: string;
+};
+
 /** Axis-aligned bounds in normalized display-volume space. */
 export type VolumeBounds = {
   min: MeshPoint3D;
@@ -39,7 +46,9 @@ export type SliceDiagnostics = {
   occupiedSliceCount: number;
   emptySliceCount: number;
   averageSliceOccupancy: number;
+  averageSliceCoverage: number;
   peakSliceOccupancy: number;
+  peakSliceCoverage: number;
 };
 
 /** Reusable slice stack output from the mesh slicer. */

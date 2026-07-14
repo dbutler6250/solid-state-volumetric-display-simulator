@@ -9,12 +9,13 @@ import {
   serializeSlicerOutput,
 } from '../../simulation/slicer/slicer';
 import { createSampleHollowSphereMesh, parseStlBytes } from '../../simulation/slicer/stl';
-import type { MeshGeometry } from '../../simulation/slicer/types';
+import type { MeshGeometry, MeshSourceMetadata } from '../../simulation/slicer/types';
 
 type StlSlicerPanelState = {
   mesh: MeshGeometry | null;
   sourceLabel: string;
   error: string | null;
+  sourceMetadata: MeshSourceMetadata;
 };
 
 /** Demonstrates the STL slicer and playback foundation with a deterministic preview. */
@@ -23,6 +24,7 @@ export function StlSlicerPanel() {
     mesh: createSampleHollowSphereMesh(),
     sourceLabel: 'Sample hollow sphere mesh',
     error: null,
+    sourceMetadata: { label: 'Sample hollow sphere mesh', kind: 'sample' },
   });
   const [sliceCount, setSliceCount] = useState(12);
   const [gridResolution, setGridResolution] = useState(10);
@@ -90,7 +92,12 @@ export function StlSlicerPanel() {
   }, [isLooping, isPlaying, playbackRate, playbackTimeline]);
 
   const loadSample = () => {
-    setState({ mesh: createSampleHollowSphereMesh(), sourceLabel: 'Sample hollow sphere mesh', error: null });
+    setState({
+      mesh: createSampleHollowSphereMesh(),
+      sourceLabel: 'Sample hollow sphere mesh',
+      error: null,
+      sourceMetadata: { label: 'Sample hollow sphere mesh', kind: 'sample' },
+    });
     setFileName('sample-hollow-sphere.stl');
     setStepIndex(0);
     setStepInput('0');
@@ -114,7 +121,12 @@ export function StlSlicerPanel() {
           throw new Error('The STL file could not be read.');
         }
         const mesh = parseStlBytes(bytes);
-        setState({ mesh, sourceLabel: file.name, error: null });
+        setState({
+          mesh,
+          sourceLabel: file.name,
+          error: null,
+          sourceMetadata: { label: file.name, kind: 'file-upload', fileName: file.name },
+        });
         setFileName(file.name);
         setStepIndex(0);
         setStepInput('0');
@@ -124,6 +136,7 @@ export function StlSlicerPanel() {
           mesh: null,
           sourceLabel: 'Failed import',
           error: error instanceof Error ? error.message : 'The STL file could not be read.',
+          sourceMetadata: { label: 'Failed import', kind: 'file-upload', fileName: file.name },
         });
       } finally {
         setIsLoadingFile(false);
@@ -137,6 +150,7 @@ export function StlSlicerPanel() {
         mesh: null,
         sourceLabel: 'Failed import',
         error: 'The STL file could not be read.',
+        sourceMetadata: { label: 'Failed import', kind: 'file-upload', fileName: file.name },
       });
     };
     reader.readAsArrayBuffer(file);
@@ -392,6 +406,19 @@ export function StlSlicerPanel() {
               Export timeline JSON
             </button>
           </div>
+          <div className="stl-slicer-timeline-strip" aria-label="Slice timeline preview">
+            {playbackTimeline.steps.map((step) => (
+              <button
+                key={step.stepIndex}
+                type="button"
+                className={step.stepIndex === playbackStep?.step ? 'stl-slicer-timeline-cell stl-slicer-timeline-cell-active' : 'stl-slicer-timeline-cell'}
+                onClick={() => goToStep(step.stepIndex)}
+                aria-label={`Go to step ${step.stepIndex}`}
+              >
+                {step.projectedFrame.occupancyMask.some((row) => row.some(Boolean)) ? '*' : ''}
+              </button>
+            ))}
+          </div>
           <label className="field">
             <span>Playback step <strong>{playbackStep?.step ?? 0}</strong></span>
             <input
@@ -432,7 +459,13 @@ export function StlSlicerPanel() {
             <line x1="8" y1={planeY} x2="92" y2={planeY} className="stl-slicer-plane-line" />
           </svg>
           <p className="reflectance-volume-summary">
+            Source: {state.sourceMetadata.kind === 'file-upload' ? `uploaded file ${state.sourceMetadata.fileName ?? state.sourceMetadata.label}` : state.sourceMetadata.label}
+          </p>
+          <p className="reflectance-volume-summary">
             Step {playbackStep?.state.stepIndex ?? 0} places the plane at {((playbackStep?.state.planePosition ?? 0) * 100).toFixed(1)}% of the sweep on the {axis.toUpperCase()} axis. The projected frame activates {activeCount} voxels.
+          </p>
+          <p className="reflectance-volume-summary">
+            Coverage averages {(sliceStack.diagnostics.averageSliceCoverage * 100).toFixed(1)}% with a peak slice coverage of {(sliceStack.diagnostics.peakSliceCoverage * 100).toFixed(1)}%.
           </p>
         </div>
       ) : null}

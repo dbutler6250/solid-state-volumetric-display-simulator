@@ -29,6 +29,8 @@ describe('buildSliceStack', () => {
     expect(stackA.slices).toHaveLength(6);
     expect(stackA.diagnostics.activeVoxelCount).toBeGreaterThan(0);
     expect(stackA.slices.some((slice) => slice.occupancyMask.some((row) => row.some(Boolean)))).toBe(true);
+    expect(stackA.diagnostics.averageSliceCoverage).toBeGreaterThan(0);
+    expect(stackA.diagnostics.peakSliceCoverage).toBeGreaterThan(0);
   });
 });
 

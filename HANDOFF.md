@@ -13,6 +13,7 @@
 - The browser pass verified the STL Slicer tab, axis selection, step navigation, and the new export affordances on the live app.
 - A follow-up fix now keeps the jump-to-step field synchronized with transport buttons and playback, guards blank step input, and makes 0.5x playback actually slower.
 - The default sample mesh is now a denser hollow sphere approximation instead of a solid cube so slice motion is easier to inspect during demos.
+- Mesh validation now rejects degenerate and duplicate triangle topology, coverage sampling is richer than binary occupancy, and the UI includes a clickable slice timeline strip plus coverage summary.
 
 ## Issue-Style Roadmap
 

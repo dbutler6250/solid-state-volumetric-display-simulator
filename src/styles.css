@@ -892,6 +892,35 @@ label {
   gap: 0.5rem;
 }
 
+.stl-slicer-timeline-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(1.1rem, 1fr));
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  padding: 0.55rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 10px;
+  background: rgba(11, 16, 23, 0.65);
+}
+
+.stl-slicer-timeline-cell {
+  min-height: 1.6rem;
+  padding: 0;
+  border: 1px solid #344456;
+  border-radius: 999px;
+  background: #18222f;
+  color: #8eb9d1;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.stl-slicer-timeline-cell-active {
+  border-color: #5aa7c8;
+  background: #285873;
+  color: #eff8fd;
+}
+
 .stl-slicer-loop {
   display: inline-flex;
   align-items: center;
