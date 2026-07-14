@@ -1,7 +1,7 @@
 # Solid State Volumetric Display Simulator
 
 Author: Dylan Butler
-Last Updated: 2026-07-12
+Last Updated: 2026-07-13
 
 This document is the historical record of completed project work. Active roadmap items, backlog work, and implementation details now live in GitHub Issues.
 
@@ -41,6 +41,8 @@ Keep this section as the historical record. Do not create issues for these items
 - Progress-aware explicit acoustic stack generation with large-period handling groundwork and future-mode stubs
 - Unified discriminated structure resolution so quarter-wave and acoustic stacks share one solver, stack-definition, sweep, and export data path
 - 3D proxy reflectance viewer with reusable scene builder, plane sweep/manual controls, live sweep animation, overlay modes, and WebGL fallback handling
+- STL slicer and playback foundation with deterministic transport controls, axis selection, richer slice diagnostics, export helpers, hollow-sphere sample mesh, mesh validation, coverage sampling, slice timeline strip, and explicit display-projection mapping
+- STL slicer boundary hardening with reusable output contracts and source metadata for sample meshes and uploaded files
 
 ## Notes
 
