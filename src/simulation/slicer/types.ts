@@ -133,3 +133,11 @@ export type SlicerOutput = {
   stack: SliceStack;
   timeline: PlaybackTimeline;
 };
+
+/** Versioned export envelope for downstream consumers. */
+export type SlicerExportEnvelope = {
+  schema: 'slicer-output';
+  version: 1;
+  generatedAt: string;
+  output: SlicerOutput;
+};

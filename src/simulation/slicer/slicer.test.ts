@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { createSampleHollowSphereMesh } from './stl';
 import {
   buildPlaybackTimeline,
+  buildSlicerExportEnvelope,
   buildSliceStack,
   buildSlicerOutput,
   getPlaybackStep,
   normalizeMeshToVolumeSpace,
   serializePlaybackTimelineJson,
+  serializeSlicerExportEnvelopeJson,
   serializeSliceStackCsv,
   serializeSlicerOutput,
 } from './slicer';
@@ -99,5 +101,18 @@ describe('buildSlicerOutput', () => {
     expect(serializeSlicerOutput(output)).toContain('"sliceCount": 3');
     expect(serializePlaybackTimelineJson(output.timeline)).toContain('"steps"');
     expect(serializeSliceStackCsv(output.stack)).toContain('sliceIndex,planePosition');
+  });
+
+  it('wraps the output in a versioned export envelope for downstream consumers', () => {
+    const output = buildSlicerOutput(createSampleHollowSphereMesh(), { sliceCount: 2, gridResolution: 2 });
+    const envelope = buildSlicerExportEnvelope(output, '2026-07-13T00:00:00.000Z');
+
+    expect(envelope).toEqual({
+      schema: 'slicer-output',
+      version: 1,
+      generatedAt: '2026-07-13T00:00:00.000Z',
+      output,
+    });
+    expect(serializeSlicerExportEnvelopeJson(envelope)).toContain('"schema": "slicer-output"');
   });
 });

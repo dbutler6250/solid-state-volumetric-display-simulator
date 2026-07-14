@@ -4,6 +4,7 @@ import type {
   MeshPoint3D,
   PlaybackTimeline,
   PlaybackTiming,
+  SlicerExportEnvelope,
   SlicerOutput,
   SliceFrame,
   SliceDiagnostics,
@@ -184,6 +185,21 @@ export function buildSlicerOutput(mesh: MeshGeometry, options: { axis?: SlicerAx
 /** Serializes a slicer output snapshot into a deterministic JSON payload. */
 export function serializeSlicerOutput(output: SlicerOutput): string {
   return JSON.stringify(output, null, 2);
+}
+
+/** Builds a versioned export envelope for downstream consumers. */
+export function buildSlicerExportEnvelope(output: SlicerOutput, generatedAt: string = new Date(0).toISOString()): SlicerExportEnvelope {
+  return {
+    schema: 'slicer-output',
+    version: 1,
+    generatedAt,
+    output,
+  };
+}
+
+/** Serializes the versioned export envelope to deterministic JSON. */
+export function serializeSlicerExportEnvelopeJson(envelope: SlicerExportEnvelope): string {
+  return JSON.stringify(envelope, null, 2);
 }
 
 /** Serializes a slice stack to a compact CSV summary for downstream tools. */

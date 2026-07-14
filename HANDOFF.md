@@ -18,6 +18,7 @@
 - The slicer contract now reports mesh topology counts and uses denser stratified coverage sampling to better represent slice fidelity without changing the upload or playback flow.
 - The STL slicer now includes a compact neighboring-slice preview rail so slice occupancy can be scanned at a glance without replacing the existing timeline strip.
 - The playback timeline now includes deterministic timing metadata and per-step timestamps so a future hardware engine can synchronize sweep cadence without changing the slice geometry contract.
+- The slicer now also exports a versioned schema envelope so downstream consumers can validate the payload shape without inferring it from raw JSON.
 
 ## Issue-Style Roadmap
 
@@ -57,7 +58,7 @@
 - `npm.cmd run test` - passed (106 tests).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
-- Live browser verification passed in Chrome against `http://127.0.0.1:5173/` after switching to the STL Slicer tab and checking the preview rail and timing summary.
+- Live browser verification passed in Chrome against `http://127.0.0.1:5173/` after switching to the STL Slicer tab and checking the preview rail, timing summary, and schema export action.
 
 ## Browser Verification
 

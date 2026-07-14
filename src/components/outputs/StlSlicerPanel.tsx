@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { DragEvent } from 'react';
 import {
   buildPlaybackTimeline,
+  buildSlicerExportEnvelope,
   buildSliceStack,
   getPlaybackStep,
   serializePlaybackTimelineJson,
   serializeSliceStackCsv,
+  serializeSlicerExportEnvelopeJson,
   serializeSlicerOutput,
 } from '../../simulation/slicer/slicer';
 import { createSampleHollowSphereMesh, parseStlBytes } from '../../simulation/slicer/stl';
@@ -400,15 +402,29 @@ export function StlSlicerPanel() {
             </div>
           </div>
           <div className="stl-slicer-export">
-            <button
-              type="button"
-              className="action-button"
-              onClick={() => {
+              <button
+                type="button"
+                className="action-button"
+                onClick={() => {
                 if (!slicerOutput) return;
                 downloadExport('stl-slicer-output.json', serializeSlicerOutput(slicerOutput), 'application/json');
               }}
             >
               Export output JSON
+            </button>
+            <button
+              type="button"
+              className="action-button"
+              onClick={() => {
+                if (!slicerOutput) return;
+                downloadExport(
+                  'stl-slicer-output-envelope.json',
+                  serializeSlicerExportEnvelopeJson(buildSlicerExportEnvelope(slicerOutput, new Date().toISOString())),
+                  'application/json',
+                );
+              }}
+            >
+              Export schema JSON
             </button>
             <button
               type="button"
