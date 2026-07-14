@@ -3,42 +3,39 @@
 ## Repository Status
 
 - PR #44 was merged into `main` at `d9405d2`.
-- The merged `codex/issue-43-unified-structure-resolution` branch was deleted locally and from `origin` after fetching with pruning.
-- `main` is the only local branch and tracks `origin/main`.
+- Current work is on branch `codex/issue-11-3d-viewer`.
 
 ## Latest Task
 
-- PR #44 / issue #43 now uses one canonical `SimulationDocument` and one shared `ResolvedStructure` for solving, Stack Definition, and result metadata.
-- Fixed all six review findings:
-  - only derived design-wavelength sweeps inherit analysis-range bounds; acoustic frequency and modulation retain configured bounds;
-  - every acoustic sweep point is preflighted against the 4,096-slice limit, 200-point cap, and 25,000,000 aggregate layer-wavelength work cap before any spectrum runs;
-  - acoustic resolution and spectrum solving are debounced, chunk-yielding, abortable, and protected from stale result ordering, while optical solving remains direct;
-  - result and parameter-sweep CSV metadata comes from the canonical document plus the exact shared resolved stack and includes manual/acoustic physical geometry;
-  - recentering rejects non-finite or unrepresentable reference intervals without applying invalid bounds and shows a clear UI error;
-  - zero modulation is verified against an equivalent homogeneous layer across wavelength, polarization, and angle cases, with field-specific acoustic geometry/physics assertions.
-- `solveResolvedStructure` is explicitly tested with supplied layers, and `StackDefinitionPanel` no longer resolves or materializes a second stack.
-- Import resets stale sweep/result UI state, targets only the imported structure draft, shares analysis fields, and preserves the other drafts.
-- Complex acoustic indices, schema-v1 imports, legacy Bragg imports, setup structure identity, and the fixed 0–89 degree angle sweep remain covered.
+- Issue #11 now adds a reusable 3D output tab built from `ReflectanceVolumeScene` and a `three.js` viewer.
+- The viewer renders a transparent medium with proxy volume and moving-plane modes, freeze control, orbit/pan/zoom behavior, preset-view scaffolding, slice/threshold/clip controls, and a legend.
+- The viewer now includes actual preset camera buttons and a shift-drag pan gesture in addition to orbit and zoom.
+- First-pass refinements added an interaction hint, inline slider values, a small scene-state badge, and a taller desktop canvas.
+- The scene builder uses the canonical `SimulationDocument`, resolved structure, and solver output instead of a second data path.
+- The tab fails gracefully when WebGL initialization is unavailable and directs the user back to Stack Definition.
+- Added focused tests for the 3D scene builder and proxy mode switching.
 
 ## Verification
 
-- `npm.cmd run test` - passed (89 tests after the final focused additions).
+- `npm.cmd run test` - passed (91 tests).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
-- `git diff --check` - passed (line-ending conversion notices only).
+- Browser-verified the 3D tab on desktop and at 390 px width.
+- Browser-verified the tab row, 3D controls, freeze toggle, and no horizontal overflow at mobile width.
+- Browser-verified the 3D tab mounts without the earlier React/runtime error, and the preset camera buttons are present.
+- Browser-verified the refinement pass with the new hint, inline values, and badge, and confirmed no actual horizontal overflow.
 
 ## Browser Verification
 
-- Verified acoustic frequency defaults remain 500,000,000–1,500,000,000 Hz and modulation remains 0–0.004.
-- Verified Reference representation constrains acoustic-period sweeps to 128 periods (4,096 slices) and excessive aggregate sweep work returns a clear error.
-- Verified a 4,096-slice automatic acoustic solve remains editable and completes through the deferred path; Stack Definition reports the same 4,096 slices and resolved geometry used by the spectrum.
-- Verified a roughly `1e20 nm` reference remains out of range and the recenter action reports that a safe 10–1,200 nm interval is not representable without corrupting the analysis range.
-- Verified Optical → Manual → Acoustic → Optical/Manual preserves independent structure drafts while the analysis range is shared.
-- Verified spectrum export controls enable for resolved manual and acoustic results; CSV content/metadata is covered by focused unit tests because programmatic Blob downloads were not captured by the in-app Browser download event.
-- Verified desktop layout and 390 px width with all three output tabs visible and no horizontal document overflow.
+- Verified the 3D View tab appears alongside Spectrum, Parameter Sweep, and Stack Definition.
+- Verified the 3D tab shows the proxy volume controls, legend, and plane/volume toggle.
+- Verified the 3D tab shows the preset camera buttons and mounts a canvas without the fallback error state.
+- Verified the 3D tab shows the interaction hint, inline slider values, and scene-state badge.
+- Verified the mobile layout keeps the tab row and 3D controls usable with no page-level horizontal overflow at 390 px width.
 
 ## Remaining Limitations
 
 - Acoustic solving is still a discretized-index TMM approximation; standing/traveling-wave dynamics and coupled-mode/Floquet physics remain future work.
 - Acoustic work is cooperatively chunked on the main thread rather than moved to a Web Worker. Cancellation prevents stale commits and yielding preserves input responsiveness, but a worker remains the preferred future path for workloads beyond the enforced limits.
 - Parameter sweeps remain explicit synchronous actions and are therefore guarded by per-point and aggregate limits.
+- The new 3D view is a proxy visualization layer, not a higher-fidelity field solver.
