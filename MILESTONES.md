@@ -45,6 +45,7 @@ Keep this section as the historical record. Do not create issues for these items
 - STL slicer boundary hardening with reusable output contracts and source metadata for sample meshes and uploaded files
 - STL slicer fidelity follow-up with axis-aware display-plane mapping, mesh topology diagnostics, and denser stratified coverage sampling
 - STL slicer compact preview rail with neighboring-slice occupancy thumbnails for lightweight at-a-glance inspection
+- STL slicer timing profile with deterministic frame intervals, sweep duration, and per-step timestamps for future hardware synchronization
 
 ## Notes
 

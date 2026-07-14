@@ -46,8 +46,12 @@ describe('playback', () => {
     const step = getPlaybackStep(stack, 2);
 
     expect(timeline.steps).toHaveLength(4);
+    expect(timeline.timing.frameIntervalMs).toBeGreaterThan(0);
+    expect(timeline.timing.sweepDurationMs).toBeGreaterThan(timeline.timing.frameIntervalMs - 1);
+    expect(timeline.steps[0]?.timestampMs).toBeCloseTo(timeline.timing.syncOffsetMs, 6);
     expect(step.step).toBe(2);
     expect(step.state.projectedFrame.index).toBe(2);
+    expect(step.state.timestampMs).toBeCloseTo(timeline.steps[2]?.timestampMs ?? 0, 6);
     expect(step.state.visibleVoxels.length).toBeGreaterThan(0);
     expect(step.state.projection.projectedSamples.length).toBeGreaterThan(0);
     expect(step.state.projection.axis).toBe('z');
@@ -75,6 +79,15 @@ describe('playback', () => {
     expect(sample).toBeDefined();
     expect(sample?.displayX).toBeCloseTo(sample?.sourceCenter[1] ?? 0, 6);
     expect(sample?.displayY).toBeCloseTo(sample?.sourceCenter[2] ?? 0, 6);
+  });
+
+  it('keeps timing deterministic for the same stack', () => {
+    const stack = buildSliceStack(createSampleHollowSphereMesh(), { sliceCount: 5, gridResolution: 5 });
+    const timelineA = buildPlaybackTimeline(stack);
+    const timelineB = buildPlaybackTimeline(stack);
+
+    expect(timelineA.timing).toEqual(timelineB.timing);
+    expect(timelineA.steps.map((step) => step.timestampMs)).toEqual(timelineB.steps.map((step) => step.timestampMs));
   });
 });
 

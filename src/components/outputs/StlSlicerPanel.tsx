@@ -68,6 +68,7 @@ export function StlSlicerPanel() {
     : 0;
   const planeY = activeFrame ? 8 + activeFrame.planeCoordinate * 84 : 8;
   const projectionPreview = playbackStep?.state.projection.projectedSamples[0] ?? null;
+  const playbackTiming = playbackTimeline?.timing ?? null;
   const previewSteps = playbackTimeline
     ? playbackTimeline.steps.slice(Math.max(0, stepIndex - 2), Math.min(playbackTimeline.steps.length, stepIndex + 3))
     : [];
@@ -362,6 +363,14 @@ export function StlSlicerPanel() {
               <strong>{playbackTimeline.steps.length}</strong>
             </div>
             <div className="stack-summary-item">
+              <span>Frame interval</span>
+              <strong>{playbackTiming ? `${playbackTiming.frameIntervalMs.toFixed(0)} ms` : '—'}</strong>
+            </div>
+            <div className="stack-summary-item">
+              <span>Sweep duration</span>
+              <strong>{playbackTiming ? `${playbackTiming.sweepDurationMs.toFixed(0)} ms` : '—'}</strong>
+            </div>
+            <div className="stack-summary-item">
               <span>Active voxels</span>
               <strong>{activeCount} / {totalCount}</strong>
             </div>
@@ -512,7 +521,13 @@ export function StlSlicerPanel() {
             Projection map keeps {playbackStep?.state.projection.projectedSamples.length ?? 0} visible voxels in display-space coordinates for downstream engines.
           </p>
           <p className="reflectance-volume-summary">
+            Timing aligns the sweep to {playbackTiming?.frameIntervalMs.toFixed(0) ?? '0'} ms frame slots with a {playbackTiming?.syncOffsetMs.toFixed(0) ?? '0'} ms sync offset.
+          </p>
+          <p className="reflectance-volume-summary">
             Mapping uses the {playbackStep?.state.projection.mapping.planeAxes.join('/').toUpperCase()} plane with {playbackStep?.state.projection.mapping.depthAxis.toUpperCase()} as depth in normalized unit-volume space.
+          </p>
+          <p className="reflectance-volume-summary">
+            Current slice timestamp is {playbackStep?.state.timestampMs.toFixed(0) ?? '0'} ms from the sweep origin.
           </p>
           {projectionPreview ? (
             <p className="reflectance-volume-summary">

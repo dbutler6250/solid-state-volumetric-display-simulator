@@ -105,10 +105,18 @@ export type DisplayProjection = {
   projectedSamples: DisplayProjectionSample[];
 };
 
+/** Deterministic timing metadata for a sweep-driven display engine. */
+export type PlaybackTiming = {
+  frameIntervalMs: number;
+  sweepDurationMs: number;
+  syncOffsetMs: number;
+};
+
 /** Instantaneous display playback state. */
 export type PlaybackStep = {
   stepIndex: number;
   planePosition: number;
+  timestampMs: number;
   projectedFrame: SliceFrame;
   visibleVoxels: VisibleVoxel[];
   projection: DisplayProjection;
@@ -117,6 +125,7 @@ export type PlaybackStep = {
 /** Deterministic time-ordered playback timeline. */
 export type PlaybackTimeline = {
   steps: PlaybackStep[];
+  timing: PlaybackTiming;
 };
 
 /** Immutable snapshot that future display engines can consume directly. */

@@ -3,6 +3,7 @@ import type {
   MeshGeometry,
   MeshPoint3D,
   PlaybackTimeline,
+  PlaybackTiming,
   SlicerOutput,
   SliceFrame,
   SliceDiagnostics,
@@ -139,10 +140,13 @@ export function buildSliceStack(
 
 /** Replays the slice stack as a deterministic display timeline. */
 export function buildPlaybackTimeline(stack: SliceStack): PlaybackTimeline {
+  const timing = buildPlaybackTiming(stack);
   return {
+    timing,
     steps: stack.slices.map((slice, stepIndex) => ({
       stepIndex,
       planePosition: slice.planePosition,
+      timestampMs: timing.syncOffsetMs + stepIndex * timing.frameIntervalMs,
       projectedFrame: slice,
       visibleVoxels: buildVisibleVoxels(stack, slice),
       projection: buildDisplayProjection(stack, slice),
@@ -154,11 +158,13 @@ export function buildPlaybackTimeline(stack: SliceStack): PlaybackTimeline {
 export function getPlaybackStep(stack: SliceStack, stepIndex: number): { step: number; state: PlaybackTimeline['steps'][number] } {
   const clampedIndex = Math.min(stack.slices.length - 1, Math.max(0, Math.round(stepIndex)));
   const projectedFrame = stack.slices[clampedIndex];
+  const timing = buildPlaybackTiming(stack);
   return {
     step: clampedIndex,
     state: {
       stepIndex: clampedIndex,
       planePosition: projectedFrame.planePosition,
+      timestampMs: timing.syncOffsetMs + clampedIndex * timing.frameIntervalMs,
       projectedFrame,
       visibleVoxels: buildVisibleVoxels(stack, projectedFrame),
       projection: buildDisplayProjection(stack, projectedFrame),
@@ -351,6 +357,17 @@ function countRefinedCells(mask: number[][]): number {
     }
   }
   return refinedCells;
+}
+
+/** Derives a deterministic frame clock from the current slice stack. */
+function buildPlaybackTiming(stack: SliceStack): PlaybackTiming {
+  const sliceCount = Math.max(1, stack.sliceCount);
+  const frameIntervalMs = Math.max(12, Math.round(1000 / Math.min(60, sliceCount)));
+  return {
+    frameIntervalMs,
+    sweepDurationMs: frameIntervalMs * sliceCount,
+    syncOffsetMs: frameIntervalMs / 2,
+  };
 }
 
 function isPointInsideMesh(mesh: MeshGeometry, point: MeshPoint3D, axis: 'x' | 'y' | 'z'): boolean {
