@@ -40,6 +40,11 @@ export type ReflectanceVolumeScene = {
   };
 };
 
+export type ReflectancePlaneTransform = {
+  phase: number;
+  positionZ: number;
+};
+
 const DEFAULT_FIELD_RESOLUTION = 6;
 const DEFAULT_CLIP_FRACTION = 0.35;
 
@@ -105,6 +110,15 @@ export function buildReflectanceVolumeScene(
   };
 }
 
+/** Converts a normalized plane phase into the render-space transform used by the viewer. */
+export function getReflectancePlaneTransform(phase: number): ReflectancePlaneTransform {
+  const normalizedPhase = clamp01(phase);
+  return {
+    phase: normalizedPhase,
+    positionZ: normalizedPhase * 2 - 1,
+  };
+}
+
 function createCells(
   stack: LayerStack,
   normalizedIntensity: number,
@@ -127,11 +141,9 @@ function createCells(
         const centeredY = (y / (resolution - 1)) * 2 - 1;
         const centeredZ = (z / (resolution - 1)) * 2 - 1;
         const radialFalloff = Math.max(0, 1 - Math.hypot(centeredX, centeredY, centeredZ) * 0.55);
-        const planeFalloff =
-          options.mode === 'plane'
-            ? Math.max(0, 1 - Math.abs(z / Math.max(1, resolution - 1) - sliceBias) * 4)
-            : 1;
-        const intensity = clamp01(normalizedIntensity * radialFalloff * planeFalloff * layerWeight);
+        const sliceDistance = Math.abs(z / Math.max(1, resolution - 1) - sliceBias);
+        const sliceFalloff = options.mode === 'plane' ? Math.max(0, 1 - sliceDistance * 4) : Math.max(0.35, 1 - sliceDistance * 1.2);
+        const intensity = clamp01(normalizedIntensity * radialFalloff * sliceFalloff * layerWeight);
         if (intensity < options.threshold) continue;
         cells.push({
           position: [centeredX, centeredY, centeredZ],

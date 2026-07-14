@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
 import { createSimulationDocument, resolveSimulationDocument } from '../simulation/structures/structureResolver';
 import { solveResolvedStructure } from '../simulation/solvers/transferMatrix';
-import { buildReflectanceVolumeScene } from './reflectanceVolumeScene';
+import { buildReflectanceVolumeScene, getReflectancePlaneTransform } from './reflectanceVolumeScene';
 
 describe('reflectance volume scene', () => {
   it('builds reusable proxy scene metadata from the canonical resolved structure', () => {
@@ -55,5 +55,11 @@ describe('reflectance volume scene', () => {
     expect(glass.overlays.showInteriorDetail).toBe(true);
     expect(shellOnly.overlays.showShell).toBe(true);
     expect(shellOnly.overlays.showInteriorDetail).toBe(false);
+  });
+
+  it('maps normalized plane phases to a moving plane position', () => {
+    expect(getReflectancePlaneTransform(0)).toMatchObject({ phase: 0, positionZ: -1 });
+    expect(getReflectancePlaneTransform(0.5)).toMatchObject({ phase: 0.5, positionZ: 0 });
+    expect(getReflectancePlaneTransform(1)).toMatchObject({ phase: 1, positionZ: 1 });
   });
 });

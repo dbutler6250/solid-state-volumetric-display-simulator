@@ -4,6 +4,7 @@ import type { SimulationDocument, SimulationResult } from '../../types/simulatio
 import type { ResolvedStructure } from '../../simulation/structures/structureResolver';
 import {
   buildReflectanceVolumeScene,
+  getReflectancePlaneTransform,
   type ReflectanceVolumeDisplayMode,
   type ReflectanceVolumeOverlayMode,
 } from '../../visualization/reflectanceVolumeScene';
@@ -39,7 +40,6 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
   const [planeSpeed, setPlaneSpeed] = useState(DEFAULT_PLANE_SPEED);
   const [status, setStatus] = useState<ViewerStatus>('loading');
   const [error, setError] = useState<string | null>(null);
-  const [phase, setPhase] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -55,7 +55,9 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
   const freezeRef = useRef(false);
   const planeMotionModeRef = useRef<PlaneMotionMode>('sweep');
   const planePhaseRef = useRef(DEFAULT_PLANE_PHASE);
+  const sweepPhaseRef = useRef(DEFAULT_PLANE_PHASE);
   const planeSpeedRef = useRef(DEFAULT_PLANE_SPEED);
+  const sweepPhaseLabelRef = useRef<HTMLSpanElement | null>(null);
   const previousFrameRef = useRef<number | null>(null);
   const controlsRef = useRef({
     theta: 0.8,
@@ -80,6 +82,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
       }),
     [document, resolvedStructure, result, mode, overlayMode, sliceIndex, threshold, clipFraction],
   );
+  const initialSceneRef = useRef(scene);
   const interactionHint = 'Drag to orbit, Shift-drag to pan, scroll to zoom.';
   const sceneBadge =
     status === 'error'
@@ -119,6 +122,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    const initialScene = initialSceneRef.current;
 
     let disposed = false;
 
@@ -148,14 +152,14 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
       const mediumMaterial = new THREE.MeshPhysicalMaterial({
         color: 0x88bbff,
         transparent: true,
-        opacity: Math.min(scene.medium.opacity, 0.08),
+        opacity: Math.min(initialScene.medium.opacity, 0.08),
         roughness: 0.03,
         metalness: 0,
         transmission: 0.92,
         thickness: 1.1,
         clearcoat: 0.55,
         clearcoatRoughness: 0.04,
-        clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))],
+        clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(initialScene.medium.clipFraction))],
       });
       mediumMaterialRef.current = mediumMaterial;
       const mediumMesh = new THREE.Mesh(mediumGeometry, mediumMaterial);
@@ -186,7 +190,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         transparent: true,
         opacity: 0.95,
         depthWrite: false,
-        clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))],
+        clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(initialScene.medium.clipFraction))],
       });
       const voxelMesh = new THREE.InstancedMesh(voxelGeometry, voxelMaterial, 1);
       voxelMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -199,7 +203,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         transparent: true,
         opacity: 0.5,
         depthWrite: false,
-        clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))],
+        clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(initialScene.medium.clipFraction))],
       });
       const planeMesh = new THREE.InstancedMesh(planeGeometry, planeMaterial, 1);
       planeMeshRef.current = planeMesh;
@@ -215,7 +219,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
           depthWrite: false,
         }),
       );
-      clipPlane.position.z = 1 - scene.medium.clipFraction * 2;
+      clipPlane.position.z = 1 - initialScene.medium.clipFraction * 2;
       clipPlaneRef.current = clipPlane;
       scene3d.add(clipPlane);
 
@@ -273,15 +277,18 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         const deltaSeconds =
           previousFrameRef.current === null ? 0 : Math.min(0.05, (now - previousFrameRef.current) / 1000);
         previousFrameRef.current = now;
-        if (!freezeRef.current) {
-          setPhase((current) => (current + scene.medium.phaseRate * 0.01) % 1);
-        }
         if (planeMotionModeRef.current === 'sweep' && !freezeRef.current) {
-          planePhaseRef.current = (planePhaseRef.current + deltaSeconds * planeSpeedRef.current) % 1;
-          setPlanePhase(planePhaseRef.current);
+          sweepPhaseRef.current = (sweepPhaseRef.current + deltaSeconds * planeSpeedRef.current) % 1;
+        }
+        if (sweepPhaseLabelRef.current) {
+          sweepPhaseLabelRef.current.textContent =
+            planeMotionModeRef.current === 'sweep'
+              ? `${Math.round(sweepPhaseRef.current * 100)}%`
+              : `${Math.round(planePhaseRef.current * 100)}%`;
         }
         const rendererInstance = rendererRef.current;
         const cameraInstance = cameraRef.current;
+        const planeMesh = planeMeshRef.current;
         if (rendererInstance && cameraInstance && sceneRef.current) {
           const { theta, phi, radius } = controlsRef.current;
           cameraInstance.position.set(
@@ -290,6 +297,21 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
             radius * Math.sin(phi) * Math.sin(theta),
           );
           cameraInstance.lookAt(controlsRef.current.panX, controlsRef.current.panY, 0);
+          if (planeMesh) {
+            const planeTransform =
+              planeMotionModeRef.current === 'manual'
+                ? getReflectancePlaneTransform(planePhaseRef.current)
+                : getReflectancePlaneTransform(sweepPhaseRef.current);
+            planeMesh.setMatrixAt(
+              0,
+              new THREE.Matrix4().compose(
+                new THREE.Vector3(0, 0, planeTransform.positionZ),
+                new THREE.Quaternion(),
+                new THREE.Vector3(1, 1, 1),
+              ),
+            );
+            planeMesh.instanceMatrix.needsUpdate = true;
+          }
           rendererInstance.render(sceneRef.current, cameraInstance);
         }
         frameRef.current = window.requestAnimationFrame(animate);
@@ -342,7 +364,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
           : 'The 3D viewer could not be initialized in this browser.',
       );
     }
-  }, [scene.medium.phaseRate, scene.medium.opacity, scene.medium.clipFraction]);
+  }, []);
 
   const applyPresetView = (view: keyof typeof PRESET_CAMERA_VIEWS) => {
     Object.assign(controlsRef.current, PRESET_CAMERA_VIEWS[view], {
@@ -374,10 +396,8 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
     mediumMaterial.opacity = scene.overlays.showShell ? scene.medium.opacity : 0;
     mediumMaterial.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))];
     clipPlane.position.z = planeZForClip(scene.medium.clipFraction);
-    const normalizedPlanePhase =
-      planeMotionMode === 'manual' ? planePhase : planePhaseRef.current;
-    const planeOffset = normalizedPlanePhase * 2 - 1;
-    const animatedPlaneZ = scene.mode === 'plane' ? planeOffset : planeZ;
+    const normalizedPlanePhase = planeMotionMode === 'manual' ? planePhase : sweepPhaseRef.current;
+    const animatedPlaneZ = scene.mode === 'plane' ? getReflectancePlaneTransform(normalizedPlanePhase).positionZ : planeZ;
     const planeVisible = scene.mode === 'plane' || scene.overlays.showInteriorDetail;
     planeMesh.setMatrixAt(
       0,
@@ -411,7 +431,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
     if (voxelMesh.instanceColor) voxelMesh.instanceColor.needsUpdate = true;
     planeMesh.instanceMatrix.needsUpdate = true;
     renderer.render(scene3d, camera);
-  }, [scene, sliceIndex, phase, planePhase, planeMotionMode]);
+  }, [scene, sliceIndex, planePhase, planeMotionMode]);
 
   return (
     <div className="reflectance-volume-panel">
@@ -486,6 +506,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
             onClick={() => {
               setPlaneMotionMode('sweep');
               setFreezeAnimation(false);
+              sweepPhaseRef.current = planePhase;
             }}
           >
             Sweep
@@ -496,6 +517,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
             onClick={() => {
               setPlaneMotionMode('manual');
               setFreezeAnimation(true);
+              setPlanePhase(sweepPhaseRef.current);
             }}
           >
             Manual
@@ -512,7 +534,11 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         </label>
         {planeMotionMode === 'sweep' ? (
           <label className="field reflectance-volume-speed-control">
-            <span>Plane speed <strong>{planeSpeed.toFixed(2)} cycles/s</strong></span>
+            <span>
+              Plane speed <strong>{planeSpeed.toFixed(2)} cycles/s</strong>
+              {' '}
+              <strong ref={sweepPhaseLabelRef}>{Math.round(sweepPhaseRef.current * 100)}%</strong>
+            </span>
             <input
               type="range"
               min={0.05}
