@@ -3,7 +3,7 @@
 ## Repository Status
 
 - Branch `codex/issue-46-stl-slicer-roadmap` is active for PR #47 / issue #46.
-- The STL slicer foundation is in place and the branch now includes playback controls, axis selection, richer diagnostics, and hardened reusable output contracts.
+- The STL slicer foundation is in place and the branch now includes playback controls, axis selection, richer diagnostics, hardened reusable output contracts, and a follow-up fix for step-state synchronization.
 
 ## Latest Task
 
@@ -11,6 +11,7 @@
 - New slicer contracts expose a reusable `SlicerOutput` snapshot plus JSON and CSV serialization for future display engines.
 - The UI now offers play/pause, previous/next, start/end, jump-to-step, loop, speed controls, and export buttons alongside the existing file upload, sample load, and SVG preview.
 - The browser pass verified the STL Slicer tab, axis selection, step navigation, and the new export affordances on the live app.
+- A follow-up fix now keeps the jump-to-step field synchronized with transport buttons and playback, guards blank step input, and makes 0.5x playback actually slower.
 
 ## Issue-Style Roadmap
 
