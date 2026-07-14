@@ -124,46 +124,49 @@ function parseBinaryStl(bytes: ArrayBuffer): MeshGeometry {
 
 /** Returns a small hollow sphere approximation that produces more dynamic slice previews. */
 export function createSampleHollowSphereMesh(): MeshGeometry {
-  const outerRadius = 0.5;
+  const latitudeBands = 6;
+  const longitudeBands = 12;
+  const outerRadius = 0.48;
   const innerRadius = 0.28;
-  const outerVertices: MeshPoint3D[] = [
-    [0, 0, outerRadius],
-    [0, 0, -outerRadius],
-    [outerRadius, 0, 0],
-    [-outerRadius, 0, 0],
-    [0, outerRadius, 0],
-    [0, -outerRadius, 0],
-  ];
-  const innerVertices: MeshPoint3D[] = [
-    [0, 0, innerRadius],
-    [0, 0, -innerRadius],
-    [innerRadius, 0, 0],
-    [-innerRadius, 0, 0],
-    [0, innerRadius, 0],
-    [0, -innerRadius, 0],
-  ];
+  const vertices: MeshPoint3D[] = [];
+  const triangles: MeshTriangle[] = [];
 
-  return {
-    vertices: [...outerVertices, ...innerVertices],
-    triangles: [
-      // Outer octahedron shell.
-      [0, 2, 4],
-      [0, 4, 3],
-      [0, 3, 5],
-      [0, 5, 2],
-      [1, 4, 2],
-      [1, 3, 4],
-      [1, 5, 3],
-      [1, 2, 5],
-      // Inner octahedron shell with reversed winding so the cavity stays hollow.
-      [6, 10, 8],
-      [6, 9, 10],
-      [6, 11, 9],
-      [6, 8, 11],
-      [7, 8, 10],
-      [7, 10, 9],
-      [7, 9, 11],
-      [7, 11, 8],
-    ],
+  const addSphereShell = (radius: number, reverseWinding: boolean) => {
+    const baseIndex = vertices.length;
+    for (let lat = 0; lat <= latitudeBands; lat += 1) {
+      const theta = (lat * Math.PI) / latitudeBands;
+      const sinTheta = Math.sin(theta);
+      const cosTheta = Math.cos(theta);
+      for (let lon = 0; lon <= longitudeBands; lon += 1) {
+        const phi = (lon * 2 * Math.PI) / longitudeBands;
+        vertices.push([
+          radius * Math.cos(phi) * sinTheta,
+          radius * Math.sin(phi) * sinTheta,
+          radius * cosTheta,
+        ]);
+      }
+    }
+
+    const rowStride = longitudeBands + 1;
+    for (let lat = 0; lat < latitudeBands; lat += 1) {
+      for (let lon = 0; lon < longitudeBands; lon += 1) {
+        const a = baseIndex + lat * rowStride + lon;
+        const b = a + rowStride;
+        const c = b + 1;
+        const d = a + 1;
+        if (reverseWinding) {
+          triangles.push([a, c, b]);
+          triangles.push([a, d, c]);
+        } else {
+          triangles.push([a, b, c]);
+          triangles.push([a, c, d]);
+        }
+      }
+    }
   };
+
+  addSphereShell(outerRadius, false);
+  addSphereShell(innerRadius, true);
+
+  return { vertices, triangles };
 }

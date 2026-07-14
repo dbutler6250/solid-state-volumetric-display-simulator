@@ -12,7 +12,7 @@
 - The UI now offers play/pause, previous/next, start/end, jump-to-step, loop, speed controls, and export buttons alongside the existing file upload, sample load, and SVG preview.
 - The browser pass verified the STL Slicer tab, axis selection, step navigation, and the new export affordances on the live app.
 - A follow-up fix now keeps the jump-to-step field synchronized with transport buttons and playback, guards blank step input, and makes 0.5x playback actually slower.
-- The default sample mesh is now a hollow sphere approximation instead of a solid cube so slice motion is easier to inspect during demos.
+- The default sample mesh is now a denser hollow sphere approximation instead of a solid cube so slice motion is easier to inspect during demos.
 
 ## Issue-Style Roadmap
 

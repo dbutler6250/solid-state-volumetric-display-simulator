@@ -52,7 +52,7 @@ endsolid cube`),
 describe('createSampleHollowSphereMesh', () => {
   it('returns a reusable hollow sphere approximation', () => {
     const mesh = createSampleHollowSphereMesh();
-    expect(mesh.vertices).toHaveLength(12);
-    expect(mesh.triangles).toHaveLength(16);
+    expect(mesh.vertices).toHaveLength(182);
+    expect(mesh.triangles).toHaveLength(288);
   });
 });
