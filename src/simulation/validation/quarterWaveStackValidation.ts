@@ -1,5 +1,5 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
-import { getAcousticSlicesPerPeriod } from '../structures/acoustoOpticGrating';
+import { getAcousticSlicesPerPeriod, isAcousticRepresentationMode } from '../structures/acoustoOpticGrating';
 import { MAX_AUTOMATIC_ACOUSTIC_LAYERS } from '../simulationLimits';
 import { getRefractiveIndexImag, getRefractiveIndexReal, isComplexRefractiveIndex } from '../materials/material';
 
@@ -147,6 +147,14 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
         message: 'Acoustic input mode requires acoustic design inputs.',
       });
     } else {
+      const hasValidAcousticRepresentationMode = isAcousticRepresentationMode(design.acousticRepresentationMode);
+
+      if (!hasValidAcousticRepresentationMode) {
+        issues.push({
+          field: 'thicknessMode',
+          message: 'Acoustic representation mode must be binary, fast, accurate, or reference.',
+        });
+      }
       if (!isFiniteNumber(design.acousticVelocityMps) || design.acousticVelocityMps <= 0) {
         issues.push({
           field: 'thicknessMode',
@@ -168,6 +176,7 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       if (
         isFiniteNumber(design.acousticPeriodCount) &&
         Number.isInteger(design.acousticPeriodCount) &&
+        hasValidAcousticRepresentationMode &&
         design.acousticPeriodCount * getAcousticSlicesPerPeriod(design.acousticRepresentationMode) >
           MAX_AUTOMATIC_ACOUSTIC_LAYERS
       ) {
