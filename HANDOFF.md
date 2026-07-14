@@ -2,32 +2,30 @@
 
 ## Repository Status
 
-- PR #45 was merged into `main` at `769e426`.
-- The merged `codex/issue-11-3d-viewer` branch has been deleted from `origin`.
-- Local `main` now needs to be fast-forwarded to `origin/main`.
+- Branch `codex/issue-46-stl-slicer-roadmap` is active for PR #47 / issue #46.
+- The STL slicer foundation is in place and the branch now includes playback controls, axis selection, richer diagnostics, and hardened reusable output contracts.
 
 ## Latest Task
 
-- Issue #46 now includes real STL file uploads and a clearer 2D slice preview.
-- New reusable modules handle ASCII/binary STL parsing, mesh normalization, axis-aligned slicing, and deterministic playback timelines.
-- The UI now includes a dedicated STL Slicer tab with file upload, sample-mesh loading, slice/grid controls, and an SVG slice visualization.
-- Focused tests now cover STL parsing, upload-path parsing, normalization, slice generation, and deterministic playback state.
+- Issue #46 now includes deterministic playback controls, per-axis slicing, richer slice diagnostics, and export helpers.
+- New slicer contracts expose a reusable `SlicerOutput` snapshot plus JSON and CSV serialization for future display engines.
+- The UI now offers play/pause, previous/next, start/end, jump-to-step, loop, speed controls, and export buttons alongside the existing file upload, sample load, and SVG preview.
+- The browser pass verified the STL Slicer tab, axis selection, step navigation, and the new export affordances on the live app.
 
 ## Issue-Style Roadmap
 
 1. Playback controls and navigation
-- Add play/pause, scrub, speed, and loop controls.
-- Surface current slice index, plane position, and visible voxel count more prominently.
+- Playback navigation is now implemented with play/pause, previous/next, start/end, scrub, and jump-to-step controls.
 - Keep playback deterministic and derived from slice-stack state only.
 
 2. Slice-axis and preview upgrades
-- Add `x`, `y`, and `z` axis selection.
-- Add richer 2D slice diagnostics such as occupancy density or a per-slice summary.
-- Consider a stacked-slice strip or thumbnail timeline for quick inspection.
+- Axis selection is now implemented.
+- Richer 2D slice diagnostics are now exposed through the stack summary.
+- Consider a stacked-slice strip or thumbnail timeline for quick inspection later.
 
 3. Output contract hardening
 - Split slicer output and playback state into explicit reusable types.
-- Add export helpers for JSON or CSV timeline output.
+- `SlicerOutput`, `serializeSlicerOutput`, `serializePlaybackTimelineJson`, and `serializeSliceStackCsv` now provide a stable handoff boundary.
 - Keep the slicer boundary independent from the UI panel and future display engines.
 
 4. Mesh validation and input resilience
@@ -43,20 +41,22 @@
 ## Session Summary
 
 - Added a new STL slicer panel and simulation boundary for parsing, normalization, slicing, and playback.
-- Wired the panel to file uploads and drag-and-drop, with sample loading and a coarse SVG slice visualization.
-- Added tests for STL parsing, upload-path parsing, normalization, slice generation, and playback determinism.
-- Kept the work focused on first-pass foundations; higher fidelity and richer playback controls are intentionally deferred.
+- Wired the panel to file uploads and drag-and-drop, with sample loading, playback transport, axis selection, export controls, and a coarse SVG slice visualization.
+- Added tests for STL parsing, malformed facet handling, upload-path parsing, normalization, slice generation, playback determinism, and the new output contract.
+- Kept the work focused on issue #46 and the deterministic coarse slicer design.
 
 ## Verification
 
-- `npm.cmd run test` - passed (100 tests).
+- `npm.cmd run test` - passed (102 tests).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
-- Live browser verification was attempted, but the local Playwright Chromium binary is not installed in this environment.
+- Live browser verification passed in the in-app browser after a reload.
 
 ## Browser Verification
 
-- Pending manual pass for the new STL Slicer tab once a browser binary is available.
+- Verified the STL Slicer tab appears alongside Spectrum, Parameter Sweep, Stack Definition, and 3D View.
+- Verified the slicer panel shows file upload, drag-and-drop, sample loading, axis selection, playback controls, jump-to-step, and export actions.
+- Verified axis selection updates the live step summary and the playback slider advances the deterministic step state.
 
 ## Remaining Limitations
 
@@ -65,3 +65,4 @@
 - Parameter sweeps remain explicit synchronous actions and are therefore guarded by per-point and aggregate limits.
 - The new 3D view is a proxy visualization layer, not a higher-fidelity field solver.
 - The STL slicer is intentionally coarse; higher-fidelity meshing and richer voxel shading remain future work.
+- The slicer output contract is still local to this branch; a formal export schema can be added when a downstream display engine consumes it.

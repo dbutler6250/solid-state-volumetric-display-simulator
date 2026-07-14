@@ -27,8 +27,19 @@ export type VoxelCell = {
 export type SliceFrame = {
   index: number;
   planePosition: number;
+  planeCoordinate: number;
   occupancyMask: boolean[][];
   intensityMask: number[][];
+};
+
+/** Summary diagnostics for one slice stack. */
+export type SliceDiagnostics = {
+  activeVoxelCount: number;
+  totalVoxelCount: number;
+  occupiedSliceCount: number;
+  emptySliceCount: number;
+  averageSliceOccupancy: number;
+  peakSliceOccupancy: number;
 };
 
 /** Reusable slice stack output from the mesh slicer. */
@@ -38,6 +49,7 @@ export type SliceStack = {
   gridResolution: number;
   sliceCount: number;
   slices: SliceFrame[];
+  diagnostics: SliceDiagnostics;
 };
 
 /** Visible voxels reported by the playback engine for one time step. */
@@ -58,4 +70,10 @@ export type PlaybackStep = {
 /** Deterministic time-ordered playback timeline. */
 export type PlaybackTimeline = {
   steps: PlaybackStep[];
+};
+
+/** Immutable snapshot that future display engines can consume directly. */
+export type SlicerOutput = {
+  stack: SliceStack;
+  timeline: PlaybackTimeline;
 };

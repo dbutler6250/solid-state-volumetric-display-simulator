@@ -34,6 +34,19 @@ endsolid cube`).buffer);
   it('rejects empty STL content', () => {
     expect(() => parseAsciiStl('solid empty\nendsolid empty')).toThrow('did not contain any triangles');
   });
+
+  it('rejects incomplete ASCII facets', () => {
+    expect(() =>
+      parseAsciiStl(`solid cube
+facet normal 0 0 1
+  outer loop
+    vertex 0 0 0
+    vertex 1 0 0
+  endloop
+endfacet
+endsolid cube`),
+    ).toThrow('three vertices');
+  });
 });
 
 describe('createSampleCubeMesh', () => {

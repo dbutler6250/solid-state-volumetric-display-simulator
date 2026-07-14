@@ -2,7 +2,9 @@ import type {
   MeshGeometry,
   MeshPoint3D,
   PlaybackTimeline,
+  SlicerOutput,
   SliceFrame,
+  SliceDiagnostics,
   SliceStack,
   VisibleVoxel,
   VolumeBounds,
@@ -61,11 +63,16 @@ export function buildSliceStack(
   const gridResolution = Math.max(2, Math.round(options.gridResolution ?? 12));
   const { mesh: normalizedMesh, bounds } = normalizeMeshToVolumeSpace(mesh);
   const slices: SliceFrame[] = [];
+  let activeVoxelCount = 0;
+  let occupiedSliceCount = 0;
+  let peakSliceOccupancy = 0;
 
   for (let sliceIndex = 0; sliceIndex < sliceCount; sliceIndex += 1) {
     const planePosition = sliceCount === 1 ? 0.5 : (sliceIndex + 0.5) / sliceCount;
+    const planeCoordinate = planePosition;
     const occupancyMask: boolean[][] = [];
     const intensityMask: number[][] = [];
+    let sliceActiveVoxelCount = 0;
 
     for (let row = 0; row < gridResolution; row += 1) {
       const occupancyRow: boolean[] = [];
@@ -75,15 +82,31 @@ export function buildSliceStack(
         const active = isPointInsideMesh(normalizedMesh, point, axis);
         occupancyRow.push(active);
         intensityRow.push(active ? 1 : 0);
+        if (active) {
+          sliceActiveVoxelCount += 1;
+        }
       }
       occupancyMask.push(occupancyRow);
       intensityMask.push(intensityRow);
     }
 
-    slices.push({ index: sliceIndex, planePosition, occupancyMask, intensityMask });
+    activeVoxelCount += sliceActiveVoxelCount;
+    if (sliceActiveVoxelCount > 0) {
+      occupiedSliceCount += 1;
+    }
+    peakSliceOccupancy = Math.max(peakSliceOccupancy, sliceActiveVoxelCount);
+    slices.push({ index: sliceIndex, planePosition, planeCoordinate, occupancyMask, intensityMask });
   }
 
-  return { axis, bounds, gridResolution, sliceCount, slices };
+  const diagnostics = buildSliceDiagnostics({
+    activeVoxelCount,
+    occupiedSliceCount,
+    sliceCount,
+    sliceResolution: gridResolution * gridResolution,
+    peakSliceOccupancy,
+  });
+
+  return { axis, bounds, gridResolution, sliceCount, slices, diagnostics };
 }
 
 /** Replays the slice stack as a deterministic display timeline. */
@@ -110,6 +133,65 @@ export function getPlaybackStep(stack: SliceStack, stepIndex: number): { step: n
       projectedFrame,
       visibleVoxels: buildVisibleVoxels(stack, projectedFrame),
     },
+  };
+}
+
+/** Returns the stable slicer output contract for engine consumers and exports. */
+export function buildSlicerOutput(mesh: MeshGeometry, options: { axis?: 'x' | 'y' | 'z'; sliceCount?: number; gridResolution?: number } = {}): SlicerOutput {
+  const stack = buildSliceStack(mesh, options);
+  return {
+    stack,
+    timeline: buildPlaybackTimeline(stack),
+  };
+}
+
+/** Serializes a slicer output snapshot into a deterministic JSON payload. */
+export function serializeSlicerOutput(output: SlicerOutput): string {
+  return JSON.stringify(output, null, 2);
+}
+
+/** Serializes a slice stack to a compact CSV summary for downstream tools. */
+export function serializeSliceStackCsv(stack: SliceStack): string {
+  const lines = ['sliceIndex,planePosition,planeCoordinate,activeVoxelCount,totalVoxelCount,occupancyPercent'];
+  for (const slice of stack.slices) {
+    const activeVoxelCount = slice.occupancyMask.reduce(
+      (count, row) => count + row.reduce((rowCount, active) => rowCount + (active ? 1 : 0), 0),
+      0,
+    );
+    const totalVoxelCount = stack.gridResolution * stack.gridResolution;
+    const occupancyPercent = totalVoxelCount > 0 ? (activeVoxelCount / totalVoxelCount) * 100 : 0;
+    lines.push([
+      slice.index,
+      slice.planePosition.toFixed(6),
+      slice.planeCoordinate.toFixed(6),
+      activeVoxelCount,
+      totalVoxelCount,
+      occupancyPercent.toFixed(3),
+    ].join(','));
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+/** Serializes the deterministic playback timeline to JSON for inspection or export. */
+export function serializePlaybackTimelineJson(timeline: PlaybackTimeline): string {
+  return JSON.stringify(timeline, null, 2);
+}
+
+function buildSliceDiagnostics(params: {
+  activeVoxelCount: number;
+  occupiedSliceCount: number;
+  peakSliceOccupancy: number;
+  sliceCount: number;
+  sliceResolution: number;
+}): SliceDiagnostics {
+  const totalVoxelCount = params.sliceCount * params.sliceResolution;
+  return {
+    activeVoxelCount: params.activeVoxelCount,
+    totalVoxelCount,
+    occupiedSliceCount: params.occupiedSliceCount,
+    emptySliceCount: params.sliceCount - params.occupiedSliceCount,
+    averageSliceOccupancy: totalVoxelCount > 0 ? params.activeVoxelCount / totalVoxelCount : 0,
+    peakSliceOccupancy: params.peakSliceOccupancy,
   };
 }
 

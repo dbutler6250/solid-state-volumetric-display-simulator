@@ -871,6 +871,39 @@ label {
   align-content: start;
 }
 
+.stl-slicer-playback {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.8rem;
+  border: 1px solid #273142;
+  border-radius: 8px;
+  background: rgba(16, 23, 32, 0.8);
+}
+
+.stl-slicer-playback-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.stl-slicer-export {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.stl-slicer-loop {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d7e0ea;
+  font-size: 0.84rem;
+}
+
+.stl-slicer-loop input {
+  width: auto;
+}
+
 .stl-slicer-actions .action-button {
   width: 100%;
 }
@@ -919,6 +952,12 @@ label {
 .stl-slicer-results {
   display: grid;
   gap: 0.9rem;
+}
+
+.stack-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 
 .stl-slicer-preview {
@@ -1253,6 +1292,14 @@ label {
   }
 
   .stl-slicer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stack-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stl-slicer-export {
     grid-template-columns: 1fr;
   }
 

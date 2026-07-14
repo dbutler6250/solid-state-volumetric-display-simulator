@@ -1,6 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DragEvent } from 'react';
-import { buildPlaybackTimeline, buildSliceStack, getPlaybackStep } from '../../simulation/slicer/slicer';
+import {
+  buildPlaybackTimeline,
+  buildSliceStack,
+  getPlaybackStep,
+  serializePlaybackTimelineJson,
+  serializeSliceStackCsv,
+  serializeSlicerOutput,
+} from '../../simulation/slicer/slicer';
 import { createSampleCubeMesh, parseStlBytes } from '../../simulation/slicer/stl';
 import type { MeshGeometry } from '../../simulation/slicer/types';
 
@@ -20,6 +27,11 @@ export function StlSlicerPanel() {
   const [sliceCount, setSliceCount] = useState(12);
   const [gridResolution, setGridResolution] = useState(10);
   const [stepIndex, setStepIndex] = useState(0);
+  const [stepInput, setStepInput] = useState('0');
+  const [axis, setAxis] = useState<'x' | 'y' | 'z'>('z');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [isLooping, setIsLooping] = useState(true);
   const [fileName, setFileName] = useState('sample-cube.stl');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isDropActive, setIsDropActive] = useState(false);
@@ -28,11 +40,11 @@ export function StlSlicerPanel() {
   const sliceStack = useMemo(() => {
     if (!state.mesh) return null;
     try {
-      return buildSliceStack(state.mesh, { sliceCount, gridResolution, axis: 'z' });
+      return buildSliceStack(state.mesh, { sliceCount, gridResolution, axis });
     } catch (error) {
       return { error: error instanceof Error ? error.message : 'The mesh could not be sliced.' };
     }
-  }, [gridResolution, sliceCount, state.mesh]);
+  }, [axis, gridResolution, sliceCount, state.mesh]);
 
   const playbackTimeline = useMemo(
     () => (sliceStack && 'slices' in sliceStack ? buildPlaybackTimeline(sliceStack) : null),
@@ -42,18 +54,44 @@ export function StlSlicerPanel() {
     if (!sliceStack || !('slices' in sliceStack)) return null;
     return getPlaybackStep(sliceStack, stepIndex);
   }, [sliceStack, stepIndex]);
+  const slicerOutput = useMemo(() => {
+    if (!sliceStack || !playbackTimeline || !('slices' in sliceStack)) return null;
+    return { stack: sliceStack, timeline: playbackTimeline };
+  }, [playbackTimeline, sliceStack]);
 
   const activeFrame = playbackStep?.state.projectedFrame;
   const activeCount = playbackStep?.state.visibleVoxels.length ?? 0;
   const totalCount = activeFrame
     ? activeFrame.occupancyMask.length * (activeFrame.occupancyMask[0]?.length ?? 0)
     : 0;
-  const planeY = activeFrame ? 8 + activeFrame.planePosition * 84 : 8;
+  const planeY = activeFrame ? 8 + activeFrame.planeCoordinate * 84 : 8;
+
+  useEffect(() => {
+    if (!isPlaying || !playbackTimeline || playbackTimeline.steps.length <= 1) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      setStepIndex((current) => {
+        const nextStep = current + playbackRate;
+        const limit = playbackTimeline.steps.length - 1;
+        if (nextStep > limit) {
+          return isLooping ? 0 : limit;
+        }
+        return Math.round(nextStep);
+      });
+    }, 650);
+
+    return () => window.clearInterval(interval);
+  }, [isLooping, isPlaying, playbackRate, playbackTimeline]);
 
   const loadSample = () => {
     setState({ mesh: createSampleCubeMesh(), sourceLabel: 'Sample cube mesh', error: null });
     setFileName('sample-cube.stl');
     setStepIndex(0);
+    setStepInput('0');
+    setAxis('z');
+    setIsPlaying(false);
   };
 
   const loadFile = (file: File) => {
@@ -75,6 +113,8 @@ export function StlSlicerPanel() {
         setState({ mesh, sourceLabel: file.name, error: null });
         setFileName(file.name);
         setStepIndex(0);
+        setStepInput('0');
+        setIsPlaying(false);
       } catch (error) {
         setState({
           mesh: null,
@@ -114,6 +154,23 @@ export function StlSlicerPanel() {
     await loadFile(file);
   };
 
+  const goToStep = (value: number) => {
+    if (!playbackTimeline) return;
+    const nextStep = Math.min(Math.max(0, Math.round(value)), Math.max(0, playbackTimeline.steps.length - 1));
+    setStepIndex(nextStep);
+    setStepInput(String(nextStep));
+  };
+
+  const downloadExport = (name: string, content: string, type: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = name;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="stl-slicer-panel">
       <div className="stack-panel-heading">
@@ -121,7 +178,7 @@ export function StlSlicerPanel() {
         <span>{state.sourceLabel}</span>
       </div>
       <p className="reflectance-volume-hint">
-        Upload an STL file, normalize it into display-volume space, slice it along `z`, and replay the plane sweep.
+        Upload an STL file, normalize it into display-volume space, choose an axis, and replay the deterministic plane sweep.
       </p>
 
       <div className="stl-slicer-grid">
@@ -165,6 +222,14 @@ export function StlSlicerPanel() {
             Load sample cube
           </button>
           <label className="field">
+            <span>Slice axis</span>
+            <select value={axis} onChange={(event) => setAxis(event.target.value as 'x' | 'y' | 'z')}>
+              <option value="x">X axis</option>
+              <option value="y">Y axis</option>
+              <option value="z">Z axis</option>
+            </select>
+          </label>
+          <label className="field">
             <span>Slice count</span>
             <input
               type="number"
@@ -184,6 +249,66 @@ export function StlSlicerPanel() {
               onChange={(event) => setGridResolution(Number(event.target.value))}
             />
           </label>
+          <div className="stl-slicer-playback">
+            <button type="button" className="action-button" onClick={() => setIsPlaying((current) => !current)}>
+              {isPlaying ? 'Pause playback' : 'Play playback'}
+            </button>
+            <div className="stl-slicer-playback-nav">
+              <button type="button" className="action-button" onClick={() => setStepIndex((current) => Math.max(0, current - 1))}>
+                Previous
+              </button>
+              <button
+                type="button"
+                className="action-button"
+                onClick={() => setStepIndex((current) => Math.min(Math.max(0, (playbackTimeline?.steps.length ?? 1) - 1), current + 1))}
+              >
+                Next
+              </button>
+            </div>
+            <label className="field">
+              <span>Playback speed</span>
+              <select value={String(playbackRate)} onChange={(event) => setPlaybackRate(Number(event.target.value))}>
+                <option value="0.5">0.5x</option>
+                <option value="1">1x</option>
+                <option value="2">2x</option>
+                <option value="4">4x</option>
+              </select>
+            </label>
+            <label className="stl-slicer-loop">
+              <input type="checkbox" checked={isLooping} onChange={(event) => setIsLooping(event.target.checked)} />
+              Loop playback
+            </label>
+            <label className="field">
+              <span>Jump to step</span>
+              <input
+                type="number"
+                min={0}
+                max={Math.max(0, (playbackTimeline?.steps.length ?? 1) - 1)}
+                value={stepInput}
+                onChange={(event) => setStepInput(event.target.value)}
+                onBlur={() => {
+                  goToStep(Number(stepInput));
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    goToStep(Number(stepInput));
+                  }
+                }}
+              />
+            </label>
+            <div className="stl-slicer-playback-nav">
+              <button type="button" className="action-button" onClick={() => goToStep(0)}>
+                Start
+              </button>
+              <button
+                type="button"
+                className="action-button"
+                onClick={() => goToStep(Math.max(0, (playbackTimeline?.steps.length ?? 1) - 1))}
+              >
+                End
+              </button>
+            </div>
+          </div>
           <div className="stl-slicer-progress" aria-live="polite">
             {isLoadingFile ? (
               <>
@@ -217,6 +342,50 @@ export function StlSlicerPanel() {
               <span>Active voxels</span>
               <strong>{activeCount} / {totalCount}</strong>
             </div>
+            <div className="stack-summary-item">
+              <span>Occupied slices</span>
+              <strong>{sliceStack.diagnostics.occupiedSliceCount} / {sliceStack.sliceCount}</strong>
+            </div>
+            <div className="stack-summary-item">
+              <span>Average occupancy</span>
+              <strong>{(sliceStack.diagnostics.averageSliceOccupancy * 100).toFixed(1)}%</strong>
+            </div>
+            <div className="stack-summary-item">
+              <span>Peak slice occupancy</span>
+              <strong>{sliceStack.diagnostics.peakSliceOccupancy} voxels</strong>
+            </div>
+          </div>
+          <div className="stl-slicer-export">
+            <button
+              type="button"
+              className="action-button"
+              onClick={() => {
+                if (!slicerOutput) return;
+                downloadExport('stl-slicer-output.json', serializeSlicerOutput(slicerOutput), 'application/json');
+              }}
+            >
+              Export output JSON
+            </button>
+            <button
+              type="button"
+              className="action-button"
+              onClick={() => {
+                if (!sliceStack) return;
+                downloadExport('stl-slicer-slices.csv', serializeSliceStackCsv(sliceStack), 'text/csv');
+              }}
+            >
+              Export slice CSV
+            </button>
+            <button
+              type="button"
+              className="action-button"
+              onClick={() => {
+                if (!playbackTimeline) return;
+                downloadExport('stl-slicer-timeline.json', serializePlaybackTimelineJson(playbackTimeline), 'application/json');
+              }}
+            >
+              Export timeline JSON
+            </button>
           </div>
           <label className="field">
             <span>Playback step <strong>{playbackStep?.step ?? 0}</strong></span>
@@ -226,7 +395,7 @@ export function StlSlicerPanel() {
               max={Math.max(0, playbackTimeline.steps.length - 1)}
               step={1}
               value={stepIndex}
-              onChange={(event) => setStepIndex(Number(event.target.value))}
+              onChange={(event) => goToStep(Number(event.target.value))}
             />
           </label>
           <svg className="stl-slicer-preview" viewBox="0 0 100 100" role="img" aria-label="2D slice preview">
@@ -258,7 +427,7 @@ export function StlSlicerPanel() {
             <line x1="8" y1={planeY} x2="92" y2={planeY} className="stl-slicer-plane-line" />
           </svg>
           <p className="reflectance-volume-summary">
-            Step {playbackStep?.state.stepIndex ?? 0} places the plane at {((playbackStep?.state.planePosition ?? 0) * 100).toFixed(1)}% of the sweep. The projected frame activates {activeCount} voxels.
+            Step {playbackStep?.state.stepIndex ?? 0} places the plane at {((playbackStep?.state.planePosition ?? 0) * 100).toFixed(1)}% of the sweep on the {axis.toUpperCase()} axis. The projected frame activates {activeCount} voxels.
           </p>
         </div>
       ) : null}

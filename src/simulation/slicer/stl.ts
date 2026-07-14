@@ -22,9 +22,13 @@ export function parseAsciiStl(text: string): MeshGeometry {
 
   const lines = text.split(/\r?\n/);
   let currentFacet: number[] = [];
+  let facetVertexCount = 0;
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
+    if (!line || line.startsWith('solid') || line.startsWith('endsolid') || line.startsWith('facet') || line.startsWith('endfacet') || line.startsWith('outer loop') || line.startsWith('endloop')) {
+      continue;
+    }
     if (!line.startsWith('vertex ')) continue;
 
     const parts = line.split(/\s+/);
@@ -48,12 +52,19 @@ export function parseAsciiStl(text: string): MeshGeometry {
     }
 
     currentFacet.push(index);
+    facetVertexCount += 1;
     if (currentFacet.length === 3) {
       triangles.push([currentFacet[0], currentFacet[1], currentFacet[2]]);
       currentFacet = [];
     }
   }
 
+  if (facetVertexCount > 0 && currentFacet.length !== 0) {
+    throw new Error('The STL file ended before a facet had three vertices.');
+  }
+  if (facetVertexCount > 0 && facetVertexCount % 3 !== 0) {
+    throw new Error('The STL file contained an incomplete facet.');
+  }
   if (vertices.length === 0 || triangles.length === 0) {
     throw new Error('The STL file did not contain any triangles.');
   }
@@ -71,6 +82,9 @@ function parseBinaryStl(bytes: ArrayBuffer): MeshGeometry {
   const expectedLength = 84 + triangleCount * 50;
   if (view.byteLength < expectedLength) {
     throw new Error('The binary STL file is truncated.');
+  }
+  if (view.byteLength > expectedLength) {
+    throw new Error('The binary STL file contains unexpected trailing bytes.');
   }
 
   const vertices: MeshPoint3D[] = [];
