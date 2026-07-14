@@ -750,6 +750,105 @@ label {
   gap: 0.65rem;
 }
 
+.reflectance-volume-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.reflectance-volume-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reflectance-volume-hint {
+  margin: 0;
+  color: #9aa8b7;
+  font-size: 0.82rem;
+}
+
+.reflectance-volume-overlay-explainer {
+  margin: 0;
+  color: #9aa8b7;
+  font-size: 0.8rem;
+}
+
+.reflectance-volume-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  border: 1px solid #3a495b;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  background: #101720;
+  color: #dce7f2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.reflectance-volume-stage {
+  position: relative;
+  min-height: 28rem;
+  border: 1px dashed #46586d;
+  border-radius: 8px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(90, 167, 200, 0.18), transparent 35%),
+    radial-gradient(circle at 75% 75%, rgba(240, 191, 88, 0.12), transparent 30%),
+    #101720;
+}
+
+.reflectance-volume-canvas {
+  width: 100%;
+  height: 28rem;
+}
+
+.reflectance-volume-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem 0.75rem;
+}
+
+.reflectance-volume-controls input[type='range'] {
+  width: 100%;
+  accent-color: #5aa7c8;
+}
+
+.reflectance-volume-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.95rem;
+  color: #9fc0d8;
+  font-size: 0.8rem;
+}
+
+.reflectance-volume-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.legend-swatch-bright { background: #b9f1ff; }
+.legend-swatch-dim { background: #295d7f; }
+.legend-swatch-plane { background: #f0bf58; }
+
+.reflectance-volume-summary {
+  margin: 0;
+  color: #9aa8b7;
+  font-size: 0.88rem;
+}
+
 .chart-toolbar-message {
   margin: 0 0 1rem;
   color: #f0aaaa;
@@ -759,7 +858,7 @@ label {
 .chart-button-group {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
   padding: 0.35rem;
   border: 1px solid #2d3a4b;
   border-radius: 999px;
@@ -1045,12 +1144,22 @@ label {
   .parameter-sweep-panel.tab-controls .parameter-sweep-run {
     width: 100%;
   }
+
+  .reflectance-volume-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .reflectance-volume-stage,
+  .reflectance-volume-canvas {
+    min-height: 24rem;
+    height: 24rem;
+  }
 }
 
 @media (max-width: 540px) {
   .output-tabs {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     width: 100%;
   }
 
@@ -1077,6 +1186,25 @@ label {
   .chart-toolbar {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .reflectance-volume-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .reflectance-volume-hint {
+    font-size: 0.78rem;
+  }
+
+  .reflectance-volume-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .reflectance-volume-stage,
+  .reflectance-volume-canvas {
+    min-height: 20rem;
+    height: 20rem;
   }
 
   .metric-grid {

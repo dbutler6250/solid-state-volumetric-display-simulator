@@ -14,6 +14,8 @@ Version 1 implements a Transfer Matrix Method (TMM) quarter-wave optical stack s
 - Visualize results interactively
 - Explore parameter changes through a modern web UI
 
+The current implementation also includes a proxy 3D reflectance view for the resolved quarter-wave stack. It is a visualization layer built on the canonical resolved structure and solver output, not a higher-fidelity field solver.
+
 The simulator should work from both desktop and mobile browsers.
 
 ## Current Architecture And Tech Stack
@@ -24,7 +26,7 @@ Stack:
 - React -> Scalable UI architecture
 - Vite -> Development and build workflow
 - Plotly -> Scientific charting
-- Three.js -> Future use
+- Three.js -> Proxy 3D visualization layer
 - GitHub Pages -> Free static hosting
 
 Hosting model:
@@ -46,6 +48,15 @@ The architecture should be future-proof without being overengineered. Design the
 - Additional optical structures can be added later
 - The quarter-wave stack is only the first supported structure
 - Core TMM code remains reusable for future simulations
+- New visualization layers should reuse the canonical resolved document and solver results rather than introducing a second structure-resolution path
+
+## Scope Adjustments From PR #45
+
+- The 3D output tab is intentionally a proxy visualization, not a new solver.
+- Plane motion in the 3D tab has two user-facing modes: sweep and manual.
+- Sweep mode is animated in the render loop and manual mode freezes the plane while exposing direct position control.
+- The slice control affects both plane and volume presentation, so it is not only a plane-mode input.
+- Overlay and clip controls update Three.js materials in place instead of rebuilding the renderer and scene graph.
 
 ## Version 1 Initial Scope
 
