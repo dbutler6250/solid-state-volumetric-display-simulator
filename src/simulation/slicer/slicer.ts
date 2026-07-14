@@ -1,0 +1,246 @@
+import type {
+  MeshGeometry,
+  MeshPoint3D,
+  PlaybackTimeline,
+  SliceFrame,
+  SliceStack,
+  VisibleVoxel,
+  VolumeBounds,
+} from './types';
+
+/** Validates, centers, and scales incoming mesh geometry into unit display-volume space. */
+export function normalizeMeshToVolumeSpace(mesh: MeshGeometry): { mesh: MeshGeometry; bounds: VolumeBounds } {
+  if (!mesh.vertices.length || !mesh.triangles.length) {
+    throw new Error('The mesh is empty.');
+  }
+
+  const bounds = getMeshBounds(mesh.vertices);
+  const sizeX = bounds.max[0] - bounds.min[0];
+  const sizeY = bounds.max[1] - bounds.min[1];
+  const sizeZ = bounds.max[2] - bounds.min[2];
+  const maxSize = Math.max(sizeX, sizeY, sizeZ);
+  if (!Number.isFinite(maxSize) || maxSize <= 0) {
+    throw new Error('The mesh bounds have zero volume.');
+  }
+
+  const center: MeshPoint3D = [
+    (bounds.min[0] + bounds.max[0]) / 2,
+    (bounds.min[1] + bounds.max[1]) / 2,
+    (bounds.min[2] + bounds.max[2]) / 2,
+  ];
+  const scale = 1 / maxSize;
+
+  const normalizedVertices = mesh.vertices.map((vertex) => {
+    const normalized: MeshPoint3D = [
+      (vertex[0] - center[0]) * scale + 0.5,
+      (vertex[1] - center[1]) * scale + 0.5,
+      (vertex[2] - center[2]) * scale + 0.5,
+    ];
+    if (!normalized.every(Number.isFinite)) {
+      throw new Error('The mesh contains non-finite coordinates.');
+    }
+    return normalized;
+  });
+
+  return {
+    mesh: { vertices: normalizedVertices, triangles: mesh.triangles.slice() },
+    bounds: {
+      min: [0, 0, 0],
+      max: [1, 1, 1],
+    },
+  };
+}
+
+/** Slices a normalized mesh into evenly spaced planes and coarse occupancy masks. */
+export function buildSliceStack(
+  mesh: MeshGeometry,
+  options: { axis?: 'x' | 'y' | 'z'; sliceCount?: number; gridResolution?: number } = {},
+): SliceStack {
+  const axis = options.axis ?? 'z';
+  const sliceCount = Math.max(1, Math.round(options.sliceCount ?? 16));
+  const gridResolution = Math.max(2, Math.round(options.gridResolution ?? 12));
+  const { mesh: normalizedMesh, bounds } = normalizeMeshToVolumeSpace(mesh);
+  const slices: SliceFrame[] = [];
+
+  for (let sliceIndex = 0; sliceIndex < sliceCount; sliceIndex += 1) {
+    const planePosition = sliceCount === 1 ? 0.5 : (sliceIndex + 0.5) / sliceCount;
+    const occupancyMask: boolean[][] = [];
+    const intensityMask: number[][] = [];
+
+    for (let row = 0; row < gridResolution; row += 1) {
+      const occupancyRow: boolean[] = [];
+      const intensityRow: number[] = [];
+      for (let column = 0; column < gridResolution; column += 1) {
+        const point = getSamplePoint(axis, planePosition, row, column, gridResolution);
+        const active = isPointInsideMesh(normalizedMesh, point, axis);
+        occupancyRow.push(active);
+        intensityRow.push(active ? 1 : 0);
+      }
+      occupancyMask.push(occupancyRow);
+      intensityMask.push(intensityRow);
+    }
+
+    slices.push({ index: sliceIndex, planePosition, occupancyMask, intensityMask });
+  }
+
+  return { axis, bounds, gridResolution, sliceCount, slices };
+}
+
+/** Replays the slice stack as a deterministic display timeline. */
+export function buildPlaybackTimeline(stack: SliceStack): PlaybackTimeline {
+  return {
+    steps: stack.slices.map((slice, stepIndex) => ({
+      stepIndex,
+      planePosition: slice.planePosition,
+      projectedFrame: slice,
+      visibleVoxels: buildVisibleVoxels(stack, slice),
+    })),
+  };
+}
+
+/** Returns the instantaneous playback state for the requested step index. */
+export function getPlaybackStep(stack: SliceStack, stepIndex: number): { step: number; state: PlaybackTimeline['steps'][number] } {
+  const clampedIndex = Math.min(stack.slices.length - 1, Math.max(0, Math.round(stepIndex)));
+  const projectedFrame = stack.slices[clampedIndex];
+  return {
+    step: clampedIndex,
+    state: {
+      stepIndex: clampedIndex,
+      planePosition: projectedFrame.planePosition,
+      projectedFrame,
+      visibleVoxels: buildVisibleVoxels(stack, projectedFrame),
+    },
+  };
+}
+
+function buildVisibleVoxels(stack: SliceStack, slice: SliceFrame): VisibleVoxel[] {
+  const voxels: VisibleVoxel[] = [];
+  for (let row = 0; row < stack.gridResolution; row += 1) {
+    for (let column = 0; column < stack.gridResolution; column += 1) {
+      if (!slice.occupancyMask[row]?.[column]) continue;
+      voxels.push({
+        sliceIndex: slice.index,
+        row,
+        column,
+        center: getVoxelCenter(stack.axis, slice.planePosition, row, column, stack.gridResolution),
+        active: true,
+        intensity: slice.intensityMask[row]?.[column] ?? 0,
+      });
+    }
+  }
+  return voxels;
+}
+
+function isPointInsideMesh(mesh: MeshGeometry, point: MeshPoint3D, axis: 'x' | 'y' | 'z'): boolean {
+  const rayAxis = axis === 'x' ? 0 : axis === 'y' ? 1 : 2;
+  const origin: MeshPoint3D = [point[0], point[1], point[2]];
+  origin[rayAxis] = -1;
+  const direction: MeshPoint3D = [0, 0, 0];
+  direction[rayAxis] = 1;
+  const maxDistance = point[rayAxis] - origin[rayAxis];
+
+  const intersections: number[] = [];
+  for (const triangle of mesh.triangles) {
+    const a = mesh.vertices[triangle[0]];
+    const b = mesh.vertices[triangle[1]];
+    const c = mesh.vertices[triangle[2]];
+    const hit = intersectRayTriangle(origin, direction, a, b, c);
+    if (hit !== null && hit > 0 && hit <= maxDistance) {
+      intersections.push(hit);
+    }
+  }
+
+  intersections.sort((left, right) => left - right);
+  let uniqueHits = 0;
+  let previousHit = Number.NEGATIVE_INFINITY;
+  for (const hit of intersections) {
+    if (Math.abs(hit - previousHit) > 1e-7) {
+      uniqueHits += 1;
+      previousHit = hit;
+    }
+  }
+
+  return uniqueHits % 2 === 1;
+}
+
+function intersectRayTriangle(
+  origin: MeshPoint3D,
+  direction: MeshPoint3D,
+  v0: MeshPoint3D,
+  v1: MeshPoint3D,
+  v2: MeshPoint3D,
+): number | null {
+  const epsilon = 1e-9;
+  const edge1 = subtract(v1, v0);
+  const edge2 = subtract(v2, v0);
+  const pVec = cross(direction, edge2);
+  const determinant = dot(edge1, pVec);
+  if (Math.abs(determinant) < epsilon) return null;
+
+  const inverseDeterminant = 1 / determinant;
+  const tVec = subtract(origin, v0);
+  const u = dot(tVec, pVec) * inverseDeterminant;
+  if (u < -epsilon || u > 1 + epsilon) return null;
+
+  const qVec = cross(tVec, edge1);
+  const v = dot(direction, qVec) * inverseDeterminant;
+  if (v < -epsilon || u + v > 1 + epsilon) return null;
+
+  const t = dot(edge2, qVec) * inverseDeterminant;
+  return t >= epsilon ? t : null;
+}
+
+function getSamplePoint(
+  axis: 'x' | 'y' | 'z',
+  planePosition: number,
+  row: number,
+  column: number,
+  gridResolution: number,
+): MeshPoint3D {
+  const u = (column + 0.5) / gridResolution;
+  const v = (row + 0.5) / gridResolution;
+  if (axis === 'x') return [planePosition, u, v];
+  if (axis === 'y') return [u, planePosition, v];
+  return [u, v, planePosition];
+}
+
+function getVoxelCenter(
+  axis: 'x' | 'y' | 'z',
+  planePosition: number,
+  row: number,
+  column: number,
+  gridResolution: number,
+): MeshPoint3D {
+  return getSamplePoint(axis, planePosition, row, column, gridResolution);
+}
+
+function getMeshBounds(vertices: MeshPoint3D[]): VolumeBounds {
+  const min: MeshPoint3D = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+  const max: MeshPoint3D = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+  for (const vertex of vertices) {
+    for (let index = 0; index < 3; index += 1) {
+      if (!Number.isFinite(vertex[index])) {
+        throw new Error('The mesh contains non-finite coordinates.');
+      }
+      min[index] = Math.min(min[index], vertex[index]);
+      max[index] = Math.max(max[index], vertex[index]);
+    }
+  }
+  return { min, max };
+}
+
+function subtract(a: MeshPoint3D, b: MeshPoint3D): MeshPoint3D {
+  return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+}
+
+function dot(a: MeshPoint3D, b: MeshPoint3D): number {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+function cross(a: MeshPoint3D, b: MeshPoint3D): MeshPoint3D {
+  return [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0],
+  ];
+}
