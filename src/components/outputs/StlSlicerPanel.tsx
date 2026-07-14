@@ -374,6 +374,14 @@ export function StlSlicerPanel() {
               <span>Peak slice occupancy</span>
               <strong>{sliceStack.diagnostics.peakSliceOccupancy} voxels</strong>
             </div>
+            <div className="stack-summary-item">
+              <span>Mesh topology</span>
+              <strong>{sliceStack.mesh.triangleCount} triangles / {sliceStack.mesh.vertexCount} vertices</strong>
+            </div>
+            <div className="stack-summary-item">
+              <span>Coverage samples</span>
+              <strong>{sliceStack.diagnostics.coverageSamplesPerCell} per cell</strong>
+            </div>
           </div>
           <div className="stl-slicer-export">
             <button
@@ -470,6 +478,9 @@ export function StlSlicerPanel() {
           </p>
           <p className="reflectance-volume-summary">
             Projection map keeps {playbackStep?.state.projection.projectedSamples.length ?? 0} visible voxels in display-space coordinates for downstream engines.
+          </p>
+          <p className="reflectance-volume-summary">
+            Mapping uses the {playbackStep?.state.projection.mapping.planeAxes.join('/').toUpperCase()} plane with {playbackStep?.state.projection.mapping.depthAxis.toUpperCase()} as depth in normalized unit-volume space.
           </p>
           {projectionPreview ? (
             <p className="reflectance-volume-summary">

@@ -1,4 +1,5 @@
 import type {
+  DisplayProjection,
   MeshGeometry,
   MeshPoint3D,
   PlaybackTimeline,
@@ -6,9 +7,9 @@ import type {
   SliceFrame,
   SliceDiagnostics,
   SliceStack,
-  DisplayProjection,
   VisibleVoxel,
   VolumeBounds,
+  SlicerAxis,
 } from './types';
 
 /** Validates, centers, and scales incoming mesh geometry into unit display-volume space. */
@@ -57,12 +58,13 @@ export function normalizeMeshToVolumeSpace(mesh: MeshGeometry): { mesh: MeshGeom
 /** Slices a normalized mesh into evenly spaced planes and coarse occupancy masks. */
 export function buildSliceStack(
   mesh: MeshGeometry,
-  options: { axis?: 'x' | 'y' | 'z'; sliceCount?: number; gridResolution?: number } = {},
+  options: { axis?: SlicerAxis; sliceCount?: number; gridResolution?: number } = {},
 ): SliceStack {
   const axis = options.axis ?? 'z';
   const sliceCount = Math.max(1, Math.round(options.sliceCount ?? 16));
   const gridResolution = Math.max(2, Math.round(options.gridResolution ?? 12));
   const { mesh: normalizedMesh, bounds } = normalizeMeshToVolumeSpace(mesh);
+  const coverageSamplesPerCell = 9;
   const slices: SliceFrame[] = [];
   let activeVoxelCount = 0;
   let occupiedSliceCount = 0;
@@ -113,9 +115,21 @@ export function buildSliceStack(
     peakSliceOccupancy,
     averageSliceCoverage: coverageAccumulator,
     peakSliceCoverage,
+    coverageSamplesPerCell,
   });
 
-  return { axis, bounds, gridResolution, sliceCount, slices, diagnostics };
+  return {
+    axis,
+    bounds,
+    gridResolution,
+    sliceCount,
+    slices,
+    diagnostics,
+    mesh: {
+      vertexCount: normalizedMesh.vertices.length,
+      triangleCount: normalizedMesh.triangles.length,
+    },
+  };
 }
 
 /** Replays the slice stack as a deterministic display timeline. */
@@ -148,7 +162,7 @@ export function getPlaybackStep(stack: SliceStack, stepIndex: number): { step: n
 }
 
 /** Returns the stable slicer output contract for engine consumers and exports. */
-export function buildSlicerOutput(mesh: MeshGeometry, options: { axis?: 'x' | 'y' | 'z'; sliceCount?: number; gridResolution?: number } = {}): SlicerOutput {
+export function buildSlicerOutput(mesh: MeshGeometry, options: { axis?: SlicerAxis; sliceCount?: number; gridResolution?: number } = {}): SlicerOutput {
   const stack = buildSliceStack(mesh, options);
   return {
     stack,
@@ -196,6 +210,7 @@ function buildSliceDiagnostics(params: {
   peakSliceCoverage: number;
   sliceCount: number;
   sliceResolution: number;
+  coverageSamplesPerCell: number;
 }): SliceDiagnostics {
   const totalVoxelCount = params.sliceCount * params.sliceResolution;
   return {
@@ -207,22 +222,28 @@ function buildSliceDiagnostics(params: {
     averageSliceCoverage: totalVoxelCount > 0 ? params.averageSliceCoverage / totalVoxelCount : 0,
     peakSliceOccupancy: params.peakSliceOccupancy,
     peakSliceCoverage: params.peakSliceCoverage,
+    coverageSamplesPerCell: params.coverageSamplesPerCell,
   };
 }
 
 function getCellCoverage(
   mesh: MeshGeometry,
-  axis: 'x' | 'y' | 'z',
+  axis: SlicerAxis,
   planePosition: number,
   row: number,
   column: number,
   gridResolution: number,
 ): number {
   const samples = [
-    getSamplePoint(axis, planePosition, row + 0.25, column + 0.25, gridResolution),
-    getSamplePoint(axis, planePosition, row + 0.25, column + 0.75, gridResolution),
-    getSamplePoint(axis, planePosition, row + 0.75, column + 0.25, gridResolution),
-    getSamplePoint(axis, planePosition, row + 0.75, column + 0.75, gridResolution),
+    getSamplePoint(axis, planePosition, row + 1 / 6, column + 1 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 1 / 6, column + 3 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 1 / 6, column + 5 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 3 / 6, column + 1 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 3 / 6, column + 3 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 3 / 6, column + 5 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 5 / 6, column + 1 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 5 / 6, column + 3 / 6, gridResolution),
+    getSamplePoint(axis, planePosition, row + 5 / 6, column + 5 / 6, gridResolution),
   ];
   let hitCount = 0;
   for (const sample of samples) {
@@ -253,22 +274,42 @@ function buildVisibleVoxels(stack: SliceStack, slice: SliceFrame): VisibleVoxel[
 
 /** Maps visible voxels into deterministic display-plane coordinates for downstream engines. */
 function buildDisplayProjection(stack: SliceStack, slice: SliceFrame): DisplayProjection {
+  const mapping = getDisplayProjectionMapping(stack.axis);
   const projectedSamples = buildVisibleVoxels(stack, slice).map((voxel) => ({
     sliceIndex: voxel.sliceIndex,
     row: voxel.row,
     column: voxel.column,
     sourceCenter: voxel.center,
-    displayX: voxel.center[0],
-    displayY: voxel.center[1],
-    depth: voxel.center[2],
+    displayX: voxel.center[getAxisIndex(mapping.planeAxes[0])],
+    displayY: voxel.center[getAxisIndex(mapping.planeAxes[1])],
+    depth: voxel.center[getAxisIndex(mapping.depthAxis)],
     intensity: voxel.intensity,
   }));
 
   return {
     axis: stack.axis,
     planePosition: slice.planePosition,
+    mapping,
     projectedSamples,
   };
+}
+
+/** Keeps the exported projection contract aligned with the active slice axis. */
+function getDisplayProjectionMapping(axis: SlicerAxis): DisplayProjection['mapping'] {
+  if (axis === 'x') {
+    return { planeAxes: ['y', 'z'], depthAxis: 'x', sourceSpace: 'normalized-unit-volume' };
+  }
+  if (axis === 'y') {
+    return { planeAxes: ['x', 'z'], depthAxis: 'y', sourceSpace: 'normalized-unit-volume' };
+  }
+  return { planeAxes: ['x', 'y'], depthAxis: 'z', sourceSpace: 'normalized-unit-volume' };
+}
+
+/** Converts a slicer axis into the matching normalized coordinate index. */
+function getAxisIndex(axis: SlicerAxis): number {
+  if (axis === 'x') return 0;
+  if (axis === 'y') return 1;
+  return 2;
 }
 
 function isPointInsideMesh(mesh: MeshGeometry, point: MeshPoint3D, axis: 'x' | 'y' | 'z'): boolean {
@@ -331,7 +372,7 @@ function intersectRayTriangle(
 }
 
 function getSamplePoint(
-  axis: 'x' | 'y' | 'z',
+  axis: SlicerAxis,
   planePosition: number,
   row: number,
   column: number,
@@ -345,7 +386,7 @@ function getSamplePoint(
 }
 
 function getVoxelCenter(
-  axis: 'x' | 'y' | 'z',
+  axis: SlicerAxis,
   planePosition: number,
   row: number,
   column: number,

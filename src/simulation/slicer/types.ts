@@ -23,6 +23,9 @@ export type VolumeBounds = {
   max: MeshPoint3D;
 };
 
+/** Canonical axis identifier used by the slicer contracts. */
+export type SlicerAxis = 'x' | 'y' | 'z';
+
 /** A voxel cell in the normalized mesh grid. */
 export type VoxelCell = {
   center: MeshPoint3D;
@@ -49,16 +52,28 @@ export type SliceDiagnostics = {
   averageSliceCoverage: number;
   peakSliceOccupancy: number;
   peakSliceCoverage: number;
+  coverageSamplesPerCell: number;
 };
 
 /** Reusable slice stack output from the mesh slicer. */
 export type SliceStack = {
-  axis: 'x' | 'y' | 'z';
+  axis: SlicerAxis;
   bounds: VolumeBounds;
   gridResolution: number;
   sliceCount: number;
   slices: SliceFrame[];
   diagnostics: SliceDiagnostics;
+  mesh: {
+    vertexCount: number;
+    triangleCount: number;
+  };
+};
+
+/** Explicit display-plane axes selected from the normalized mesh volume. */
+export type DisplayProjectionMapping = {
+  planeAxes: [SlicerAxis, SlicerAxis];
+  depthAxis: SlicerAxis;
+  sourceSpace: 'normalized-unit-volume';
 };
 
 /** Visible voxels reported by the playback engine for one time step. */
@@ -82,8 +97,9 @@ export type DisplayProjectionSample = {
 
 /** Explicit mapping from slice-space voxels into display-plane coordinates. */
 export type DisplayProjection = {
-  axis: 'x' | 'y' | 'z';
+  axis: SlicerAxis;
   planePosition: number;
+  mapping: DisplayProjectionMapping;
   projectedSamples: DisplayProjectionSample[];
 };
 

@@ -61,6 +61,27 @@ endfacet
 endsolid flat`),
     ).toThrow('degenerate triangle');
   });
+
+  it('rejects duplicate triangle topology', () => {
+    expect(() =>
+      parseAsciiStl(`solid dup
+facet normal 0 0 1
+  outer loop
+    vertex 0 0 0
+    vertex 1 0 0
+    vertex 0 1 0
+  endloop
+endfacet
+facet normal 0 0 1
+  outer loop
+    vertex 0 0 0
+    vertex 1 0 0
+    vertex 0 1 0
+  endloop
+endfacet
+endsolid dup`),
+    ).toThrow('duplicated triangle topology');
+  });
 });
 
 describe('createSampleHollowSphereMesh', () => {

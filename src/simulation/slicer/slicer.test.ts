@@ -31,6 +31,9 @@ describe('buildSliceStack', () => {
     expect(stackA.slices.some((slice) => slice.occupancyMask.some((row) => row.some(Boolean)))).toBe(true);
     expect(stackA.diagnostics.averageSliceCoverage).toBeGreaterThan(0);
     expect(stackA.diagnostics.peakSliceCoverage).toBeGreaterThan(0);
+    expect(stackA.diagnostics.coverageSamplesPerCell).toBe(9);
+    expect(stackA.mesh.triangleCount).toBeGreaterThan(0);
+    expect(stackA.mesh.vertexCount).toBeGreaterThan(0);
   });
 });
 
@@ -46,6 +49,30 @@ describe('playback', () => {
     expect(step.state.visibleVoxels.length).toBeGreaterThan(0);
     expect(step.state.projection.projectedSamples.length).toBeGreaterThan(0);
     expect(step.state.projection.axis).toBe('z');
+    expect(step.state.projection.mapping).toEqual({
+      planeAxes: ['x', 'y'],
+      depthAxis: 'z',
+      sourceSpace: 'normalized-unit-volume',
+    });
+  });
+
+  it('maps the display plane from the active slice axis', () => {
+    const mesh = createSampleHollowSphereMesh();
+    const stack = buildSliceStack(mesh, { axis: 'x', sliceCount: 3, gridResolution: 3 });
+    const step = stack.slices
+      .map((_, index) => getPlaybackStep(stack, index))
+      .find((candidate) => candidate.state.projection.projectedSamples.length > 0);
+
+    expect(step).toBeDefined();
+    expect(step?.state.projection.mapping).toEqual({
+      planeAxes: ['y', 'z'],
+      depthAxis: 'x',
+      sourceSpace: 'normalized-unit-volume',
+    });
+    const sample = step?.state.projection.projectedSamples[0];
+    expect(sample).toBeDefined();
+    expect(sample?.displayX).toBeCloseTo(sample?.sourceCenter[1] ?? 0, 6);
+    expect(sample?.displayY).toBeCloseTo(sample?.sourceCenter[2] ?? 0, 6);
   });
 });
 

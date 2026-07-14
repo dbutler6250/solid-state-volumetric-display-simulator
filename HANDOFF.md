@@ -15,6 +15,7 @@
 - The default sample mesh is now a denser hollow sphere approximation instead of a solid cube so slice motion is easier to inspect during demos.
 - Mesh validation now rejects degenerate and duplicate triangle topology, coverage sampling is richer than binary occupancy, and the UI includes a clickable slice timeline strip plus coverage summary.
 - The slicer output now carries an explicit display-projection mapping so future hardware-aligned engines can consume slice-space voxels directly.
+- The slicer contract now reports mesh topology counts and uses denser stratified coverage sampling to better represent slice fidelity without changing the upload or playback flow.
 
 ## Issue-Style Roadmap
 
@@ -54,7 +55,7 @@
 - `npm.cmd run test` - passed (102 tests).
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
-- Live browser verification passed in the in-app browser after a reload.
+- Live browser verification passed in Chrome against `http://127.0.0.1:5173/` after switching to the STL Slicer tab.
 
 ## Browser Verification
 
