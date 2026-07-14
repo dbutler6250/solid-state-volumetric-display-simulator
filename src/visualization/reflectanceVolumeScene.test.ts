@@ -34,4 +34,26 @@ describe('reflectance volume scene', () => {
     expect(plane.medium.clipFraction).toBeGreaterThanOrEqual(0);
     expect(plane.medium.clipFraction).toBeLessThanOrEqual(1);
   });
+
+  it('distinguishes the overlay modes in the scene metadata', () => {
+    const document = createSimulationDocument(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
+    const resolved = resolveSimulationDocument(document);
+    const result = solveResolvedStructure(resolved, document.analysis);
+    const ghosted = buildReflectanceVolumeScene(document, resolved, result, {
+      overlayMode: 'ghosted-stack',
+    });
+    const glass = buildReflectanceVolumeScene(document, resolved, result, {
+      overlayMode: 'transparent-medium',
+    });
+    const shellOnly = buildReflectanceVolumeScene(document, resolved, result, {
+      overlayMode: 'none',
+    });
+
+    expect(ghosted.overlays.showGhostedStack).toBe(true);
+    expect(ghosted.overlays.showInteriorDetail).toBe(true);
+    expect(glass.overlays.showGhostedStack).toBe(false);
+    expect(glass.overlays.showInteriorDetail).toBe(true);
+    expect(shellOnly.overlays.showShell).toBe(true);
+    expect(shellOnly.overlays.showInteriorDetail).toBe(false);
+  });
 });

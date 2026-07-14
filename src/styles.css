@@ -769,6 +769,12 @@ label {
   font-size: 0.82rem;
 }
 
+.reflectance-volume-overlay-explainer {
+  margin: 0;
+  color: #9aa8b7;
+  font-size: 0.8rem;
+}
+
 .reflectance-volume-badge {
   display: inline-flex;
   align-items: center;

@@ -25,6 +25,11 @@ export type ReflectanceVolumeScene = {
     clipFraction: number;
     phaseRate: number;
   };
+  overlays: {
+    showShell: boolean;
+    showInteriorDetail: boolean;
+    showGhostedStack: boolean;
+  };
   summary: {
     title: string;
     subtitle: string;
@@ -79,6 +84,11 @@ export function buildReflectanceVolumeScene(
       opacity: overlayMode === 'transparent-medium' ? 0.18 : 0.32,
       clipFraction,
       phaseRate: getPhaseRate(document, resolved, result),
+    },
+    overlays: {
+      showShell: true,
+      showInteriorDetail: overlayMode !== 'none',
+      showGhostedStack: overlayMode === 'ghosted-stack',
     },
     summary: {
       title:

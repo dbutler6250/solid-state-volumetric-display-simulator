@@ -15,8 +15,11 @@ type ReflectanceVolumePanelProps = {
 };
 
 type ViewerStatus = 'loading' | 'ready' | 'error';
+type PlaneMotionMode = 'sweep' | 'manual';
 
 const DEFAULT_SLICE = 3;
+const DEFAULT_PLANE_PHASE = 0.35;
+const DEFAULT_PLANE_SPEED = 0.35;
 const PRESET_CAMERA_VIEWS = {
   front: { theta: 0.7, phi: 1.05, radius: 4.2 },
   side: { theta: Math.PI / 2, phi: 1.05, radius: 4.2 },
@@ -31,6 +34,9 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
   const [threshold, setThreshold] = useState(0.2);
   const [clipFraction, setClipFraction] = useState(0.35);
   const [freezeAnimation, setFreezeAnimation] = useState(false);
+  const [planeMotionMode, setPlaneMotionMode] = useState<PlaneMotionMode>('sweep');
+  const [planePhase, setPlanePhase] = useState(DEFAULT_PLANE_PHASE);
+  const [planeSpeed, setPlaneSpeed] = useState(DEFAULT_PLANE_SPEED);
   const [status, setStatus] = useState<ViewerStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState(0);
@@ -38,12 +44,19 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const mediumMeshRef = useRef<THREE.Mesh | null>(null);
   const mediumMaterialRef = useRef<THREE.MeshPhysicalMaterial | null>(null);
+  const edgesRef = useRef<THREE.LineSegments | null>(null);
+  const shellMeshRef = useRef<THREE.Mesh | null>(null);
   const voxelMeshRef = useRef<THREE.InstancedMesh | null>(null);
   const planeMeshRef = useRef<THREE.InstancedMesh | null>(null);
   const clipPlaneRef = useRef<THREE.Mesh | null>(null);
   const frameRef = useRef<number | null>(null);
   const freezeRef = useRef(false);
+  const planeMotionModeRef = useRef<PlaneMotionMode>('sweep');
+  const planePhaseRef = useRef(DEFAULT_PLANE_PHASE);
+  const planeSpeedRef = useRef(DEFAULT_PLANE_SPEED);
+  const previousFrameRef = useRef<number | null>(null);
   const controlsRef = useRef({
     theta: 0.8,
     phi: 1.1,
@@ -75,6 +88,12 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         ? 'Plane mode'
         : 'Volume mode';
   const sliceLabel = `${sliceIndex}/${Math.max(0, scene.field.depth - 1)}`;
+  const overlayDescription =
+    overlayMode === 'ghosted-stack'
+      ? 'Ghosted stack shows the internal proxy geometry behind a faint glass shell.'
+      : overlayMode === 'transparent-medium'
+        ? 'Transparent medium keeps the glass shell and internal proxy color, but removes the ghosted stack overlay.'
+        : 'No overlay leaves the glass shell only, with the faintest outline and no internal stack hint.';
 
   useEffect(() => {
     if (scene.field.depth === 0) return;
@@ -84,6 +103,18 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
   useEffect(() => {
     freezeRef.current = freezeAnimation;
   }, [freezeAnimation]);
+
+  useEffect(() => {
+    planeMotionModeRef.current = planeMotionMode;
+  }, [planeMotionMode]);
+
+  useEffect(() => {
+    planePhaseRef.current = planePhase;
+  }, [planePhase]);
+
+  useEffect(() => {
+    planeSpeedRef.current = planeSpeed;
+  }, [planeSpeed]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -117,21 +148,37 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
       const mediumMaterial = new THREE.MeshPhysicalMaterial({
         color: 0x88bbff,
         transparent: true,
-        opacity: scene.medium.opacity,
-        roughness: 0.08,
+        opacity: Math.min(scene.medium.opacity, 0.08),
+        roughness: 0.03,
         metalness: 0,
-        transmission: 0.25,
-        thickness: 0.6,
-        clearcoat: 0.2,
+        transmission: 0.92,
+        thickness: 1.1,
+        clearcoat: 0.55,
+        clearcoatRoughness: 0.04,
         clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))],
       });
       mediumMaterialRef.current = mediumMaterial;
       const mediumMesh = new THREE.Mesh(mediumGeometry, mediumMaterial);
+      mediumMeshRef.current = mediumMesh;
       scene3d.add(mediumMesh);
 
-      const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xa6c8df, transparent: true, opacity: 0.7 });
-      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(mediumGeometry), edgeMaterial);
+      const edgeGeometry = new THREE.EdgesGeometry(mediumGeometry);
+      const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xd0edf8, transparent: true, opacity: 0.14 });
+      const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+      edgesRef.current = edges;
       scene3d.add(edges);
+
+      const shellGeometry = new THREE.BoxGeometry(2.02, 2.02, 2.02);
+      const shellMaterial = new THREE.MeshBasicMaterial({
+        color: 0xdff5ff,
+        transparent: true,
+        opacity: 0.08,
+        side: THREE.BackSide,
+        depthWrite: false,
+      });
+      const shellMesh = new THREE.Mesh(shellGeometry, shellMaterial);
+      shellMeshRef.current = shellMesh;
+      scene3d.add(shellMesh);
 
       const voxelGeometry = new THREE.BoxGeometry(0.22, 0.22, 0.22);
       const voxelMaterial = new THREE.MeshBasicMaterial({
@@ -155,7 +202,6 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))],
       });
       const planeMesh = new THREE.InstancedMesh(planeGeometry, planeMaterial, 1);
-      planeMesh.visible = false;
       planeMeshRef.current = planeMesh;
       scene3d.add(planeMesh);
 
@@ -164,7 +210,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         new THREE.MeshBasicMaterial({
           color: 0xf0bf58,
           transparent: true,
-          opacity: 0.12,
+          opacity: 0.05,
           side: THREE.DoubleSide,
           depthWrite: false,
         }),
@@ -223,8 +269,16 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
 
       const animate = () => {
         if (disposed) return;
+        const now = performance.now();
+        const deltaSeconds =
+          previousFrameRef.current === null ? 0 : Math.min(0.05, (now - previousFrameRef.current) / 1000);
+        previousFrameRef.current = now;
         if (!freezeRef.current) {
           setPhase((current) => (current + scene.medium.phaseRate * 0.01) % 1);
+        }
+        if (planeMotionModeRef.current === 'sweep' && !freezeRef.current) {
+          planePhaseRef.current = (planePhaseRef.current + deltaSeconds * planeSpeedRef.current) % 1;
+          setPlanePhase(planePhaseRef.current);
         }
         const rendererInstance = rendererRef.current;
         const cameraInstance = cameraRef.current;
@@ -255,11 +309,15 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         if (frameRef.current !== null) {
           cancelAnimationFrame(frameRef.current);
         }
+        previousFrameRef.current = null;
         renderer.dispose();
         mediumGeometry.dispose();
+        edgeGeometry.dispose();
+        shellGeometry.dispose();
         voxelGeometry.dispose();
         planeGeometry.dispose();
         mediumMaterial.dispose();
+        shellMaterial.dispose();
         voxelMaterial.dispose();
         planeMaterial.dispose();
         edgeMaterial.dispose();
@@ -268,7 +326,10 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         rendererRef.current = null;
         sceneRef.current = null;
         cameraRef.current = null;
+        mediumMeshRef.current = null;
         mediumMaterialRef.current = null;
+        edgesRef.current = null;
+        shellMeshRef.current = null;
         voxelMeshRef.current = null;
         planeMeshRef.current = null;
         clipPlaneRef.current = null;
@@ -299,20 +360,29 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
     const camera = cameraRef.current;
     const scene3d = sceneRef.current;
     if (!voxelMesh || !planeMesh || !mediumMaterial || !clipPlane || !renderer || !camera || !scene3d) return;
+    const mediumMesh = mediumMeshRef.current;
+    const edges = edgesRef.current;
+    const shellMesh = shellMeshRef.current;
 
     const voxelColor = new THREE.Color();
     const planeZ = scene.field.depth > 1 ? (sliceIndex / (scene.field.depth - 1)) * 2 - 1 : 0;
     voxelMesh.count = scene.field.cells.length;
     planeMesh.count = 1;
-    voxelMesh.visible = scene.mode === 'volume';
+    voxelMesh.visible = scene.mode === 'volume' && scene.overlays.showInteriorDetail;
     planeMesh.visible = scene.mode === 'plane';
-    mediumMaterial.opacity = scene.medium.opacity;
+    mediumMesh!.visible = scene.overlays.showShell;
+    mediumMaterial.opacity = scene.overlays.showShell ? scene.medium.opacity : 0;
     mediumMaterial.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(scene.medium.clipFraction))];
     clipPlane.position.z = planeZForClip(scene.medium.clipFraction);
+    const normalizedPlanePhase =
+      planeMotionMode === 'manual' ? planePhase : planePhaseRef.current;
+    const planeOffset = normalizedPlanePhase * 2 - 1;
+    const animatedPlaneZ = scene.mode === 'plane' ? planeOffset : planeZ;
+    const planeVisible = scene.mode === 'plane' || scene.overlays.showInteriorDetail;
     planeMesh.setMatrixAt(
       0,
       new THREE.Matrix4().compose(
-        new THREE.Vector3(0, 0, planeZ),
+        new THREE.Vector3(0, 0, animatedPlaneZ),
         new THREE.Quaternion(),
         new THREE.Vector3(1, 1, 1),
       ),
@@ -331,11 +401,17 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
       voxelColor.setHSL(0.58 - cell.intensity * 0.18, 0.9, 0.38 + cell.intensity * 0.45);
       voxelMesh.setColorAt(index, voxelColor);
     }
+    voxelMesh.visible = scene.mode === 'volume' && scene.overlays.showInteriorDetail;
+    planeMesh.visible = planeVisible;
+    mediumMaterial.opacity = scene.overlays.showShell ? scene.medium.opacity : 0;
+    clipPlane.visible = scene.overlays.showShell;
+    if (edges) edges.visible = scene.overlays.showGhostedStack;
+    if (shellMesh) shellMesh.visible = scene.overlays.showShell;
     voxelMesh.instanceMatrix.needsUpdate = true;
     if (voxelMesh.instanceColor) voxelMesh.instanceColor.needsUpdate = true;
     planeMesh.instanceMatrix.needsUpdate = true;
     renderer.render(scene3d, camera);
-  }, [scene, sliceIndex, phase]);
+  }, [scene, sliceIndex, phase, planePhase, planeMotionMode]);
 
   return (
     <div className="reflectance-volume-panel">
@@ -367,6 +443,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
             type="button"
             aria-pressed={overlayMode === 'ghosted-stack'}
             onClick={() => setOverlayMode('ghosted-stack')}
+            title="Glass shell with ghosted internal stack"
           >
             Ghosted stack
           </button>
@@ -374,11 +451,17 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
             type="button"
             aria-pressed={overlayMode === 'transparent-medium'}
             onClick={() => setOverlayMode('transparent-medium')}
+            title="Glass shell with no ghosted stack overlay"
           >
-            Transparent medium
+            Glass shell
           </button>
-          <button type="button" aria-pressed={overlayMode === 'none'} onClick={() => setOverlayMode('none')}>
-            No overlay
+          <button
+            type="button"
+            aria-pressed={overlayMode === 'none'}
+            onClick={() => setOverlayMode('none')}
+            title="Glass shell only, with the faintest outline"
+          >
+            Shell only
           </button>
         </div>
         <div className="chart-button-group" role="group" aria-label="Camera preset views">
@@ -393,7 +476,66 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
           </button>
         </div>
       </div>
+      <p className="reflectance-volume-overlay-explainer">{overlayDescription}</p>
       <p className="reflectance-volume-hint">{interactionHint}</p>
+      <div className="reflectance-volume-plane-controls" aria-label="Reflection plane controls">
+        <div className="chart-button-group" role="group" aria-label="Plane motion mode">
+          <button
+            type="button"
+            aria-pressed={planeMotionMode === 'sweep'}
+            onClick={() => {
+              setPlaneMotionMode('sweep');
+              setFreezeAnimation(false);
+            }}
+          >
+            Sweep
+          </button>
+          <button
+            type="button"
+            aria-pressed={planeMotionMode === 'manual'}
+            onClick={() => {
+              setPlaneMotionMode('manual');
+              setFreezeAnimation(true);
+            }}
+          >
+            Manual
+          </button>
+        </div>
+        <label className="toggle-control">
+          <input
+            type="checkbox"
+            checked={planeMotionMode === 'manual' || freezeAnimation}
+            disabled={planeMotionMode === 'manual'}
+            onChange={(event) => setFreezeAnimation(event.target.checked)}
+          />
+          <span>{planeMotionMode === 'manual' || freezeAnimation ? 'Frozen' : 'Playing'}</span>
+        </label>
+        {planeMotionMode === 'sweep' ? (
+          <label className="field reflectance-volume-speed-control">
+            <span>Plane speed <strong>{planeSpeed.toFixed(2)} cycles/s</strong></span>
+            <input
+              type="range"
+              min={0.05}
+              max={1.25}
+              step={0.05}
+              value={planeSpeed}
+              onChange={(event) => setPlaneSpeed(Number(event.target.value))}
+            />
+          </label>
+        ) : (
+          <label className="field reflectance-volume-speed-control">
+            <span>Plane position <strong>{Math.round(planePhase * 100)}%</strong></span>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={planePhase}
+              onChange={(event) => setPlanePhase(Number(event.target.value))}
+            />
+          </label>
+        )}
+      </div>
       <div className="reflectance-volume-stage">
         <div ref={containerRef} className="reflectance-volume-canvas" aria-label="3D reflectance canvas" />
         {status === 'error' ? (
@@ -454,7 +596,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
       </div>
       <p className="reflectance-volume-summary">
         {scene.summary.title}. {scene.summary.subtitle}. Peak reflectance {scene.summary.peakReflectance.toFixed(3)}.
-        Phase progression is tied to the solved peak reflectance and active structure.
+        The shell stays visible in every overlay mode; the toggles only change the amount of ghosted internal detail.
       </p>
     </div>
   );

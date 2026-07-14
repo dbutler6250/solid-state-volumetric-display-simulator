@@ -11,6 +11,8 @@
 - The viewer renders a transparent medium with proxy volume and moving-plane modes, freeze control, orbit/pan/zoom behavior, preset-view scaffolding, slice/threshold/clip controls, and a legend.
 - The viewer now includes actual preset camera buttons and a shift-drag pan gesture in addition to orbit and zoom.
 - First-pass refinements added an interaction hint, inline slider values, a small scene-state badge, and a taller desktop canvas.
+- Plane motion is now split into sweep and manual modes; sweep loops through the volume with adjustable speed, while manual mode freezes the plane and exposes direct position control.
+- Overlay modes now differ in rendered shell/interior behavior instead of only changing labels.
 - The scene builder uses the canonical `SimulationDocument`, resolved structure, and solver output instead of a second data path.
 - The tab fails gracefully when WebGL initialization is unavailable and directs the user back to Stack Definition.
 - Added focused tests for the 3D scene builder and proxy mode switching.
@@ -24,6 +26,7 @@
 - Browser-verified the tab row, 3D controls, freeze toggle, and no horizontal overflow at mobile width.
 - Browser-verified the 3D tab mounts without the earlier React/runtime error, and the preset camera buttons are present.
 - Browser-verified the refinement pass with the new hint, inline values, and badge, and confirmed no actual horizontal overflow.
+- Browser-verified that sweep mode shows plane speed, manual mode shows plane position, and manual mode reads as frozen.
 
 ## Browser Verification
 
@@ -31,6 +34,7 @@
 - Verified the 3D tab shows the proxy volume controls, legend, and plane/volume toggle.
 - Verified the 3D tab shows the preset camera buttons and mounts a canvas without the fallback error state.
 - Verified the 3D tab shows the interaction hint, inline slider values, and scene-state badge.
+- Verified sweep/manual plane state changes, including the frozen manual state and the sweep speed control.
 - Verified the mobile layout keeps the tab row and 3D controls usable with no page-level horizontal overflow at 390 px width.
 
 ## Remaining Limitations
