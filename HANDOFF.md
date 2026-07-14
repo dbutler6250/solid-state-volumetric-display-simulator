@@ -12,10 +12,14 @@
 - The viewer now includes actual preset camera buttons and a shift-drag pan gesture in addition to orbit and zoom.
 - First-pass refinements added an interaction hint, inline slider values, a small scene-state badge, and a taller desktop canvas.
 - Plane motion is now split into sweep and manual modes; sweep loops through the volume with adjustable speed, while manual mode freezes the plane and exposes direct position control.
+- Sweep mode now animates the plane in the render loop and shows a live sweep-phase readout so the motion is visibly active.
+- The slice control affects both volume and plane presentation, rather than only the plane view.
 - Overlay modes now differ in rendered shell/interior behavior instead of only changing labels.
 - The scene builder uses the canonical `SimulationDocument`, resolved structure, and solver output instead of a second data path.
+- Overlay and clip changes update Three.js materials in place instead of rebuilding the renderer and scene graph.
 - The tab fails gracefully when WebGL initialization is unavailable and directs the user back to Stack Definition.
 - Added focused tests for the 3D scene builder and proxy mode switching.
+- Added a focused test for plane transform mapping in sweep/manual motion.
 
 ## Verification
 
@@ -27,6 +31,7 @@
 - Browser-verified the 3D tab mounts without the earlier React/runtime error, and the preset camera buttons are present.
 - Browser-verified the refinement pass with the new hint, inline values, and badge, and confirmed no actual horizontal overflow.
 - Browser-verified that sweep mode shows plane speed, manual mode shows plane position, and manual mode reads as frozen.
+- Browser-verified that sweep mode shows a live phase percentage that advances over time, and manual mode stays frozen at a fixed position.
 
 ## Browser Verification
 
