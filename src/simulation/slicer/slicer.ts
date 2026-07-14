@@ -65,12 +65,14 @@ export function buildSliceStack(
   const gridResolution = Math.max(2, Math.round(options.gridResolution ?? 12));
   const { mesh: normalizedMesh, bounds } = normalizeMeshToVolumeSpace(mesh);
   const coverageSamplesPerCell = 9;
+  const refinedCoverageSamplesPerCell = 25;
   const slices: SliceFrame[] = [];
   let activeVoxelCount = 0;
   let occupiedSliceCount = 0;
   let peakSliceOccupancy = 0;
   let coverageAccumulator = 0;
   let peakSliceCoverage = 0;
+  let refinedCellCount = 0;
 
   for (let sliceIndex = 0; sliceIndex < sliceCount; sliceIndex += 1) {
     const planePosition = sliceCount === 1 ? 0.5 : (sliceIndex + 0.5) / sliceCount;
@@ -105,6 +107,7 @@ export function buildSliceStack(
     peakSliceOccupancy = Math.max(peakSliceOccupancy, sliceActiveVoxelCount);
     peakSliceCoverage = Math.max(peakSliceCoverage, sliceCoverageSum);
     slices.push({ index: sliceIndex, planePosition, planeCoordinate, occupancyMask, intensityMask });
+    refinedCellCount += countRefinedCells(intensityMask);
   }
 
   const diagnostics = buildSliceDiagnostics({
@@ -116,6 +119,8 @@ export function buildSliceStack(
     averageSliceCoverage: coverageAccumulator,
     peakSliceCoverage,
     coverageSamplesPerCell,
+    refinedCoverageSamplesPerCell,
+    refinedCellCount,
   });
 
   return {
@@ -211,6 +216,8 @@ function buildSliceDiagnostics(params: {
   sliceCount: number;
   sliceResolution: number;
   coverageSamplesPerCell: number;
+  refinedCoverageSamplesPerCell: number;
+  refinedCellCount: number;
 }): SliceDiagnostics {
   const totalVoxelCount = params.sliceCount * params.sliceResolution;
   return {
@@ -223,6 +230,8 @@ function buildSliceDiagnostics(params: {
     peakSliceOccupancy: params.peakSliceOccupancy,
     peakSliceCoverage: params.peakSliceCoverage,
     coverageSamplesPerCell: params.coverageSamplesPerCell,
+    refinedCoverageSamplesPerCell: params.refinedCoverageSamplesPerCell,
+    refinedCellCount: params.refinedCellCount,
   };
 }
 
@@ -234,24 +243,44 @@ function getCellCoverage(
   column: number,
   gridResolution: number,
 ): number {
-  const samples = [
-    getSamplePoint(axis, planePosition, row + 1 / 6, column + 1 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 1 / 6, column + 3 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 1 / 6, column + 5 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 3 / 6, column + 1 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 3 / 6, column + 3 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 3 / 6, column + 5 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 5 / 6, column + 1 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 5 / 6, column + 3 / 6, gridResolution),
-    getSamplePoint(axis, planePosition, row + 5 / 6, column + 5 / 6, gridResolution),
-  ];
+  const coarseSamples = buildCoverageSamples(axis, planePosition, row, column, gridResolution, 3);
+  const coarseCoverage = getSampleCoverage(mesh, axis, coarseSamples);
+  if (coarseCoverage === 0 || coarseCoverage === 1) {
+    return coarseCoverage;
+  }
+
+  const fineSamples = buildCoverageSamples(axis, planePosition, row, column, gridResolution, 5);
+  const fineCoverage = getSampleCoverage(mesh, axis, fineSamples);
+  return (coarseCoverage + fineCoverage) / 2;
+}
+
+function buildCoverageSamples(
+  axis: SlicerAxis,
+  planePosition: number,
+  row: number,
+  column: number,
+  gridResolution: number,
+  sampleGridSize: number,
+): MeshPoint3D[] {
+  const samples: MeshPoint3D[] = [];
+  for (let sampleRow = 0; sampleRow < sampleGridSize; sampleRow += 1) {
+    for (let sampleColumn = 0; sampleColumn < sampleGridSize; sampleColumn += 1) {
+      const rowOffset = (sampleRow + 0.5) / sampleGridSize;
+      const columnOffset = (sampleColumn + 0.5) / sampleGridSize;
+      samples.push(getSamplePoint(axis, planePosition, row + rowOffset, column + columnOffset, gridResolution));
+    }
+  }
+  return samples;
+}
+
+function getSampleCoverage(mesh: MeshGeometry, axis: SlicerAxis, samples: MeshPoint3D[]): number {
   let hitCount = 0;
   for (const sample of samples) {
     if (isPointInsideMesh(mesh, sample, axis)) {
       hitCount += 1;
     }
   }
-  return hitCount / samples.length;
+  return samples.length > 0 ? hitCount / samples.length : 0;
 }
 
 function buildVisibleVoxels(stack: SliceStack, slice: SliceFrame): VisibleVoxel[] {
@@ -310,6 +339,18 @@ function getAxisIndex(axis: SlicerAxis): number {
   if (axis === 'x') return 0;
   if (axis === 'y') return 1;
   return 2;
+}
+
+function countRefinedCells(mask: number[][]): number {
+  let refinedCells = 0;
+  for (const row of mask) {
+    for (const coverage of row) {
+      if (coverage > 0 && coverage < 1) {
+        refinedCells += 1;
+      }
+    }
+  }
+  return refinedCells;
 }
 
 function isPointInsideMesh(mesh: MeshGeometry, point: MeshPoint3D, axis: 'x' | 'y' | 'z'): boolean {

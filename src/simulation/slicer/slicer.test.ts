@@ -32,6 +32,8 @@ describe('buildSliceStack', () => {
     expect(stackA.diagnostics.averageSliceCoverage).toBeGreaterThan(0);
     expect(stackA.diagnostics.peakSliceCoverage).toBeGreaterThan(0);
     expect(stackA.diagnostics.coverageSamplesPerCell).toBe(9);
+    expect(stackA.diagnostics.refinedCoverageSamplesPerCell).toBe(25);
+    expect(stackA.diagnostics.refinedCellCount).toBeGreaterThan(0);
     expect(stackA.mesh.triangleCount).toBeGreaterThan(0);
     expect(stackA.mesh.vertexCount).toBeGreaterThan(0);
   });

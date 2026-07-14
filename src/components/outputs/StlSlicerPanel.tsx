@@ -380,7 +380,11 @@ export function StlSlicerPanel() {
             </div>
             <div className="stack-summary-item">
               <span>Coverage samples</span>
-              <strong>{sliceStack.diagnostics.coverageSamplesPerCell} per cell</strong>
+              <strong>{sliceStack.diagnostics.coverageSamplesPerCell} base / {sliceStack.diagnostics.refinedCoverageSamplesPerCell} refined</strong>
+            </div>
+            <div className="stack-summary-item">
+              <span>Refined cells</span>
+              <strong>{sliceStack.diagnostics.refinedCellCount} boundary cells</strong>
             </div>
           </div>
           <div className="stl-slicer-export">

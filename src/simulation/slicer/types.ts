@@ -53,6 +53,8 @@ export type SliceDiagnostics = {
   peakSliceOccupancy: number;
   peakSliceCoverage: number;
   coverageSamplesPerCell: number;
+  refinedCoverageSamplesPerCell: number;
+  refinedCellCount: number;
 };
 
 /** Reusable slice stack output from the mesh slicer. */
