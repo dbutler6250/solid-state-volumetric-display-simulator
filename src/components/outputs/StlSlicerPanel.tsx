@@ -76,8 +76,13 @@ export function StlSlicerPanel() {
     : [];
 
   useEffect(() => {
-    setStepInput(String(stepIndex));
-  }, [stepIndex]);
+    if (!playbackStep) return;
+
+    // Keep the editable field aligned with the clamped playback state so shrinking
+    // the timeline cannot leave a stale out-of-range step in the UI.
+    setStepIndex(playbackStep.step);
+    setStepInput(String(playbackStep.step));
+  }, [playbackStep]);
 
   useEffect(() => {
     if (!isPlaying || !playbackTimeline || playbackTimeline.steps.length <= 1) {
