@@ -67,20 +67,24 @@ export function StlSlicerPanel() {
   const planeY = activeFrame ? 8 + activeFrame.planeCoordinate * 84 : 8;
 
   useEffect(() => {
+    setStepInput(String(stepIndex));
+  }, [stepIndex]);
+
+  useEffect(() => {
     if (!isPlaying || !playbackTimeline || playbackTimeline.steps.length <= 1) {
       return undefined;
     }
 
     const interval = window.setInterval(() => {
       setStepIndex((current) => {
-        const nextStep = current + playbackRate;
+        const nextStep = current + 1;
         const limit = playbackTimeline.steps.length - 1;
         if (nextStep > limit) {
           return isLooping ? 0 : limit;
         }
-        return Math.round(nextStep);
+        return nextStep;
       });
-    }, 650);
+    }, 650 / playbackRate);
 
     return () => window.clearInterval(interval);
   }, [isLooping, isPlaying, playbackRate, playbackTimeline]);
@@ -156,7 +160,8 @@ export function StlSlicerPanel() {
 
   const goToStep = (value: number) => {
     if (!playbackTimeline) return;
-    const nextStep = Math.min(Math.max(0, Math.round(value)), Math.max(0, playbackTimeline.steps.length - 1));
+    const safeValue = Number.isFinite(value) ? value : 0;
+    const nextStep = Math.min(Math.max(0, Math.round(safeValue)), Math.max(0, playbackTimeline.steps.length - 1));
     setStepIndex(nextStep);
     setStepInput(String(nextStep));
   };
@@ -254,13 +259,13 @@ export function StlSlicerPanel() {
               {isPlaying ? 'Pause playback' : 'Play playback'}
             </button>
             <div className="stl-slicer-playback-nav">
-              <button type="button" className="action-button" onClick={() => setStepIndex((current) => Math.max(0, current - 1))}>
+              <button type="button" className="action-button" onClick={() => goToStep(stepIndex - 1)}>
                 Previous
               </button>
               <button
                 type="button"
                 className="action-button"
-                onClick={() => setStepIndex((current) => Math.min(Math.max(0, (playbackTimeline?.steps.length ?? 1) - 1), current + 1))}
+                onClick={() => goToStep(stepIndex + 1)}
               >
                 Next
               </button>
