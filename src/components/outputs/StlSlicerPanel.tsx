@@ -8,7 +8,7 @@ import {
   serializeSliceStackCsv,
   serializeSlicerOutput,
 } from '../../simulation/slicer/slicer';
-import { createSampleCubeMesh, parseStlBytes } from '../../simulation/slicer/stl';
+import { createSampleHollowSphereMesh, parseStlBytes } from '../../simulation/slicer/stl';
 import type { MeshGeometry } from '../../simulation/slicer/types';
 
 type StlSlicerPanelState = {
@@ -20,8 +20,8 @@ type StlSlicerPanelState = {
 /** Demonstrates the STL slicer and playback foundation with a deterministic preview. */
 export function StlSlicerPanel() {
   const [state, setState] = useState<StlSlicerPanelState>({
-    mesh: createSampleCubeMesh(),
-    sourceLabel: 'Sample cube mesh',
+    mesh: createSampleHollowSphereMesh(),
+    sourceLabel: 'Sample hollow sphere mesh',
     error: null,
   });
   const [sliceCount, setSliceCount] = useState(12);
@@ -32,7 +32,7 @@ export function StlSlicerPanel() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isLooping, setIsLooping] = useState(true);
-  const [fileName, setFileName] = useState('sample-cube.stl');
+  const [fileName, setFileName] = useState('sample-hollow-sphere.stl');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isDropActive, setIsDropActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -90,8 +90,8 @@ export function StlSlicerPanel() {
   }, [isLooping, isPlaying, playbackRate, playbackTimeline]);
 
   const loadSample = () => {
-    setState({ mesh: createSampleCubeMesh(), sourceLabel: 'Sample cube mesh', error: null });
-    setFileName('sample-cube.stl');
+    setState({ mesh: createSampleHollowSphereMesh(), sourceLabel: 'Sample hollow sphere mesh', error: null });
+    setFileName('sample-hollow-sphere.stl');
     setStepIndex(0);
     setStepInput('0');
     setAxis('z');
@@ -224,7 +224,7 @@ export function StlSlicerPanel() {
         </div>
         <div className="stl-slicer-actions">
           <button type="button" className="action-button" onClick={loadSample}>
-            Load sample cube
+            Load sample hollow sphere
           </button>
           <label className="field">
             <span>Slice axis</span>

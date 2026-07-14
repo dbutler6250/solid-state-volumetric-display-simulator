@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createSampleCubeMesh, parseAsciiStl, parseStlBytes } from './stl';
+import { createSampleHollowSphereMesh, parseAsciiStl, parseStlBytes } from './stl';
 
 describe('parseAsciiStl', () => {
   it('parses a simple ASCII STL into a mesh', () => {
@@ -49,10 +49,10 @@ endsolid cube`),
   });
 });
 
-describe('createSampleCubeMesh', () => {
-  it('returns a reusable sample mesh', () => {
-    const mesh = createSampleCubeMesh();
-    expect(mesh.vertices).toHaveLength(8);
-    expect(mesh.triangles).toHaveLength(12);
+describe('createSampleHollowSphereMesh', () => {
+  it('returns a reusable hollow sphere approximation', () => {
+    const mesh = createSampleHollowSphereMesh();
+    expect(mesh.vertices).toHaveLength(12);
+    expect(mesh.triangles).toHaveLength(16);
   });
 });

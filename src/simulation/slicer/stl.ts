@@ -122,32 +122,48 @@ function parseBinaryStl(bytes: ArrayBuffer): MeshGeometry {
   return { vertices, triangles };
 }
 
-/** Returns a tiny sample mesh that exercises the slicer pipeline without a file upload. */
-export function createSampleCubeMesh(): MeshGeometry {
+/** Returns a small hollow sphere approximation that produces more dynamic slice previews. */
+export function createSampleHollowSphereMesh(): MeshGeometry {
+  const outerRadius = 0.5;
+  const innerRadius = 0.28;
+  const outerVertices: MeshPoint3D[] = [
+    [0, 0, outerRadius],
+    [0, 0, -outerRadius],
+    [outerRadius, 0, 0],
+    [-outerRadius, 0, 0],
+    [0, outerRadius, 0],
+    [0, -outerRadius, 0],
+  ];
+  const innerVertices: MeshPoint3D[] = [
+    [0, 0, innerRadius],
+    [0, 0, -innerRadius],
+    [innerRadius, 0, 0],
+    [-innerRadius, 0, 0],
+    [0, innerRadius, 0],
+    [0, -innerRadius, 0],
+  ];
+
   return {
-    vertices: [
-      [0, 0, 0],
-      [1, 0, 0],
-      [1, 1, 0],
-      [0, 1, 0],
-      [0, 0, 1],
-      [1, 0, 1],
-      [1, 1, 1],
-      [0, 1, 1],
-    ],
+    vertices: [...outerVertices, ...innerVertices],
     triangles: [
-      [0, 1, 2],
-      [0, 2, 3],
-      [4, 6, 5],
-      [4, 7, 6],
-      [0, 4, 5],
-      [0, 5, 1],
-      [1, 5, 6],
-      [1, 6, 2],
-      [2, 6, 7],
-      [2, 7, 3],
-      [3, 7, 4],
-      [3, 4, 0],
+      // Outer octahedron shell.
+      [0, 2, 4],
+      [0, 4, 3],
+      [0, 3, 5],
+      [0, 5, 2],
+      [1, 4, 2],
+      [1, 3, 4],
+      [1, 5, 3],
+      [1, 2, 5],
+      // Inner octahedron shell with reversed winding so the cavity stays hollow.
+      [6, 10, 8],
+      [6, 9, 10],
+      [6, 11, 9],
+      [6, 8, 11],
+      [7, 8, 10],
+      [7, 10, 9],
+      [7, 9, 11],
+      [7, 11, 8],
     ],
   };
 }
