@@ -40,6 +40,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Acoustic generator tab with discretized sinusoid layer generation, acoustic-material inputs, and acoustic config round-tripping
 - Progress-aware explicit acoustic stack generation with large-period handling groundwork and future-mode stubs
 - Unified discriminated structure resolution so quarter-wave and acoustic stacks share one solver, stack-definition, sweep, and export data path
+- 3D proxy reflectance viewer with reusable scene builder, plane sweep/manual controls, live sweep animation, overlay modes, and WebGL fallback handling
 
 ## Notes
 
