@@ -2,24 +2,23 @@
 
 ## Repository Status
 
-- Branch `codex/wp-02-shared-workload-limits-defaults` is active for WP-02 Shared Synchronous Workload Limits And Defaults.
-- Working tree contains the WP-02 implementation and tests; no unrelated findings were intentionally included.
-- The active branch was created from `main` after WP-01 landed on the current base.
+- Branch `codex/wp-04-stl-slicer-limits-coverage` is active for WP-04 STL Slicer Limits And Coverage Semantics.
+- Working tree contains the WP-04 implementation and tests; no unrelated findings were intentionally included.
 
 ## Latest Task
 
-- Added shared synchronous workload limits and a single 500-point wavelength default.
-- Enforced direct optical/manual caps for period count, wavelength samples, and total layer-wavelength work.
-- Updated UI bounds for period and wavelength-point inputs to match the shared limits.
-- Kept acoustic slice validation and parameter sweep safety behavior intact.
+- Added shared STL slicer limits for upload size, triangle count, slice/grid bounds, and estimated work.
+- Enforced parser and slicer rejection paths for over-limit STL files and over-limit slice workloads.
+- Normalized peak slice coverage for UI display while preserving the raw summed peak coverage under an explicit field.
+- Updated STL slicer export text and UI labels to surface both normalized and raw coverage values, while keeping CSV export to a single per-slice table.
 
 ## Verification
 
-- Focused: `npm.cmd run test -- src/simulation/validation/quarterWaveStackValidation.test.ts src/simulation/structures/structureResolver.test.ts src/simulation/solvers/transferMatrix.test.ts src/io/importStackConfigJson.test.ts src/components/inputs/QuarterWaveStackForm.test.ts` - passed (70 tests).
-- Full test: `npm.cmd run test` - passed (132 tests).
+- Focused: `npm.cmd run test -- src/simulation/slicer/stl.test.ts src/simulation/slicer/slicer.test.ts src/components/outputs/stlUploadLimits.test.ts` - passed (18 tests).
+- Full test: `npm.cmd run test` - passed (136 tests).
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
-- Browser: desktop Chrome verified the spectrum renders, direct work over-limit shows the new validation message, valid values recover the spectrum, and a narrow viewport still loads with the shared bounds present.
+- Browser: system Chrome verified the STL slicer sample loads, coverage displays as `37.5%` / `49.4%` peak, the raw summed peak coverage is labeled separately, oversized STL upload is rejected before file reading, the favicon 404 is gone, and a narrow viewport still loads the app.
 
 ## Browser Verification
 
@@ -29,5 +28,4 @@
 
 ## Remaining Follow-Up
 
-- Independent review should focus on the exact direct-work cap wording and any edge cases around public callers of `solveSimulationDocumentParameterSweep`.
-- A later browser pass with file uploads can still confirm the import error path in the UI end to end.
+- Independent review should focus on the exact coverage export contract, especially the raw versus normalized naming in downstream consumers.

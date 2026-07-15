@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Volumetric Display Simulator">
+  <rect width="64" height="64" rx="14" fill="#0f172a"/>
+  <path d="M14 42L25 18h6l11 24h-6l-2.5-6h-11L20 42h-6zm14.5-10h7l-3.5-8-3.5 8z" fill="#5aa7c8"/>
+  <circle cx="46" cy="24" r="8" fill="#f0bf58"/>
+</svg>
