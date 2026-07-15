@@ -2,6 +2,8 @@ import type {
   ParameterSweepResult,
   ParameterSweepSettings,
   QuarterWaveStackInputs,
+  ReflectanceHeatmapResult,
+  ReflectanceHeatmapSettings,
   SimulationDocument,
   SimulationResult,
 } from '../../types/simulation';
@@ -360,6 +362,129 @@ export function solveSimulationDocumentParameterSweep(
   return { settings, points };
 }
 
+const heatmapResultCache = new Map<string, ReflectanceHeatmapResult>();
+
+/** Resolves a general 2D reflectance grid for the active document. */
+export function solveSimulationDocumentReflectanceHeatmap(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+): ReflectanceHeatmapResult {
+  const cacheKey = createHeatmapCacheKey(document, settings);
+  const cached = heatmapResultCache.get(cacheKey);
+  if (cached) return cached;
+
+  const resolved = resolveSimulationDocument(document);
+  const supported = resolved.sweepParameters;
+  if (!supported.includes(settings.xAxis.parameter) || !supported.includes(settings.yAxis.parameter)) {
+    throw new Error('One or both heatmap axes are not supported by the active structure.');
+  }
+
+  const xValues = createParameterSweepValues(settings.xAxis);
+  const yValues = createParameterSweepValues(settings.yAxis);
+  assertHeatmapSweepIsSafe(document, settings, xValues, yValues);
+  const pointCache = new Map<string, number>();
+  const reflectance: number[][] = [];
+  for (const yValue of yValues) {
+    const row: number[] = [];
+    for (const xValue of xValues) {
+      const pointKey = createHeatmapPointKey(xValue, yValue);
+      const cachedValue = pointCache.get(pointKey);
+      if (cachedValue !== undefined) {
+        row.push(cachedValue);
+        continue;
+      }
+
+      const sweptDocument = applySweepValue(
+        applySweepValue(document, settings.xAxis, xValue),
+        settings.yAxis,
+        yValue,
+      );
+      const result = solveSimulationDocument(sweptDocument, {
+        requiredWavelengthNm:
+          settings.xAxis.parameter === 'designWavelengthNm'
+            ? xValue
+            : settings.yAxis.parameter === 'designWavelengthNm'
+              ? yValue
+              : undefined,
+      });
+      const peakReflectance = result.peakReflectance;
+      pointCache.set(pointKey, peakReflectance);
+      row.push(peakReflectance);
+    }
+    reflectance.push(row);
+  }
+
+  const heatmapResult: ReflectanceHeatmapResult = {
+    settings,
+    xAxis: { settings: settings.xAxis, values: xValues },
+    yAxis: { settings: settings.yAxis, values: yValues },
+    reflectance,
+  };
+  heatmapResultCache.set(cacheKey, heatmapResult);
+  return heatmapResult;
+}
+
+/** Resolves a general 2D reflectance grid without blocking the main thread for large sweeps. */
+export async function solveSimulationDocumentReflectanceHeatmapAsync(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+  options: { signal?: AbortSignal } = {},
+): Promise<ReflectanceHeatmapResult> {
+  const cacheKey = createHeatmapCacheKey(document, settings);
+  const cached = heatmapResultCache.get(cacheKey);
+  if (cached) return cached;
+
+  const resolved = resolveSimulationDocument(document);
+  const supported = resolved.sweepParameters;
+  if (!supported.includes(settings.xAxis.parameter) || !supported.includes(settings.yAxis.parameter)) {
+    throw new Error('One or both heatmap axes are not supported by the active structure.');
+  }
+
+  const xValues = createParameterSweepValues(settings.xAxis);
+  const yValues = createParameterSweepValues(settings.yAxis);
+  assertHeatmapSweepIsSafe(document, settings, xValues, yValues, { async: true });
+  const pointCache = new Map<string, number>();
+  const reflectance: number[][] = [];
+
+  for (const yValue of yValues) {
+    throwIfAborted(options.signal);
+    const row: number[] = [];
+    for (const xValue of xValues) {
+      throwIfAborted(options.signal);
+      const pointKey = createHeatmapPointKey(xValue, yValue);
+      const cachedValue = pointCache.get(pointKey);
+      if (cachedValue !== undefined) {
+        row.push(cachedValue);
+        continue;
+      }
+
+      const sweptDocument = applySweepValue(applySweepValue(document, settings.xAxis, xValue), settings.yAxis, yValue);
+      const result = solveSimulationDocument(sweptDocument, {
+        requiredWavelengthNm:
+          settings.xAxis.parameter === 'designWavelengthNm'
+            ? xValue
+            : settings.yAxis.parameter === 'designWavelengthNm'
+              ? yValue
+              : undefined,
+      });
+      const peakReflectance = result.peakReflectance;
+      pointCache.set(pointKey, peakReflectance);
+      row.push(peakReflectance);
+      await yieldToBrowser();
+    }
+    reflectance.push(row);
+  }
+
+  const heatmapResult: ReflectanceHeatmapResult = {
+    settings,
+    xAxis: { settings: settings.xAxis, values: xValues },
+    yAxis: { settings: settings.yAxis, values: yValues },
+    reflectance,
+  };
+  heatmapResultCache.set(cacheKey, heatmapResult);
+  return heatmapResult;
+}
+
 /** Creates inclusive sweep values while preserving integer period counts. */
 function createParameterSweepValues(settings: ParameterSweepSettings): number[] {
   if (settings.parameter === 'incidentAngleDegrees') {
@@ -391,6 +516,61 @@ function createParameterSweepValues(settings: ParameterSweepSettings): number[] 
 
   const step = (settings.end - settings.start) / (settings.pointCount - 1);
   return Array.from({ length: settings.pointCount }, (_, index) => settings.start + step * index);
+}
+
+function createHeatmapPointKey(xValue: number, yValue: number): string {
+  return `${xValue}::${yValue}`;
+}
+
+function createHeatmapCacheKey(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+): string {
+  return JSON.stringify({ document, settings });
+}
+
+/** Rejects the entire heatmap before resolving any over-limit stack or excessive workload. */
+function assertHeatmapSweepIsSafe(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+  xValues: number[],
+  yValues: number[],
+  options: { async?: boolean } = {},
+): void {
+  const pointCount = xValues.length * yValues.length;
+  if (pointCount > MAX_PARAMETER_SWEEP_POINTS * MAX_PARAMETER_SWEEP_POINTS) {
+    throw new Error('The heatmap sweep is too large to evaluate synchronously.');
+  }
+
+  let aggregateWork = 0;
+  for (const yValue of yValues) {
+    for (const xValue of xValues) {
+      const sweptDocument = applySweepValue(applySweepValue(document, settings.xAxis, xValue), settings.yAxis, yValue);
+      const sweptInputs = documentToLegacyInputs(sweptDocument);
+      const issues = validateQuarterWaveStackInputs(sweptInputs);
+      if (issues.length > 0) {
+        throw new Error(`Invalid heatmap value ${xValue}, ${yValue}: ${issues.map((issue) => issue.message).join(' ')}`);
+      }
+
+      const layerCount =
+        sweptDocument.structure.type === 'acousto-optic-grating'
+          ? sweptDocument.structure.design.acousticPeriodCount *
+            getAcousticSlicesPerPeriod(sweptDocument.structure.design.acousticRepresentationMode)
+          : sweptDocument.structure.periodCount * 2;
+      if (layerCount > MAX_AUTOMATIC_ACOUSTIC_LAYERS && sweptDocument.structure.type === 'acousto-optic-grating') {
+        throw new Error(
+          `Heatmap value ${xValue}, ${yValue} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
+        );
+      }
+      aggregateWork += layerCount * sweptDocument.analysis.wavelengthPointCount;
+    }
+  }
+
+  if (!options.async && aggregateWork > MAX_PARAMETER_SWEEP_WORK) {
+    throw new Error(
+      `This heatmap requires approximately ${aggregateWork.toLocaleString()} layer-wavelength evaluations; the synchronous sweep limit is ${MAX_PARAMETER_SWEEP_WORK.toLocaleString()}. Reduce the bounds, points, wavelength samples, or representation detail.`,
+    );
+  }
 }
 
 /** Rejects the entire sweep before resolving any over-limit stack or excessive workload. */

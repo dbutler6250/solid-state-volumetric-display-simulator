@@ -239,6 +239,55 @@ label {
   grid-column: 1 / -1;
 }
 
+.heatmap-axis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.heatmap-axis-panel {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #2d3a4b;
+  border-radius: 8px;
+  background: #101720;
+}
+
+.heatmap-axis-panel .sweep-section-title h3 {
+  margin: 0;
+  color: #e5edf5;
+  font-size: 0.95rem;
+}
+
+.heatmap-axis-panel .sweep-section-title {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.heatmap-parameter-field {
+  display: grid;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.heatmap-parameter-field span {
+  color: #c7d4e2;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.heatmap-axis-panel .parameter-sweep-grid {
+  grid-template-columns: 1fr;
+  margin-top: 0;
+}
+
+.heatmap-axis-panel .field span {
+  font-size: 0.85rem;
+}
+
 #stack-definition-panel .stack-panel {
   margin-top: 0;
   padding-top: 0;
@@ -1347,6 +1396,10 @@ label {
   }
 
   .parameter-sweep-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .heatmap-axis-grid {
     grid-template-columns: 1fr;
   }
 

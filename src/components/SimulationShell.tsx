@@ -14,10 +14,12 @@ import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ReflectanceVolumePanel } from './outputs/ReflectanceVolumePanel';
 import { StlSlicerPanel } from './outputs/StlSlicerPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
+import { ReflectanceHeatmapChart } from '../plots/ReflectanceHeatmapChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
 import {
   solveQuarterWaveStackParameterSweep,
+  solveSimulationDocumentReflectanceHeatmapAsync,
   solveResolvedStructure,
   solveResolvedStructureAsync,
 } from '../simulation/solvers/transferMatrix';
@@ -36,12 +38,15 @@ import { validateQuarterWaveStackInputs } from '../simulation/validation/quarter
 import { exportStackConfigJson } from '../io/exportStackConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
 import { exportParameterSweepCsv } from '../io/exportParameterSweepCsv';
+import { exportReflectanceHeatmapCsv } from '../io/exportReflectanceHeatmapCsv';
 import { downloadTextFile } from '../io/download';
 import { importStackConfigJson } from '../io/importStackConfigJson';
 import type {
   ParameterSweepResult,
   ParameterSweepSettings,
   QuarterWaveStackInputs,
+  ReflectanceHeatmapResult,
+  ReflectanceHeatmapSettings,
   SimulationDocument,
   SimulationResult,
 } from '../types/simulation';
@@ -59,10 +64,11 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
 };
 const DEFAULT_PARAMETER_SWEEP_WARNING =
   'Caution: Center wavelength may fall outside of wavelength sweep, resulting in poor data.';
+const DEFAULT_HEATMAP_POINT_COUNT = 25;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 const ACOUSTIC_SOLVE_DEBOUNCE_MS = 150;
-const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition', 'reflectance-volume', 'stl-slicer'] as const;
+export const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'heatmap', 'stack-definition', 'reflectance-volume', 'stl-slicer'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
 
 const formatParameterSweepInput = (value: number | undefined): string =>
@@ -89,6 +95,10 @@ export function SimulationShell() {
     null,
   );
   const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
+  const [heatmapSettings, setHeatmapSettings] = useState<ReflectanceHeatmapSettings | null>(null);
+  const [heatmapResult, setHeatmapResult] = useState<ReflectanceHeatmapResult | null>(null);
+  const [heatmapError, setHeatmapError] = useState<string | null>(null);
+  const [heatmapIsSolving, setHeatmapIsSolving] = useState(false);
   const [referenceRangeError, setReferenceRangeError] = useState<string | null>(null);
   const [acousticSolveError, setAcousticSolveError] = useState<string | null>(null);
   const [acousticOutput, setAcousticOutput] = useState<{
@@ -101,6 +111,7 @@ export function SimulationShell() {
   const tabRefs = useRef<Record<OutputTab, HTMLButtonElement | null>>({
     spectrum: null,
     'parameter-sweep': null,
+    heatmap: null,
     'stack-definition': null,
     'reflectance-volume': null,
     'stl-slicer': null,
@@ -166,6 +177,10 @@ export function SimulationShell() {
         ? `${inputs.acousticDesign?.acousticPeriodCount}:${inputs.acousticDesign?.acousticRepresentationMode}`
         : ''
   }`;
+  const supportedHeatmapParameters = useMemo(
+    () => resolvedStructure?.sweepParameters ?? [],
+    [resolvedStructure],
+  );
 
   useEffect(() => {
     if (simulationDocument?.structure.type !== 'acousto-optic-grating') return;
@@ -242,8 +257,32 @@ export function SimulationShell() {
   useEffect(() => {
     setParameterSweepResult(null);
     setParameterSweepError(null);
+    setHeatmapResult(null);
+    setHeatmapError(null);
+    setHeatmapIsSolving(false);
     setReferenceRangeError(null);
   }, [inputs]);
+
+  useEffect(() => {
+    if (supportedHeatmapParameters.length === 0) {
+      setHeatmapSettings(null);
+      setHeatmapResult(null);
+      setHeatmapError(null);
+      return;
+    }
+
+    setHeatmapSettings((current) => {
+      if (
+        current &&
+        supportedHeatmapParameters.includes(current.xAxis.parameter) &&
+        supportedHeatmapParameters.includes(current.yAxis.parameter)
+      ) {
+        return current;
+      }
+
+      return getDefaultHeatmapSettings(inputs, supportedHeatmapParameters);
+    });
+  }, [inputs, supportedHeatmapParameters]);
 
   /*
   const centerOnBandwidth = () => {
@@ -275,6 +314,32 @@ export function SimulationShell() {
     setParameterSweepError(null);
   };
 
+  const updateHeatmapAxis = (
+    axis: 'xAxis' | 'yAxis',
+    parameter: ReflectanceHeatmapSettings['xAxis']['parameter'],
+  ) => {
+    setHeatmapSettings((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const otherAxis = axis === 'xAxis' ? current.yAxis : current.xAxis;
+      const nextAxis = getDefaultHeatmapAxisSettings(inputs, parameter);
+      const nextOtherAxis =
+        otherAxis.parameter === parameter
+          ? getDefaultHeatmapAxisSettings(inputs, getDistinctHeatmapParameter(parameter, supportedHeatmapParameters))
+          : otherAxis;
+
+      return {
+        ...current,
+        [axis]: nextAxis,
+        [axis === 'xAxis' ? 'yAxis' : 'xAxis']: nextOtherAxis,
+      };
+    });
+    setHeatmapResult(null);
+    setHeatmapError(null);
+  };
+
   const updateParameterSweepParameter = (parameter: ParameterSweepSettings['parameter']) => {
     if (parameter === 'incidentAngleDegrees') {
       updateParameterSweep(FIXED_INCIDENT_ANGLE_SWEEP);
@@ -303,6 +368,31 @@ export function SimulationShell() {
     }
   };
 
+  const runHeatmap = () => {
+    void (async () => {
+    if (validationIssues.length > 0) {
+      setHeatmapError('Fix highlighted inputs before running a heatmap.');
+      return;
+    }
+
+    if (!simulationDocument || !heatmapSettings) {
+      setHeatmapError('Resolve a valid stack before running a heatmap.');
+      return;
+    }
+
+    try {
+      setHeatmapIsSolving(true);
+      setHeatmapResult(await solveSimulationDocumentReflectanceHeatmapAsync(simulationDocument, heatmapSettings));
+      setHeatmapError(null);
+    } catch (error) {
+      setHeatmapResult(null);
+      setHeatmapError(error instanceof Error ? error.message : 'The heatmap could not be completed.');
+    } finally {
+      setHeatmapIsSolving(false);
+    }
+    })();
+  };
+
   const exportCsv = () => {
     if (!result) {
       return;
@@ -325,6 +415,21 @@ export function SimulationShell() {
       resolvedStructure ?? undefined,
     );
     const filename = `parameter-sweep-${formatDateStamp(new Date())}.csv`;
+    downloadTextFile(filename, csv);
+  };
+
+  const exportHeatmapCsv = () => {
+    if (!simulationDocument || !heatmapResult || !heatmapSettings) {
+      return;
+    }
+
+    const csv = exportReflectanceHeatmapCsv(
+      inputs,
+      heatmapSettings,
+      heatmapResult,
+      resolvedStructure ?? undefined,
+    );
+    const filename = `reflectance-heatmap-${formatDateStamp(new Date())}.csv`;
     downloadTextFile(filename, csv);
   };
 
@@ -452,6 +557,8 @@ export function SimulationShell() {
                     ? 'Spectrum'
                     : tab === 'parameter-sweep'
                       ? 'Parameter Sweep'
+                      : tab === 'heatmap'
+                        ? 'Heatmap'
                       : tab === 'stack-definition'
                         ? 'Stack Definition'
                         : tab === 'reflectance-volume'
@@ -660,6 +767,73 @@ export function SimulationShell() {
           </section>
           </section>
 
+          <section
+            className="chart-panel"
+            id="heatmap-panel"
+            role="tabpanel"
+            aria-labelledby="heatmap-tab"
+            hidden={activeTab !== 'heatmap'}
+          >
+            <div className="chart-heading">
+              <h2>Heatmap</h2>
+              <button type="button" className="action-button" onClick={exportHeatmapCsv} disabled={!heatmapResult || !heatmapSettings || heatmapIsSolving}>
+                Export Heatmap CSV
+              </button>
+            </div>
+            <ReflectanceHeatmapChart result={heatmapResult} />
+            <section className="parameter-sweep-panel tab-controls" aria-label="Heatmap controls">
+              {heatmapSettings ? (
+                <>
+                  <div className="heatmap-axis-grid">
+                    <HeatmapAxisControls
+                      axisLabel="X Axis"
+                      inputs={inputs}
+                      settings={heatmapSettings.xAxis}
+                      inputKey={inputResetKey}
+                      parameters={resolvedStructure?.sweepParameters ?? []}
+                      onParameterChange={(parameter) => updateHeatmapAxis('xAxis', parameter)}
+                      onChange={(nextAxis) =>
+                        setHeatmapSettings((current) => (current ? { ...current, xAxis: nextAxis } : current))
+                      }
+                    />
+                    <HeatmapAxisControls
+                      axisLabel="Y Axis"
+                      inputs={inputs}
+                      settings={heatmapSettings.yAxis}
+                      inputKey={inputResetKey}
+                      parameters={resolvedStructure?.sweepParameters ?? []}
+                      onParameterChange={(parameter) => updateHeatmapAxis('yAxis', parameter)}
+                      onChange={(nextAxis) =>
+                        setHeatmapSettings((current) => (current ? { ...current, yAxis: nextAxis } : current))
+                      }
+                    />
+                  </div>
+                  <button type="button" className="parameter-sweep-run" onClick={runHeatmap} disabled={validationIssues.length > 0 || heatmapIsSolving}>
+                    {heatmapIsSolving ? 'Running Heatmap...' : 'Run Heatmap'}
+                  </button>
+                  {heatmapIsSolving ? (
+                    <p className="parameter-sweep-status" role="status">
+                      Solving the heatmap asynchronously...
+                    </p>
+                  ) : null}
+                  {heatmapError ? (
+                    <p className="chart-toolbar-message" role="alert">
+                      {heatmapError}
+                    </p>
+                  ) : heatmapResult ? (
+                    <p className="parameter-sweep-status" role="status">
+                      Heatmap complete: {heatmapResult.xAxis.values.length * heatmapResult.yAxis.values.length} points evaluated.
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p className="chart-placeholder chart-placeholder-compact" role="status">
+                  Resolve a valid stack first, then choose heatmap axes.
+                </p>
+              )}
+            </section>
+          </section>
+
           <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
             <StackDefinitionPanel
               inputs={inputs}
@@ -707,7 +881,7 @@ export function SimulationShell() {
         <h2>How To Use</h2>
         <div className="how-to-use-panel-body">
           Choose Optical, Manual, or Acoustic input mode; configure the structure; then inspect the
-          spectrum and Stack Definition. Parameter Sweep only lists fields that change the active
+          spectrum, heatmap, and Stack Definition. Parameter Sweep only lists fields that change the active
           physical structure. Import and export preserve the active structure and shared analysis range.
         </div>
       </section>
@@ -764,6 +938,171 @@ function getSweepParameterLabel(parameter: ParameterSweepSettings['parameter']):
     acousticIndexModulation: 'Peak index modulation',
   };
   return labels[parameter];
+}
+
+/** Chooses the default axis settings for a general 2D sweep. */
+function getDefaultHeatmapSettings(
+  inputs: QuarterWaveStackInputs,
+  supportedParameters: readonly ParameterSweepSettings['parameter'][],
+): ReflectanceHeatmapSettings {
+  const [xParameter, yParameter] = supportedParameters;
+  return {
+    xAxis: getDefaultHeatmapAxisSettings(inputs, xParameter),
+    yAxis: getDefaultHeatmapAxisSettings(inputs, yParameter ?? xParameter),
+  };
+}
+
+/** Chooses a stable default range for one heatmap axis. */
+function getDefaultHeatmapAxisSettings(
+  inputs: QuarterWaveStackInputs,
+  parameter: ParameterSweepSettings['parameter'],
+): ReflectanceHeatmapSettings['xAxis'] {
+  if (parameter === 'periodCount') {
+    return { parameter, ...getDefaultPeriodSweepBounds(inputs.periodCount), pointCount: DEFAULT_HEATMAP_POINT_COUNT };
+  }
+  if (parameter === 'acousticPeriodCount') {
+    const periods = inputs.acousticDesign?.acousticPeriodCount ?? 10;
+    return {
+      parameter,
+      ...getDefaultPeriodSweepBounds(periods, getMaximumAcousticPeriodCount(inputs)),
+      pointCount: DEFAULT_HEATMAP_POINT_COUNT,
+    };
+  }
+  if (parameter === 'incidentAngleDegrees') {
+    return { parameter, start: 0, end: MAX_INCIDENT_ANGLE_DEGREES, pointCount: DEFAULT_HEATMAP_POINT_COUNT };
+  }
+  if (parameter === 'acousticFrequencyHz') {
+    const frequency = inputs.acousticDesign?.acousticFrequencyHz ?? 1e9;
+    return { parameter, start: frequency * 0.5, end: frequency * 1.5, pointCount: DEFAULT_HEATMAP_POINT_COUNT };
+  }
+  if (parameter === 'acousticIndexModulation') {
+    const modulation = inputs.acousticDesign?.acousticIndexModulation ?? 0.002;
+    return { parameter, start: 0, end: Math.max(0.001, modulation * 2), pointCount: DEFAULT_HEATMAP_POINT_COUNT };
+  }
+
+  return {
+    parameter,
+    start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
+    end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
+    pointCount: DEFAULT_HEATMAP_POINT_COUNT,
+  };
+}
+
+function getDistinctHeatmapParameter(
+  parameter: ParameterSweepSettings['parameter'],
+  supportedParameters: readonly ParameterSweepSettings['parameter'][],
+): ParameterSweepSettings['parameter'] {
+  return supportedParameters.find((candidate) => candidate !== parameter) ?? parameter;
+}
+
+type HeatmapAxisControlsProps = {
+  axisLabel: string;
+  inputs: QuarterWaveStackInputs;
+  settings: ReflectanceHeatmapSettings['xAxis'];
+  inputKey: number;
+  parameters: readonly ParameterSweepSettings['parameter'][];
+  onParameterChange: (parameter: ParameterSweepSettings['parameter']) => void;
+  onChange: (settings: ReflectanceHeatmapSettings['xAxis']) => void;
+};
+
+/** Renders one axis editor for the reflectance heatmap controls. */
+function HeatmapAxisControls({
+  axisLabel,
+  inputs,
+  settings,
+  inputKey,
+  parameters,
+  onParameterChange,
+  onChange,
+}: HeatmapAxisControlsProps) {
+  const isInteger = settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount';
+  const isFixedAngle = settings.parameter === 'incidentAngleDegrees';
+  const isLocked = isFixedAngle;
+  const minimum = settings.parameter === 'incidentAngleDegrees' || settings.parameter === 'acousticIndexModulation'
+    ? 0
+    : 1;
+  const maximum =
+    settings.parameter === 'incidentAngleDegrees'
+      ? MAX_INCIDENT_ANGLE_DEGREES
+      : settings.parameter === 'acousticPeriodCount'
+        ? getMaximumAcousticPeriodCount(inputs)
+        : undefined;
+  const boundsLabelSuffix = isFixedAngle ? ' (fixed)' : '';
+  const pointsLocked = isInteger || isFixedAngle;
+  const axisTitle = `${axisLabel} · ${getSweepParameterLabel(settings.parameter)}`;
+
+  return (
+    <div className="heatmap-axis-panel">
+      <div className="sweep-section-title">
+        <h3>{axisTitle}</h3>
+        <label className="heatmap-parameter-field">
+          <span>Parameter</span>
+          <select
+            value={settings.parameter}
+            onChange={(event) => onParameterChange(event.target.value as ParameterSweepSettings['parameter'])}
+          >
+            {parameters.map((parameter) => (
+              <option key={parameter} value={parameter}>
+                {getSweepParameterLabel(parameter)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="parameter-sweep-grid">
+        <label className="field">
+          <span>{`Start${boundsLabelSuffix}`}</span>
+          <FormattedNumberInput
+            min={minimum}
+            max={maximum}
+            step="1"
+            parseMode={isInteger ? 'integer' : 'decimal'}
+            normalizeOnBlur={isInteger ? Math.round : undefined}
+            value={settings.start}
+            disabled={isLocked}
+            formatInactive={formatParameterSweepInput}
+            onValueChange={(start) => onChange({ ...settings, start })}
+            resetKey={`${inputKey}:${settings.parameter}:start`}
+            showStepper={!isLocked}
+            stepperLabel={`${axisLabel.toLowerCase()} start`}
+          />
+        </label>
+        <label className="field">
+          <span>{`End${boundsLabelSuffix}`}</span>
+          <FormattedNumberInput
+            min={minimum}
+            max={maximum}
+            step="1"
+            parseMode={isInteger ? 'integer' : 'decimal'}
+            normalizeOnBlur={isInteger ? Math.round : undefined}
+            value={settings.end}
+            disabled={isLocked}
+            formatInactive={formatParameterSweepInput}
+            onValueChange={(end) => onChange({ ...settings, end })}
+            resetKey={`${inputKey}:${settings.parameter}:end`}
+            showStepper={!isLocked}
+            stepperLabel={`${axisLabel.toLowerCase()} end`}
+          />
+        </label>
+        <label className="field">
+          <span>{pointsLocked ? 'Points (derived)' : 'Points'}</span>
+          <FormattedNumberInput
+            min={2}
+            step="1"
+            parseMode="integer"
+            normalizeOnBlur={Math.round}
+            value={settings.pointCount}
+            disabled={pointsLocked}
+            formatInactive={formatParameterSweepInput}
+            onValueChange={(pointCount) => onChange({ ...settings, pointCount })}
+            resetKey={`${inputKey}:${settings.parameter}:points`}
+            showStepper={!pointsLocked}
+            stepperLabel={`${axisLabel.toLowerCase()} points`}
+          />
+        </label>
+      </div>
+    </div>
+  );
 }
 
 /** Centers period-count sweep bounds around the current optical stack period count. */

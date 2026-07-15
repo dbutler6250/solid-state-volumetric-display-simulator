@@ -47,6 +47,7 @@ Keep this section as the historical record. Do not create issues for these items
 - STL slicer compact preview rail with neighboring-slice occupancy thumbnails for lightweight at-a-glance inspection
 - STL slicer timing profile with deterministic frame intervals, sweep duration, and per-step timestamps for future hardware synchronization
 - STL slicer export schema envelope with versioned downstream contract metadata for JSON consumers
+- General 2D reflectance heatmap tab with reusable axis selection, solver caching, Plotly heatmap rendering, and regression coverage
 
 ## Notes
 
@@ -54,6 +55,5 @@ Use this section for quick general brain dumps before cleaning them up into GitH
 
 - Consider richer parameter sweep export metadata if external analysis pipelines become important.
 - Consider angle sweep support as a future analysis workflow.
-- Consider 2D sweep heatmaps after multiple swept parameters are supported.
 - Improve peak, center, and bandwidth metric extraction with interpolation instead of sampled-point estimates.
 - Manual thickness tuning should be expected to shift the stopband peak before it sharply reduces reflectance, so reflectance at the design wavelength and peak reflectance across a sweep are different checks. The manual thickness path is now covered by regression tests.
