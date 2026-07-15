@@ -52,6 +52,7 @@ export type SliceDiagnostics = {
   averageSliceCoverage: number;
   peakSliceOccupancy: number;
   peakSliceCoverage: number;
+  peakSliceCoverageSum: number;
   coverageSamplesPerCell: number;
   refinedCoverageSamplesPerCell: number;
   refinedCellCount: number;

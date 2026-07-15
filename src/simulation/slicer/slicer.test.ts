@@ -12,6 +12,7 @@ import {
   serializeSliceStackCsv,
   serializeSlicerOutput,
 } from './slicer';
+import { MAX_SLICER_GRID_RESOLUTION, MAX_SLICER_SLICE_COUNT, MAX_SLICER_WORK } from './limits';
 
 describe('normalizeMeshToVolumeSpace', () => {
   it('centers and scales the mesh into unit volume space', () => {
@@ -33,11 +34,46 @@ describe('buildSliceStack', () => {
     expect(stackA.slices.some((slice) => slice.occupancyMask.some((row) => row.some(Boolean)))).toBe(true);
     expect(stackA.diagnostics.averageSliceCoverage).toBeGreaterThan(0);
     expect(stackA.diagnostics.peakSliceCoverage).toBeGreaterThan(0);
+    expect(stackA.diagnostics.peakSliceCoverage).toBeLessThanOrEqual(1);
+    expect(stackA.diagnostics.peakSliceCoverageSum).toBeGreaterThanOrEqual(stackA.diagnostics.peakSliceCoverage);
     expect(stackA.diagnostics.coverageSamplesPerCell).toBe(9);
     expect(stackA.diagnostics.refinedCoverageSamplesPerCell).toBe(25);
     expect(stackA.diagnostics.refinedCellCount).toBeGreaterThan(0);
     expect(stackA.mesh.triangleCount).toBeGreaterThan(0);
     expect(stackA.mesh.vertexCount).toBeGreaterThan(0);
+  });
+
+  it('enforces the shared slice and grid maximums', () => {
+    const tinyMesh = {
+      vertices: [
+        [0, 0, 0],
+        [1, 0, 0],
+        [0, 1, 0],
+      ] as [[number, number, number], [number, number, number], [number, number, number]],
+      triangles: [[0, 1, 2]] as [[number, number, number]],
+    };
+    expect(() => buildSliceStack(tinyMesh, { sliceCount: MAX_SLICER_SLICE_COUNT, gridResolution: MAX_SLICER_GRID_RESOLUTION })).not.toThrow();
+    expect(() => buildSliceStack(tinyMesh, { sliceCount: MAX_SLICER_SLICE_COUNT + 1, gridResolution: 4 })).toThrow(
+      `sliceCount cannot exceed ${MAX_SLICER_SLICE_COUNT}`,
+    );
+    expect(() => buildSliceStack(tinyMesh, { sliceCount: 4, gridResolution: MAX_SLICER_GRID_RESOLUTION + 1 })).toThrow(
+      `gridResolution cannot exceed ${MAX_SLICER_GRID_RESOLUTION}`,
+    );
+  }, 30000);
+
+  it('rejects estimated work above the shared cap', () => {
+    const denseMesh = {
+      vertices: [
+        [0, 0, 0],
+        [1, 0, 0],
+        [0, 1, 0],
+      ] as [[number, number, number], [number, number, number], [number, number, number]],
+      triangles: Array.from({ length: 122 }, () => [0, 1, 2] as [number, number, number]),
+    };
+    expect(() => buildSliceStack(denseMesh, { sliceCount: 128, gridResolution: 128 })).toThrow(
+      `work limit`,
+    );
+    expect(denseMesh.triangles.length * 128 * 128 * 128).toBeGreaterThan(MAX_SLICER_WORK);
   });
 });
 
@@ -99,8 +135,12 @@ describe('buildSlicerOutput', () => {
     expect(output.stack.slices).toHaveLength(3);
     expect(output.timeline.steps).toHaveLength(3);
     expect(serializeSlicerOutput(output)).toContain('"sliceCount": 3');
+    expect(serializeSlicerOutput(output)).toContain('"peakSliceCoverageSum"');
     expect(serializePlaybackTimelineJson(output.timeline)).toContain('"steps"');
-    expect(serializeSliceStackCsv(output.stack)).toContain('sliceIndex,planePosition');
+    const csv = serializeSliceStackCsv(output.stack);
+    expect(csv).toContain('sliceIndex,planePosition,planeCoordinate,activeVoxelCount,totalVoxelCount,occupancyPercent');
+    expect(csv).not.toContain('peakSliceCoverage');
+    expect(csv).not.toContain('peakSliceCoverageSum');
   });
 
   it('wraps the output in a versioned export envelope for downstream consumers', () => {
