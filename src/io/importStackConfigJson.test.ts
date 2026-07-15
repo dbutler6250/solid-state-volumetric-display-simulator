@@ -206,6 +206,35 @@ describe('importStackConfigJson', () => {
     });
   });
 
+  it('returns an error for over-limit direct optical work during import validation', () => {
+    const payload = makeModernPayload({
+      inputs: {
+        ...inputs,
+        periodCount: 401,
+        wavelengthPointCount: 500,
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: false,
+      message: 'Direct optical solving is limited to about 400,000 layer-wavelength evaluations. Reduce periods or wavelength samples.',
+    });
+  });
+
+  it('returns an error when wavelengthPointCount exceeds the shared maximum during import validation', () => {
+    const payload = makeModernPayload({
+      inputs: {
+        ...inputs,
+        wavelengthPointCount: 3001,
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: false,
+      message: 'Sweep points must not exceed 3,000.',
+    });
+  });
+
   it('imports legacy Bragg setup JSON', () => {
     const payload = {
       schema: 'ssvds-bragg-config-v1',

@@ -1,6 +1,12 @@
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 import { getAcousticSlicesPerPeriod, isAcousticRepresentationMode } from '../structures/acoustoOpticGrating';
-import { MAX_AUTOMATIC_ACOUSTIC_LAYERS } from '../simulationLimits';
+import {
+  DEFAULT_WAVELENGTH_POINT_COUNT,
+  MAX_AUTOMATIC_ACOUSTIC_LAYERS,
+  MAX_DIRECT_SOLVE_WORK,
+  MAX_OPTICAL_PERIODS,
+  MAX_WAVELENGTH_POINTS,
+} from '../simulationLimits';
 import { getRefractiveIndexImag, getRefractiveIndexReal, isComplexRefractiveIndex } from '../materials/material';
 
 export type ValidationIssue = {
@@ -49,7 +55,7 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
   const thicknessMode = inputs.thicknessMode ?? 'derived';
   const wavelengthStartNm = inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5;
   const wavelengthEndNm = inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5;
-  const wavelengthPointCount = inputs.wavelengthPointCount ?? 401;
+  const wavelengthPointCount = inputs.wavelengthPointCount ?? DEFAULT_WAVELENGTH_POINT_COUNT;
 
   if (
     !isNonEmptyString(inputs.highIndexMaterial.id) ||
@@ -77,14 +83,15 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
   const lowIndexIssue = validateRefractiveIndex(inputs.lowIndexMaterial.refractiveIndex, 'low-index');
   if (lowIndexIssue) issues.push(lowIndexIssue);
 
-  if (
-    !isFiniteNumber(inputs.periodCount) ||
-    inputs.periodCount < 1 ||
-    !Number.isInteger(inputs.periodCount)
-  ) {
+  if (!isFiniteNumber(inputs.periodCount) || inputs.periodCount < 1 || !Number.isInteger(inputs.periodCount)) {
     issues.push({
       field: 'periodCount',
       message: 'Period count must be a whole number greater than 0.',
+    });
+  } else if (thicknessMode !== 'acoustic' && inputs.periodCount > MAX_OPTICAL_PERIODS) {
+    issues.push({
+      field: 'periodCount',
+      message: `Period count must not exceed ${MAX_OPTICAL_PERIODS.toLocaleString()} for direct optical or manual solving.`,
     });
   }
 
@@ -224,15 +231,28 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
     });
   }
 
-  if (
-    !isFiniteNumber(wavelengthPointCount) ||
-    wavelengthPointCount < 2 ||
-    !Number.isInteger(wavelengthPointCount)
-  ) {
+  if (!isFiniteNumber(wavelengthPointCount) || wavelengthPointCount < 2 || !Number.isInteger(wavelengthPointCount)) {
     issues.push({
       field: 'wavelengthPointCount',
       message: 'Sweep points must be a whole number of at least 2.',
     });
+  } else if (wavelengthPointCount > MAX_WAVELENGTH_POINTS) {
+    issues.push({
+      field: 'wavelengthPointCount',
+      message: `Sweep points must not exceed ${MAX_WAVELENGTH_POINTS.toLocaleString()}.`,
+    });
+  }
+
+  if (issues.length === 0 && thicknessMode !== 'acoustic') {
+    const resolvedLayerCount = inputs.periodCount * 2;
+    // The direct solve must bound layer-by-wavelength work before building the full layer stack.
+    const directSolveWork = resolvedLayerCount * wavelengthPointCount;
+    if (directSolveWork > MAX_DIRECT_SOLVE_WORK) {
+      issues.push({
+        field: 'periodCount',
+        message: `Direct optical solving is limited to about ${MAX_DIRECT_SOLVE_WORK.toLocaleString()} layer-wavelength evaluations. Reduce periods or wavelength samples.`,
+      });
+    }
   }
 
   return issues;

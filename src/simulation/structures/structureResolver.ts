@@ -9,6 +9,7 @@ import type {
   SweepParameter,
 } from '../../types/simulation';
 import { buildQuarterWaveStack } from './quarterWaveStack';
+import { DEFAULT_WAVELENGTH_POINT_COUNT } from '../simulationLimits';
 import {
   buildAcousticGratingStack,
   buildAcousticGratingStackAsync,
@@ -53,7 +54,7 @@ export function createSimulationDocument(inputs: QuarterWaveStackInputs): Simula
     polarization: inputs.polarization,
     wavelengthStartNm: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
     wavelengthEndNm: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
-    wavelengthPointCount: inputs.wavelengthPointCount ?? 500,
+    wavelengthPointCount: inputs.wavelengthPointCount ?? DEFAULT_WAVELENGTH_POINT_COUNT,
   };
 
   if (inputs.thicknessMode === 'acoustic' && inputs.acousticDesign) {

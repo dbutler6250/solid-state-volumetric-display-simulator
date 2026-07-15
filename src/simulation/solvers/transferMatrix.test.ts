@@ -467,6 +467,25 @@ describe('transfer matrix solver', () => {
     expect(lastPeakReflectance).toBeGreaterThan(firstPeakReflectance);
   });
 
+  it('rejects oversized direct optical inputs before building a spectrum', () => {
+    expect(() =>
+      solveQuarterWaveStack({
+        ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+        periodCount: 401,
+        wavelengthPointCount: 500,
+      }),
+    ).toThrow(/layer-wavelength evaluations/i);
+  });
+
+  it('rejects wavelength sweeps above the shared maximum', () => {
+    expect(() =>
+      solveQuarterWaveStack({
+        ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+        wavelengthPointCount: 3001,
+      }),
+    ).toThrow(/must not exceed 3,000/i);
+  });
+
   it('applies configured acoustic frequency and modulation sweep bounds', () => {
     const inputs: QuarterWaveStackInputs = {
       highIndexMaterial: makeMaterial('nH', 2.4),

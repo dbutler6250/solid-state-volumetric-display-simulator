@@ -1,5 +1,9 @@
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../../simulation/structures/quarterWaveStack';
+import { MAX_OPTICAL_PERIODS, MAX_WAVELENGTH_POINTS } from '../../simulation/simulationLimits';
+import { QuarterWaveStackForm } from './QuarterWaveStackForm';
 import {
   applyCenteredSweepRange,
   applyCustomMaterialComponent,
@@ -8,6 +12,23 @@ import {
 } from './quarterWaveStackFormState';
 
 describe('QuarterWaveStackForm numeric updates', () => {
+  it('renders the shared max bounds for period and wavelength point inputs', () => {
+    const globalMarkup = renderToStaticMarkup(createElement(QuarterWaveStackForm, {
+      inputs: DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      validationIssues: [],
+      onChange: () => undefined,
+    }));
+    const sweepMarkup = renderToStaticMarkup(createElement(QuarterWaveStackForm, {
+      inputs: DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      validationIssues: [],
+      onChange: () => undefined,
+      section: 'sweep',
+    }));
+
+    expect(globalMarkup).toContain(`max="${MAX_OPTICAL_PERIODS}"`);
+    expect(sweepMarkup).toContain(`max="${MAX_WAVELENGTH_POINTS}"`);
+  });
+
   it('keeps sweep presets centered and normalized', () => {
     const inputs = { ...DEFAULT_QUARTER_WAVE_STACK_INPUTS, wavelengthStartNm: 400, wavelengthEndNm: 800 };
     const updated = applySweepRange(inputs, 101.4);

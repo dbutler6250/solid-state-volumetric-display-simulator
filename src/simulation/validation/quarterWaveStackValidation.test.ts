@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { Material } from '../materials/material';
 import type { AcousticRepresentationMode, QuarterWaveStackInputs } from '../../types/simulation';
+import {
+  DEFAULT_WAVELENGTH_POINT_COUNT,
+  MAX_DIRECT_SOLVE_WORK,
+  MAX_OPTICAL_PERIODS,
+  MAX_WAVELENGTH_POINTS,
+} from '../simulationLimits';
 import { validateQuarterWaveStackInputs } from './quarterWaveStackValidation';
+import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../structures/quarterWaveStack';
+import { createSimulationDocument } from '../structures/structureResolver';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
@@ -29,6 +37,74 @@ const acousticInputs: QuarterWaveStackInputs = {
 };
 
 describe('validateQuarterWaveStackInputs', () => {
+  it('uses the shared 500-point default when wavelengthPointCount is omitted', () => {
+    const issues = validateQuarterWaveStackInputs({
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      wavelengthPointCount: undefined,
+    });
+
+    expect(issues).toEqual([]);
+    expect(DEFAULT_WAVELENGTH_POINT_COUNT).toBe(500);
+  });
+
+  it('rejects wavelengthPointCount above the shared maximum', () => {
+    expect(
+      validateQuarterWaveStackInputs({
+        ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+        wavelengthPointCount: MAX_WAVELENGTH_POINTS + 1,
+      }),
+    ).toContainEqual({
+      field: 'wavelengthPointCount',
+      message: `Sweep points must not exceed ${MAX_WAVELENGTH_POINTS.toLocaleString()}.`,
+    });
+  });
+
+  it('rejects optical periodCount above the shared maximum', () => {
+    expect(
+      validateQuarterWaveStackInputs({
+        ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+        periodCount: MAX_OPTICAL_PERIODS + 1,
+      }),
+    ).toContainEqual({
+      field: 'periodCount',
+      message: `Period count must not exceed ${MAX_OPTICAL_PERIODS.toLocaleString()} for direct optical or manual solving.`,
+    });
+  });
+
+  it('accepts a direct workload at the cap and rejects one above it', () => {
+    const nearCapIssues = validateQuarterWaveStackInputs({
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      periodCount: 400,
+      wavelengthPointCount: 500,
+    });
+    const overCapIssues = validateQuarterWaveStackInputs({
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      periodCount: 401,
+      wavelengthPointCount: 500,
+    });
+
+    expect(nearCapIssues).toEqual([]);
+    expect(overCapIssues).toContainEqual({
+      field: 'periodCount',
+      message: `Direct optical solving is limited to about ${MAX_DIRECT_SOLVE_WORK.toLocaleString()} layer-wavelength evaluations. Reduce periods or wavelength samples.`,
+    });
+  });
+
+  it('keeps acoustic slice validation intact', () => {
+    const issues = validateQuarterWaveStackInputs({
+      ...acousticInputs,
+      acousticDesign: {
+        ...acousticInputs.acousticDesign!,
+        acousticPeriodCount: 4097,
+      },
+    });
+
+    expect(issues).toContainEqual({
+      field: 'thicknessMode',
+      message: 'Automatic acoustic solving is limited to 4,096 slices. Reduce periods or representation detail.',
+    });
+  });
+
   it('rejects an invalid runtime acoustic representation mode', () => {
     const issues = validateQuarterWaveStackInputs({
       ...acousticInputs,
@@ -58,5 +134,11 @@ describe('validateQuarterWaveStackInputs', () => {
 
       expect(issues).toEqual([]);
     }
+  });
+
+  it('treats the canonical document default wavelength count as 500', () => {
+    const document = createSimulationDocument(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
+
+    expect(document.analysis.wavelengthPointCount).toBe(500);
   });
 });

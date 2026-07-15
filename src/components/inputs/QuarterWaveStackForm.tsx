@@ -11,6 +11,7 @@ import {
   applySweepRange,
 } from './quarterWaveStackFormState';
 import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveStack';
+import { MAX_OPTICAL_PERIODS, MAX_WAVELENGTH_POINTS } from '../../simulation/simulationLimits';
 
 type QuarterWaveStackFormProps = {
   inputs: QuarterWaveStackInputs;
@@ -312,6 +313,7 @@ export function QuarterWaveStackForm({
             <span>Periods</span>
             <FormattedNumberInput
               min={1}
+              max={MAX_OPTICAL_PERIODS}
               step="1"
               parseMode="integer"
               normalizeOnBlur={Math.round}
@@ -460,7 +462,7 @@ export function QuarterWaveStackForm({
         <span>Sweep points</span>
         <FormattedNumberInput
           min={2}
-          max={2001}
+          max={MAX_WAVELENGTH_POINTS}
           step="1"
           parseMode="integer"
           normalizeOnBlur={Math.round}

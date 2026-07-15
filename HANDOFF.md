@@ -2,33 +2,32 @@
 
 ## Repository Status
 
-- Branch `codex/wp-01-strict-setup-import-contract` is active for WP-01 Strict Setup Import Contract.
-- Working tree contains the WP-01 implementation and tests; no unrelated findings were intentionally included.
-- A stale empty `.git/rebase-merge` marker was found on `main`; `git rebase --quit` cleared the active state and the empty marker directory was removed before branching.
+- Branch `codex/wp-02-shared-workload-limits-defaults` is active for WP-02 Shared Synchronous Workload Limits And Defaults.
+- Working tree contains the WP-02 implementation and tests; no unrelated findings were intentionally included.
+- The active branch was created from `main` after WP-01 landed on the current base.
 
 ## Latest Task
 
-- Hardened modern setup imports to require canonical `units.wavelength = "nm"` and `units.angle = "deg"`.
-- Replaced silent import normalization for unknown `thicknessMode` and `acousticRepresentationMode` with clear import failures.
-- Added structure type/input mode consistency checks for `quarter-wave-stack`, `acousto-optic-grating`, and legacy Bragg setup files.
-- Added runtime acoustic representation validation before acoustic slice-limit calculations.
-- Preserved valid modern quarter-wave/acoustic imports and compatible legacy Bragg imports.
+- Added shared synchronous workload limits and a single 500-point wavelength default.
+- Enforced direct optical/manual caps for period count, wavelength samples, and total layer-wavelength work.
+- Updated UI bounds for period and wavelength-point inputs to match the shared limits.
+- Kept acoustic slice validation and parameter sweep safety behavior intact.
 
 ## Verification
 
-- Focused: `npm.cmd run test -- src/io/importStackConfigJson.test.ts src/simulation/validation/quarterWaveStackValidation.test.ts` - passed (25 tests).
-- Full test: `npm.cmd run test` - passed (119 tests).
+- Focused: `npm.cmd run test -- src/simulation/validation/quarterWaveStackValidation.test.ts src/simulation/structures/structureResolver.test.ts src/simulation/solvers/transferMatrix.test.ts src/io/importStackConfigJson.test.ts src/components/inputs/QuarterWaveStackForm.test.ts` - passed (70 tests).
+- Full test: `npm.cmd run test` - passed (132 tests).
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
+- Browser: desktop Chrome verified the spectrum renders, direct work over-limit shows the new validation message, valid values recover the spectrum, and a narrow viewport still loads with the shared bounds present.
 
 ## Browser Verification
 
 - Vite dev server was already listening at `http://127.0.0.1:5173/`.
-- In-app Browser reload confirmed the app renders the Spectrum workflow and a unique `Import Setup` button.
-- Console inspection showed no browser errors.
-- File-upload automation was not available in the in-app Browser Playwright surface (`setInputFiles` absent), so invalid/valid import file selection was covered by automated import tests instead of direct UI upload automation.
+- Browser checks were performed with system Chrome through Playwright because the bundled Playwright browser was not installed.
+- Console errors were not observed during the verification run.
 
 ## Remaining Follow-Up
 
-- Independent review should focus on import compatibility boundaries, especially legacy Bragg payloads that omit modern fields.
-- A later browser pass with a file-upload-capable harness can manually confirm the visible import error/state-preservation flow end to end.
+- Independent review should focus on the exact direct-work cap wording and any edge cases around public callers of `solveSimulationDocumentParameterSweep`.
+- A later browser pass with file uploads can still confirm the import error path in the UI end to end.
