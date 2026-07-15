@@ -10,8 +10,13 @@ import {
   serializeSlicerExportEnvelopeJson,
   serializeSlicerOutput,
 } from '../../simulation/slicer/slicer';
+import {
+  MAX_SLICER_GRID_RESOLUTION,
+  MAX_SLICER_SLICE_COUNT,
+} from '../../simulation/slicer/limits';
 import { createSampleHollowSphereMesh, parseStlBytes } from '../../simulation/slicer/stl';
 import type { MeshGeometry, MeshSourceMetadata } from '../../simulation/slicer/types';
+import { getStlUploadSizeError } from './stlUploadLimits';
 
 type StlSlicerPanelState = {
   mesh: MeshGeometry | null;
@@ -118,6 +123,14 @@ export function StlSlicerPanel() {
   };
 
   const loadFile = (file: File) => {
+    const uploadError = getStlUploadSizeError(file.size);
+    if (uploadError) {
+      setState((current) => ({
+        ...current,
+        error: uploadError,
+      }));
+      return;
+    }
     setIsLoadingFile(true);
     setUploadProgress(0);
 
@@ -265,7 +278,7 @@ export function StlSlicerPanel() {
             <input
               type="number"
               min={1}
-              max={64}
+              max={MAX_SLICER_SLICE_COUNT}
               value={sliceCount}
               onChange={(event) => setSliceCount(Number(event.target.value))}
             />
@@ -275,7 +288,7 @@ export function StlSlicerPanel() {
             <input
               type="number"
               min={2}
-              max={24}
+              max={MAX_SLICER_GRID_RESOLUTION}
               value={gridResolution}
               onChange={(event) => setGridResolution(Number(event.target.value))}
             />
@@ -537,6 +550,9 @@ export function StlSlicerPanel() {
           </p>
           <p className="reflectance-volume-summary">
             Coverage averages {(sliceStack.diagnostics.averageSliceCoverage * 100).toFixed(1)}% with a peak slice coverage of {(sliceStack.diagnostics.peakSliceCoverage * 100).toFixed(1)}%.
+          </p>
+          <p className="reflectance-volume-summary">
+            Peak slice coverage sum is {sliceStack.diagnostics.peakSliceCoverageSum.toFixed(3)} raw cells before normalization.
           </p>
           <p className="reflectance-volume-summary">
             Projection map keeps {playbackStep?.state.projection.projectedSamples.length ?? 0} visible voxels in display-space coordinates for downstream engines.

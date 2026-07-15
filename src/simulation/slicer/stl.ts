@@ -1,4 +1,15 @@
+import { MAX_STL_TRIANGLES } from './limits';
 import type { MeshGeometry, MeshTriangle, MeshPoint3D } from './types';
+
+/** Throws when an STL declares more triangles than the slicer supports. */
+export function assertStlTriangleCountWithinLimit(triangleCount: number): void {
+  if (!Number.isFinite(triangleCount) || Math.round(triangleCount) !== triangleCount) {
+    throw new Error('The STL file declares an invalid triangle count.');
+  }
+  if (triangleCount > MAX_STL_TRIANGLES) {
+    throw new Error(`The STL file contains more than ${MAX_STL_TRIANGLES} triangles.`);
+  }
+}
 
 /** Parses STL file bytes into a reusable mesh geometry, supporting ASCII and binary inputs. */
 export function parseStlBytes(bytes: ArrayBuffer): MeshGeometry {
@@ -55,6 +66,7 @@ export function parseAsciiStl(text: string): MeshGeometry {
     facetVertexCount += 1;
     if (currentFacet.length === 3) {
       triangles.push([currentFacet[0], currentFacet[1], currentFacet[2]]);
+      assertStlTriangleCountWithinLimit(triangles.length);
       currentFacet = [];
     }
   }
@@ -81,6 +93,7 @@ function parseBinaryStl(bytes: ArrayBuffer): MeshGeometry {
   }
 
   const triangleCount = view.getUint32(80, true);
+  assertStlTriangleCountWithinLimit(triangleCount);
   const expectedLength = 84 + triangleCount * 50;
   if (view.byteLength < expectedLength) {
     throw new Error('The binary STL file is truncated.');

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createSampleHollowSphereMesh, parseAsciiStl, parseStlBytes } from './stl';
+import { MAX_STL_TRIANGLES } from './limits';
+import { assertStlTriangleCountWithinLimit, createSampleHollowSphereMesh, parseAsciiStl, parseStlBytes } from './stl';
 
 describe('parseAsciiStl', () => {
   it('parses a simple ASCII STL into a mesh', () => {
@@ -81,6 +82,13 @@ facet normal 0 0 1
 endfacet
 endsolid dup`),
     ).toThrow('duplicated triangle topology');
+  });
+
+  it('rejects triangle counts above the shared limit', () => {
+    expect(() => assertStlTriangleCountWithinLimit(MAX_STL_TRIANGLES)).not.toThrow();
+    expect(() => assertStlTriangleCountWithinLimit(MAX_STL_TRIANGLES + 1)).toThrow(
+      `more than ${MAX_STL_TRIANGLES} triangles`,
+    );
   });
 });
 

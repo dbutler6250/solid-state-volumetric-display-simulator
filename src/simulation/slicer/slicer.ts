@@ -13,6 +13,11 @@ import type {
   VolumeBounds,
   SlicerAxis,
 } from './types';
+import {
+  MAX_SLICER_GRID_RESOLUTION,
+  MAX_SLICER_SLICE_COUNT,
+  MAX_SLICER_WORK,
+} from './limits';
 
 /** Validates, centers, and scales incoming mesh geometry into unit display-volume space. */
 export function normalizeMeshToVolumeSpace(mesh: MeshGeometry): { mesh: MeshGeometry; bounds: VolumeBounds } {
@@ -63,8 +68,12 @@ export function buildSliceStack(
   options: { axis?: SlicerAxis; sliceCount?: number; gridResolution?: number } = {},
 ): SliceStack {
   const axis = options.axis ?? 'z';
-  const sliceCount = Math.max(1, Math.round(options.sliceCount ?? 16));
-  const gridResolution = Math.max(2, Math.round(options.gridResolution ?? 12));
+  const sliceCount = validateStackOption('sliceCount', options.sliceCount ?? 16, 1, MAX_SLICER_SLICE_COUNT);
+  const gridResolution = validateStackOption('gridResolution', options.gridResolution ?? 12, 2, MAX_SLICER_GRID_RESOLUTION);
+  const estimatedWork = mesh.triangles.length * sliceCount * gridResolution * gridResolution;
+  if (estimatedWork > MAX_SLICER_WORK) {
+    throw new Error(`The slicer estimate exceeds the ${MAX_SLICER_WORK.toLocaleString('en-US')} work limit. Reduce triangle count, slice count, or grid resolution.`);
+  }
   const { mesh: normalizedMesh, bounds } = normalizeMeshToVolumeSpace(mesh);
   const coverageSamplesPerCell = 9;
   const refinedCoverageSamplesPerCell = 25;
@@ -73,7 +82,7 @@ export function buildSliceStack(
   let occupiedSliceCount = 0;
   let peakSliceOccupancy = 0;
   let coverageAccumulator = 0;
-  let peakSliceCoverage = 0;
+  let peakSliceCoverageSum = 0;
   let refinedCellCount = 0;
 
   for (let sliceIndex = 0; sliceIndex < sliceCount; sliceIndex += 1) {
@@ -107,7 +116,7 @@ export function buildSliceStack(
       occupiedSliceCount += 1;
     }
     peakSliceOccupancy = Math.max(peakSliceOccupancy, sliceActiveVoxelCount);
-    peakSliceCoverage = Math.max(peakSliceCoverage, sliceCoverageSum);
+    peakSliceCoverageSum = Math.max(peakSliceCoverageSum, sliceCoverageSum);
     slices.push({ index: sliceIndex, planePosition, planeCoordinate, occupancyMask, intensityMask });
     refinedCellCount += countRefinedCells(intensityMask);
   }
@@ -119,7 +128,7 @@ export function buildSliceStack(
     sliceResolution: gridResolution * gridResolution,
     peakSliceOccupancy,
     averageSliceCoverage: coverageAccumulator,
-    peakSliceCoverage,
+    peakSliceCoverageSum,
     coverageSamplesPerCell,
     refinedCoverageSamplesPerCell,
     refinedCellCount,
@@ -234,7 +243,7 @@ function buildSliceDiagnostics(params: {
   occupiedSliceCount: number;
   averageSliceCoverage: number;
   peakSliceOccupancy: number;
-  peakSliceCoverage: number;
+  peakSliceCoverageSum: number;
   sliceCount: number;
   sliceResolution: number;
   coverageSamplesPerCell: number;
@@ -242,6 +251,7 @@ function buildSliceDiagnostics(params: {
   refinedCellCount: number;
 }): SliceDiagnostics {
   const totalVoxelCount = params.sliceCount * params.sliceResolution;
+  const peakSliceCoverage = params.sliceResolution > 0 ? params.peakSliceCoverageSum / params.sliceResolution : 0;
   return {
     activeVoxelCount: params.activeVoxelCount,
     totalVoxelCount,
@@ -250,11 +260,26 @@ function buildSliceDiagnostics(params: {
     averageSliceOccupancy: totalVoxelCount > 0 ? params.activeVoxelCount / totalVoxelCount : 0,
     averageSliceCoverage: totalVoxelCount > 0 ? params.averageSliceCoverage / totalVoxelCount : 0,
     peakSliceOccupancy: params.peakSliceOccupancy,
-    peakSliceCoverage: params.peakSliceCoverage,
+    peakSliceCoverage,
+    peakSliceCoverageSum: params.peakSliceCoverageSum,
     coverageSamplesPerCell: params.coverageSamplesPerCell,
     refinedCoverageSamplesPerCell: params.refinedCoverageSamplesPerCell,
     refinedCellCount: params.refinedCellCount,
   };
+}
+
+function validateStackOption(name: 'sliceCount' | 'gridResolution', value: number, minimum: number, maximum: number): number {
+  const roundedValue = Math.round(value);
+  if (!Number.isFinite(value) || !Number.isFinite(roundedValue)) {
+    throw new Error(`The slicer ${name} must be a finite number.`);
+  }
+  if (roundedValue < minimum) {
+    return minimum;
+  }
+  if (roundedValue > maximum) {
+    throw new Error(`The slicer ${name} cannot exceed ${maximum}.`);
+  }
+  return roundedValue;
 }
 
 function getCellCoverage(
