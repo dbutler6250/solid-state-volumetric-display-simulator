@@ -3,6 +3,7 @@ import type { LayerStack } from '../layers/stack';
 import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
 import { getRefractiveIndexReal } from '../materials/material';
 import { getAcousticDesignSummary, getAcousticSlicesPerPeriod, getAcousticWavelengthNm } from './acoustoOpticGrating';
+import { DEFAULT_WAVELENGTH_POINT_COUNT } from '../simulationLimits';
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 
 const getQuarterWaveThickness = (designWavelengthNm: number, refractiveIndex: number): number =>
@@ -79,7 +80,7 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   acousticDesign: undefined,
   wavelengthStartNm: 300,
   wavelengthEndNm: 900,
-  wavelengthPointCount: 500,
+  wavelengthPointCount: DEFAULT_WAVELENGTH_POINT_COUNT,
 };
 
 /** Builds the alternating high/low layer sequence for the solver. */

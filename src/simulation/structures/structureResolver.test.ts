@@ -7,6 +7,7 @@ import {
   resolveSimulationDocument,
 } from './structureResolver';
 import { solveLayerStack } from '../solvers/transferMatrix';
+import { DEFAULT_WAVELENGTH_POINT_COUNT } from '../simulationLimits';
 
 const acousticInputs = {
   ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
@@ -34,6 +35,19 @@ describe('structure resolver', () => {
       'periodCount',
       'incidentAngleDegrees',
     ]);
+  });
+
+  it('uses the shared default wavelength sample count when omitted', () => {
+    const document = createSimulationDocument({
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      wavelengthPointCount: undefined,
+    });
+
+    expect(document.analysis.wavelengthPointCount).toBe(DEFAULT_WAVELENGTH_POINT_COUNT);
+  });
+
+  it('keeps the quarter-wave default inputs aligned with the shared sample count', () => {
+    expect(DEFAULT_QUARTER_WAVE_STACK_INPUTS.wavelengthPointCount).toBe(DEFAULT_WAVELENGTH_POINT_COUNT);
   });
 
   it('resolves acoustic slices as the active solver structure and reports one consistent count', () => {
