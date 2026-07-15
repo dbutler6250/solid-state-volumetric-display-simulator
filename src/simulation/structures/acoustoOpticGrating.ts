@@ -1,7 +1,7 @@
 import type { LayerStack } from '../layers/stack';
 import type { OpticalLayer } from '../layers/layer';
 import { AIR } from '../materials/catalog';
-import type { AcousticDesignInputs, QuarterWaveStackInputs } from '../../types/simulation';
+import type { AcousticDesignInputs, AcousticRepresentationMode, QuarterWaveStackInputs } from '../../types/simulation';
 
 const DEFAULT_ACOUSTIC_REPRESENTATION_SLICES: Record<AcousticDesignInputs['acousticRepresentationMode'], number> = {
   binary: 2,
@@ -31,6 +31,16 @@ export type AcousticGenerationProgress = {
   completedLayers: number;
   totalLayers: number;
 };
+
+/** Checks runtime input from imports or unsafe casts before acoustic layer calculations. */
+export function isAcousticRepresentationMode(value: unknown): value is AcousticRepresentationMode {
+  return (
+    value === 'binary' ||
+    value === 'fast' ||
+    value === 'accurate' ||
+    value === 'reference'
+  );
+}
 
 /** Returns the acoustic wavelength in the propagation medium. */
 export function getAcousticWavelengthNm(inputs: AcousticDesignInputs): number {

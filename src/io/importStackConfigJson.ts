@@ -1,6 +1,7 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
+import { isAcousticRepresentationMode } from '../simulation/structures/acoustoOpticGrating';
 import type { Material, ComplexRefractiveIndex } from '../simulation/materials/material';
-import type { ParameterSweepSettings, Polarization, QuarterWaveStackInputs } from '../types/simulation';
+import type { ParameterSweepSettings, Polarization, QuarterWaveStackInputs, ThicknessMode } from '../types/simulation';
 
 const STACK_CONFIG_SCHEMA = 'ssvds-stack-config-v1';
 const LEGACY_BRAGG_CONFIG_SCHEMA = 'ssvds-bragg-config-v1';
@@ -52,11 +53,22 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     return { ok: false, message: 'This setup file uses an unsupported structure type.' };
   }
 
+  const isModernStackConfig = parsed.schema === STACK_CONFIG_SCHEMA;
+  if (isModernStackConfig) {
+    const units = parseModernUnits(parsed.units);
+    if (!units.ok) return units;
+  }
+
   if (!isRecord(parsed.inputs)) {
     return { ok: false, message: 'The setup file is missing its inputs payload.' };
   }
 
   const rawInputs = parsed.inputs;
+  const thicknessMode = parseThicknessMode(rawInputs.thicknessMode, isModernStackConfig);
+  if (!thicknessMode.ok) return thicknessMode;
+
+  const structureConsistency = validateStructureTypeConsistency(parsed.structureType, thicknessMode.mode);
+  if (!structureConsistency.ok) return structureConsistency;
 
   const highIndexMaterial = parseMaterial(rawInputs.highIndexMaterial, 'high-index');
   if (!highIndexMaterial.ok) return highIndexMaterial;
@@ -75,7 +87,7 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     designWavelengthNm: rawInputs.designWavelengthNm as number,
     incidentAngleDegrees: rawInputs.incidentAngleDegrees as number,
     polarization: polarization as Polarization,
-    thicknessMode: normalizeThicknessMode(rawInputs.thicknessMode),
+    thicknessMode: thicknessMode.mode,
     wavelengthStartNm: rawInputs.wavelengthStartNm as number | undefined,
     wavelengthEndNm: rawInputs.wavelengthEndNm as number | undefined,
     wavelengthPointCount: rawInputs.wavelengthPointCount as number | undefined,
@@ -90,7 +102,7 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
   }
 
   if (isRecord(rawInputs.acousticDesign)) {
-    const acousticDesign = parseAcousticDesign(rawInputs.acousticDesign);
+    const acousticDesign = parseAcousticDesign(rawInputs.acousticDesign, !isModernStackConfig);
     if (!acousticDesign.ok) return acousticDesign;
     inputs.acousticDesign = acousticDesign.design;
   }
@@ -158,6 +170,70 @@ function parseParameterSweep(
       pointCount: value.pointCount as number,
     },
   };
+}
+
+function parseModernUnits(value: unknown): { ok: true } | ImportFailure {
+  if (!isRecord(value)) {
+    return { ok: false, message: 'Modern setup files must include units metadata.' };
+  }
+
+  if (value.wavelength !== 'nm') {
+    return { ok: false, message: 'Modern setup wavelength units must be nm.' };
+  }
+
+  if (value.angle !== 'deg') {
+    return { ok: false, message: 'Modern setup angle units must be deg.' };
+  }
+
+  return { ok: true };
+}
+
+function parseThicknessMode(
+  value: unknown,
+  isModernStackConfig: boolean,
+): { ok: true; mode: ThicknessMode } | ImportFailure {
+  if (value === 'derived' || value === 'manual' || value === 'acoustic') {
+    return { ok: true, mode: value };
+  }
+
+  // Legacy Bragg files predate explicit input modes, so omission keeps the historical quarter-wave default.
+  if (value === undefined && !isModernStackConfig) {
+    return { ok: true, mode: 'derived' };
+  }
+
+  if (value === undefined) {
+    return { ok: false, message: 'Modern setup files must include an input mode.' };
+  }
+
+  return { ok: false, message: 'Input mode must be derived, manual, or acoustic.' };
+}
+
+function validateStructureTypeConsistency(
+  structureType: unknown,
+  thicknessMode: ThicknessMode,
+): { ok: true } | ImportFailure {
+  if (structureType === ACOUSTIC_STRUCTURE_TYPE && thicknessMode !== 'acoustic') {
+    return {
+      ok: false,
+      message: 'Acousto-optic grating setup files must use acoustic input mode.',
+    };
+  }
+
+  if (structureType === STACK_CONFIG_STRUCTURE_TYPE && thicknessMode === 'acoustic') {
+    return {
+      ok: false,
+      message: 'Quarter-wave stack setup files cannot use acoustic input mode.',
+    };
+  }
+
+  if (structureType === LEGACY_BRAGG_STRUCTURE_TYPE && thicknessMode === 'acoustic') {
+    return {
+      ok: false,
+      message: 'Legacy Bragg setup files cannot use acoustic input mode.',
+    };
+  }
+
+  return { ok: true };
 }
 
 function parseMaterial(
@@ -239,16 +315,9 @@ function isAngleFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < 90;
 }
 
-function normalizeThicknessMode(value: unknown): QuarterWaveStackInputs['thicknessMode'] {
-  if (value === 'manual' || value === 'acoustic') {
-    return value;
-  }
-
-  return 'derived';
-}
-
 function parseAcousticDesign(
   value: Record<string, unknown>,
+  allowMissingRepresentationMode: boolean,
 ): { ok: true; design: QuarterWaveStackInputs['acousticDesign'] } | ImportFailure {
   if (!isRecord(value.acousticMaterial)) {
     return { ok: false, message: 'The acoustic material is missing or invalid.' };
@@ -280,13 +349,17 @@ function parseAcousticDesign(
     return { ok: false, message: 'The acoustic index modulation must be 0 or greater.' };
   }
 
-  const mode =
-    value.acousticRepresentationMode === 'binary' ||
-    value.acousticRepresentationMode === 'fast' ||
-    value.acousticRepresentationMode === 'accurate' ||
-    value.acousticRepresentationMode === 'reference'
-      ? value.acousticRepresentationMode
-      : 'accurate';
+  if (value.acousticRepresentationMode === undefined && !allowMissingRepresentationMode) {
+    return { ok: false, message: 'Acoustic representation mode must be binary, fast, accurate, or reference.' };
+  }
+
+  const mode = value.acousticRepresentationMode === undefined && allowMissingRepresentationMode
+    ? 'accurate'
+    : value.acousticRepresentationMode;
+
+  if (!isAcousticRepresentationMode(mode)) {
+    return { ok: false, message: 'Acoustic representation mode must be binary, fast, accurate, or reference.' };
+  }
 
   return {
     ok: true,
