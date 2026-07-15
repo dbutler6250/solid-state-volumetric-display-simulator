@@ -4,9 +4,14 @@ import type { PlotParams } from 'react-plotly.js';
 
 export type LazyPlotBridgeProps = PlotParams;
 
+const lazyPlotComponentCache = new Map<number, ComponentType<LazyPlotBridgeProps>>();
+
 /** Creates a fresh lazy Plotly bridge so retries remount the importer. */
 export function createLazyPlotComponent(retryKey: number): ComponentType<LazyPlotBridgeProps> {
-  return lazy(async () => {
+  const cached = lazyPlotComponentCache.get(retryKey);
+  if (cached) return cached;
+
+  const component = lazy(async () => {
     void retryKey;
     const [{ default: Plotly }, { default: createPlotlyComponent }] = await Promise.all([
       import('plotly.js-basic-dist-min'),
@@ -17,4 +22,7 @@ export function createLazyPlotComponent(retryKey: number): ComponentType<LazyPlo
       default: createPlotlyComponent(Plotly) as ComponentType<LazyPlotBridgeProps>,
     };
   });
+
+  lazyPlotComponentCache.set(retryKey, component);
+  return component;
 }

@@ -1,4 +1,4 @@
-import { Component, useMemo } from 'react';
+import { Component } from 'react';
 import type { ReactNode } from 'react';
 import type { PlotParams } from 'react-plotly.js';
 import { getChartUnavailableLabel } from './chartFallbackCopy';
@@ -11,7 +11,7 @@ export type LazyPlotProps = PlotParams & {
 
 /** Loads the Plotly React bridge only when a chart first renders. */
 export function LazyPlot({ retryKey = 0, ...plotProps }: LazyPlotProps) {
-  const Plot = useMemo(() => createLazyPlotComponent(retryKey), [retryKey]);
+  const Plot = createLazyPlotComponent(retryKey);
 
   return <Plot {...plotProps} />;
 }
