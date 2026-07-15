@@ -3,7 +3,6 @@ import type { Material } from '../materials/material';
 import type { AcousticRepresentationMode, QuarterWaveStackInputs } from '../../types/simulation';
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
-  MAX_DIRECT_SOLVE_WORK,
   MAX_OPTICAL_PERIODS,
   MAX_WAVELENGTH_POINTS,
 } from '../simulationLimits';
@@ -71,23 +70,14 @@ describe('validateQuarterWaveStackInputs', () => {
     });
   });
 
-  it('accepts a direct workload at the cap and rejects one above it', () => {
-    const nearCapIssues = validateQuarterWaveStackInputs({
+  it('allows a 500-layer optical stack when the inputs are otherwise valid', () => {
+    const issues = validateQuarterWaveStackInputs({
       ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
-      periodCount: 400,
-      wavelengthPointCount: 500,
-    });
-    const overCapIssues = validateQuarterWaveStackInputs({
-      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
-      periodCount: 401,
+      periodCount: 500,
       wavelengthPointCount: 500,
     });
 
-    expect(nearCapIssues).toEqual([]);
-    expect(overCapIssues).toContainEqual({
-      field: 'periodCount',
-      message: `Direct optical solving is limited to about ${MAX_DIRECT_SOLVE_WORK.toLocaleString()} layer-wavelength evaluations. Reduce periods or wavelength samples.`,
-    });
+    expect(issues).toEqual([]);
   });
 
   it('keeps acoustic slice validation intact', () => {

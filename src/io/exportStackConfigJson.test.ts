@@ -56,10 +56,16 @@ describe('exportStackConfigJson', () => {
   });
 
   it('exports material and sweep inputs', () => {
-    const json = exportStackConfigJson(inputs, parameterSweep);
+    const json = exportStackConfigJson(inputs, {
+      incidentAngleDegrees: parameterSweep,
+    }, {
+      xParameter: 'designWavelengthNm',
+      yParameter: 'periodCount',
+    });
     const exported = JSON.parse(json) as {
       inputs: QuarterWaveStackInputs;
-      parameterSweep: ParameterSweepSettings;
+      parameterSweeps: Record<string, ParameterSweepSettings>;
+      heatmapSelection: { xParameter: string; yParameter: string };
     };
 
     expect(exported.inputs.highIndexMaterial).toEqual(inputs.highIndexMaterial);
@@ -72,7 +78,11 @@ describe('exportStackConfigJson', () => {
     expect(exported.inputs.wavelengthEndNm).toBe(650);
     expect(exported.inputs.wavelengthPointCount).toBe(401);
     expect(exported.inputs.acousticDesign).toEqual(inputs.acousticDesign);
-    expect(exported.parameterSweep).toEqual(parameterSweep);
+    expect(exported.parameterSweeps.incidentAngleDegrees).toEqual(parameterSweep);
+    expect(exported.heatmapSelection).toEqual({
+      xParameter: 'designWavelengthNm',
+      yParameter: 'periodCount',
+    });
   });
 
   it('preserves complex refractive-index objects in exported JSON', () => {

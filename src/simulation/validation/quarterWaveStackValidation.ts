@@ -3,7 +3,6 @@ import { getAcousticSlicesPerPeriod, isAcousticRepresentationMode } from '../str
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
   MAX_AUTOMATIC_ACOUSTIC_LAYERS,
-  MAX_DIRECT_SOLVE_WORK,
   MAX_OPTICAL_PERIODS,
   MAX_WAVELENGTH_POINTS,
 } from '../simulationLimits';
@@ -241,18 +240,6 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       field: 'wavelengthPointCount',
       message: `Sweep points must not exceed ${MAX_WAVELENGTH_POINTS.toLocaleString()}.`,
     });
-  }
-
-  if (issues.length === 0 && thicknessMode !== 'acoustic') {
-    const resolvedLayerCount = inputs.periodCount * 2;
-    // The direct solve must bound layer-by-wavelength work before building the full layer stack.
-    const directSolveWork = resolvedLayerCount * wavelengthPointCount;
-    if (directSolveWork > MAX_DIRECT_SOLVE_WORK) {
-      issues.push({
-        field: 'periodCount',
-        message: `Direct optical solving is limited to about ${MAX_DIRECT_SOLVE_WORK.toLocaleString()} layer-wavelength evaluations. Reduce periods or wavelength samples.`,
-      });
-    }
   }
 
   return issues;

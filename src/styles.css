@@ -239,11 +239,18 @@ label {
   grid-column: 1 / -1;
 }
 
+.heatmap-config-panel {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
 .heatmap-axis-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
   gap: 0.75rem;
-  margin-top: 0.85rem;
 }
 
 .heatmap-axis-panel {
@@ -256,15 +263,22 @@ label {
   background: #101720;
 }
 
-.heatmap-axis-panel .sweep-section-title h3 {
-  margin: 0;
-  color: #e5edf5;
-  font-size: 0.95rem;
+.heatmap-axis-heading {
+  display: grid;
+  gap: 0.15rem;
 }
 
-.heatmap-axis-panel .sweep-section-title {
-  align-items: flex-start;
-  flex-direction: column;
+.heatmap-axis-heading h3 {
+  margin: 0;
+  color: #e5edf5;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.heatmap-axis-subtitle {
+  margin: 0;
+  color: #9aa8b7;
+  font-size: 0.85rem;
 }
 
 .heatmap-parameter-field {
@@ -286,6 +300,20 @@ label {
 
 .heatmap-axis-panel .field span {
   font-size: 0.85rem;
+}
+
+.heatmap-axis-panel .heatmap-parameter-field select {
+  min-width: 0;
+}
+
+.heatmap-action-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.heatmap-run-button {
+  justify-self: start;
+  min-width: 9.5rem;
 }
 
 #stack-definition-panel .stack-panel {
@@ -1301,7 +1329,15 @@ label {
 }
 
 .chart-placeholder-compact {
-  min-height: 20rem;
+  min-height: 14rem;
+}
+
+.reflectance-heatmap-frame {
+  margin-top: 0.85rem;
+}
+
+.reflectance-heatmap-chart {
+  min-height: 30rem;
 }
 
 .assumptions-panel {
@@ -1418,6 +1454,15 @@ label {
 
   .parameter-sweep-panel.tab-controls .parameter-sweep-run {
     width: 100%;
+  }
+
+  .heatmap-run-button {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .reflectance-heatmap-chart {
+    min-height: 24rem;
   }
 
   .reflectance-volume-controls {
@@ -1543,6 +1588,10 @@ label {
   .form-grid-sweep,
   .parameter-sweep-panel.tab-controls {
     grid-template-columns: 1fr;
+  }
+
+  .heatmap-config-panel {
+    gap: 0.75rem;
   }
 
   .form-grid-sweep {

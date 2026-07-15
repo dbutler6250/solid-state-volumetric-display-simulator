@@ -33,7 +33,6 @@ import { getAcousticSlicesPerPeriod } from '../structures/acoustoOpticGrating';
 import {
   MAX_AUTOMATIC_ACOUSTIC_LAYERS,
   MAX_PARAMETER_SWEEP_POINTS,
-  MAX_PARAMETER_SWEEP_WORK,
 } from '../simulationLimits';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 import { toComplexRefractiveIndex } from '../materials/material';
@@ -330,6 +329,16 @@ export function solveQuarterWaveStackParameterSweep(
   return solveSimulationDocumentParameterSweep(createSimulationDocument(inputs), settings);
 }
 
+/** Runs a parameter sweep without blocking the main thread for large jobs. */
+export async function solveQuarterWaveStackParameterSweepAsync(
+  inputs: QuarterWaveStackInputs,
+  settings: ParameterSweepSettings,
+  options: { signal?: AbortSignal } = {},
+): Promise<ParameterSweepResult> {
+  assertValidInputs(inputs);
+  return solveSimulationDocumentParameterSweepAsync(createSimulationDocument(inputs), settings, options);
+}
+
 /** Resolves every sweep point after updating the active discriminated structure field. */
 export function solveSimulationDocumentParameterSweep(
   document: SimulationDocument,
@@ -359,6 +368,44 @@ export function solveSimulationDocumentParameterSweep(
     };
   });
 
+  return { settings, points };
+}
+
+/** Resolves parameter sweep points cooperatively so large sweeps stay responsive. */
+export async function solveSimulationDocumentParameterSweepAsync(
+  document: SimulationDocument,
+  settings: ParameterSweepSettings,
+  options: { signal?: AbortSignal } = {},
+): Promise<ParameterSweepResult> {
+  const supported = resolveSimulationDocument(document).sweepParameters;
+  if (!supported.includes(settings.parameter)) {
+    throw new Error(`Sweep parameter ${settings.parameter} is not supported by the active structure.`);
+  }
+  const values = createParameterSweepValues(settings);
+  assertParameterSweepIsSafe(document, settings, values);
+  const points: ParameterSweepResult['points'] = [];
+
+  for (const parameterValue of values) {
+    throwIfAborted(options.signal);
+    const sweptDocument = applySweepValue(document, settings, parameterValue);
+    const result = solveSimulationDocument(sweptDocument, {
+      requiredWavelengthNm:
+        settings.parameter === 'designWavelengthNm' ? parameterValue : undefined,
+    });
+
+    points.push({
+      parameterValue:
+        settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount'
+          ? Math.round(parameterValue)
+          : parameterValue,
+      peakReflectance: result.bandTouchesBoundary ? null : result.peakReflectance,
+      centerWavelengthNm: result.bandTouchesBoundary ? null : result.centerWavelengthNm,
+      bandwidthNm: result.bandTouchesBoundary ? null : result.bandwidthNm,
+    });
+    await yieldToBrowser();
+  }
+
+  throwIfAborted(options.signal);
   return { settings, points };
 }
 
@@ -442,7 +489,7 @@ export async function solveSimulationDocumentReflectanceHeatmapAsync(
 
   const xValues = createParameterSweepValues(settings.xAxis);
   const yValues = createParameterSweepValues(settings.yAxis);
-  assertHeatmapSweepIsSafe(document, settings, xValues, yValues, { async: true });
+  assertHeatmapSweepIsSafe(document, settings, xValues, yValues);
   const pointCache = new Map<string, number>();
   const reflectance: number[][] = [];
 
@@ -535,14 +582,12 @@ function assertHeatmapSweepIsSafe(
   settings: ReflectanceHeatmapSettings,
   xValues: number[],
   yValues: number[],
-  options: { async?: boolean } = {},
 ): void {
   const pointCount = xValues.length * yValues.length;
   if (pointCount > MAX_PARAMETER_SWEEP_POINTS * MAX_PARAMETER_SWEEP_POINTS) {
     throw new Error('The heatmap sweep is too large to evaluate synchronously.');
   }
 
-  let aggregateWork = 0;
   for (const yValue of yValues) {
     for (const xValue of xValues) {
       const sweptDocument = applySweepValue(applySweepValue(document, settings.xAxis, xValue), settings.yAxis, yValue);
@@ -562,14 +607,7 @@ function assertHeatmapSweepIsSafe(
           `Heatmap value ${xValue}, ${yValue} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
         );
       }
-      aggregateWork += layerCount * sweptDocument.analysis.wavelengthPointCount;
     }
-  }
-
-  if (!options.async && aggregateWork > MAX_PARAMETER_SWEEP_WORK) {
-    throw new Error(
-      `This heatmap requires approximately ${aggregateWork.toLocaleString()} layer-wavelength evaluations; the synchronous sweep limit is ${MAX_PARAMETER_SWEEP_WORK.toLocaleString()}. Reduce the bounds, points, wavelength samples, or representation detail.`,
-    );
   }
 }
 
@@ -585,7 +623,6 @@ function assertParameterSweepIsSafe(
     );
   }
 
-  let aggregateWork = 0;
   for (const value of values) {
     const sweptDocument = applySweepValue(document, settings, value);
     const sweptInputs = documentToLegacyInputs(sweptDocument);
@@ -603,14 +640,8 @@ function assertParameterSweepIsSafe(
         `Acoustic sweep value ${value} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
       );
     }
-    aggregateWork += layerCount * sweptDocument.analysis.wavelengthPointCount;
   }
 
-  if (aggregateWork > MAX_PARAMETER_SWEEP_WORK) {
-    throw new Error(
-      `This sweep requires approximately ${aggregateWork.toLocaleString()} layer-wavelength evaluations; the synchronous sweep limit is ${MAX_PARAMETER_SWEEP_WORK.toLocaleString()}. Reduce the bounds, points, wavelength samples, or representation detail.`,
-    );
-  }
 }
 
 function throwIfAborted(signal?: AbortSignal): void {
