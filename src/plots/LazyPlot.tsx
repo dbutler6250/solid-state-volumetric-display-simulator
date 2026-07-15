@@ -1,8 +1,8 @@
-import { Component, lazy, useMemo } from 'react';
+import { Component, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import type { ComponentType } from 'react';
 import type { PlotParams } from 'react-plotly.js';
 import { getChartUnavailableLabel } from './chartFallbackCopy';
+import { createLazyPlotComponent } from './lazyPlotFactory';
 
 export type LazyPlotProps = PlotParams & {
   /** Changes to force a fresh dynamic import after a failed load. */
@@ -11,24 +11,11 @@ export type LazyPlotProps = PlotParams & {
 
 /** Loads the Plotly React bridge only when a chart first renders. */
 export function LazyPlot({ retryKey = 0, ...plotProps }: LazyPlotProps) {
-  const Plot = useMemo(
-    () =>
-      lazy(async () => {
-        void retryKey;
-        const [{ default: Plotly }, { default: createPlotlyComponent }] = await Promise.all([
-          import('plotly.js-basic-dist-min'),
-          import('react-plotly.js/factory'),
-        ]);
-
-        return {
-          default: createPlotlyComponent(Plotly) as ComponentType<Omit<LazyPlotProps, 'retryKey'>>,
-        };
-      }),
-    [retryKey],
-  );
+  const Plot = useMemo(() => createLazyPlotComponent(retryKey), [retryKey]);
 
   return <Plot {...plotProps} />;
 }
+
 
 type LazyPlotErrorBoundaryProps = {
   fallback: ReactNode;

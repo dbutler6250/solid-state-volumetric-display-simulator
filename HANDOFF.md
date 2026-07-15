@@ -12,11 +12,12 @@
 - Added a shared `Chart Unavailable` fallback with retry/remount behavior for Plotly load failures.
 - Corrected the 3D reflectance voxel mesh capacity handling so multi-cell scenes rebuild safely and preserve existing instance transforms/colors.
 - Updated assumptions copy to reflect nondispersive defaults and supported complex-index/absorption inputs.
+- Follow-up: extracted the lazy Plotly retry factory into a separate module so the retry path is lint-clean and directly unit-tested.
 
 ## Verification
 
 - Focused tests added for sweep labels, assumptions text, Plotly boundary fallback, and instanced-mesh capacity rebuild.
-- Full test: `npm.cmd run test` - passed (137 tests).
+- Full test: `npm.cmd run test` - passed (138 tests).
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
 - Browser: desktop and narrow-viewport checks from the previous pass still apply; the new retry/fallback path is covered by unit tests.

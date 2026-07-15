@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { ChartUnavailableFallback, LazyPlotErrorBoundary } from './LazyPlot';
 import { getChartUnavailableLabel } from './chartFallbackCopy';
+import { createLazyPlotComponent } from './lazyPlotFactory';
 
 describe('LazyPlotErrorBoundary', () => {
   it('renders the provided fallback after a Plotly load error', () => {
@@ -27,5 +28,9 @@ describe('LazyPlotErrorBoundary', () => {
     );
     expect(markup).toContain('Chart Unavailable');
     expect(markup).toContain('Retry');
+  });
+
+  it('creates a fresh lazy component when the retry key changes', () => {
+    expect(createLazyPlotComponent(0)).not.toBe(createLazyPlotComponent(1));
   });
 });
