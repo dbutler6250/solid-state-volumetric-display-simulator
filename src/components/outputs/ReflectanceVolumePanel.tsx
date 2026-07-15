@@ -8,6 +8,7 @@ import {
   type ReflectanceVolumeDisplayMode,
   type ReflectanceVolumeOverlayMode,
 } from '../../visualization/reflectanceVolumeScene';
+import { ensureInstancedMeshCapacity } from './reflectanceVolumeMesh';
 
 type ReflectanceVolumePanelProps = {
   document: SimulationDocument;
@@ -192,7 +193,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         depthWrite: false,
         clippingPlanes: [new THREE.Plane(new THREE.Vector3(0, 0, -1), clipDistance(initialScene.medium.clipFraction))],
       });
-      const voxelMesh = new THREE.InstancedMesh(voxelGeometry, voxelMaterial, 1);
+      const voxelMesh = new THREE.InstancedMesh(voxelGeometry, voxelMaterial, Math.max(1, initialScene.field.cells.length));
       voxelMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       voxelMeshRef.current = voxelMesh;
       scene3d.add(voxelMesh);
@@ -385,12 +386,17 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
     const mediumMesh = mediumMeshRef.current;
     const edges = edgesRef.current;
     const shellMesh = shellMeshRef.current;
+    const activeVoxelMesh = ensureInstancedMeshCapacity(
+      scene3d,
+      voxelMeshRef,
+      scene.field.cells.length,
+    );
 
     const voxelColor = new THREE.Color();
     const planeZ = scene.field.depth > 1 ? (sliceIndex / (scene.field.depth - 1)) * 2 - 1 : 0;
-    voxelMesh.count = scene.field.cells.length;
+    activeVoxelMesh.count = scene.field.cells.length;
     planeMesh.count = 1;
-    voxelMesh.visible = scene.mode === 'volume' && scene.overlays.showInteriorDetail;
+    activeVoxelMesh.visible = scene.mode === 'volume' && scene.overlays.showInteriorDetail;
     planeMesh.visible = scene.mode === 'plane';
     mediumMesh!.visible = scene.overlays.showShell;
     mediumMaterial.opacity = scene.overlays.showShell ? scene.medium.opacity : 0;
@@ -410,7 +416,7 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
 
     for (let index = 0; index < scene.field.cells.length; index += 1) {
       const cell = scene.field.cells[index];
-      voxelMesh.setMatrixAt(
+      activeVoxelMesh.setMatrixAt(
         index,
         new THREE.Matrix4().compose(
           new THREE.Vector3(cell.position[0], cell.position[1], cell.position[2]),
@@ -419,16 +425,16 @@ export function ReflectanceVolumePanel({ document, resolvedStructure, result }: 
         ),
       );
       voxelColor.setHSL(0.58 - cell.intensity * 0.18, 0.9, 0.38 + cell.intensity * 0.45);
-      voxelMesh.setColorAt(index, voxelColor);
+      activeVoxelMesh.setColorAt(index, voxelColor);
     }
-    voxelMesh.visible = scene.mode === 'volume' && scene.overlays.showInteriorDetail;
+    activeVoxelMesh.visible = scene.mode === 'volume' && scene.overlays.showInteriorDetail;
     planeMesh.visible = planeVisible;
     mediumMaterial.opacity = scene.overlays.showShell ? scene.medium.opacity : 0;
     clipPlane.visible = scene.overlays.showShell;
     if (edges) edges.visible = scene.overlays.showGhostedStack;
     if (shellMesh) shellMesh.visible = scene.overlays.showShell;
-    voxelMesh.instanceMatrix.needsUpdate = true;
-    if (voxelMesh.instanceColor) voxelMesh.instanceColor.needsUpdate = true;
+    activeVoxelMesh.instanceMatrix.needsUpdate = true;
+    if (activeVoxelMesh.instanceColor) activeVoxelMesh.instanceColor.needsUpdate = true;
     planeMesh.instanceMatrix.needsUpdate = true;
     renderer.render(scene3d, camera);
   }, [scene, sliceIndex, planePhase, planeMotionMode]);

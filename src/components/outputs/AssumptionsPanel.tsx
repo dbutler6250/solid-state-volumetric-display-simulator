@@ -1,6 +1,6 @@
 const assumptions = [
-  'Lossless real-valued refractive indices',
-  'No absorption or material dispersion',
+  'Default catalog materials use nondispersive constants',
+  'Complex refractive indices and absorption are supported when provided',
   'Air incident and exit media',
   'Coherent planar multilayer stack',
   'Non-magnetic materials',

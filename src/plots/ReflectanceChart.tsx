@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
-import { LazyPlot } from './LazyPlot';
+import { Suspense, useState } from 'react';
+import { ChartUnavailableFallback, LazyPlot, LazyPlotErrorBoundary } from './LazyPlot';
 import type { SimulationResult } from '../types/simulation';
 
 type ReflectanceChartProps = {
@@ -10,6 +10,8 @@ type ReflectanceChartProps = {
 
 /** Renders the reflectance spectrum with an optional transmission overlay. */
 export function ReflectanceChart({ result, showTransmission, xRange }: ReflectanceChartProps) {
+  const [retryKey, setRetryKey] = useState(0);
+
   if (!result) {
     return (
       <div className="chart-placeholder" role="status">
@@ -49,53 +51,59 @@ export function ReflectanceChart({ result, showTransmission, xRange }: Reflectan
   }
 
   return (
-    <Suspense fallback={<div className="chart-placeholder" role="status">Loading chart...</div>}>
-      <LazyPlot
-        className="reflectance-chart"
-        data={chartData}
-        layout={{
-          autosize: true,
-          paper_bgcolor: '#101720',
-          plot_bgcolor: '#101720',
-          font: {
-            color: '#dce7f2',
-            family: 'Inter, system-ui, sans-serif',
-          },
-          margin: {
-            t: 18,
-            r: 22,
-            b: 56,
-            l: 62,
-          },
-          xaxis: {
-            title: {
-              text: 'Wavelength (nm)',
+    <LazyPlotErrorBoundary
+      key={retryKey}
+      fallback={<ChartUnavailableFallback chartName="Spectrum chart" onRetry={() => setRetryKey((current) => current + 1)} />}
+    >
+      <Suspense fallback={<div className="chart-placeholder" role="status">Loading chart...</div>}>
+        <LazyPlot
+          retryKey={retryKey}
+          className="reflectance-chart"
+          data={chartData}
+          layout={{
+            autosize: true,
+            paper_bgcolor: '#101720',
+            plot_bgcolor: '#101720',
+            font: {
+              color: '#dce7f2',
+              family: 'Inter, system-ui, sans-serif',
             },
-            gridcolor: '#263443',
-            zerolinecolor: '#334457',
-            range: xRange ?? undefined,
-          },
-          yaxis: {
-            title: {
-              text: 'Reflectance',
+            margin: {
+              t: 18,
+              r: 22,
+              b: 56,
+              l: 62,
             },
-            range: [0, 1],
-            gridcolor: '#263443',
-            zerolinecolor: '#334457',
-          },
-          showlegend: showTransmission,
-          legend: {
-            orientation: 'h',
-            x: 0,
-            y: 1.12,
-          },
-        }}
-        config={{
-          displaylogo: false,
-          responsive: true,
-        }}
-        useResizeHandler
-      />
-    </Suspense>
+            xaxis: {
+              title: {
+                text: 'Wavelength (nm)',
+              },
+              gridcolor: '#263443',
+              zerolinecolor: '#334457',
+              range: xRange ?? undefined,
+            },
+            yaxis: {
+              title: {
+                text: 'Reflectance',
+              },
+              range: [0, 1],
+              gridcolor: '#263443',
+              zerolinecolor: '#334457',
+            },
+            showlegend: showTransmission,
+            legend: {
+              orientation: 'h',
+              x: 0,
+              y: 1.12,
+            },
+          }}
+          config={{
+            displaylogo: false,
+            responsive: true,
+          }}
+          useResizeHandler
+        />
+      </Suspense>
+    </LazyPlotErrorBoundary>
   );
 }
