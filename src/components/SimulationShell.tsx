@@ -99,6 +99,8 @@ export function SimulationShell() {
   const [opticalSolveError, setOpticalSolveError] = useState<string | null>(null);
   const [acousticSolveError, setAcousticSolveError] = useState<string | null>(null);
   const opticalRequestId = useRef(0);
+  const parameterSweepRequestId = useRef(0);
+  const parameterSweepController = useRef<AbortController | null>(null);
   const [acousticOutput, setAcousticOutput] = useState<{
     document: SimulationDocument;
     resolved: ResolvedStructure;
@@ -208,6 +210,10 @@ export function SimulationShell() {
   }, [opticalResolvedStructure, simulationDocument]);
 
   useEffect(() => {
+    parameterSweepController.current?.abort();
+    parameterSweepController.current = null;
+    parameterSweepRequestId.current += 1;
+    setParameterSweepIsSolving(false);
     setParameterSweepResult(null);
     setParameterSweepError(null);
     setHeatmapResult(null);
@@ -309,20 +315,30 @@ export function SimulationShell() {
     }
 
     const currentRow = getEffectiveParameterSweep(inputs, row);
+    const requestId = ++parameterSweepRequestId.current;
+    parameterSweepController.current?.abort();
+    const controller = new AbortController();
+    parameterSweepController.current = controller;
     setParameterSweepIsSolving(true);
     setParameterSweepError(null);
     void (async () => {
       try {
-        setParameterSweepResult(
-          await solveQuarterWaveStackParameterSweepAsync(inputs, currentRow),
-        );
+        const nextResult = await solveQuarterWaveStackParameterSweepAsync(inputs, currentRow, {
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted || requestId !== parameterSweepRequestId.current) return;
+        setParameterSweepResult(nextResult);
       } catch (error) {
+        if (controller.signal.aborted || requestId !== parameterSweepRequestId.current) return;
         setParameterSweepResult(null);
         setParameterSweepError(
           error instanceof Error ? error.message : 'The parameter sweep could not be completed.',
         );
       } finally {
-        setParameterSweepIsSolving(false);
+        if (requestId === parameterSweepRequestId.current) {
+          parameterSweepController.current = null;
+          setParameterSweepIsSolving(false);
+        }
       }
     })();
   };
