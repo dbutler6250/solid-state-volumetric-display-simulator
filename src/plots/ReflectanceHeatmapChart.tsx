@@ -1,20 +1,23 @@
 import { Suspense, useState } from 'react';
+import { ChartProgressOverlay, type ChartProgress } from './ChartProgressOverlay';
 import { ChartUnavailableFallback, LazyPlot, LazyPlotErrorBoundary } from './LazyPlot';
 import type { ReflectanceHeatmapResult } from '../types/simulation';
 import { getHeatmapAxisLabel } from './heatmapAxisLabels';
 
 type ReflectanceHeatmapChartProps = {
   result: ReflectanceHeatmapResult | null;
+  progress: ChartProgress | null;
 };
 
 /** Renders a 2D reflectance heatmap for the selected sweep axes. */
-export function ReflectanceHeatmapChart({ result }: ReflectanceHeatmapChartProps) {
+export function ReflectanceHeatmapChart({ result, progress }: ReflectanceHeatmapChartProps) {
   const [retryKey, setRetryKey] = useState(0);
 
   if (!result) {
     return (
       <div className="chart-placeholder chart-placeholder-compact" role="status">
-        Run a heatmap sweep to visualize reflectance across both axes.
+        {progress ? null : 'Run a heatmap sweep to visualize reflectance across both axes.'}
+        <ChartProgressOverlay label="Running heatmap..." progress={progress} />
       </div>
     );
   }
@@ -100,6 +103,7 @@ export function ReflectanceHeatmapChart({ result }: ReflectanceHeatmapChartProps
           />
         </Suspense>
       </LazyPlotErrorBoundary>
+      <ChartProgressOverlay label="Running heatmap..." progress={progress} />
     </div>
   );
 }

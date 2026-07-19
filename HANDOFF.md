@@ -7,16 +7,15 @@
 
 ## Latest Task
 
-- Moved the heatmap controls and chart into the Parameter Sweep tab.
-- Made sweep rows dynamic so they follow the active structure's supported sweep parameters.
-- Added async parameter sweep and optical spectrum execution so large valid stacks stay responsive.
-- Removed the direct optical layer-wavelength validation cap that blocked standard large stacks.
+- Added in-chart progress bars for Spectrum, Parameter Sweep, and Reflectance Heatmap calculations.
+- Threaded async solver progress callbacks for wavelength samples, sweep points, and heatmap cells.
+- Preserved existing chart placeholder/result behavior while clearing progress on completion, stale requests, and aborts.
 
 ## Verification
 
 - Full test: `npm.cmd run test` - passed.
 - Lint: `npm.cmd run lint` - passed.
-- Build: `npm.cmd run build` - passed, with the existing Vite chunk-size warning.
+- Build: `npm.cmd run build` - passed, with the existing Vite Plotly chunk-size warning.
 
 ## Browser Verification
 

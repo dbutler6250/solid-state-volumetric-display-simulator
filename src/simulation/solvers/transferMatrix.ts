@@ -270,6 +270,12 @@ export function solveResolvedStructure(
 type AsyncSolveOptions = {
   requiredWavelengthNm?: number;
   signal?: AbortSignal;
+  onProgress?: (progress: SolverProgress) => void;
+};
+
+export type SolverProgress = {
+  completed: number;
+  total: number;
 };
 
 /** Solves a resolved stack in cancellable wavelength chunks for responsive acoustic editing. */
@@ -285,6 +291,7 @@ export async function solveResolvedStructureAsync(
     requiredWavelengthNm: options.requiredWavelengthNm,
   });
   const spectrum: LayerStackPointResult[] = [];
+  options.onProgress?.({ completed: 0, total: wavelengths.length });
 
   for (const wavelengthNm of wavelengths) {
     throwIfAborted(options.signal);
@@ -295,6 +302,7 @@ export async function solveResolvedStructureAsync(
         polarization: analysis.polarization,
       }),
     );
+    options.onProgress?.({ completed: spectrum.length, total: wavelengths.length });
     await yieldToBrowser();
   }
 
@@ -333,7 +341,7 @@ export function solveQuarterWaveStackParameterSweep(
 export async function solveQuarterWaveStackParameterSweepAsync(
   inputs: QuarterWaveStackInputs,
   settings: ParameterSweepSettings,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; onProgress?: (progress: SolverProgress) => void } = {},
 ): Promise<ParameterSweepResult> {
   assertValidInputs(inputs);
   return solveSimulationDocumentParameterSweepAsync(createSimulationDocument(inputs), settings, options);
@@ -375,7 +383,7 @@ export function solveSimulationDocumentParameterSweep(
 export async function solveSimulationDocumentParameterSweepAsync(
   document: SimulationDocument,
   settings: ParameterSweepSettings,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; onProgress?: (progress: SolverProgress) => void } = {},
 ): Promise<ParameterSweepResult> {
   const supported = resolveSimulationDocument(document).sweepParameters;
   if (!supported.includes(settings.parameter)) {
@@ -384,6 +392,7 @@ export async function solveSimulationDocumentParameterSweepAsync(
   const values = createParameterSweepValues(settings);
   assertParameterSweepIsSafe(document, settings, values);
   const points: ParameterSweepResult['points'] = [];
+  options.onProgress?.({ completed: 0, total: values.length });
 
   for (const parameterValue of values) {
     throwIfAborted(options.signal);
@@ -402,6 +411,7 @@ export async function solveSimulationDocumentParameterSweepAsync(
       centerWavelengthNm: result.bandTouchesBoundary ? null : result.centerWavelengthNm,
       bandwidthNm: result.bandTouchesBoundary ? null : result.bandwidthNm,
     });
+    options.onProgress?.({ completed: points.length, total: values.length });
     await yieldToBrowser();
   }
 
@@ -475,7 +485,7 @@ export function solveSimulationDocumentReflectanceHeatmap(
 export async function solveSimulationDocumentReflectanceHeatmapAsync(
   document: SimulationDocument,
   settings: ReflectanceHeatmapSettings,
-  options: { signal?: AbortSignal } = {},
+  options: { signal?: AbortSignal; onProgress?: (progress: SolverProgress) => void } = {},
 ): Promise<ReflectanceHeatmapResult> {
   const cacheKey = createHeatmapCacheKey(document, settings);
   const cached = heatmapResultCache.get(cacheKey);
@@ -492,6 +502,9 @@ export async function solveSimulationDocumentReflectanceHeatmapAsync(
   assertHeatmapSweepIsSafe(document, settings, xValues, yValues);
   const pointCache = new Map<string, number>();
   const reflectance: number[][] = [];
+  const totalCells = xValues.length * yValues.length;
+  let completedCells = 0;
+  options.onProgress?.({ completed: 0, total: totalCells });
 
   for (const yValue of yValues) {
     throwIfAborted(options.signal);
@@ -502,6 +515,8 @@ export async function solveSimulationDocumentReflectanceHeatmapAsync(
       const cachedValue = pointCache.get(pointKey);
       if (cachedValue !== undefined) {
         row.push(cachedValue);
+        completedCells += 1;
+        options.onProgress?.({ completed: completedCells, total: totalCells });
         continue;
       }
 
@@ -517,6 +532,8 @@ export async function solveSimulationDocumentReflectanceHeatmapAsync(
       const peakReflectance = result.peakReflectance;
       pointCache.set(pointKey, peakReflectance);
       row.push(peakReflectance);
+      completedCells += 1;
+      options.onProgress?.({ completed: completedCells, total: totalCells });
       await yieldToBrowser();
     }
     reflectance.push(row);

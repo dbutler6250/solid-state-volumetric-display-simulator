@@ -16,6 +16,7 @@ import { StlSlicerPanel } from './outputs/StlSlicerPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceHeatmapChart } from '../plots/ReflectanceHeatmapChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
+import type { ChartProgress } from '../plots/ChartProgressOverlay';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
 import {
   solveQuarterWaveStackParameterSweepAsync,
@@ -90,17 +91,22 @@ export function SimulationShell() {
   );
   const [parameterSweepError, setParameterSweepError] = useState<string | null>(null);
   const [parameterSweepIsSolving, setParameterSweepIsSolving] = useState(false);
+  const [parameterSweepProgress, setParameterSweepProgress] = useState<ChartProgress | null>(null);
   const [heatmapSelection, setHeatmapSelection] = useState<{ xParameter: SweepParameter; yParameter: SweepParameter } | null>(null);
   const [heatmapResult, setHeatmapResult] = useState<ReflectanceHeatmapResult | null>(null);
   const [heatmapError, setHeatmapError] = useState<string | null>(null);
   const [heatmapIsSolving, setHeatmapIsSolving] = useState(false);
+  const [heatmapProgress, setHeatmapProgress] = useState<ChartProgress | null>(null);
   const [referenceRangeError, setReferenceRangeError] = useState<string | null>(null);
   const [opticalResult, setOpticalResult] = useState<SimulationResult | null>(null);
   const [opticalSolveError, setOpticalSolveError] = useState<string | null>(null);
+  const [spectrumProgress, setSpectrumProgress] = useState<ChartProgress | null>(null);
   const [acousticSolveError, setAcousticSolveError] = useState<string | null>(null);
   const opticalRequestId = useRef(0);
   const parameterSweepRequestId = useRef(0);
   const parameterSweepController = useRef<AbortController | null>(null);
+  const heatmapRequestId = useRef(0);
+  const heatmapController = useRef<AbortController | null>(null);
   const [acousticOutput, setAcousticOutput] = useState<{
     document: SimulationDocument;
     resolved: ResolvedStructure;
@@ -159,14 +165,21 @@ export function SimulationShell() {
           const nextResult = await solveResolvedStructureAsync(
             resolved,
             simulationDocument.analysis,
-            { signal: controller.signal },
+            {
+              signal: controller.signal,
+              onProgress: (progress) => {
+                if (requestId === acousticRequestId.current) setSpectrumProgress(progress);
+              },
+            },
           );
           if (controller.signal.aborted || requestId !== acousticRequestId.current) return;
           setAcousticOutput({ document: simulationDocument, resolved, result: nextResult });
+          setSpectrumProgress(null);
         } catch (error) {
           if (controller.signal.aborted || (error instanceof Error && error.name === 'AbortError')) {
             return;
           }
+          if (requestId === acousticRequestId.current) setSpectrumProgress(null);
           setAcousticSolveError(
             error instanceof Error ? error.message : 'The acoustic spectrum could not be calculated.',
           );
@@ -177,6 +190,7 @@ export function SimulationShell() {
     return () => {
       window.clearTimeout(timeoutId);
       controller.abort();
+      setSpectrumProgress(null);
     };
   }, [simulationDocument]);
 
@@ -184,20 +198,29 @@ export function SimulationShell() {
     if (!simulationDocument || simulationDocument.structure.type === 'acousto-optic-grating' || !opticalResolvedStructure) {
       setOpticalResult(null);
       setOpticalSolveError(null);
+      setSpectrumProgress(null);
       return;
     }
 
     const requestId = ++opticalRequestId.current;
+    const controller = new AbortController();
     setOpticalSolveError(null);
     setOpticalResult(null);
 
     void (async () => {
       try {
-        const nextResult = await solveResolvedStructureAsync(opticalResolvedStructure, simulationDocument.analysis);
-        if (requestId !== opticalRequestId.current) return;
+        const nextResult = await solveResolvedStructureAsync(opticalResolvedStructure, simulationDocument.analysis, {
+          signal: controller.signal,
+          onProgress: (progress) => {
+            if (requestId === opticalRequestId.current) setSpectrumProgress(progress);
+          },
+        });
+        if (controller.signal.aborted || requestId !== opticalRequestId.current) return;
         setOpticalResult(nextResult);
+        setSpectrumProgress(null);
       } catch (error) {
-        if (requestId !== opticalRequestId.current) return;
+        if (controller.signal.aborted || requestId !== opticalRequestId.current) return;
+        setSpectrumProgress(null);
         setOpticalSolveError(
           error instanceof Error ? error.message : 'The spectrum could not be calculated.',
         );
@@ -205,20 +228,27 @@ export function SimulationShell() {
     })();
 
     return () => {
+      controller.abort();
       opticalRequestId.current += 1;
+      setSpectrumProgress(null);
     };
   }, [opticalResolvedStructure, simulationDocument]);
 
   useEffect(() => {
     parameterSweepController.current?.abort();
     parameterSweepController.current = null;
+    heatmapController.current?.abort();
+    heatmapController.current = null;
     parameterSweepRequestId.current += 1;
+    heatmapRequestId.current += 1;
     setParameterSweepIsSolving(false);
+    setParameterSweepProgress(null);
     setParameterSweepResult(null);
     setParameterSweepError(null);
     setHeatmapResult(null);
     setHeatmapError(null);
     setHeatmapIsSolving(false);
+    setHeatmapProgress(null);
     setReferenceRangeError(null);
   }, [inputs]);
 
@@ -320,11 +350,15 @@ export function SimulationShell() {
     const controller = new AbortController();
     parameterSweepController.current = controller;
     setParameterSweepIsSolving(true);
+    setParameterSweepProgress({ completed: 0, total: currentRow.pointCount });
     setParameterSweepError(null);
     void (async () => {
       try {
         const nextResult = await solveQuarterWaveStackParameterSweepAsync(inputs, currentRow, {
           signal: controller.signal,
+          onProgress: (progress) => {
+            if (requestId === parameterSweepRequestId.current) setParameterSweepProgress(progress);
+          },
         });
         if (controller.signal.aborted || requestId !== parameterSweepRequestId.current) return;
         setParameterSweepResult(nextResult);
@@ -338,6 +372,7 @@ export function SimulationShell() {
         if (requestId === parameterSweepRequestId.current) {
           parameterSweepController.current = null;
           setParameterSweepIsSolving(false);
+          setParameterSweepProgress(null);
         }
       }
     })();
@@ -362,15 +397,33 @@ export function SimulationShell() {
       return;
     }
 
+    const requestId = ++heatmapRequestId.current;
+    heatmapController.current?.abort();
+    const controller = new AbortController();
+    heatmapController.current = controller;
+
     try {
       setHeatmapIsSolving(true);
-      setHeatmapResult(await solveSimulationDocumentReflectanceHeatmapAsync(simulationDocument, { xAxis, yAxis }));
+      setHeatmapProgress({ completed: 0, total: xAxis.pointCount * yAxis.pointCount });
+      const nextResult = await solveSimulationDocumentReflectanceHeatmapAsync(simulationDocument, { xAxis, yAxis }, {
+        signal: controller.signal,
+        onProgress: (progress) => {
+          if (requestId === heatmapRequestId.current) setHeatmapProgress(progress);
+        },
+      });
+      if (controller.signal.aborted || requestId !== heatmapRequestId.current) return;
+      setHeatmapResult(nextResult);
       setHeatmapError(null);
     } catch (error) {
+      if (controller.signal.aborted || requestId !== heatmapRequestId.current) return;
       setHeatmapResult(null);
       setHeatmapError(error instanceof Error ? error.message : 'The heatmap could not be completed.');
     } finally {
-      setHeatmapIsSolving(false);
+      if (requestId === heatmapRequestId.current) {
+        heatmapController.current = null;
+        setHeatmapIsSolving(false);
+        setHeatmapProgress(null);
+      }
     }
     })();
   };
@@ -579,7 +632,7 @@ export function SimulationShell() {
                 </label>
               </div>
             </div>
-            <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} />
+            <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} progress={spectrumProgress} />
             {opticalSolveError ? (
               <p className="chart-toolbar-message" role="alert">{opticalSolveError}</p>
             ) : null}
@@ -617,7 +670,7 @@ export function SimulationShell() {
               <h2>Parameter Sweep</h2>
               <button type="button" className="action-button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>Export Sweep CSV</button>
             </div>
-            <ParameterSweepChart result={parameterSweepResult} />
+            <ParameterSweepChart result={parameterSweepResult} progress={parameterSweepProgress} />
             <section className="parameter-sweep-panel tab-controls" aria-label="Parameter sweep controls">
               {supportedHeatmapParameters.map((parameter) => (
                 <ParameterSweepRowControls
@@ -733,7 +786,7 @@ export function SimulationShell() {
                 </p>
               )}
             </section>
-            <ReflectanceHeatmapChart result={heatmapResult} />
+            <ReflectanceHeatmapChart result={heatmapResult} progress={heatmapProgress} />
           </section>
 
           <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
