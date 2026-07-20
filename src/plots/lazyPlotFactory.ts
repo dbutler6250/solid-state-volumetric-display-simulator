@@ -14,7 +14,7 @@ export function createLazyPlotComponent(retryKey: number): ComponentType<LazyPlo
   const component = lazy(async () => {
     void retryKey;
     const [{ default: Plotly }, { default: createPlotlyComponent }] = await Promise.all([
-      import('plotly.js-dist-min'),
+      import('plotly.js-cartesian-dist-min'),
       import('react-plotly.js/factory'),
     ]);
 
