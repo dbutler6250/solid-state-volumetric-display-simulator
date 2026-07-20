@@ -1,7 +1,7 @@
 # Solid State Volumetric Display Simulator
 
 Author: Dylan Butler
-Last Updated: 2026-07-13
+Last Updated: 2026-07-19
 
 This document is the historical record of completed project work. Active roadmap items, backlog work, and implementation details now live in GitHub Issues.
 
@@ -47,7 +47,14 @@ Keep this section as the historical record. Do not create issues for these items
 - STL slicer compact preview rail with neighboring-slice occupancy thumbnails for lightweight at-a-glance inspection
 - STL slicer timing profile with deterministic frame intervals, sweep duration, and per-step timestamps for future hardware synchronization
 - STL slicer export schema envelope with versioned downstream contract metadata for JSON consumers
+- Strict setup import contract with validated parameter-sweep and heatmap-selection round-tripping
+- Shared workload limits and safer defaults for large automatic optical/acoustic jobs
+- STL slicer workload-limit hardening with regression coverage for large meshes and slice counts
+- UI runtime correctness hardening for Plotly lazy loading, Suspense remounts, and stale async result handling
+- Local Playwright browser regression harness covering primary simulator workflows and responsive layout
 - General 2D reflectance heatmap tab with reusable axis selection, solver caching, Plotly heatmap rendering, and regression coverage
+- Dynamic structure-aware parameter sweep rows with embedded heatmap controls and async sweep/heatmap solving
+- In-chart calculation progress bars for spectrum, parameter sweep, and heatmap solver work
 
 ## Notes
 
