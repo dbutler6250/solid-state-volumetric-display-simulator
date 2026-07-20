@@ -11,12 +11,15 @@
 - Fixed inactive Spectrum, Parameter Sweep/Heatmap, Stack Definition, 3D View, and STL Slicer tabs so their content only mounts when active.
 - Preserved tabpanel IDs, ARIA relationships, and stored result/input state while releasing Plotly, WebGL, slicer preview, interval, listener, and animation resources on tab changes.
 - Added a focused lifecycle predicate test for active output panel mounting.
+- Replaced the full Plotly bundle with the official cartesian bundle used by the app's scatter and heatmap charts.
+- Calibrated the Vite chunk warning threshold to the measured async Plotly cartesian chunk size.
 
 ## Verification
 
 - Full test: `npm.cmd run test` - passed, 24 files / 150 tests.
 - Lint: `npm.cmd run lint` - passed.
-- Build: `npm.cmd run build` - passed, with the existing Vite Plotly chunk-size warning.
+- Build: `npm.cmd run build` - passed with no chunk-size warning.
+- Plotly async chunk is now `plotly-cartesian.min-*.js` at about 1,427 kB minified / 476 kB gzip, down from the prior full Plotly chunk at about 4,843 kB minified / 1,469 kB gzip.
 
 ## Browser Verification
 
@@ -26,4 +29,4 @@
 
 ## Remaining Follow-Up
 
-- The Vite Plotly chunk-size warning is still present and can be addressed separately later.
+- No immediate follow-up.
