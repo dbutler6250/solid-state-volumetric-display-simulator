@@ -55,6 +55,8 @@ Keep this section as the historical record. Do not create issues for these items
 - General 2D reflectance heatmap tab with reusable axis selection, solver caching, Plotly heatmap rendering, and regression coverage
 - Dynamic structure-aware parameter sweep rows with embedded heatmap controls and async sweep/heatmap solving
 - In-chart calculation progress bars for spectrum, parameter sweep, and heatmap solver work
+- Resource-efficient output tabs that preserve ARIA tabpanels while unmounting inactive Plotly, WebGL, and STL slicer runtime views
+- Reduced Plotly production payload by switching lazy charts from the full bundle to the official cartesian bundle and removing the chunk-size build warning
 
 ## Notes
 
