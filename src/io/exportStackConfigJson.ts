@@ -1,4 +1,8 @@
-import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
+import type {
+  ParameterSweepSettings,
+  QuarterWaveStackInputs,
+  SweepParameter,
+} from '../types/simulation';
 
 type StackConfigExport = {
   schema: 'ssvds-stack-config-v1';
@@ -24,12 +28,20 @@ type StackConfigExport = {
     wavelengthEndNm?: number;
     wavelengthPointCount?: number;
   };
-  parameterSweep?: ParameterSweepSettings;
+  parameterSweeps?: Partial<Record<SweepParameter, ParameterSweepSettings>>;
+  heatmapSelection?: {
+    xParameter: SweepParameter;
+    yParameter: SweepParameter;
+  };
 };
 
 export function exportStackConfigJson(
   inputs: QuarterWaveStackInputs,
-  parameterSweep?: ParameterSweepSettings,
+  parameterSweeps?: Partial<Record<SweepParameter, ParameterSweepSettings>>,
+  heatmapSelection?: {
+    xParameter: SweepParameter;
+    yParameter: SweepParameter;
+  },
 ): string {
   const payload: StackConfigExport = {
     schema: 'ssvds-stack-config-v1',
@@ -56,7 +68,8 @@ export function exportStackConfigJson(
       wavelengthEndNm: inputs.wavelengthEndNm,
       wavelengthPointCount: inputs.wavelengthPointCount,
     },
-    parameterSweep,
+    parameterSweeps,
+    heatmapSelection,
   };
 
   return `${JSON.stringify(payload, null, 2)}\n`;

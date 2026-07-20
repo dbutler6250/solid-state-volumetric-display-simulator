@@ -111,3 +111,26 @@ export type ParameterSweepResult = {
   settings: ParameterSweepSettings;
   points: ParameterSweepPoint[];
 };
+
+/** Shared axis metadata for reusable 2D sweep visualizations. */
+export type HeatmapAxisSettings = ParameterSweepSettings;
+
+/** Describes one axis of a 2D sweep result. */
+export type HeatmapAxis = {
+  settings: HeatmapAxisSettings;
+  values: number[];
+};
+
+/** Settings for a general 2D reflectance heatmap sweep. */
+export type ReflectanceHeatmapSettings = {
+  xAxis: HeatmapAxisSettings;
+  yAxis: HeatmapAxisSettings;
+};
+
+/** General 2D reflectance data suitable for heatmaps or future surface plots. */
+export type ReflectanceHeatmapResult = {
+  settings: ReflectanceHeatmapSettings;
+  xAxis: HeatmapAxis;
+  yAxis: HeatmapAxis;
+  reflectance: number[][];
+};

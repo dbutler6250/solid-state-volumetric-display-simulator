@@ -1,7 +1,13 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import { isAcousticRepresentationMode } from '../simulation/structures/acoustoOpticGrating';
 import type { Material, ComplexRefractiveIndex } from '../simulation/materials/material';
-import type { ParameterSweepSettings, Polarization, QuarterWaveStackInputs, ThicknessMode } from '../types/simulation';
+import type {
+  ParameterSweepSettings,
+  Polarization,
+  QuarterWaveStackInputs,
+  SweepParameter,
+  ThicknessMode,
+} from '../types/simulation';
 
 const STACK_CONFIG_SCHEMA = 'ssvds-stack-config-v1';
 const LEGACY_BRAGG_CONFIG_SCHEMA = 'ssvds-bragg-config-v1';
@@ -14,6 +20,15 @@ type ImportSuccess = {
   ok: true;
   inputs: QuarterWaveStackInputs;
   parameterSweep?: ParameterSweepSettings;
+  parameterSweeps?: Partial<Record<SweepParameter, ParameterSweepSettings>>;
+  heatmapSettings?: {
+    xAxis: ParameterSweepSettings;
+    yAxis: ParameterSweepSettings;
+  };
+  heatmapSelection?: {
+    xParameter: SweepParameter;
+    yParameter: SweepParameter;
+  };
 };
 
 type ImportFailure = {
@@ -112,14 +127,62 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     return { ok: false, message: issues[0].message };
   }
 
-  const parameterSweep = parseParameterSweep(parsed.parameterSweep);
-  if (!parameterSweep.ok) return parameterSweep;
+  const parameterSweeps = parseParameterSweeps(parsed.parameterSweeps, parsed.parameterSweep);
+  if (!parameterSweeps.ok) return parameterSweeps;
+  const heatmapSelection = parseHeatmapSelection(parsed.heatmapSelection, parsed.heatmapSettings);
+  if (!heatmapSelection.ok) return heatmapSelection;
 
   return {
     ok: true,
     inputs,
-    ...(parameterSweep.settings ? { parameterSweep: parameterSweep.settings } : {}),
+    ...(parameterSweeps.settings
+      ? { parameterSweep: firstParameterSweep(parameterSweeps.settings), parameterSweeps: parameterSweeps.settings }
+      : {}),
+    ...(heatmapSelection.settings
+      ? {
+          heatmapSelection: heatmapSelection.settings,
+          heatmapSettings: {
+            xAxis: {
+              parameter: heatmapSelection.settings.xParameter,
+              ...getDefaultHeatmapAxisBounds(heatmapSelection.settings.xParameter, inputs),
+            },
+            yAxis: {
+              parameter: heatmapSelection.settings.yParameter,
+              ...getDefaultHeatmapAxisBounds(heatmapSelection.settings.yParameter, inputs),
+            },
+          },
+        }
+      : {}),
   };
+}
+
+function parseParameterSweeps(
+  value: unknown,
+  legacyValue: unknown,
+): { ok: true; settings?: Partial<Record<SweepParameter, ParameterSweepSettings>> } | ImportFailure {
+  if (value === undefined && legacyValue === undefined) return { ok: true };
+  if (value !== undefined && !isRecord(value)) return { ok: false, message: 'The parameter sweep setup is invalid.' };
+  if (value !== undefined) {
+    const sweeps = parseParameterSweepMap(value);
+    if (!sweeps.ok) return sweeps;
+    return { ok: true, settings: sweeps.settings };
+  }
+  const sweep = parseParameterSweep(legacyValue);
+  if (!sweep.ok) return sweep;
+  return { ok: true, settings: sweep.settings ? { [sweep.settings.parameter]: sweep.settings } : undefined };
+}
+
+function parseParameterSweepMap(
+  value: Record<string, unknown>,
+): { ok: true; settings?: Partial<Record<SweepParameter, ParameterSweepSettings>> } | ImportFailure {
+  const settings: Partial<Record<SweepParameter, ParameterSweepSettings>> = {};
+  for (const key of Object.keys(value)) {
+    if (!isSweepParameter(key)) continue;
+    const parsed = parseParameterSweep(value[key]);
+    if (!parsed.ok) return parsed;
+    if (parsed.settings) settings[key] = parsed.settings;
+  }
+  return { ok: true, settings };
 }
 
 function parseParameterSweep(
@@ -127,14 +190,7 @@ function parseParameterSweep(
 ): { ok: true; settings?: ParameterSweepSettings } | ImportFailure {
   if (value === undefined) return { ok: true };
   if (!isRecord(value)) return { ok: false, message: 'The parameter sweep setup is invalid.' };
-  if (
-    value.parameter !== 'designWavelengthNm' &&
-    value.parameter !== 'incidentAngleDegrees' &&
-    value.parameter !== 'periodCount' &&
-    value.parameter !== 'acousticFrequencyHz' &&
-    value.parameter !== 'acousticPeriodCount' &&
-    value.parameter !== 'acousticIndexModulation'
-  ) {
+  if (!isSweepParameter(value.parameter)) {
     return { ok: false, message: 'Parameter sweep must target design wavelength, angle, or periods.' };
   }
   if (
@@ -169,6 +225,81 @@ function parseParameterSweep(
       end: value.end as number,
       pointCount: value.pointCount as number,
     },
+  };
+}
+
+function parseHeatmapSelection(
+  value: unknown,
+  legacyValue: unknown,
+): { ok: true; settings?: { xParameter: SweepParameter; yParameter: SweepParameter } } | ImportFailure {
+  if (value === undefined && legacyValue === undefined) return { ok: true };
+  if (value !== undefined) {
+    if (!isRecord(value)) return { ok: false, message: 'The heatmap setup is invalid.' };
+    if (!isSweepParameter(value.xParameter) || !isSweepParameter(value.yParameter) || value.xParameter === value.yParameter) {
+      return { ok: false, message: 'The heatmap axis selection is invalid.' };
+    }
+    return { ok: true, settings: { xParameter: value.xParameter, yParameter: value.yParameter } };
+  }
+  if (!isRecord(legacyValue) || !isRecord(legacyValue.xAxis) || !isRecord(legacyValue.yAxis)) {
+    return { ok: false, message: 'The heatmap setup is invalid.' };
+  }
+  if (!isSweepParameter(legacyValue.xAxis.parameter) || !isSweepParameter(legacyValue.yAxis.parameter)) {
+    return { ok: false, message: 'The heatmap axis selection is invalid.' };
+  }
+  if (legacyValue.xAxis.parameter === legacyValue.yAxis.parameter) {
+    return { ok: false, message: 'The heatmap axis selection is invalid.' };
+  }
+  return { ok: true, settings: { xParameter: legacyValue.xAxis.parameter, yParameter: legacyValue.yAxis.parameter } };
+}
+
+function firstParameterSweep(
+  settings: Partial<Record<SweepParameter, ParameterSweepSettings>>,
+): ParameterSweepSettings | undefined {
+  return Object.values(settings)[0];
+}
+
+function getDefaultHeatmapAxisBounds(
+  parameter: SweepParameter,
+  inputs: QuarterWaveStackInputs,
+): Pick<ParameterSweepSettings, 'start' | 'end' | 'pointCount'> {
+  if (parameter === 'periodCount') {
+    return { ...getDefaultPeriodSweepBounds(inputs.periodCount), pointCount: 25 };
+  }
+  if (parameter === 'acousticPeriodCount') {
+    const periods = inputs.acousticDesign?.acousticPeriodCount ?? 10;
+    return {
+      ...getDefaultPeriodSweepBounds(periods),
+      pointCount: 25,
+    };
+  }
+  if (parameter === 'incidentAngleDegrees') {
+    return { start: 0, end: 89.9, pointCount: 25 };
+  }
+  if (parameter === 'acousticFrequencyHz') {
+    const frequency = inputs.acousticDesign?.acousticFrequencyHz ?? 1e9;
+    return { start: frequency * 0.5, end: frequency * 1.5, pointCount: 25 };
+  }
+  if (parameter === 'acousticIndexModulation') {
+    const modulation = inputs.acousticDesign?.acousticIndexModulation ?? 0.002;
+    return { start: 0, end: Math.max(0.001, modulation * 2), pointCount: 25 };
+  }
+  return {
+    start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
+    end: inputs.wavelengthEndNm ?? inputs.designWavelengthNm * 1.5,
+    pointCount: 25,
+  };
+}
+
+function getDefaultPeriodSweepBounds(periodCount: number, maximum?: number) {
+  const currentPeriodCount =
+    Number.isFinite(periodCount) && periodCount > 0 ? Math.round(periodCount) : 1;
+
+  return {
+    start: Math.max(1, currentPeriodCount - 100),
+    end: Math.min(
+      maximum ?? Number.POSITIVE_INFINITY,
+      Math.max(2, currentPeriodCount + 100),
+    ),
   };
 }
 
@@ -304,6 +435,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /** Checks for a non-empty string field. */
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isSweepParameter(value: unknown): value is SweepParameter {
+  return (
+    value === 'designWavelengthNm' ||
+    value === 'incidentAngleDegrees' ||
+    value === 'periodCount' ||
+    value === 'acousticFrequencyHz' ||
+    value === 'acousticPeriodCount' ||
+    value === 'acousticIndexModulation'
+  );
 }
 /** Checks for a non-negative finite numeric field. */
 function isNonNegativeFiniteNumber(value: unknown): value is number {

@@ -50,6 +50,8 @@ const makeModernPayload = (
     units: unknown;
     inputs: unknown;
     parameterSweep: unknown;
+    parameterSweeps: unknown;
+    heatmapSelection: unknown;
   }> = {},
 ) => ({
   schema: 'ssvds-stack-config-v1',
@@ -63,14 +65,26 @@ const makeModernPayload = (
 // Covers the preferred schema and the retained legacy Bragg aliases.
 describe('importStackConfigJson', () => {
   it('round-trips a valid exported JSON setup', () => {
-    const json = exportStackConfigJson(inputs, parameterSweep);
+    const json = exportStackConfigJson(inputs, {
+      incidentAngleDegrees: parameterSweep,
+    }, {
+      xParameter: 'designWavelengthNm',
+      yParameter: 'periodCount',
+    });
     const imported = importStackConfigJson(json);
 
-    expect(imported).toEqual({
+    expect(imported).toEqual(expect.objectContaining({
       ok: true,
       inputs,
       parameterSweep,
-    });
+      parameterSweeps: {
+        incidentAngleDegrees: parameterSweep,
+      },
+      heatmapSelection: {
+        xParameter: 'designWavelengthNm',
+        yParameter: 'periodCount',
+      },
+    }));
   });
 
   it('returns an error for invalid JSON', () => {
@@ -206,19 +220,18 @@ describe('importStackConfigJson', () => {
     });
   });
 
-  it('returns an error for over-limit direct optical work during import validation', () => {
+  it('allows a 500-layer optical stack during import validation', () => {
     const payload = makeModernPayload({
       inputs: {
         ...inputs,
-        periodCount: 401,
+        periodCount: 500,
         wavelengthPointCount: 500,
       },
     });
 
-    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
-      ok: false,
-      message: 'Direct optical solving is limited to about 400,000 layer-wavelength evaluations. Reduce periods or wavelength samples.',
-    });
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual(expect.objectContaining({
+      ok: true,
+    }));
   });
 
   it('returns an error when wavelengthPointCount exceeds the shared maximum during import validation', () => {
@@ -301,6 +314,24 @@ describe('importStackConfigJson', () => {
       ok: false,
       message: 'Parameter sweep end must be greater than start.',
     });
+  });
+
+  it('imports heatmap setup', () => {
+    const payload = makeModernPayload({
+      heatmapSelection: {
+        xParameter: 'designWavelengthNm',
+        yParameter: 'periodCount',
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual(expect.objectContaining({
+      ok: true,
+      inputs,
+      heatmapSelection: {
+        xParameter: 'designWavelengthNm',
+        yParameter: 'periodCount',
+      },
+    }));
   });
 
   it('imports an acoustic structure with a complex material index', () => {

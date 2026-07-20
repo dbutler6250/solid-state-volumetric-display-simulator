@@ -1,10 +1,12 @@
 import { Suspense, useState } from 'react';
+import { ChartProgressOverlay, type ChartProgress } from './ChartProgressOverlay';
 import { ChartUnavailableFallback, LazyPlot, LazyPlotErrorBoundary } from './LazyPlot';
 import type { ParameterSweepResult } from '../types/simulation';
 import { getParameterSweepAxisLabel } from './parameterSweepAxisLabels';
 
 type ParameterSweepChartProps = {
   result: ParameterSweepResult | null;
+  progress: ChartProgress | null;
 };
 
 const SERIES_COLORS = {
@@ -18,13 +20,14 @@ function getParameterLabel(result: ParameterSweepResult): string {
 }
 
 /** Renders sweep metrics against the selected swept parameter. */
-export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
+export function ParameterSweepChart({ result, progress }: ParameterSweepChartProps) {
   const [retryKey, setRetryKey] = useState(0);
 
   if (!result) {
     return (
       <div className="chart-placeholder chart-placeholder-compact" role="status">
-        Run a parameter sweep to compare peak reflectance, center wavelength, and bandwidth.
+        {progress ? null : 'Run a parameter sweep to compare peak reflectance, center wavelength, and bandwidth.'}
+        <ChartProgressOverlay label="Running sweep..." progress={progress} />
       </div>
     );
   }
@@ -124,6 +127,7 @@ export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
           />
         </Suspense>
       </LazyPlotErrorBoundary>
+      <ChartProgressOverlay label="Running sweep..." progress={progress} />
     </div>
   );
 }

@@ -10,9 +10,6 @@ export const MAX_OPTICAL_PERIODS = 1_000_000;
 /** Maximum supported wavelength samples in one direct optical solve. */
 export const MAX_WAVELENGTH_POINTS = 3_000;
 
-/** Caps direct optical layer-by-wavelength evaluations before stack allocation and solving. */
-export const MAX_DIRECT_SOLVE_WORK = 400_000;
-
 /** Maximum number of spectra evaluated by one synchronous parameter sweep. */
 export const MAX_PARAMETER_SWEEP_POINTS = 200;
 

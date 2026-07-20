@@ -2,6 +2,8 @@ import type {
   ParameterSweepResult,
   ParameterSweepSettings,
   QuarterWaveStackInputs,
+  ReflectanceHeatmapResult,
+  ReflectanceHeatmapSettings,
   SimulationDocument,
   SimulationResult,
 } from '../../types/simulation';
@@ -31,7 +33,6 @@ import { getAcousticSlicesPerPeriod } from '../structures/acoustoOpticGrating';
 import {
   MAX_AUTOMATIC_ACOUSTIC_LAYERS,
   MAX_PARAMETER_SWEEP_POINTS,
-  MAX_PARAMETER_SWEEP_WORK,
 } from '../simulationLimits';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 import { toComplexRefractiveIndex } from '../materials/material';
@@ -269,6 +270,12 @@ export function solveResolvedStructure(
 type AsyncSolveOptions = {
   requiredWavelengthNm?: number;
   signal?: AbortSignal;
+  onProgress?: (progress: SolverProgress) => void;
+};
+
+export type SolverProgress = {
+  completed: number;
+  total: number;
 };
 
 /** Solves a resolved stack in cancellable wavelength chunks for responsive acoustic editing. */
@@ -284,6 +291,7 @@ export async function solveResolvedStructureAsync(
     requiredWavelengthNm: options.requiredWavelengthNm,
   });
   const spectrum: LayerStackPointResult[] = [];
+  options.onProgress?.({ completed: 0, total: wavelengths.length });
 
   for (const wavelengthNm of wavelengths) {
     throwIfAborted(options.signal);
@@ -294,6 +302,7 @@ export async function solveResolvedStructureAsync(
         polarization: analysis.polarization,
       }),
     );
+    options.onProgress?.({ completed: spectrum.length, total: wavelengths.length });
     await yieldToBrowser();
   }
 
@@ -328,6 +337,16 @@ export function solveQuarterWaveStackParameterSweep(
   return solveSimulationDocumentParameterSweep(createSimulationDocument(inputs), settings);
 }
 
+/** Runs a parameter sweep without blocking the main thread for large jobs. */
+export async function solveQuarterWaveStackParameterSweepAsync(
+  inputs: QuarterWaveStackInputs,
+  settings: ParameterSweepSettings,
+  options: { signal?: AbortSignal; onProgress?: (progress: SolverProgress) => void } = {},
+): Promise<ParameterSweepResult> {
+  assertValidInputs(inputs);
+  return solveSimulationDocumentParameterSweepAsync(createSimulationDocument(inputs), settings, options);
+}
+
 /** Resolves every sweep point after updating the active discriminated structure field. */
 export function solveSimulationDocumentParameterSweep(
   document: SimulationDocument,
@@ -358,6 +377,176 @@ export function solveSimulationDocumentParameterSweep(
   });
 
   return { settings, points };
+}
+
+/** Resolves parameter sweep points cooperatively so large sweeps stay responsive. */
+export async function solveSimulationDocumentParameterSweepAsync(
+  document: SimulationDocument,
+  settings: ParameterSweepSettings,
+  options: { signal?: AbortSignal; onProgress?: (progress: SolverProgress) => void } = {},
+): Promise<ParameterSweepResult> {
+  const supported = resolveSimulationDocument(document).sweepParameters;
+  if (!supported.includes(settings.parameter)) {
+    throw new Error(`Sweep parameter ${settings.parameter} is not supported by the active structure.`);
+  }
+  const values = createParameterSweepValues(settings);
+  assertParameterSweepIsSafe(document, settings, values);
+  const points: ParameterSweepResult['points'] = [];
+  options.onProgress?.({ completed: 0, total: values.length });
+
+  for (const parameterValue of values) {
+    throwIfAborted(options.signal);
+    const sweptDocument = applySweepValue(document, settings, parameterValue);
+    const result = solveSimulationDocument(sweptDocument, {
+      requiredWavelengthNm:
+        settings.parameter === 'designWavelengthNm' ? parameterValue : undefined,
+    });
+
+    points.push({
+      parameterValue:
+        settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount'
+          ? Math.round(parameterValue)
+          : parameterValue,
+      peakReflectance: result.bandTouchesBoundary ? null : result.peakReflectance,
+      centerWavelengthNm: result.bandTouchesBoundary ? null : result.centerWavelengthNm,
+      bandwidthNm: result.bandTouchesBoundary ? null : result.bandwidthNm,
+    });
+    options.onProgress?.({ completed: points.length, total: values.length });
+    await yieldToBrowser();
+  }
+
+  throwIfAborted(options.signal);
+  return { settings, points };
+}
+
+const heatmapResultCache = new Map<string, ReflectanceHeatmapResult>();
+
+/** Resolves a general 2D reflectance grid for the active document. */
+export function solveSimulationDocumentReflectanceHeatmap(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+): ReflectanceHeatmapResult {
+  const cacheKey = createHeatmapCacheKey(document, settings);
+  const cached = heatmapResultCache.get(cacheKey);
+  if (cached) return cached;
+
+  const resolved = resolveSimulationDocument(document);
+  const supported = resolved.sweepParameters;
+  if (!supported.includes(settings.xAxis.parameter) || !supported.includes(settings.yAxis.parameter)) {
+    throw new Error('One or both heatmap axes are not supported by the active structure.');
+  }
+
+  const xValues = createParameterSweepValues(settings.xAxis);
+  const yValues = createParameterSweepValues(settings.yAxis);
+  assertHeatmapSweepIsSafe(document, settings, xValues, yValues);
+  const pointCache = new Map<string, number>();
+  const reflectance: number[][] = [];
+  for (const yValue of yValues) {
+    const row: number[] = [];
+    for (const xValue of xValues) {
+      const pointKey = createHeatmapPointKey(xValue, yValue);
+      const cachedValue = pointCache.get(pointKey);
+      if (cachedValue !== undefined) {
+        row.push(cachedValue);
+        continue;
+      }
+
+      const sweptDocument = applySweepValue(
+        applySweepValue(document, settings.xAxis, xValue),
+        settings.yAxis,
+        yValue,
+      );
+      const result = solveSimulationDocument(sweptDocument, {
+        requiredWavelengthNm:
+          settings.xAxis.parameter === 'designWavelengthNm'
+            ? xValue
+            : settings.yAxis.parameter === 'designWavelengthNm'
+              ? yValue
+              : undefined,
+      });
+      const peakReflectance = result.peakReflectance;
+      pointCache.set(pointKey, peakReflectance);
+      row.push(peakReflectance);
+    }
+    reflectance.push(row);
+  }
+
+  const heatmapResult: ReflectanceHeatmapResult = {
+    settings,
+    xAxis: { settings: settings.xAxis, values: xValues },
+    yAxis: { settings: settings.yAxis, values: yValues },
+    reflectance,
+  };
+  heatmapResultCache.set(cacheKey, heatmapResult);
+  return heatmapResult;
+}
+
+/** Resolves a general 2D reflectance grid without blocking the main thread for large sweeps. */
+export async function solveSimulationDocumentReflectanceHeatmapAsync(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+  options: { signal?: AbortSignal; onProgress?: (progress: SolverProgress) => void } = {},
+): Promise<ReflectanceHeatmapResult> {
+  const cacheKey = createHeatmapCacheKey(document, settings);
+  const cached = heatmapResultCache.get(cacheKey);
+  if (cached) return cached;
+
+  const resolved = resolveSimulationDocument(document);
+  const supported = resolved.sweepParameters;
+  if (!supported.includes(settings.xAxis.parameter) || !supported.includes(settings.yAxis.parameter)) {
+    throw new Error('One or both heatmap axes are not supported by the active structure.');
+  }
+
+  const xValues = createParameterSweepValues(settings.xAxis);
+  const yValues = createParameterSweepValues(settings.yAxis);
+  assertHeatmapSweepIsSafe(document, settings, xValues, yValues);
+  const pointCache = new Map<string, number>();
+  const reflectance: number[][] = [];
+  const totalCells = xValues.length * yValues.length;
+  let completedCells = 0;
+  options.onProgress?.({ completed: 0, total: totalCells });
+
+  for (const yValue of yValues) {
+    throwIfAborted(options.signal);
+    const row: number[] = [];
+    for (const xValue of xValues) {
+      throwIfAborted(options.signal);
+      const pointKey = createHeatmapPointKey(xValue, yValue);
+      const cachedValue = pointCache.get(pointKey);
+      if (cachedValue !== undefined) {
+        row.push(cachedValue);
+        completedCells += 1;
+        options.onProgress?.({ completed: completedCells, total: totalCells });
+        continue;
+      }
+
+      const sweptDocument = applySweepValue(applySweepValue(document, settings.xAxis, xValue), settings.yAxis, yValue);
+      const result = solveSimulationDocument(sweptDocument, {
+        requiredWavelengthNm:
+          settings.xAxis.parameter === 'designWavelengthNm'
+            ? xValue
+            : settings.yAxis.parameter === 'designWavelengthNm'
+              ? yValue
+              : undefined,
+      });
+      const peakReflectance = result.peakReflectance;
+      pointCache.set(pointKey, peakReflectance);
+      row.push(peakReflectance);
+      completedCells += 1;
+      options.onProgress?.({ completed: completedCells, total: totalCells });
+      await yieldToBrowser();
+    }
+    reflectance.push(row);
+  }
+
+  const heatmapResult: ReflectanceHeatmapResult = {
+    settings,
+    xAxis: { settings: settings.xAxis, values: xValues },
+    yAxis: { settings: settings.yAxis, values: yValues },
+    reflectance,
+  };
+  heatmapResultCache.set(cacheKey, heatmapResult);
+  return heatmapResult;
 }
 
 /** Creates inclusive sweep values while preserving integer period counts. */
@@ -393,6 +582,52 @@ function createParameterSweepValues(settings: ParameterSweepSettings): number[] 
   return Array.from({ length: settings.pointCount }, (_, index) => settings.start + step * index);
 }
 
+function createHeatmapPointKey(xValue: number, yValue: number): string {
+  return `${xValue}::${yValue}`;
+}
+
+function createHeatmapCacheKey(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+): string {
+  return JSON.stringify({ document, settings });
+}
+
+/** Rejects the entire heatmap before resolving any over-limit stack or excessive workload. */
+function assertHeatmapSweepIsSafe(
+  document: SimulationDocument,
+  settings: ReflectanceHeatmapSettings,
+  xValues: number[],
+  yValues: number[],
+): void {
+  const pointCount = xValues.length * yValues.length;
+  if (pointCount > MAX_PARAMETER_SWEEP_POINTS * MAX_PARAMETER_SWEEP_POINTS) {
+    throw new Error('The heatmap sweep is too large to evaluate synchronously.');
+  }
+
+  for (const yValue of yValues) {
+    for (const xValue of xValues) {
+      const sweptDocument = applySweepValue(applySweepValue(document, settings.xAxis, xValue), settings.yAxis, yValue);
+      const sweptInputs = documentToLegacyInputs(sweptDocument);
+      const issues = validateQuarterWaveStackInputs(sweptInputs);
+      if (issues.length > 0) {
+        throw new Error(`Invalid heatmap value ${xValue}, ${yValue}: ${issues.map((issue) => issue.message).join(' ')}`);
+      }
+
+      const layerCount =
+        sweptDocument.structure.type === 'acousto-optic-grating'
+          ? sweptDocument.structure.design.acousticPeriodCount *
+            getAcousticSlicesPerPeriod(sweptDocument.structure.design.acousticRepresentationMode)
+          : sweptDocument.structure.periodCount * 2;
+      if (layerCount > MAX_AUTOMATIC_ACOUSTIC_LAYERS && sweptDocument.structure.type === 'acousto-optic-grating') {
+        throw new Error(
+          `Heatmap value ${xValue}, ${yValue} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
+        );
+      }
+    }
+  }
+}
+
 /** Rejects the entire sweep before resolving any over-limit stack or excessive workload. */
 function assertParameterSweepIsSafe(
   document: SimulationDocument,
@@ -405,7 +640,6 @@ function assertParameterSweepIsSafe(
     );
   }
 
-  let aggregateWork = 0;
   for (const value of values) {
     const sweptDocument = applySweepValue(document, settings, value);
     const sweptInputs = documentToLegacyInputs(sweptDocument);
@@ -423,14 +657,8 @@ function assertParameterSweepIsSafe(
         `Acoustic sweep value ${value} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
       );
     }
-    aggregateWork += layerCount * sweptDocument.analysis.wavelengthPointCount;
   }
 
-  if (aggregateWork > MAX_PARAMETER_SWEEP_WORK) {
-    throw new Error(
-      `This sweep requires approximately ${aggregateWork.toLocaleString()} layer-wavelength evaluations; the synchronous sweep limit is ${MAX_PARAMETER_SWEEP_WORK.toLocaleString()}. Reduce the bounds, points, wavelength samples, or representation detail.`,
-    );
-  }
 }
 
 function throwIfAborted(signal?: AbortSignal): void {

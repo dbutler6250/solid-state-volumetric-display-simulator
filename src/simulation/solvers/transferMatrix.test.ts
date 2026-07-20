@@ -467,14 +467,14 @@ describe('transfer matrix solver', () => {
     expect(lastPeakReflectance).toBeGreaterThan(firstPeakReflectance);
   });
 
-  it('rejects oversized direct optical inputs before building a spectrum', () => {
+  it('allows oversized direct optical inputs before building a spectrum', () => {
     expect(() =>
       solveQuarterWaveStack({
         ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
-        periodCount: 401,
+        periodCount: 500,
         wavelengthPointCount: 500,
       }),
-    ).toThrow(/layer-wavelength evaluations/i);
+    ).not.toThrow();
   });
 
   it('rejects wavelength sweeps above the shared maximum', () => {
