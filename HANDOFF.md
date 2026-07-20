@@ -10,6 +10,7 @@
 - Added in-chart progress bars for Spectrum, Parameter Sweep, and Reflectance Heatmap calculations.
 - Threaded async solver progress callbacks for wavelength samples, sweep points, and heatmap cells.
 - Preserved existing chart placeholder/result behavior while clearing progress on completion, stale requests, and aborts.
+- Fixed stale async invalidation when sweep rows or heatmap axis controls change during long-running calculations.
 
 ## Verification
 

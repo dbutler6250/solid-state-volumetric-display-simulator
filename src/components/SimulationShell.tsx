@@ -321,7 +321,25 @@ export function SimulationShell() {
   };
   */
 
+  const cancelParameterSweepRun = () => {
+    parameterSweepController.current?.abort();
+    parameterSweepController.current = null;
+    parameterSweepRequestId.current += 1;
+    setParameterSweepIsSolving(false);
+    setParameterSweepProgress(null);
+  };
+
+  const cancelHeatmapRun = () => {
+    heatmapController.current?.abort();
+    heatmapController.current = null;
+    heatmapRequestId.current += 1;
+    setHeatmapIsSolving(false);
+    setHeatmapProgress(null);
+  };
+
   const updateParameterRow = (parameter: SweepParameter, nextSettings: ParameterSweepSettings) => {
+    cancelParameterSweepRun();
+    cancelHeatmapRun();
     setParameterSweepRows((current) => ({
       ...current,
       [parameter]: nextSettings,
@@ -704,6 +722,7 @@ export function SimulationShell() {
                         value={heatmapSelection.xParameter}
                         onChange={(event) => {
                           const nextParameter = event.target.value as SweepParameter;
+                          cancelHeatmapRun();
                           setHeatmapSelection((current) => {
                             if (!current) return current;
                             if (nextParameter === current.yParameter) {
@@ -733,6 +752,7 @@ export function SimulationShell() {
                         value={heatmapSelection.yParameter}
                         onChange={(event) => {
                           const nextParameter = event.target.value as SweepParameter;
+                          cancelHeatmapRun();
                           setHeatmapSelection((current) => {
                             if (!current) return current;
                             if (nextParameter === current.xParameter) {
