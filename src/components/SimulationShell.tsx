@@ -34,6 +34,7 @@ import {
   getActiveInputs,
   simulationWorkspaceReducer,
 } from './simulationWorkspaceState';
+import { shouldRenderOutputPanelContent } from './outputPanelLifecycle';
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import { exportStackConfigJson } from '../io/exportStackConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
@@ -638,83 +639,89 @@ export function SimulationShell() {
             aria-labelledby="spectrum-tab"
             hidden={activeTab !== 'spectrum'}
           >
-            <div className="chart-heading">
-              <h2>Spectrum</h2>
-              <div className="chart-toolbar">
-                <button type="button" className="action-button" onClick={exportCsv} disabled={!result}>
-                  Export Spectrum CSV
-                </button>
-                <label className="toggle-control">
-                  <input type="checkbox" checked={showTransmission} onChange={(event) => setShowTransmission(event.target.checked)} />
-                  <span>Transmission</span>
-                </label>
-              </div>
-            </div>
-            <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} progress={spectrumProgress} />
-            {opticalSolveError ? (
-              <p className="chart-toolbar-message" role="alert">{opticalSolveError}</p>
+            {shouldRenderOutputPanelContent('spectrum', activeTab) ? (
+              <>
+                <div className="chart-heading">
+                  <h2>Spectrum</h2>
+                  <div className="chart-toolbar">
+                    <button type="button" className="action-button" onClick={exportCsv} disabled={!result}>
+                      Export Spectrum CSV
+                    </button>
+                    <label className="toggle-control">
+                      <input type="checkbox" checked={showTransmission} onChange={(event) => setShowTransmission(event.target.checked)} />
+                      <span>Transmission</span>
+                    </label>
+                  </div>
+                </div>
+                <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} progress={spectrumProgress} />
+                {opticalSolveError ? (
+                  <p className="chart-toolbar-message" role="alert">{opticalSolveError}</p>
+                ) : null}
+                {acousticSolveError ? (
+                  <p className="chart-toolbar-message" role="alert">{acousticSolveError}</p>
+                ) : null}
+                {referenceOutsideRange && resolvedStructure ? (
+                  <div className="reference-range-warning" role="alert">
+                    <span>
+                      The resolved reference wavelength ({resolvedStructure.referenceWavelengthNm.toFixed(1)} nm)
+                      is outside the analysis range.
+                    </span>
+                    <button type="button" onClick={recenterAnalysisRange}>
+                      Center analysis range
+                    </button>
+                  </div>
+                ) : null}
+                {referenceRangeError ? (
+                  <p className="chart-toolbar-message" role="alert">{referenceRangeError}</p>
+                ) : null}
+                <MetricsPanel result={result} />
+                <section className="tab-controls" aria-label="Wavelength sweep controls">
+                  <QuarterWaveStackForm
+                    inputs={inputs}
+                    validationIssues={validationIssues}
+                    onChange={setInputs}
+                    section="sweep"
+                    externalResetKey={inputResetKey}
+                  />
+                </section>
+              </>
             ) : null}
-            {acousticSolveError ? (
-              <p className="chart-toolbar-message" role="alert">{acousticSolveError}</p>
-            ) : null}
-            {referenceOutsideRange && resolvedStructure ? (
-              <div className="reference-range-warning" role="alert">
-                <span>
-                  The resolved reference wavelength ({resolvedStructure.referenceWavelengthNm.toFixed(1)} nm)
-                  is outside the analysis range.
-                </span>
-                <button type="button" onClick={recenterAnalysisRange}>
-                  Center analysis range
-                </button>
-              </div>
-            ) : null}
-            {referenceRangeError ? (
-              <p className="chart-toolbar-message" role="alert">{referenceRangeError}</p>
-            ) : null}
-            <MetricsPanel result={result} />
-            <section className="tab-controls" aria-label="Wavelength sweep controls">
-              <QuarterWaveStackForm
-                inputs={inputs}
-                validationIssues={validationIssues}
-                onChange={setInputs}
-                section="sweep"
-                externalResetKey={inputResetKey}
-              />
-            </section>
           </section>
 
           <section className="chart-panel" id="parameter-sweep-panel" role="tabpanel" aria-labelledby="parameter-sweep-tab" hidden={activeTab !== 'parameter-sweep'}>
-            <div className="chart-heading">
-              <h2>Parameter Sweep</h2>
-              <button type="button" className="action-button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>Export Sweep CSV</button>
-            </div>
-            <ParameterSweepChart result={parameterSweepResult} progress={parameterSweepProgress} />
-            <section className="parameter-sweep-panel tab-controls" aria-label="Parameter sweep controls">
-              {supportedHeatmapParameters.map((parameter) => (
-                <ParameterSweepRowControls
-                  key={parameter}
-                  label={getSweepParameterLabel(parameter)}
-                  inputs={inputs}
-                  settings={parameterSweepRows[parameter] ?? getDefaultSweepSettings(inputs, parameter)}
-                  inputKey={inputResetKey}
-                  onChange={(nextSettings) => updateParameterRow(parameter, nextSettings)}
-                  onRun={() => runParameterSweep(parameter)}
-                  isRunning={parameterSweepIsSolving}
-                />
-              ))}
-              {parameterSweepError ? (
-                <p className="chart-toolbar-message" role="alert">
-                  {parameterSweepError}
-                </p>
-              ) : parameterSweepResult ? (
-                <p className="parameter-sweep-status" role="status">
-                  Sweep complete: {parameterSweepResult.points.length} points evaluated for {getSweepParameterLabel(parameterSweepResult.settings.parameter)}.
-                </p>
-              ) : null}
-            </section>
-            <section className="heatmap-config-panel" aria-label="Heatmap controls">
-              {heatmapSelection ? (
-                <>
+            {shouldRenderOutputPanelContent('parameter-sweep', activeTab) ? (
+              <>
+                <div className="chart-heading">
+                  <h2>Parameter Sweep</h2>
+                  <button type="button" className="action-button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>Export Sweep CSV</button>
+                </div>
+                <ParameterSweepChart result={parameterSweepResult} progress={parameterSweepProgress} />
+                <section className="parameter-sweep-panel tab-controls" aria-label="Parameter sweep controls">
+                  {supportedHeatmapParameters.map((parameter) => (
+                    <ParameterSweepRowControls
+                      key={parameter}
+                      label={getSweepParameterLabel(parameter)}
+                      inputs={inputs}
+                      settings={parameterSweepRows[parameter] ?? getDefaultSweepSettings(inputs, parameter)}
+                      inputKey={inputResetKey}
+                      onChange={(nextSettings) => updateParameterRow(parameter, nextSettings)}
+                      onRun={() => runParameterSweep(parameter)}
+                      isRunning={parameterSweepIsSolving}
+                    />
+                  ))}
+                  {parameterSweepError ? (
+                    <p className="chart-toolbar-message" role="alert">
+                      {parameterSweepError}
+                    </p>
+                  ) : parameterSweepResult ? (
+                    <p className="parameter-sweep-status" role="status">
+                      Sweep complete: {parameterSweepResult.points.length} points evaluated for {getSweepParameterLabel(parameterSweepResult.settings.parameter)}.
+                    </p>
+                  ) : null}
+                </section>
+                <section className="heatmap-config-panel" aria-label="Heatmap controls">
+                  {heatmapSelection ? (
+                    <>
                   <div className="heatmap-axis-grid">
                     <label className="field heatmap-axis-selector">
                       <span>X Axis</span>
@@ -799,22 +806,26 @@ export function SimulationShell() {
                       Heatmap complete: {heatmapResult.xAxis.values.length * heatmapResult.yAxis.values.length} points evaluated.
                     </p>
                   ) : null}
-                </>
-              ) : (
-                <p className="chart-placeholder chart-placeholder-compact" role="status">
-                  Resolve a valid stack first, then choose heatmap axes.
-                </p>
-              )}
-            </section>
-            <ReflectanceHeatmapChart result={heatmapResult} progress={heatmapProgress} />
+                    </>
+                  ) : (
+                    <p className="chart-placeholder chart-placeholder-compact" role="status">
+                      Resolve a valid stack first, then choose heatmap axes.
+                    </p>
+                  )}
+                </section>
+                <ReflectanceHeatmapChart result={heatmapResult} progress={heatmapProgress} />
+              </>
+            ) : null}
           </section>
 
           <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
-            <StackDefinitionPanel
-              inputs={inputs}
-              isValid={validationIssues.length === 0}
-              resolvedStructure={resolvedStructure}
-            />
+            {shouldRenderOutputPanelContent('stack-definition', activeTab) ? (
+              <StackDefinitionPanel
+                inputs={inputs}
+                isValid={validationIssues.length === 0}
+                resolvedStructure={resolvedStructure}
+              />
+            ) : null}
           </section>
 
           <section
@@ -824,20 +835,22 @@ export function SimulationShell() {
             aria-labelledby="reflectance-volume-tab"
             hidden={activeTab !== 'reflectance-volume'}
           >
-            {simulationDocument && resolvedStructure && result ? (
-              <ReflectanceVolumePanel
-                document={simulationDocument}
-                resolvedStructure={resolvedStructure}
-                result={result}
-              />
-            ) : (
-              <div className="chart-placeholder">
-                <div>
-                  <strong>3D view unavailable</strong>
-                  <p>Resolve a valid stack first, then open the 3D View tab.</p>
+            {shouldRenderOutputPanelContent('reflectance-volume', activeTab) ? (
+              simulationDocument && resolvedStructure && result ? (
+                <ReflectanceVolumePanel
+                  document={simulationDocument}
+                  resolvedStructure={resolvedStructure}
+                  result={result}
+                />
+              ) : (
+                <div className="chart-placeholder">
+                  <div>
+                    <strong>3D view unavailable</strong>
+                    <p>Resolve a valid stack first, then open the 3D View tab.</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            ) : null}
           </section>
 
           <section
@@ -847,7 +860,7 @@ export function SimulationShell() {
             aria-labelledby="stl-slicer-tab"
             hidden={activeTab !== 'stl-slicer'}
           >
-            <StlSlicerPanel />
+            {shouldRenderOutputPanelContent('stl-slicer', activeTab) ? <StlSlicerPanel /> : null}
           </section>
         </section>
       </section>
