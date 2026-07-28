@@ -1578,3 +1578,459 @@ Even after strong coherent coupling is achieved, the project must still solve:
 \]
 
 The next physics investigation should focus on the higher-order acoustic-Bragg question before assuming that the architecture can remain in the tens-to-hundreds-of-MHz acoustic regime.
+
+---
+
+# 17. First-Pass Open Research Investigation Update
+
+This section records findings from the first focused investigation performed after consolidation of the research archive. It is intended to preserve the earlier research trail while updating the status of several previously unresolved questions.
+
+## 17.1 Higher-order Bragg coupling is real but is strongly constrained for weak sinusoidal modulation
+
+The earlier discussion in Section 5 correctly identified that a purely sinusoidal refractive-index grating contains only its fundamental spatial Fourier component explicitly. However, a Fourier-spectrum-only interpretation is incomplete.
+
+A sinusoidal periodic medium can exhibit higher-order Bragg resonances through sequential coupling among intermediate spatial harmonics even when the index profile does not contain an explicit Fourier component at the final momentum-transfer wavevector. Extended coupled-wave and Floquet treatments show that, for a weak singly periodic dielectric perturbation with normalized magnitude \(\eta\), the effective coupling coefficient for Bragg order \(N\) decreases rapidly with perturbation strength and scales schematically as
+
+\[
+\boxed{
+\chi_N\propto\eta^N
+}
+\]
+
+with order-dependent numerical factors.
+
+For weak photoelastic modulation,
+
+\[
+\eta\sim\frac{\Delta\epsilon}{\epsilon}
+\approx\frac{2\Delta n}{n}.
+\]
+
+Because \(|\Delta n|\ll n\) in the regime presently contemplated, sequential high-order coupling becomes rapidly weaker with increasing order.
+
+### Updated status of the integer-multiple hypothesis
+
+**Supported with qualification:** higher-order Bragg interaction is physically real and does not strictly require an explicit high-order Fourier harmonic in the grating profile.
+
+**Strongly constrained:** using very high Bragg order as the principal mechanism for reducing the fundamental acoustic frequency appears unfavorable for a weak sinusoidal photoelastic grating because the effective coupling decreases rapidly with order.
+
+A different mechanism is possible if the acoustic waveform itself becomes nonsinusoidal and contains a real spatial harmonic at the required wavevector. In that case the harmonic can provide direct coupling. However, if the fundamental acoustic frequency is \(f_1\) and the required component is the \(N\)-th harmonic,
+
+\[
+f_N=Nf_1.
+\]
+
+The high-order spatial harmonic must therefore still physically exist at approximately the frequency and wavevector demanded by optical momentum conservation. Lowering the electrical or acoustic fundamental does not by itself eliminate the need to generate and sustain the high-\(K\) component.
+
+### Architecture implication
+
+The discrete odd-quarter-wave multilayer analogy should not be treated as a straightforward route around the visible-light acoustic momentum requirement.
+
+A more useful follow-up question is whether nonlinear or engineered acoustic structures can generate the required high-spatial-frequency component locally with useful amplitude, efficiency, and thermal performance.
+
+### Simulator implication
+
+The proposed higher-order solver should distinguish between:
+
+1. **direct harmonic coupling**, where the acoustic/index waveform explicitly contains the spatial Fourier component that supplies the required optical momentum; and
+2. **sequential higher-order coupling**, where multiple coupling steps produce an \(N\)-th-order Bragg resonance.
+
+A Fourier-spectrum diagnostic remains useful for the first case, but a Floquet, extended coupled-wave, or rigorous coupled-wave model is required to represent the second case reliably.
+
+---
+
+## 17.2 Acoustic intensity can be linked directly to strain and refractive-index modulation
+
+For a longitudinal traveling plane wave in the linear-elastic regime, the time-averaged acoustic intensity can be written approximately as
+
+\[
+\boxed{
+I_a=\frac12\rho v_a^3S^2
+}
+\]
+
+where:
+
+- \(I_a\) is acoustic intensity in W/m\(^2\),
+- \(\rho\) is material density in kg/m\(^3\),
+- \(v_a\) is longitudinal acoustic phase velocity in m/s,
+- \(S\) is strain amplitude.
+
+Therefore,
+
+\[
+\boxed{
+S=\sqrt{\frac{2I_a}{\rho v_a^3}}.
+}
+\]
+
+Combining this with the scalar photoelastic approximation
+
+\[
+\Delta n\approx-\frac12n^3p_{\text{eff}}S
+\]
+
+gives
+
+\[
+\boxed{
+|\Delta n|
+\approx
+\frac12 n^3|p_{\text{eff}}|
+\sqrt{\frac{2I_a}{\rho v_a^3}}.
+}
+\]
+
+This relationship provides a direct bridge between an acoustic power-density model and the optical \(\Delta n\) used by the grating solver.
+
+### Important assumptions
+
+This equation assumes:
+
+- a longitudinal plane wave,
+- linear elasticity,
+- a single acoustic phase velocity,
+- a scalar effective photoelastic coefficient,
+- negligible attenuation across the local calculation region,
+- and no nonlinear acoustic or thermal limitation.
+
+It should therefore be treated as a useful first-order engineering model rather than a universal material law.
+
+### Simulator implication
+
+The acoustic/material solver should eventually accept acoustic intensity directly or derive it from launched acoustic power and effective acoustic aperture:
+
+\[
+\boxed{
+I_a\approx\frac{P_a}{A_a}.
+}
+\]
+
+Candidate material and device inputs should therefore include
+
+\[
+P_a,\quad
+A_a,\quad
+\rho,\quad
+v_a,\quad
+p_{ij},\quad
+n,\quad
+\alpha_a(f),
+\]
+
+plus transducer efficiency and geometry as the model matures.
+
+---
+
+## 17.3 Acoustic attenuation limits the useful coherent interaction length
+
+Large physical grating length is useful only while the acoustic modulation remains sufficiently strong and phase coherent.
+
+If the acoustic amplitude decays approximately as
+
+\[
+\boxed{
+A(z)=A_0e^{-\alpha_a z},
+}
+\]
+
+and optical coupling is proportional to the local index modulation, then a corresponding position-dependent coupling coefficient can be written as
+
+\[
+\boxed{
+\kappa(z)=\kappa_0e^{-\alpha_a z}.
+}
+\]
+
+The accumulated coupling strength is then
+
+\[
+\boxed{
+\int_0^L\kappa(z)\,dz
+=
+\frac{\kappa_0}{\alpha_a}
+\left(1-e^{-\alpha_aL}\right).
+}
+\]
+
+For
+
+\[
+L\gg\frac{1}{\alpha_a},
+\]
+
+the accumulated coupling approaches
+
+\[
+\boxed{
+\frac{\kappa_0}{\alpha_a}
+}
+\]
+
+rather than continuing to grow as \(\kappa_0L\).
+
+This establishes a more useful design distinction:
+
+\[
+\boxed{
+L_{\text{physical}}\neq L_{\text{effective}}.
+}
+\]
+
+The effective interaction length may be limited by acoustic attenuation, phase coherence, optical beam geometry, finite aperture, boundary effects, or other nonidealities.
+
+### Current evidence and confidence
+
+Hypersonic attenuation measurements in ordinary glasses indicate that acoustic lifetimes can become short in the multi-GHz regime. Representative silica Brillouin linewidths imply acoustic propagation lengths that can be much shorter than the millimeter-to-centimeter interaction lengths suggested by weak-grating optical calculations.
+
+The exact result is strongly dependent on material, acoustic frequency, temperature, mode, and geometry. No universal numerical coherence length should yet be adopted for the project.
+
+### Architecture implication
+
+The concept of obtaining arbitrarily strong coupling merely by increasing the number of periods is not physically valid once attenuation or phase decoherence makes additional periods ineffective.
+
+This elevates distributed acoustic generation, standing-wave/resonant architectures, lower-loss crystalline media, and other methods of maintaining local acoustic amplitude to important follow-up research topics.
+
+### Simulator implication
+
+Future coupled-mode calculations should replace a purely physical interaction length with an attenuation- and coherence-aware coupling integral. Useful future quantities include
+
+\[
+L_{\text{att}},\quad
+L_{\text{coh}},\quad
+L_{\text{eff}},\quad
+\int\kappa(z)\,dz.
+\]
+
+---
+
+## 17.4 Complete backreflection is the most demanding optical momentum-transfer geometry
+
+The previous first-order backreflection result can be generalized to arbitrary angular deflection.
+
+For elastic optical magnitudes \(|\mathbf k_{\text{in}}|\approx|\mathbf k_{\text{out}}|=k\), and an angle \(\Theta\) between the incident and output optical directions, the required grating momentum magnitude is
+
+\[
+\boxed{
+q=|\mathbf k_{\text{out}}-\mathbf k_{\text{in}}|
+=2k\sin\frac{\Theta}{2}.
+}
+\]
+
+Using
+
+\[
+k=\frac{2\pi n}{\lambda_0}
+\]
+
+and
+
+\[
+q=\frac{2\pi f_a}{v_a},
+\]
+
+gives the approximate acoustic frequency requirement
+
+\[
+\boxed{
+f_a(\Theta)=
+\frac{2nv_a}{\lambda_0}
+\sin\frac{\Theta}{2}.
+}
+\]
+
+The familiar direct-backreflection result is recovered when
+
+\[
+\Theta=180^\circ,
+\]
+
+for which
+
+\[
+\boxed{
+f_{\text{back}}=\frac{2nv_a}{\lambda_0}.}
+\]
+
+For smaller optical direction changes, the required acoustic frequency decreases substantially.
+
+### Architecture implication
+
+The question
+
+\[
+\boxed{
+\text{Does voxel formation actually require direct }180^\circ\text{ optical reversal?}
+}
+\]
+
+should now be treated as a highest-priority architecture question.
+
+A system that uses moderate-angle coherent coupling only for spatial selection or routing, followed by a separate viewer-facing emission or scattering process, may reduce the required acoustic wavevector much more effectively than attempting extremely high-order Bragg backreflection.
+
+This strengthens the motivation for the two-stage architecture already identified in Section 6.3:
+
+\[
+\text{coherent selection}
+\rightarrow
+\text{localized optical energy}
+\rightarrow
+\text{viewer-facing emission}.
+\]
+
+---
+
+## 17.5 Updated first-pass research priorities
+
+The first focused investigation changes the relative priority of the remaining research questions.
+
+### P0 — Fundamental feasibility
+
+1. **Determine whether direct optical backreflection is actually required by the display architecture.** Compare acoustic momentum and frequency requirements across practical optical deflection angles.
+2. **Determine realistic frequency-dependent acoustic attenuation and coherence length in candidate transparent materials.** This controls whether weak coupling can be compensated by interaction length.
+3. **Determine realistic \(\Delta n\) from achievable acoustic intensity, aperture, duty cycle, and transducer efficiency.**
+
+### P1 — Device architecture
+
+4. **Compare candidate materials using both acousto-optic coupling and acoustic loss.** The conventional \(M_2\) figure of merit alone is insufficient if the usable interaction length is attenuation limited.
+5. **Investigate distributed, resonant, and standing-wave acoustic generation.** These architectures may reduce dependence on long single-pass hypersonic propagation.
+6. **Establish experimentally demonstrated transducer bounds across the required frequency range.** Relevant quantities include mode, aperture, strain, efficiency, bandwidth, and thermal load.
+
+### P2 — Display implementation
+
+7. Define the required viewing-zone radiance distribution.
+8. Evaluate projector/pattern-generation timing after the acoustic spatial architecture is better constrained.
+
+---
+
+## 17.6 Updated Simulation Tool roadmap implications
+
+The existing TMM solver remains appropriate for explicit layered optical structures, but the research now suggests the following additions or refinements when physics development resumes:
+
+### Directly implementable relations
+
+\[
+\boxed{
+f_{\text{back}}=\frac{2nv_a}{\lambda_0}}
+\]
+
+\[
+\boxed{
+f_a(\Theta)=
+\frac{2nv_a}{\lambda_0}
+\sin\frac{\Theta}{2}}
+\]
+
+\[
+\boxed{
+S=\sqrt{\frac{2I_a}{\rho v_a^3}}}
+\]
+
+\[
+\boxed{
+|\Delta n|
+\approx
+\frac12n^3|p_{\text{eff}}|
+\sqrt{\frac{2I_a}{\rho v_a^3}}}
+\]
+
+and, for an exponentially attenuated grating,
+
+\[
+\boxed{
+\kappa_{\text{integrated}}
+=
+\frac{\kappa_0}{\alpha_a}
+\left(1-e^{-\alpha_aL}\right).
+}
+\]
+
+### Material-catalog properties
+
+Candidate properties should include
+
+\[
+\rho,\quad
+v_L,\quad
+p_{ij},\quad
+n(\lambda,T),\quad
+\alpha_a(f,T).
+\]
+
+### Useful future parameter sweeps and heatmaps
+
+\[
+I_a\times L_{\text{eff}}\rightarrow R,
+\]
+
+\[
+f_a\times\alpha_a\rightarrow L_{\text{att}},
+\]
+
+\[
+\Theta\times\lambda\rightarrow f_a,
+\]
+
+and
+
+\[
+\Delta n\times\alpha_a\rightarrow R_{\max}.
+\]
+
+### Higher-order solver refinement
+
+A Fourier-spectrum model alone should not be treated as a complete higher-order Bragg solver. Direct coupling from explicit acoustic harmonics can be evaluated through Fourier content, while sequential higher-order Bragg coupling requires a multiwave Floquet, extended coupled-wave, or rigorous coupled-wave treatment.
+
+---
+
+## 17.7 Current integrated feasibility posture
+
+The broad physical concept remains supported:
+
+\[
+\boxed{
+\text{acoustic field}
+\rightarrow
+\Delta n(\mathbf r,t)
+\rightarrow
+\text{programmable coherent optical coupling}
+}
+\]
+
+The first focused investigation does not invalidate that concept.
+
+It does, however, weaken a more specific architecture assumption:
+
+\[
+\boxed{
+\text{weak photoelastic modulation}
++
+\text{very large period count}
++
+\text{high-order Bragg operation}
+}
+\]
+
+should not currently be assumed to provide strong visible backreflection at moderate acoustic frequency.
+
+The dominant coupled feasibility chain is now:
+
+\[
+\boxed{
+\begin{array}{c}
+\text{desired optical direction change}\\
+\downarrow\\
+\text{required acoustic momentum }K\\
+\downarrow\\
+\text{required acoustic frequency}\\
+\downarrow\\
+\text{frequency-dependent attenuation and available strain}\\
+\downarrow\\
+L_{\text{effective}}\text{ and }\Delta n\\
+\downarrow\\
+\text{achievable optical coupling}
+\end{array}
+}
+\]
+
+The next research batch should therefore prioritize optical deflection geometry, frequency-dependent material attenuation, and practical hypersonic acoustic generation before optimizing projector timing or wide-angle viewing details.
