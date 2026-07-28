@@ -8,7 +8,7 @@ The working concept is a solid transparent medium in which a driven acoustic fie
 
 The most important conceptual correction from the research is that the system should not primarily be modeled as light undergoing an enormous number of microscopic total-internal-reflection events. The more appropriate high-level description is:
 
-\[
+$$
 \boxed{
 \text{electrical drive}
 \rightarrow
@@ -18,7 +18,7 @@ The most important conceptual correction from the research is that the system sh
 \rightarrow
 \text{coherent optical mode coupling}
 }
-\]
+$$
 
 The central feasibility questions are therefore whether the acoustic field can provide:
 
@@ -58,41 +58,41 @@ An acoustic wave produces strain in a transparent solid. Through the photoelasti
 
 A simplified scalar representation is
 
-\[
+$$
 n(\mathbf r,t)=n_0+\Delta n(\mathbf r,t).
-\]
+$$
 
 For a traveling sinusoidal acoustic field,
 
-\[
+$$
 \boxed{
 n(z,t)=n_0+\Delta n_0\cos(Kz-\Omega t)
 }
-\]
+$$
 
 with
 
-\[
+$$
 K=\frac{2\pi}{\Lambda_a},
 \qquad
 \Omega=2\pi f_a,
 \qquad
 \Lambda_a=\frac{v_a}{f_a}.
-\]
+$$
 
 A commonly useful scalar approximation for the photoelastic index perturbation is
 
-\[
+$$
 \boxed{
 \Delta n\sim-\frac12 n^3 p S
 }
-\]
+$$
 
 where:
 
-- \(n\) is refractive index,
-- \(p\) is an effective photoelastic coefficient,
-- \(S\) is strain.
+- $n$ is refractive index,
+- $p$ is an effective photoelastic coefficient,
+- $S$ is strain.
 
 The full physical treatment is tensorial and depends on acoustic mode, crystal orientation, optical polarization, and propagation geometry.
 
@@ -100,72 +100,72 @@ The full physical treatment is tensorial and depends on acoustic mode, crystal o
 
 ## 2.2 Weak refractive-index modulation can still produce strong coherent coupling
 
-A small \(\Delta n\) is not by itself fatal to the concept. In a uniform, lossless Bragg-grating model at exact resonance, a useful coupled-mode result is
+A small $\Delta n$ is not by itself fatal to the concept. In a uniform, lossless Bragg-grating model at exact resonance, a useful coupled-mode result is
 
-\[
+$$
 \boxed{
 R_{\text{peak}}=\tanh^2(\kappa L)
 }
-\]
+$$
 
 where:
 
-- \(\kappa\) is the optical coupling coefficient,
-- \(L\) is the coherent interaction length.
+- $\kappa$ is the optical coupling coefficient,
+- $L$ is the coherent interaction length.
 
-For a weak sinusoidal grating, \(\kappa\) scales approximately as
+For a weak sinusoidal grating, $\kappa$ scales approximately as
 
-\[
+$$
 \boxed{
 \kappa\propto\frac{\Delta n}{\lambda}
 }
-\]
+$$
 
 with additional geometry, polarization, and modal-overlap factors.
 
 In the weak-grating limit,
 
-\[
+$$
 \kappa L\ll1,
-\]
+$$
 
 so
 
-\[
+$$
 \tanh(\kappa L)\approx\kappa L
-\]
+$$
 
 and therefore
 
-\[
+$$
 \boxed{
 R\approx(\kappa L)^2.
 }
-\]
+$$
 
 If
 
-\[
+$$
 L=N\Lambda,
-\]
+$$
 
 then the weak-coupling scaling initially gives approximately
 
-\[
+$$
 \boxed{
 R\propto N^2
 }
-\]
+$$
 
 provided phase coherence and phase matching are maintained.
 
 The physically meaningful strength parameter is therefore approximately
 
-\[
+$$
 \boxed{\kappa L}
-\]
+$$
 
-rather than \(\Delta n\) or period count alone.
+rather than $\Delta n$ or period count alone.
 
 ---
 
@@ -173,28 +173,28 @@ rather than \(\Delta n\) or period count alone.
 
 An ideal periodic refractive-index structure has discrete spatial Fourier components. Optical scattering from the periodic structure obeys momentum-selection conditions of the form
 
-\[
+$$
 \boxed{
 \mathbf k_{\text{out}}=\mathbf k_{\text{in}}+m\mathbf K
 }
-\]
+$$
 
 where:
 
-- \(\mathbf k_{\text{in}}\) is the incident optical wave vector,
-- \(\mathbf k_{\text{out}}\) is an allowed scattered optical wave vector,
-- \(\mathbf K\) is the grating wave vector,
-- \(m\) is diffraction order.
+- $\mathbf k_{\text{in}}$ is the incident optical wave vector,
+- $\mathbf k_{\text{out}}$ is an allowed scattered optical wave vector,
+- $\mathbf K$ is the grating wave vector,
+- $m$ is diffraction order.
 
 An ideal Bragg grating therefore does not intrinsically produce diffuse reflection. It coherently couples optical energy into allowed guided, diffracted, backward, radiation, or polarization modes according to symmetry, momentum matching, and modal overlap.
 
 For this project, the preferred description is
 
-\[
+$$
 \boxed{
 \text{coherent, mode-selective Bragg scattering}
 }
-\]
+$$
 
 rather than simply "specular reflection."
 
@@ -206,33 +206,33 @@ Increasing period count can compensate for weak coupling only after phase matchi
 
 A useful mismatch quantity is
 
-\[
+$$
 \boxed{
 \Delta\mathbf k=
 \mathbf k_{\text{out}}-
 \mathbf k_{\text{in}}-
  m\mathbf K.
 }
-\]
+$$
 
 A long grating remains useful only if accumulated mismatch remains sufficiently small. Schematically,
 
-\[
+$$
 \boxed{
 |\Delta k|L\lesssim 1
 }
-\]
+$$
 
 for strong coherent accumulation near the ideal phase-matched condition.
 
 Therefore:
 
-\[
+$$
 \boxed{
 \text{large }N\text{ can compensate for weak }\kappa,
 \text{ but not arbitrary }\Delta k.
 }
-\]
+$$
 
 This is one of the project's central design rules.
 
@@ -242,47 +242,47 @@ This is one of the project's central design rules.
 
 A realistic acoustic index field can be represented as
 
-\[
+$$
 \boxed{
 \Delta n(z,t)=A(z)\cos[Kz+\phi(z)-\Omega t].
 }
-\]
+$$
 
 The total reflected/scattered amplitude from many sections can be represented schematically as
 
-\[
+$$
 \boxed{
 A_r=\sum_{m=1}^{N}a_m e^{i\phi_m}.
 }
-\]
+$$
 
 For ideal phase coherence,
 
-\[
+$$
 |A_r|\propto N,
-\]
+$$
 
 leading to the approximate weak-coupling scaling
 
-\[
+$$
 R\propto N^2.
-\]
+$$
 
 If phase errors become effectively random, the coherent amplitude scaling can collapse toward approximately
 
-\[
+$$
 |A_r|\sim\sqrt N
-\]
+$$
 
-statistically rather than \(N\).
+statistically rather than $N$.
 
 The architecture must therefore distinguish
 
-\[
+$$
 \boxed{
 N_{\text{physical}}\neq N_{\text{coherent}}
 }
-\]
+$$
 
 in a nonideal device.
 
@@ -304,41 +304,41 @@ Potential coherence limits include:
 
 Unlike a static dielectric grating,
 
-\[
+$$
 n(z)=n_0+\Delta n\cos Kz,
-\]
+$$
 
 a traveling acoustic grating is time dependent:
 
-\[
+$$
 \boxed{
 n(z,t)=n_0+\Delta n\cos(Kz-\Omega t).
 }
-\]
+$$
 
 The optical interaction can therefore satisfy both
 
-\[
+$$
 \boxed{
 \mathbf k_{\text{out}}=\mathbf k_{\text{in}}\pm\mathbf K
 }
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{
 \omega_{\text{out}}=\omega_{\text{in}}\pm\Omega.
 }
-\]
+$$
 
 Thus a traveling acoustic grating generally produces an optical frequency shift of approximately
 
-\[
+$$
 \boxed{
 \Delta f=\pm f_a.
 }
-\]
+$$
 
 A standing acoustic wave should instead be treated as a superposition of counterpropagating acoustic components.
 
@@ -350,53 +350,53 @@ A standing acoustic wave should instead be treated as a superposition of counter
 
 At a sharp interface with
 
-\[
+$$
 n_1>n_2,
-\]
+$$
 
 the critical angle is
 
-\[
+$$
 \boxed{
 \theta_c=\sin^{-1}\left(\frac{n_2}{n_1}\right).
 }
-\]
+$$
 
 Let
 
-\[
+$$
 n_1=n+\Delta n,
 \qquad
 n_2=n,
 \qquad
 \Delta n\ll n.
-\]
+$$
 
 Define the small angle from grazing incidence
 
-\[
+$$
 \delta=90^\circ-\theta_c.
-\]
+$$
 
 Then approximately
 
-\[
+$$
 \boxed{
 \delta\approx\sqrt{\frac{2\Delta n}{n}}
 }
-\]
+$$
 
 in radians.
 
-Therefore arbitrarily small positive index contrast can theoretically permit TIR, but the angular acceptance collapses toward grazing incidence as \(\Delta n\rightarrow0\).
+Therefore arbitrarily small positive index contrast can theoretically permit TIR, but the angular acceptance collapses toward grazing incidence as $\Delta n\rightarrow0$.
 
 This establishes an important distinction:
 
-\[
+$$
 \boxed{
 \text{existence of TIR}\neq\text{strong optical confinement}.
 }
-\]
+$$
 
 ---
 
@@ -404,85 +404,85 @@ This establishes an important distinction:
 
 Under TIR, the electromagnetic field extends into the lower-index region. For a simple planar interface,
 
-\[
+$$
 \boxed{
 \kappa_e=
  k_0\sqrt{n_1^2\sin^2\theta_i-n_2^2}
 }
-\]
+$$
 
 with
 
-\[
+$$
 k_0=\frac{2\pi}{\lambda_0}.
-\]
+$$
 
 The corresponding amplitude penetration depth is
 
-\[
+$$
 \boxed{
 \delta_E=
 \frac{\lambda_0}
 {2\pi\sqrt{n_1^2\sin^2\theta_i-n_2^2}}.
 }
-\]
+$$
 
 Near the critical angle,
 
-\[
+$$
 \delta_E\rightarrow\infty.
-\]
+$$
 
 This reinforces that very weak index contrast can give mathematically valid TIR while still producing weak spatial confinement.
 
 A useful engineering criterion for a physical cladding or surrounding region is of the form
 
-\[
+$$
 \boxed{
 t_{\text{clad}}\gtrsim m\delta_E
 }
-\]
+$$
 
-for an application-specific attenuation factor \(m\), rather than assuming a universal cladding thickness.
+for an application-specific attenuation factor $m$, rather than assuming a universal cladding thickness.
 
 ---
 
 ## 3.3 Telecom fiber dimensions are not optical minimums
 
-Common telecom fibers use a 125-\(\mu\text{m}\) outer glass diameter, but this is primarily a standardized mechanical and interconnection geometry rather than a universal electromagnetic requirement.
+Common telecom fibers use a 125-$\mu\text{m}$ outer glass diameter, but this is primarily a standardized mechanical and interconnection geometry rather than a universal electromagnetic requirement.
 
 For a cylindrical weak-guidance structure, more meaningful quantities include numerical aperture
 
-\[
+$$
 \boxed{
 NA=\sqrt{n_{\text{core}}^2-n_{\text{clad}}^2}
 }
-\]
+$$
 
-and, for \(\Delta n\ll n\),
+and, for $\Delta n\ll n$,
 
-\[
+$$
 \boxed{
 NA\approx\sqrt{2n\Delta n}.
 }
-\]
+$$
 
 The normalized frequency is
 
-\[
+$$
 \boxed{
 V=\frac{2\pi a}{\lambda_0}
 \sqrt{n_{\text{core}}^2-n_{\text{clad}}^2}
 }
-\]
+$$
 
 or approximately
 
-\[
+$$
 \boxed{
 V\approx\frac{2\pi a}{\lambda_0}\sqrt{2n\Delta n}.
 }
-\]
+$$
 
 These are more relevant than importing conventional fiber-cladding dimensions into the acoustic architecture.
 
@@ -490,15 +490,15 @@ These are more relevant than importing conventional fiber-cladding dimensions in
 
 ## 3.4 Reflection-count models are only rough ray-optics diagnostics
 
-For a straight step-index fiber treated as a meridional ray system, with \(\alpha\) measured from the fiber axis,
+For a straight step-index fiber treated as a meridional ray system, with $\alpha$ measured from the fiber axis,
 
-\[
+$$
 \boxed{
 N\approx\frac{L\tan\alpha}{d}
 }
-\]
+$$
 
-is a useful geometrical estimate for core-boundary encounters over length \(L\) and core diameter \(d\).
+is a useful geometrical estimate for core-boundary encounters over length $L$ and core diameter $d$.
 
 This is not a suitable primary model for wavelength-scale acoustic index structures, guided optical modes, or coherent Bragg gratings. The project should not use "number of TIR reflections" as a principal design metric.
 
@@ -510,57 +510,57 @@ This is not a suitable primary model for wavelength-scale acoustic index structu
 
 For exact optical reversal,
 
-\[
+$$
 \mathbf k_{\text{out}}=-\mathbf k_{\text{in}}.
-\]
+$$
 
 The grating must therefore supply approximately
 
-\[
+$$
 K=2k.
-\]
+$$
 
 Using
 
-\[
+$$
 K=\frac{2\pi}{\Lambda_a},
 \qquad
 k=\frac{2\pi n}{\lambda_0},
-\]
+$$
 
 gives
 
-\[
+$$
 \boxed{
 \Lambda_a=\frac{\lambda_0}{2n}.
 }
-\]
+$$
 
 For example, with
 
-\[
+$$
 \lambda_0=532\text{ nm},
 \qquad
 n=1.5,
-\]
+$$
 
-\[
+$$
 \Lambda_a\approx177\text{ nm}.
-\]
+$$
 
 If
 
-\[
+$$
 v_a=5000\text{ m/s},
-\]
+$$
 
 then
 
-\[
+$$
 \boxed{
 f_a=\frac{v_a}{\Lambda_a}\approx28\text{ GHz}.
 }
-\]
+$$
 
 This is a fundamental momentum-matching result for the assumed first-order collinear backreflection geometry, not merely an implementation inconvenience.
 
@@ -572,11 +572,11 @@ Ordinary AOMs use much longer acoustic wavelengths, often on the order of tens o
 
 In a simple small-angle AO geometry,
 
-\[
+$$
 \boxed{
 \theta_D\approx\frac{\lambda_0 f_a}{v_a}.
 }
-\]
+$$
 
 Thus moderate RF frequencies naturally produce modest angular deflection rather than retroreflection.
 
@@ -590,23 +590,23 @@ This explains the difference between conventional AOM behavior and first-order f
 
 For a conventional discrete quarter-wave Bragg reflector at normal incidence,
 
-\[
+$$
 \boxed{
 nd=\frac{\lambda_0}{4}
 }
-\]
+$$
 
 for first-order quarter-wave thickness.
 
 Odd multiples preserve the relevant optical phase relation:
 
-\[
+$$
 \boxed{
 nd=(2m+1)\frac{\lambda_0}{4},
 \qquad
 m=0,1,2,\ldots
 }
-\]
+$$
 
 This allows discrete optical layers to be made thicker while retaining the design-wavelength phase relation.
 
@@ -616,33 +616,33 @@ This allows discrete optical layers to be made thicker while retaining the desig
 
 A rectangular or piecewise multilayer structure contains higher spatial Fourier harmonics. A perfect sinusoidal acoustic modulation,
 
-\[
+$$
 \Delta n(z)=\Delta n_0\cos Kz,
-\]
+$$
 
 contains primarily the spatial components at
 
-\[
+$$
 \pm K.
-\]
+$$
 
 A rectangular periodic structure contains harmonics such as
 
-\[
+$$
 K,\ 3K,\ 5K,\ldots
-\]
+$$
 
 with amplitudes determined by its Fourier series.
 
 Higher-order optical scattering can schematically satisfy
 
-\[
+$$
 \boxed{
 2k\approx mK.
 }
-\]
+$$
 
-However, a large harmonic order is useful only if the real acoustic index waveform contains a sufficiently strong spatial Fourier component at \(mK\).
+However, a large harmonic order is useful only if the real acoustic index waveform contains a sufficiently strong spatial Fourier component at $mK$.
 
 ### Current status
 
@@ -650,11 +650,11 @@ The hypothesis that an odd-integer-multiple acoustic period can substantially re
 
 The correct research question is:
 
-\[
+$$
 \boxed{
 \text{What spatial Fourier component supplies the required optical momentum, and how strong is it?}
 }
-\]
+$$
 
 This is the highest-priority unresolved physics question in the archive.
 
@@ -666,15 +666,15 @@ This is the highest-priority unresolved physics question in the archive.
 
 An ideal volume Bragg grating is angularly selective. Its diffraction efficiency has a finite response
 
-\[
+$$
 \eta(\Delta\theta),
-\]
+$$
 
 rather than operating at one mathematical delta-function angle, but longer/thicker high-efficiency gratings generally produce narrower angular acceptance.
 
 This creates a central tradeoff:
 
-\[
+$$
 \boxed{
 L\uparrow
 \Rightarrow
@@ -683,7 +683,7 @@ L\uparrow
 \text{narrower angular acceptance}
 \end{cases}
 }
-\]
+$$
 
 Therefore a very long grating that solves weak coupling may simultaneously become highly directional.
 
@@ -693,11 +693,11 @@ Therefore a very long grating that solves weak coupling may simultaneously becom
 
 The display ultimately requires an angular radiance distribution
 
-\[
+$$
 \boxed{
 I_{\text{voxel}}(\theta,\phi).
 }
-\]
+$$
 
 A single high-efficiency Bragg channel naturally produces a narrow output angular distribution rather than Lambertian emission.
 
@@ -705,31 +705,31 @@ Directionality is beneficial for optical routing but can be harmful for a naked-
 
 A future system requirement should therefore define a target viewing solid angle
 
-\[
+$$
 \Omega_{\text{view}}
-\]
+$$
 
 and compare it against the angular coverage of one Bragg channel.
 
 For small horizontal and vertical angular spans,
 
-\[
+$$
 \boxed{
 \Omega_{\text{view}}
 \approx
 \Delta\theta_x\Delta\theta_y
 }
-\]
+$$
 
 with angles in radians.
 
 A rough channel-count estimate is
 
-\[
+$$
 \boxed{
 N_{\text{views}}\sim\frac{\Omega_{\text{view}}}{\Omega_B}
 }
-\]
+$$
 
 subject to overlap and actual response shape.
 
@@ -741,9 +741,9 @@ subject to overlap and actual response shape.
 
 Generate multiple grating vectors
 
-\[
+$$
 \mathbf K_1,\mathbf K_2,\ldots,\mathbf K_M
-\]
+$$
 
 so that multiple output channels are simultaneously available.
 
@@ -751,9 +751,9 @@ so that multiple output channels are simultaneously available.
 
 Use a time-varying grating vector
 
-\[
+$$
 \mathbf K=\mathbf K(t)
-\]
+$$
 
 and scan viewing directions rapidly relative to visual integration.
 
@@ -761,7 +761,7 @@ and scan viewing directions rapidly relative to visual integration.
 
 Use Bragg interaction for localization or routing, followed by a second process that provides the desired angular distribution:
 
-\[
+$$
 \boxed{
 \text{projector}
 \rightarrow
@@ -773,7 +773,7 @@ Use Bragg interaction for localization or routing, followed by a second process 
 \rightarrow
 \text{viewer}
 }
-\]
+$$
 
 No particular secondary emission mechanism has yet been established.
 
@@ -794,13 +794,13 @@ No particular secondary emission mechanism has yet been established.
 
 A multi-tone drive can be represented as
 
-\[
+$$
 V(t)=\sum_j V_j\cos(2\pi f_j t+\phi_j).
-\]
+$$
 
 In the small-signal linear regime, the resulting acoustic/index field can be approximated as
 
-\[
+$$
 \boxed{
 \Delta n(\mathbf r,t)=
 \sum_j
@@ -811,15 +811,15 @@ In the small-signal linear regime, the resulting acoustic/index field can be app
 \phi_j
 ).
 }
-\]
+$$
 
 with
 
-\[
+$$
 \boxed{
 K_j=\frac{2\pi f_j}{v_a}.
 }
-\]
+$$
 
 This provides a physically plausible route to dynamically multiplexed acousto-optic channels.
 
@@ -829,28 +829,28 @@ This provides a physically plausible route to dynamically multiplexed acousto-op
 
 For a fixed transducer/acoustic propagation geometry, changing frequency changes
 
-\[
+$$
 |\mathbf K|
-\]
+$$
 
 but does not necessarily change
 
-\[
+$$
 \hat{\mathbf K}.
-\]
+$$
 
 Therefore:
 
-\[
+$$
 \boxed{
 f\rightarrow|\mathbf K|}
-\]
+$$
 
 is generally valid, while
 
-\[
+$$
 \boxed{f\not\Rightarrow\hat{\mathbf K}}
-\]
+$$
 
 without additional geometry or mode effects.
 
@@ -864,19 +864,19 @@ A transducer array with controlled relative phases may permit control over acous
 
 Conceptually:
 
-- RF frequency controls \(|\mathbf K|\),
-- transducer geometry and phase control \(\hat{\mathbf K}\),
+- RF frequency controls $|\mathbf K|$,
+- transducer geometry and phase control $\hat{\mathbf K}$,
 - amplitude and time dependence control the spatiotemporal grating strength.
 
 A generalized drive could be represented as
 
-\[
+$$
 \boxed{
 s_{\text{RF}}(t)=
 \sum_j A_j(t)
 \cos[2\pi f_j(t)t+\phi_j(t)].
 }
-\]
+$$
 
 This remains a design hypothesis, not an established final architecture.
 
@@ -886,21 +886,21 @@ This remains a design hypothesis, not an established final architecture.
 
 ## 8.1 The acoustic volume cannot reconfigure instantaneously
 
-A drive change propagates through the medium at acoustic velocity. For propagation length \(L\),
+A drive change propagates through the medium at acoustic velocity. For propagation length $L$,
 
-\[
+$$
 \boxed{
 t_{\text{transit}}=\frac{L}{v_a}.
 }
-\]
+$$
 
 For a frequency-swept drive, the local acoustic frequency can be thought of approximately as a delayed copy of the drive history:
 
-\[
+$$
 \boxed{
 f(z,t)\approx f_{\text{drive}}\left(t-\frac{z}{v_a}\right).
 }
-\]
+$$
 
 Thus a temporal waveform maps into a spatial acoustic structure through finite sound velocity.
 
@@ -910,45 +910,45 @@ Thus a temporal waveform maps into a spatial acoustic structure through finite s
 
 If acoustic motion is used as a volumetric coordinate,
 
-\[
+$$
 \boxed{z=v_at.}
-\]
+$$
 
-A timing error \(\Delta t\) therefore gives
+A timing error $\Delta t$ therefore gives
 
-\[
+$$
 \boxed{\Delta z=v_a\Delta t.}
-\]
+$$
 
 Example:
 
 for
 
-\[
+$$
 v_a=3400\text{ m/s},
-\]
+$$
 
-\[
+$$
 \Delta t=1\ \mu\text{s}
-\]
+$$
 
 corresponds to
 
-\[
+$$
 \Delta z=3.4\text{ mm}.
-\]
+$$
 
 For a desired axial uncertainty of
 
-\[
+$$
 \Delta z=100\ \mu\text{m},
-\]
+$$
 
 the timing requirement would be approximately
 
-\[
+$$
 \Delta t\approx29\text{ ns}.
-\]
+$$
 
 These numbers are illustrative and scale directly with the selected material velocity and target voxel depth.
 
@@ -956,47 +956,47 @@ These numbers are illustrative and scale directly with the selected material vel
 
 ## 8.3 Projection pattern rate may be a primary bottleneck
 
-If consecutive depth slices are separated by \(\Delta z\), then
+If consecutive depth slices are separated by $\Delta z$, then
 
-\[
+$$
 \boxed{
 \Delta t=\frac{\Delta z}{v_a}
 }
-\]
+$$
 
 and the required optical pattern rate is
 
-\[
+$$
 \boxed{
 f_{\text{pattern}}=\frac{v_a}{\Delta z}.
 }
-\]
+$$
 
 For
 
-\[
+$$
 v_a=3400\text{ m/s},
-\]
+$$
 
 and
 
-\[
+$$
 \Delta z=1\text{ mm},
-\]
+$$
 
-\[
+$$
 f_{\text{pattern}}=3.4\text{ MHz}.
-\]
+$$
 
 For
 
-\[
+$$
 \Delta z=100\ \mu\text{m},
-\]
+$$
 
-\[
+$$
 \boxed{f_{\text{pattern}}=34\text{ MHz}.}
-\]
+$$
 
 These are arbitrary full-pattern update rates, not individual micromirror switching rates. A conventional full-frame DLP architecture may therefore become a serious throughput constraint at high axial resolution.
 
@@ -1012,18 +1012,18 @@ Heavy flint glasses such as SF57 or SF6 remain candidates, but the research did 
 
 A commonly used acousto-optic figure of merit has the approximate form
 
-\[
+$$
 \boxed{
 M_2=\frac{n^6p_{\text{eff}}^2}{\rho v_a^3}.
 }
-\]
+$$
 
-Therefore high refractive index helps strongly through \(n^6\), but material performance also depends on:
+Therefore high refractive index helps strongly through $n^6$, but material performance also depends on:
 
-- effective photoelastic coefficient \(p_{\text{eff}}\),
-- density \(\rho\),
-- relevant acoustic velocity \(v_a\),
-- acoustic attenuation \(\alpha_a(f)\),
+- effective photoelastic coefficient $p_{\text{eff}}$,
+- density $\rho$,
+- relevant acoustic velocity $v_a$,
+- acoustic attenuation $\alpha_a(f)$,
 - optical absorption,
 - dispersion,
 - thermal properties,
@@ -1041,11 +1041,11 @@ Material selection should be comparative and data driven. The project should mai
 
 A conventional Lorentz-force EMAT requires a conducting region. The force density is
 
-\[
+$$
 \boxed{
 \mathbf f_L=\mathbf J\times\mathbf B.
 }
-\]
+$$
 
 A nonconductive glass or crystal cannot directly support the required eddy current, but a thin conductive film on the dielectric can act as the driven element and transfer elastic motion into the substrate.
 
@@ -1057,9 +1057,9 @@ This is physically legitimate, but such a system is more accurately treated as a
 
 Meander-line pitch can select an acoustic spatial wavelength, but acoustic frequency is governed by
 
-\[
+$$
 \boxed{f=\frac{v_{\text{phase}}}{\lambda_a}.}
-\]
+$$
 
 PCB fabrication resolution alone does not define a universal 1-5 MHz upper limit. Real limits arise from conductor pitch, RF impedance, parasitics, skin/proximity effects, achievable current, lift-off, acoustic mode selection, attenuation, and substrate geometry.
 
@@ -1071,13 +1071,13 @@ Nevertheless, ordinary PCB-EMAT architectures appear poorly matched to a direct-
 
 For a conductor,
 
-\[
+$$
 \boxed{
 \delta_s=\sqrt{\frac{2}{\omega\mu\sigma}}
 }
-\]
+$$
 
-where \(\omega=2\pi f\), \(\mu\) is permeability, and \(\sigma\) is conductivity.
+where $\omega=2\pi f$, $\mu$ is permeability, and $\sigma$ is conductivity.
 
 At high frequency, the relation between conductive-film thickness and skin depth affects induced-current distribution and transduction behavior.
 
@@ -1087,25 +1087,25 @@ At high frequency, the relation between conductive-film thickness and skin depth
 
 For longitudinal waves,
 
-\[
+$$
 \boxed{Z=\rho v_L.}
-\]
+$$
 
 For a simple normally incident interface, the pressure-amplitude reflection coefficient is
 
-\[
+$$
 \boxed{
 r_p=\frac{Z_2-Z_1}{Z_2+Z_1}
 }
-\]
+$$
 
 and the ideal transmitted power fraction is
 
-\[
+$$
 \boxed{
 T=\frac{4Z_1Z_2}{(Z_1+Z_2)^2}.
 }
-\]
+$$
 
 A thin metal/bond/glass stack cannot be judged solely from bulk impedance mismatch. Film thickness relative to acoustic wavelength and multilayer phase must also be considered.
 
@@ -1117,9 +1117,9 @@ The research supports keeping thin-film piezoelectric transduction, including Al
 
 A simplified piezoelectric relation is
 
-\[
+$$
 \boxed{S=dE}
-\]
+$$
 
 with the full constitutive equations required for realistic tensorial modeling.
 
@@ -1147,24 +1147,24 @@ The following assumptions recur in the simplified equations above and should rem
 - Scalar refractive index where anisotropy is neglected.
 - Plane-wave or guided-mode approximations depending on solver.
 - Ideal periodicity for analytic Bragg expressions.
-- Exact resonance for \(R_{\text{peak}}=\tanh^2(\kappa L)\).
-- Weak modulation for simple proportionality \(\kappa\propto\Delta n/\lambda\).
+- Exact resonance for $R_{\text{peak}}=\tanh^2(\kappa L)$.
+- Weak modulation for simple proportionality $\kappa\propto\Delta n/\lambda$.
 
 ## Acoustic
 
 - Linear elasticity and small-signal superposition for multi-tone fields.
-- Single phase velocity when writing \(\Lambda_a=v_a/f_a\).
+- Single phase velocity when writing $\Lambda_a=v_a/f_a$.
 - Acoustic attenuation, dispersion, reflections, and finite-aperture effects neglected unless explicitly modeled.
 
 ## TIR / waveguide approximations
 
 - Sharp planar interfaces for critical-angle and evanescent-depth equations.
-- Weak-guidance approximation for \(NA\approx\sqrt{2n\Delta n}\).
+- Weak-guidance approximation for $NA\approx\sqrt{2n\Delta n}$.
 - Meridional geometrical rays only for the simple fiber reflection-count estimate.
 
 ## Display timing
 
-- A single dominant acoustic propagation velocity for \(z=v_at\).
+- A single dominant acoustic propagation velocity for $z=v_at$.
 - Projection pattern changes treated as synchronized with the local acoustic state.
 - Pattern-rate examples are illustrative rather than current hardware specifications.
 
@@ -1174,7 +1174,7 @@ The following assumptions recur in the simplified equations above and should rem
 
 The most defensible architecture emerging from the research is:
 
-\[
+$$
 \boxed{
 \begin{array}{c}
 \text{high-speed RF synthesis}\\
@@ -1192,7 +1192,7 @@ The most defensible architecture emerging from the research is:
 \text{viewer}
 \end{array}
 }
-\]
+$$
 
 This is a **design hypothesis**, not a finalized architecture.
 
@@ -1224,31 +1224,31 @@ Needed for very long weak gratings where constructing thousands to millions of e
 
 Candidate inputs:
 
-\[
+$$
 \Delta n,\quad
 \Lambda,\quad
 N,\quad
 L,\quad
 \lambda,\quad
 \theta.
-\]
+$$
 
 Candidate derived quantities:
 
-\[
+$$
 \kappa,\quad
 \kappa L,\quad
 \Delta k,\quad
 \Delta kL,\quad
 R,\quad
 T.
-\]
+$$
 
 A grating-strength metric
 
-\[
+$$
 \boxed{S=\kappa L}
-\]
+$$
 
 would be useful for period-count and coupling sweeps.
 
@@ -1267,9 +1267,9 @@ It should compare spatial Fourier spectra for:
 
 The central output is the strength of the spatial Fourier component capable of satisfying
 
-\[
+$$
 2k\approx mK.
-\]
+$$
 
 This should be developed before treating low-frequency higher-order visible backreflection as feasible.
 
@@ -1279,35 +1279,35 @@ This should be developed before treating low-frequency higher-order visible back
 
 Candidate inputs:
 
-\[
+$$
 f_a,\quad
 v_a,\quad
 \rho,\quad
 p_{ij},\quad
 \alpha_a(f),\quad
 P_a,
-\]
+$$
 
 plus mode/polarization and geometry as the model matures.
 
 Candidate outputs:
 
-\[
+$$
 \Lambda_a,\quad
 M_2,\quad
 S,\quad
 \Delta n.
-\]
+$$
 
 The longer-term goal should be to derive
 
-\[
+$$
 \boxed{
 \Delta n=f(P_{\text{acoustic}},\rho,v,p,n,\text{geometry})
 }
-\]
+$$
 
-rather than treating \(\Delta n\) only as a free optical input.
+rather than treating $\Delta n$ only as a free optical input.
 
 ---
 
@@ -1315,21 +1315,21 @@ rather than treating \(\Delta n\) only as a free optical input.
 
 The simulator should derive
 
-\[
+$$
 \boxed{t_{\text{transit}}=\frac{L}{v_a}}
-\]
+$$
 
 and
 
-\[
+$$
 \boxed{\Delta z=v_a\Delta t}
-\]
+$$
 
 as well as
 
-\[
+$$
 \boxed{f_{\text{pattern}}=\frac{v_a}{\Delta z}}.
-\]
+$$
 
 These quantities connect acoustic architecture directly to projector timing and volumetric resolution.
 
@@ -1341,7 +1341,7 @@ Display feasibility ultimately requires angular response rather than only spectr
 
 A general target quantity would resemble
 
-\[
+$$
 \boxed{
 \eta(
 \lambda,
@@ -1351,7 +1351,7 @@ A general target quantity would resemble
 \phi_{\text{out}}
 ).
 }
-\]
+$$
 
 Near-term useful outputs include:
 
@@ -1364,23 +1364,23 @@ Near-term useful outputs include:
 
 The existing parameter-sweep and heatmap architecture is well suited to plots such as:
 
-\[
+$$
 \lambda\times\theta,
-\]
+$$
 
-\[
+$$
 L\times\Delta\theta,
-\]
+$$
 
-\[
+$$
 N\times\text{angular bandwidth},
-\]
+$$
 
 and eventually
 
-\[
+$$
 f_a\times f_{\text{RF-span}}\rightarrow\text{available steering angle}.
-\]
+$$
 
 ---
 
@@ -1394,13 +1394,13 @@ The simulator should eventually distinguish among:
 
 Useful future fields include
 
-\[
+$$
 A(z),\quad
 \phi(z),\quad
 \sigma_A,\quad
 \sigma_\phi,\quad
 L_{\text{coh}}.
-\]
+$$
 
 The current 1D TMM model represents the ideal laterally infinite coherent limit and therefore contains no diffuse-scattering channel. That limitation should remain explicit.
 
@@ -1412,7 +1412,7 @@ The current 1D TMM model represents the ideal laterally infinite coherent limit 
 
 - Acoustic strain can create optical refractive-index modulation.
 - Many weak coherent interactions can produce strong Bragg coupling.
-- Increasing coherent interaction length can compensate for weak \(\Delta n\).
+- Increasing coherent interaction length can compensate for weak $\Delta n$.
 - Phase/momentum matching is mandatory.
 - Ideal Bragg scattering is coherent and directional rather than intrinsically diffuse.
 - RF frequency can dynamically control acousto-optic diffraction/deflection.
@@ -1451,7 +1451,7 @@ Required outputs include:
 
 - harmonic amplitude versus order,
 - optical coupling coefficient versus order,
-- required strain/\(\Delta n\),
+- required strain/$\Delta n$,
 - achievable reflectivity versus interaction length,
 - sensitivity to waveform distortion and acoustic loss.
 
@@ -1459,20 +1459,20 @@ Until this is answered, the architecture remains split between moderate-frequenc
 
 ---
 
-## 15.2 What acoustic \(\Delta n\) is realistically achievable in candidate materials?
+## 15.2 What acoustic $\Delta n$ is realistically achievable in candidate materials?
 
 Obtain reliable material data for
 
-\[
+$$
 p_{ij},\quad
 \rho,\quad
 v_a,\quad
 M_2,\quad
 \alpha_a(f),\quad
 n(\lambda),
-\]
+$$
 
-then derive realistic strain, index modulation, and coupling coefficient rather than relying on arbitrary \(\Delta n\) inputs.
+then derive realistic strain, index modulation, and coupling coefficient rather than relying on arbitrary $\Delta n$ inputs.
 
 ---
 
@@ -1510,9 +1510,9 @@ The answer strongly affects whether narrow coherent Bragg channels are an advant
 
 Evaluate real projector/pattern-generation hardware against
 
-\[
+$$
 \boxed{f_{\text{pattern}}=\frac{v_a}{\Delta z}.}
-\]
+$$
 
 This should be evaluated before committing to high axial resolution or a moving-acoustic-plane architecture.
 
@@ -1537,35 +1537,35 @@ The archive does not invalidate the volumetric-display concept. It narrows the p
 
 The strongest supported idea is:
 
-\[
+$$
 \boxed{
 \text{dynamic acoustic fields can create programmable coherent optical structures in a solid medium.}
 }
-\]
+$$
 
 The hardest current problem is:
 
-\[
+$$
 \boxed{
 \text{supplying enough acoustic spatial momentum for the desired visible-light geometry.}
 }
-\]
+$$
 
 Large period count addresses weak coupling through
 
-\[
+$$
 \kappa L,
-\]
+$$
 
 but does not solve momentum mismatch
 
-\[
+$$
 \Delta k.
-\]
+$$
 
 Even after strong coherent coupling is achieved, the project must still solve:
 
-\[
+$$
 \boxed{
 \text{viewing-angle distribution}
 +
@@ -1575,7 +1575,7 @@ Even after strong coherent coupling is achieved, the project must still solve:
 +
 \text{projector timing}.
 }
-\]
+$$
 
 The next physics investigation should focus on the higher-order acoustic-Bragg question before assuming that the architecture can remain in the tens-to-hundreds-of-MHz acoustic regime.
 
@@ -1589,24 +1589,24 @@ This section records findings from the first focused investigation performed aft
 
 The earlier discussion in Section 5 correctly identified that a purely sinusoidal refractive-index grating contains only its fundamental spatial Fourier component explicitly. However, a Fourier-spectrum-only interpretation is incomplete.
 
-A sinusoidal periodic medium can exhibit higher-order Bragg resonances through sequential coupling among intermediate spatial harmonics even when the index profile does not contain an explicit Fourier component at the final momentum-transfer wavevector. Extended coupled-wave and Floquet treatments show that, for a weak singly periodic dielectric perturbation with normalized magnitude \(\eta\), the effective coupling coefficient for Bragg order \(N\) decreases rapidly with perturbation strength and scales schematically as
+A sinusoidal periodic medium can exhibit higher-order Bragg resonances through sequential coupling among intermediate spatial harmonics even when the index profile does not contain an explicit Fourier component at the final momentum-transfer wavevector. Extended coupled-wave and Floquet treatments show that, for a weak singly periodic dielectric perturbation with normalized magnitude $\eta$, the effective coupling coefficient for Bragg order $N$ decreases rapidly with perturbation strength and scales schematically as
 
-\[
+$$
 \boxed{
 \chi_N\propto\eta^N
 }
-\]
+$$
 
 with order-dependent numerical factors.
 
 For weak photoelastic modulation,
 
-\[
+$$
 \eta\sim\frac{\Delta\epsilon}{\epsilon}
 \approx\frac{2\Delta n}{n}.
-\]
+$$
 
-Because \(|\Delta n|\ll n\) in the regime presently contemplated, sequential high-order coupling becomes rapidly weaker with increasing order.
+Because $|\Delta n|\ll n$ in the regime presently contemplated, sequential high-order coupling becomes rapidly weaker with increasing order.
 
 ### Updated status of the integer-multiple hypothesis
 
@@ -1614,13 +1614,13 @@ Because \(|\Delta n|\ll n\) in the regime presently contemplated, sequential hig
 
 **Strongly constrained:** using very high Bragg order as the principal mechanism for reducing the fundamental acoustic frequency appears unfavorable for a weak sinusoidal photoelastic grating because the effective coupling decreases rapidly with order.
 
-A different mechanism is possible if the acoustic waveform itself becomes nonsinusoidal and contains a real spatial harmonic at the required wavevector. In that case the harmonic can provide direct coupling. However, if the fundamental acoustic frequency is \(f_1\) and the required component is the \(N\)-th harmonic,
+A different mechanism is possible if the acoustic waveform itself becomes nonsinusoidal and contains a real spatial harmonic at the required wavevector. In that case the harmonic can provide direct coupling. However, if the fundamental acoustic frequency is $f_1$ and the required component is the $N$-th harmonic,
 
-\[
+$$
 f_N=Nf_1.
-\]
+$$
 
-The high-order spatial harmonic must therefore still physically exist at approximately the frequency and wavevector demanded by optical momentum conservation. Lowering the electrical or acoustic fundamental does not by itself eliminate the need to generate and sustain the high-\(K\) component.
+The high-order spatial harmonic must therefore still physically exist at approximately the frequency and wavevector demanded by optical momentum conservation. Lowering the electrical or acoustic fundamental does not by itself eliminate the need to generate and sustain the high-$K$ component.
 
 ### Architecture implication
 
@@ -1633,7 +1633,7 @@ A more useful follow-up question is whether nonlinear or engineered acoustic str
 The proposed higher-order solver should distinguish between:
 
 1. **direct harmonic coupling**, where the acoustic/index waveform explicitly contains the spatial Fourier component that supplies the required optical momentum; and
-2. **sequential higher-order coupling**, where multiple coupling steps produce an \(N\)-th-order Bragg resonance.
+2. **sequential higher-order coupling**, where multiple coupling steps produce an $N$-th-order Bragg resonance.
 
 A Fourier-spectrum diagnostic remains useful for the first case, but a Floquet, extended coupled-wave, or rigorous coupled-wave model is required to represent the second case reliably.
 
@@ -1643,45 +1643,45 @@ A Fourier-spectrum diagnostic remains useful for the first case, but a Floquet, 
 
 For a longitudinal traveling plane wave in the linear-elastic regime, the time-averaged acoustic intensity can be written approximately as
 
-\[
+$$
 \boxed{
 I_a=\frac12\rho v_a^3S^2
 }
-\]
+$$
 
 where:
 
-- \(I_a\) is acoustic intensity in W/m\(^2\),
-- \(\rho\) is material density in kg/m\(^3\),
-- \(v_a\) is longitudinal acoustic phase velocity in m/s,
-- \(S\) is strain amplitude.
+- $I_a$ is acoustic intensity in W/m$^2$,
+- $\rho$ is material density in kg/m$^3$,
+- $v_a$ is longitudinal acoustic phase velocity in m/s,
+- $S$ is strain amplitude.
 
 Therefore,
 
-\[
+$$
 \boxed{
 S=\sqrt{\frac{2I_a}{\rho v_a^3}}.
 }
-\]
+$$
 
 Combining this with the scalar photoelastic approximation
 
-\[
+$$
 \Delta n\approx-\frac12n^3p_{\text{eff}}S
-\]
+$$
 
 gives
 
-\[
+$$
 \boxed{
 |\Delta n|
 \approx
 \frac12 n^3|p_{\text{eff}}|
 \sqrt{\frac{2I_a}{\rho v_a^3}}.
 }
-\]
+$$
 
-This relationship provides a direct bridge between an acoustic power-density model and the optical \(\Delta n\) used by the grating solver.
+This relationship provides a direct bridge between an acoustic power-density model and the optical $\Delta n$ used by the grating solver.
 
 ### Important assumptions
 
@@ -1700,15 +1700,15 @@ It should therefore be treated as a useful first-order engineering model rather 
 
 The acoustic/material solver should eventually accept acoustic intensity directly or derive it from launched acoustic power and effective acoustic aperture:
 
-\[
+$$
 \boxed{
 I_a\approx\frac{P_a}{A_a}.
 }
-\]
+$$
 
 Candidate material and device inputs should therefore include
 
-\[
+$$
 P_a,\quad
 A_a,\quad
 \rho,\quad
@@ -1716,7 +1716,7 @@ v_a,\quad
 p_{ij},\quad
 n,\quad
 \alpha_a(f),
-\]
+$$
 
 plus transducer efficiency and geometry as the model matures.
 
@@ -1728,54 +1728,54 @@ Large physical grating length is useful only while the acoustic modulation remai
 
 If the acoustic amplitude decays approximately as
 
-\[
+$$
 \boxed{
 A(z)=A_0e^{-\alpha_a z},
 }
-\]
+$$
 
 and optical coupling is proportional to the local index modulation, then a corresponding position-dependent coupling coefficient can be written as
 
-\[
+$$
 \boxed{
 \kappa(z)=\kappa_0e^{-\alpha_a z}.
 }
-\]
+$$
 
 The accumulated coupling strength is then
 
-\[
+$$
 \boxed{
 \int_0^L\kappa(z)\,dz
 =
 \frac{\kappa_0}{\alpha_a}
 \left(1-e^{-\alpha_aL}\right).
 }
-\]
+$$
 
 For
 
-\[
+$$
 L\gg\frac{1}{\alpha_a},
-\]
+$$
 
 the accumulated coupling approaches
 
-\[
+$$
 \boxed{
 \frac{\kappa_0}{\alpha_a}
 }
-\]
+$$
 
-rather than continuing to grow as \(\kappa_0L\).
+rather than continuing to grow as $\kappa_0L$.
 
 This establishes a more useful design distinction:
 
-\[
+$$
 \boxed{
 L_{\text{physical}}\neq L_{\text{effective}}.
 }
-\]
+$$
 
 The effective interaction length may be limited by acoustic attenuation, phase coherence, optical beam geometry, finite aperture, boundary effects, or other nonidealities.
 
@@ -1795,12 +1795,12 @@ This elevates distributed acoustic generation, standing-wave/resonant architectu
 
 Future coupled-mode calculations should replace a purely physical interaction length with an attenuation- and coherence-aware coupling integral. Useful future quantities include
 
-\[
+$$
 L_{\text{att}},\quad
 L_{\text{coh}},\quad
 L_{\text{eff}},\quad
 \int\kappa(z)\,dz.
-\]
+$$
 
 ---
 
@@ -1808,49 +1808,49 @@ L_{\text{eff}},\quad
 
 The previous first-order backreflection result can be generalized to arbitrary angular deflection.
 
-For elastic optical magnitudes \(|\mathbf k_{\text{in}}|\approx|\mathbf k_{\text{out}}|=k\), and an angle \(\Theta\) between the incident and output optical directions, the required grating momentum magnitude is
+For elastic optical magnitudes $|\mathbf k_{\text{in}}|\approx|\mathbf k_{\text{out}}|=k$, and an angle $\Theta$ between the incident and output optical directions, the required grating momentum magnitude is
 
-\[
+$$
 \boxed{
 q=|\mathbf k_{\text{out}}-\mathbf k_{\text{in}}|
 =2k\sin\frac{\Theta}{2}.
 }
-\]
+$$
 
 Using
 
-\[
+$$
 k=\frac{2\pi n}{\lambda_0}
-\]
+$$
 
 and
 
-\[
+$$
 q=\frac{2\pi f_a}{v_a},
-\]
+$$
 
 gives the approximate acoustic frequency requirement
 
-\[
+$$
 \boxed{
 f_a(\Theta)=
 \frac{2nv_a}{\lambda_0}
 \sin\frac{\Theta}{2}.
 }
-\]
+$$
 
 The familiar direct-backreflection result is recovered when
 
-\[
+$$
 \Theta=180^\circ,
-\]
+$$
 
 for which
 
-\[
+$$
 \boxed{
 f_{\text{back}}=\frac{2nv_a}{\lambda_0}.}
-\]
+$$
 
 For smaller optical direction changes, the required acoustic frequency decreases substantially.
 
@@ -1858,11 +1858,11 @@ For smaller optical direction changes, the required acoustic frequency decreases
 
 The question
 
-\[
+$$
 \boxed{
 \text{Does voxel formation actually require direct }180^\circ\text{ optical reversal?}
 }
-\]
+$$
 
 should now be treated as a highest-priority architecture question.
 
@@ -1870,13 +1870,13 @@ A system that uses moderate-angle coherent coupling only for spatial selection o
 
 This strengthens the motivation for the two-stage architecture already identified in Section 6.3:
 
-\[
+$$
 \text{coherent selection}
 \rightarrow
 \text{localized optical energy}
 \rightarrow
 \text{viewer-facing emission}.
-\]
+$$
 
 ---
 
@@ -1888,11 +1888,11 @@ The first focused investigation changes the relative priority of the remaining r
 
 1. **Determine whether direct optical backreflection is actually required by the display architecture.** Compare acoustic momentum and frequency requirements across practical optical deflection angles.
 2. **Determine realistic frequency-dependent acoustic attenuation and coherence length in candidate transparent materials.** This controls whether weak coupling can be compensated by interaction length.
-3. **Determine realistic \(\Delta n\) from achievable acoustic intensity, aperture, duty cycle, and transducer efficiency.**
+3. **Determine realistic $\Delta n$ from achievable acoustic intensity, aperture, duty cycle, and transducer efficiency.**
 
 ### P1 — Device architecture
 
-4. **Compare candidate materials using both acousto-optic coupling and acoustic loss.** The conventional \(M_2\) figure of merit alone is insufficient if the usable interaction length is attenuation limited.
+4. **Compare candidate materials using both acousto-optic coupling and acoustic loss.** The conventional $M_2$ figure of merit alone is insufficient if the usable interaction length is attenuation limited.
 5. **Investigate distributed, resonant, and standing-wave acoustic generation.** These architectures may reduce dependence on long single-pass hypersonic propagation.
 6. **Establish experimentally demonstrated transducer bounds across the required frequency range.** Relevant quantities include mode, aperture, strain, efficiency, bandwidth, and thermal load.
 
@@ -1909,73 +1909,73 @@ The existing TMM solver remains appropriate for explicit layered optical structu
 
 ### Directly implementable relations
 
-\[
+$$
 \boxed{
 f_{\text{back}}=\frac{2nv_a}{\lambda_0}}
-\]
+$$
 
-\[
+$$
 \boxed{
 f_a(\Theta)=
 \frac{2nv_a}{\lambda_0}
 \sin\frac{\Theta}{2}}
-\]
+$$
 
-\[
+$$
 \boxed{
 S=\sqrt{\frac{2I_a}{\rho v_a^3}}}
-\]
+$$
 
-\[
+$$
 \boxed{
 |\Delta n|
 \approx
 \frac12n^3|p_{\text{eff}}|
 \sqrt{\frac{2I_a}{\rho v_a^3}}}
-\]
+$$
 
 and, for an exponentially attenuated grating,
 
-\[
+$$
 \boxed{
 \kappa_{\text{integrated}}
 =
 \frac{\kappa_0}{\alpha_a}
 \left(1-e^{-\alpha_aL}\right).
 }
-\]
+$$
 
 ### Material-catalog properties
 
 Candidate properties should include
 
-\[
+$$
 \rho,\quad
 v_L,\quad
 p_{ij},\quad
 n(\lambda,T),\quad
 \alpha_a(f,T).
-\]
+$$
 
 ### Useful future parameter sweeps and heatmaps
 
-\[
+$$
 I_a\times L_{\text{eff}}\rightarrow R,
-\]
+$$
 
-\[
+$$
 f_a\times\alpha_a\rightarrow L_{\text{att}},
-\]
+$$
 
-\[
+$$
 \Theta\times\lambda\rightarrow f_a,
-\]
+$$
 
 and
 
-\[
+$$
 \Delta n\times\alpha_a\rightarrow R_{\max}.
-\]
+$$
 
 ### Higher-order solver refinement
 
@@ -1987,7 +1987,7 @@ A Fourier-spectrum model alone should not be treated as a complete higher-order 
 
 The broad physical concept remains supported:
 
-\[
+$$
 \boxed{
 \text{acoustic field}
 \rightarrow
@@ -1995,13 +1995,13 @@ The broad physical concept remains supported:
 \rightarrow
 \text{programmable coherent optical coupling}
 }
-\]
+$$
 
 The first focused investigation does not invalidate that concept.
 
 It does, however, weaken a more specific architecture assumption:
 
-\[
+$$
 \boxed{
 \text{weak photoelastic modulation}
 +
@@ -2009,13 +2009,13 @@ It does, however, weaken a more specific architecture assumption:
 +
 \text{high-order Bragg operation}
 }
-\]
+$$
 
 should not currently be assumed to provide strong visible backreflection at moderate acoustic frequency.
 
 The dominant coupled feasibility chain is now:
 
-\[
+$$
 \boxed{
 \begin{array}{c}
 \text{desired optical direction change}\\
@@ -2031,6 +2031,6 @@ L_{\text{effective}}\text{ and }\Delta n\\
 \text{achievable optical coupling}
 \end{array}
 }
-\]
+$$
 
 The next research batch should therefore prioritize optical deflection geometry, frequency-dependent material attenuation, and practical hypersonic acoustic generation before optimizing projector timing or wide-angle viewing details.
