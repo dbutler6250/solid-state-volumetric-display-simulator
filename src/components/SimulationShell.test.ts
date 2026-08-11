@@ -6,6 +6,7 @@ describe('simulation shell output tabs', () => {
   it('omits the standalone heatmap tab', () => {
     expect(OUTPUT_TABS).toEqual([
       'spectrum',
+      'moving-region',
       'parameter-sweep',
       'stack-definition',
       'reflectance-volume',

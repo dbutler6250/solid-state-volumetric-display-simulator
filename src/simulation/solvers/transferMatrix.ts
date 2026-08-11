@@ -36,6 +36,7 @@ import {
 } from '../simulationLimits';
 import { validateQuarterWaveStackInputs } from '../validation/quarterWaveStackValidation';
 import { toComplexRefractiveIndex } from '../materials/material';
+import { solveHybridBraggCoupledModeSpectrum } from './coupledMode/spatialBraggSolver';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
@@ -256,6 +257,11 @@ export function solveResolvedStructure(
     pointCount: analysis.wavelengthPointCount,
     requiredWavelengthNm: options.requiredWavelengthNm,
   });
+  if (resolved.hybridModel) {
+    const spectrum = solveHybridBraggCoupledModeSpectrum(resolved.hybridModel, wavelengths);
+    const metrics = calculateMetrics(spectrum);
+    return { spectrum, ...metrics };
+  }
   const spectrum = wavelengths.map((wavelengthNm) =>
     solveLayerStack(resolved.stack, {
       wavelengthNm,
@@ -292,6 +298,17 @@ export async function solveResolvedStructureAsync(
   });
   const spectrum: LayerStackPointResult[] = [];
   options.onProgress?.({ completed: 0, total: wavelengths.length });
+
+  if (resolved.hybridModel) {
+    for (const wavelengthNm of wavelengths) {
+      throwIfAborted(options.signal);
+      spectrum.push(solveHybridBraggCoupledModeSpectrum(resolved.hybridModel, [wavelengthNm])[0]);
+      options.onProgress?.({ completed: spectrum.length, total: wavelengths.length });
+      await yieldToBrowser();
+    }
+    throwIfAborted(options.signal);
+    return { spectrum, ...calculateMetrics(spectrum) };
+  }
 
   for (const wavelengthNm of wavelengths) {
     throwIfAborted(options.signal);
@@ -618,7 +635,9 @@ function assertHeatmapSweepIsSafe(
         sweptDocument.structure.type === 'acousto-optic-grating'
           ? sweptDocument.structure.design.acousticPeriodCount *
             getAcousticSlicesPerPeriod(sweptDocument.structure.design.acousticRepresentationMode)
-          : sweptDocument.structure.periodCount * 2;
+          : sweptDocument.structure.type === 'quarter-wave-stack'
+            ? sweptDocument.structure.periodCount * 2
+            : 0;
       if (layerCount > MAX_AUTOMATIC_ACOUSTIC_LAYERS && sweptDocument.structure.type === 'acousto-optic-grating') {
         throw new Error(
           `Heatmap value ${xValue}, ${yValue} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,
@@ -651,7 +670,9 @@ function assertParameterSweepIsSafe(
     const layerCount = sweptDocument.structure.type === 'acousto-optic-grating'
       ? sweptDocument.structure.design.acousticPeriodCount *
         getAcousticSlicesPerPeriod(sweptDocument.structure.design.acousticRepresentationMode)
-      : sweptDocument.structure.periodCount * 2;
+      : sweptDocument.structure.type === 'quarter-wave-stack'
+        ? sweptDocument.structure.periodCount * 2
+        : 0;
     if (layerCount > MAX_AUTOMATIC_ACOUSTIC_LAYERS && sweptDocument.structure.type === 'acousto-optic-grating') {
       throw new Error(
         `Acoustic sweep value ${value} requires ${layerCount.toLocaleString()} slices; automatic sweeps are limited to ${MAX_AUTOMATIC_ACOUSTIC_LAYERS.toLocaleString()} slices per point. Reduce the acoustic-period bounds or representation detail.`,

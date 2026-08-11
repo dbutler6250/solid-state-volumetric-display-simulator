@@ -1,5 +1,6 @@
 import type { QuarterWaveStackInputs, ThicknessMode } from '../types/simulation';
 import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../simulation/structures/acoustoOpticGrating';
+import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
 import { getRefractiveIndexReal } from '../simulation/materials/material';
 
 export type SimulationWorkspaceState = {
@@ -20,7 +21,7 @@ const ANALYSIS_FIELDS = [
   'wavelengthPointCount',
 ] as const;
 
-/** Creates independent optical, manual, and acoustic drafts with shared analysis settings. */
+/** Creates independent optical, manual, acoustic, and hybrid drafts with shared analysis settings. */
 export function createSimulationWorkspaceState(
   inputs: QuarterWaveStackInputs,
 ): SimulationWorkspaceState {
@@ -44,6 +45,11 @@ export function createSimulationWorkspaceState(
         ...inputs,
         thicknessMode: 'acoustic',
         acousticDesign: inputs.acousticDesign ?? DEFAULT_ACOUSTIC_DESIGN_INPUTS,
+      },
+      hybrid: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: inputs.hybridBraggDesign ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
       },
     },
   };

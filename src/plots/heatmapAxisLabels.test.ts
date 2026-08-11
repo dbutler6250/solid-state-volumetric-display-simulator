@@ -10,6 +10,10 @@ describe('heatmap axis labels', () => {
       acousticFrequencyHz: 'Acoustic frequency (Hz)',
       acousticPeriodCount: 'Acoustic periods',
       acousticIndexModulation: 'Peak index modulation',
+      hybridPeakStrain: 'Hybrid peak strain',
+      hybridStrainCenterMm: 'Hybrid strain center (mm)',
+      hybridStrainWidthMm: 'Hybrid strain width (mm)',
+      hybridIndexModulation: 'Hybrid index modulation',
     });
   });
 });

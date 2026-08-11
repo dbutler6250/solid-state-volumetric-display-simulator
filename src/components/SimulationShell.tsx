@@ -10,12 +10,14 @@ import {
 } from './parameterSweepSettings';
 import { MetricsPanel } from './outputs/MetricsPanel';
 import { AcousticGeneratorPanel } from './outputs/AcousticGeneratorPanel';
+import { HybridBraggPanel } from './outputs/HybridBraggPanel';
 import { StackDefinitionPanel } from './outputs/StackDefinitionPanel';
 import { ReflectanceVolumePanel } from './outputs/ReflectanceVolumePanel';
 import { StlSlicerPanel } from './outputs/StlSlicerPanel';
 import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceHeatmapChart } from '../plots/ReflectanceHeatmapChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
+import { MovingPulseExperimentChart } from '../plots/MovingPulseExperimentChart';
 import type { ChartProgress } from '../plots/ChartProgressOverlay';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
 import {
@@ -39,8 +41,13 @@ import { validateQuarterWaveStackInputs } from '../simulation/validation/quarter
 import { exportStackConfigJson } from '../io/exportStackConfigJson';
 import { exportResultsCsv } from '../io/exportResultsCsv';
 import { exportParameterSweepCsv } from '../io/exportParameterSweepCsv';
+import { exportMovingPulseCsv } from '../io/exportMovingPulseCsv';
 import { downloadTextFile } from '../io/download';
 import { importStackConfigJson } from '../io/importStackConfigJson';
+import {
+  solveMovingPulseExperimentAsync,
+  type MovingPulseExperimentResult,
+} from '../simulation/experiments/hybridBraggExperiments';
 import type {
   ParameterSweepResult,
   ParameterSweepSettings,
@@ -65,7 +72,7 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 const ACOUSTIC_SOLVE_DEBOUNCE_MS = 150;
-export const OUTPUT_TABS = ['spectrum', 'parameter-sweep', 'stack-definition', 'reflectance-volume', 'stl-slicer'] as const;
+export const OUTPUT_TABS = ['spectrum', 'moving-region', 'parameter-sweep', 'stack-definition', 'reflectance-volume', 'stl-slicer'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
 
 const formatParameterSweepInput = (value: number | undefined): string =>
@@ -98,6 +105,9 @@ export function SimulationShell() {
   const [heatmapError, setHeatmapError] = useState<string | null>(null);
   const [heatmapIsSolving, setHeatmapIsSolving] = useState(false);
   const [heatmapProgress, setHeatmapProgress] = useState<ChartProgress | null>(null);
+  const [movingPulseResult, setMovingPulseResult] = useState<MovingPulseExperimentResult | null>(null);
+  const [movingPulseError, setMovingPulseError] = useState<string | null>(null);
+  const [movingPulseProgress, setMovingPulseProgress] = useState<ChartProgress | null>(null);
   const [referenceRangeError, setReferenceRangeError] = useState<string | null>(null);
   const [opticalResult, setOpticalResult] = useState<SimulationResult | null>(null);
   const [opticalSolveError, setOpticalSolveError] = useState<string | null>(null);
@@ -108,6 +118,7 @@ export function SimulationShell() {
   const parameterSweepController = useRef<AbortController | null>(null);
   const heatmapRequestId = useRef(0);
   const heatmapController = useRef<AbortController | null>(null);
+  const movingPulseRequestId = useRef(0);
   const [acousticOutput, setAcousticOutput] = useState<{
     document: SimulationDocument;
     resolved: ResolvedStructure;
@@ -117,6 +128,7 @@ export function SimulationShell() {
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const tabRefs = useRef<Record<OutputTab, HTMLButtonElement | null>>({
     spectrum: null,
+    'moving-region': null,
     'parameter-sweep': null,
     'stack-definition': null,
     'reflectance-volume': null,
@@ -128,7 +140,7 @@ export function SimulationShell() {
     [inputs, validationIssues],
   );
   const opticalResolvedStructure = useMemo(
-    () => simulationDocument?.structure.type === 'quarter-wave-stack'
+    () => simulationDocument && simulationDocument.structure.type !== 'acousto-optic-grating'
       ? resolveSimulationDocument(simulationDocument)
       : null,
     [simulationDocument],
@@ -234,6 +246,53 @@ export function SimulationShell() {
       setSpectrumProgress(null);
     };
   }, [opticalResolvedStructure, simulationDocument]);
+
+  useEffect(() => {
+    if (
+      validationIssues.length > 0 ||
+      simulationDocument?.structure.type !== 'hybrid-bragg-grating' ||
+      !inputs.hybridBraggDesign
+    ) {
+      movingPulseRequestId.current += 1;
+      setMovingPulseResult(null);
+      setMovingPulseError(null);
+      setMovingPulseProgress(null);
+      return;
+    }
+
+    const design = inputs.hybridBraggDesign;
+    const requestId = ++movingPulseRequestId.current;
+    const controller = new AbortController();
+    setMovingPulseResult(null);
+    setMovingPulseError(null);
+    setMovingPulseProgress({ completed: 0, total: design.pulseSweepPointCount });
+
+    void (async () => {
+      try {
+        const nextResult = await solveMovingPulseExperimentAsync(design, {
+          signal: controller.signal,
+          onProgress: (progress) => {
+            if (requestId === movingPulseRequestId.current) setMovingPulseProgress(progress);
+          },
+        });
+        if (controller.signal.aborted || requestId !== movingPulseRequestId.current) return;
+        setMovingPulseResult(nextResult);
+        setMovingPulseProgress(null);
+      } catch (error) {
+        if (controller.signal.aborted || requestId !== movingPulseRequestId.current) return;
+        setMovingPulseProgress(null);
+        setMovingPulseError(
+          error instanceof Error ? error.message : 'The moving-region experiment could not be calculated.',
+        );
+      }
+    })();
+
+    return () => {
+      controller.abort();
+      movingPulseRequestId.current += 1;
+      setMovingPulseProgress(null);
+    };
+  }, [inputs.hybridBraggDesign, simulationDocument?.structure.type, validationIssues.length]);
 
   useEffect(() => {
     parameterSweepController.current?.abort();
@@ -467,6 +526,16 @@ export function SimulationShell() {
     downloadTextFile(filename, csv);
   };
 
+  const exportMovingRegionCsv = () => {
+    if (!movingPulseResult) {
+      return;
+    }
+
+    const csv = exportMovingPulseCsv(inputs, movingPulseResult, resolvedStructure ?? undefined);
+    const filename = `moving-region-${formatDateStamp(new Date())}.csv`;
+    downloadTextFile(filename, csv);
+  };
+
   const exportSetup = () => {
     if (validationIssues.length > 0) {
       return;
@@ -578,6 +647,9 @@ export function SimulationShell() {
           {inputs.thicknessMode === 'acoustic' ? (
             <AcousticGeneratorPanel inputs={inputs} onChange={setInputs} />
           ) : null}
+          {inputs.thicknessMode === 'hybrid' ? (
+            <HybridBraggPanel inputs={inputs} onChange={setInputs} />
+          ) : null}
         </aside>
 
         <section className="output-area" aria-label="Simulation outputs">
@@ -587,13 +659,15 @@ export function SimulationShell() {
                 const label =
                   tab === 'spectrum'
                     ? 'Spectrum'
-                    : tab === 'parameter-sweep'
-                      ? 'Parameter Sweep'
-                      : tab === 'stack-definition'
-                        ? 'Stack Definition'
-                        : tab === 'reflectance-volume'
-                          ? '3D View'
-                          : 'STL Slicer';
+                    : tab === 'moving-region'
+                      ? 'Moving Region'
+                      : tab === 'parameter-sweep'
+                        ? 'Parameter Sweep'
+                        : tab === 'stack-definition'
+                          ? 'Stack Definition'
+                          : tab === 'reflectance-volume'
+                            ? '3D View'
+                            : 'STL Slicer';
                 return (
                   <button
                     key={tab}
@@ -684,6 +758,27 @@ export function SimulationShell() {
                     externalResetKey={inputResetKey}
                   />
                 </section>
+              </>
+            ) : null}
+          </section>
+
+          <section className="chart-panel" id="moving-region-panel" role="tabpanel" aria-labelledby="moving-region-tab" hidden={activeTab !== 'moving-region'}>
+            {shouldRenderOutputPanelContent('moving-region', activeTab) ? (
+              <>
+                <div className="chart-heading">
+                  <h2>Moving Active Region</h2>
+                  <button type="button" className="action-button" onClick={exportMovingRegionCsv} disabled={!movingPulseResult}>
+                    Export Moving Region CSV
+                  </button>
+                </div>
+                <MovingPulseExperimentChart
+                  result={movingPulseResult}
+                  design={simulationDocument?.structure.type === 'hybrid-bragg-grating' && inputs.hybridBraggDesign ? inputs.hybridBraggDesign : null}
+                  progress={movingPulseProgress}
+                />
+                {movingPulseError ? (
+                  <p className="chart-toolbar-message" role="alert">{movingPulseError}</p>
+                ) : null}
               </>
             ) : null}
           </section>
@@ -908,6 +1003,22 @@ function getDefaultSweepSettings(
     const modulation = inputs.acousticDesign?.acousticIndexModulation ?? 0.002;
     return { parameter, start: 0, end: Math.max(0.001, modulation * 2), pointCount: 30 };
   }
+  if (parameter === 'hybridPeakStrain') {
+    const strain = inputs.hybridBraggDesign?.peakStrain ?? 0;
+    return { parameter, start: 0, end: Math.max(1e-5, Math.abs(strain) * 2), pointCount: 30 };
+  }
+  if (parameter === 'hybridStrainCenterMm') {
+    const lengthMm = inputs.hybridBraggDesign?.lengthMm ?? 10;
+    return { parameter, start: 0, end: lengthMm, pointCount: 30 };
+  }
+  if (parameter === 'hybridStrainWidthMm') {
+    const lengthMm = inputs.hybridBraggDesign?.lengthMm ?? 10;
+    return { parameter, start: 0.1, end: lengthMm, pointCount: 30 };
+  }
+  if (parameter === 'hybridIndexModulation') {
+    const modulation = inputs.hybridBraggDesign?.indexModulation ?? 1e-4;
+    return { parameter, start: 0, end: Math.max(1e-5, modulation * 2), pointCount: 30 };
+  }
   return {
     parameter,
     start: inputs.wavelengthStartNm ?? inputs.designWavelengthNm * 0.5,
@@ -924,6 +1035,10 @@ function getSweepParameterLabel(parameter: ParameterSweepSettings['parameter']):
     acousticFrequencyHz: 'Acoustic frequency',
     acousticPeriodCount: 'Acoustic periods',
     acousticIndexModulation: 'Peak index modulation',
+    hybridPeakStrain: 'Hybrid peak strain',
+    hybridStrainCenterMm: 'Hybrid strain center',
+    hybridStrainWidthMm: 'Hybrid strain width',
+    hybridIndexModulation: 'Hybrid index modulation',
   };
   return labels[parameter];
 }
@@ -958,9 +1073,15 @@ function ParameterSweepRowControls({
   const isInteger = settings.parameter === 'periodCount' || settings.parameter === 'acousticPeriodCount';
   const isFixedAngle = settings.parameter === 'incidentAngleDegrees';
   const isLocked = isFixedAngle;
-  const minimum = settings.parameter === 'incidentAngleDegrees' || settings.parameter === 'acousticIndexModulation'
+  const minimum = settings.parameter === 'incidentAngleDegrees' ||
+    settings.parameter === 'acousticIndexModulation' ||
+    settings.parameter === 'hybridPeakStrain' ||
+    settings.parameter === 'hybridStrainCenterMm' ||
+    settings.parameter === 'hybridIndexModulation'
     ? 0
-    : 1;
+    : settings.parameter === 'hybridStrainWidthMm'
+      ? 0.001
+      : 1;
   const maximum =
     settings.parameter === 'incidentAngleDegrees'
       ? MAX_INCIDENT_ANGLE_DEGREES

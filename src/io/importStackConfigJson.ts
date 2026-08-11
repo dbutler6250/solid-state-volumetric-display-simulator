@@ -1,5 +1,6 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import { isAcousticRepresentationMode } from '../simulation/structures/acoustoOpticGrating';
+import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
 import type { Material, ComplexRefractiveIndex } from '../simulation/materials/material';
 import type {
   ParameterSweepSettings,
@@ -14,6 +15,7 @@ const LEGACY_BRAGG_CONFIG_SCHEMA = 'ssvds-bragg-config-v1';
 const STACK_CONFIG_APP = 'solid-state-volumetric-display-simulator';
 const STACK_CONFIG_STRUCTURE_TYPE = 'quarter-wave-stack';
 const ACOUSTIC_STRUCTURE_TYPE = 'acousto-optic-grating';
+const HYBRID_STRUCTURE_TYPE = 'hybrid-bragg-grating';
 const LEGACY_BRAGG_STRUCTURE_TYPE = 'quarter-wave-bragg-reflector';
 
 type ImportSuccess = {
@@ -63,6 +65,7 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
   if (
     parsed.structureType !== STACK_CONFIG_STRUCTURE_TYPE &&
     parsed.structureType !== ACOUSTIC_STRUCTURE_TYPE &&
+    parsed.structureType !== HYBRID_STRUCTURE_TYPE &&
     parsed.structureType !== LEGACY_BRAGG_STRUCTURE_TYPE
   ) {
     return { ok: false, message: 'This setup file uses an unsupported structure type.' };
@@ -120,6 +123,12 @@ export function importStackConfigJson(rawJson: string): ImportStackConfigJsonRes
     const acousticDesign = parseAcousticDesign(rawInputs.acousticDesign, !isModernStackConfig);
     if (!acousticDesign.ok) return acousticDesign;
     inputs.acousticDesign = acousticDesign.design;
+  }
+
+  if (isRecord(rawInputs.hybridBraggDesign)) {
+    const hybridDesign = parseHybridBraggDesign(rawInputs.hybridBraggDesign);
+    if (!hybridDesign.ok) return hybridDesign;
+    inputs.hybridBraggDesign = hybridDesign.design;
   }
 
   const issues = validateQuarterWaveStackInputs(inputs);
@@ -198,7 +207,10 @@ function parseParameterSweep(
       ? !isNonNegativeFiniteNumber(value.start) ||
         !isAngleFiniteNumber(value.end) ||
         value.end <= value.start
-      : value.parameter === 'acousticIndexModulation'
+      : value.parameter === 'acousticIndexModulation' ||
+          value.parameter === 'hybridPeakStrain' ||
+          value.parameter === 'hybridStrainCenterMm' ||
+          value.parameter === 'hybridIndexModulation'
         ? !isNonNegativeFiniteNumber(value.start) ||
           !isNonNegativeFiniteNumber(value.end) ||
           value.end <= value.start
@@ -323,7 +335,7 @@ function parseThicknessMode(
   value: unknown,
   isModernStackConfig: boolean,
 ): { ok: true; mode: ThicknessMode } | ImportFailure {
-  if (value === 'derived' || value === 'manual' || value === 'acoustic') {
+  if (value === 'derived' || value === 'manual' || value === 'acoustic' || value === 'hybrid') {
     return { ok: true, mode: value };
   }
 
@@ -336,7 +348,7 @@ function parseThicknessMode(
     return { ok: false, message: 'Modern setup files must include an input mode.' };
   }
 
-  return { ok: false, message: 'Input mode must be derived, manual, or acoustic.' };
+  return { ok: false, message: 'Input mode must be derived, manual, acoustic, or hybrid.' };
 }
 
 function validateStructureTypeConsistency(
@@ -350,6 +362,13 @@ function validateStructureTypeConsistency(
     };
   }
 
+  if (structureType === HYBRID_STRUCTURE_TYPE && thicknessMode !== 'hybrid') {
+    return {
+      ok: false,
+      message: 'Hybrid Bragg setup files must use hybrid input mode.',
+    };
+  }
+
   if (structureType === STACK_CONFIG_STRUCTURE_TYPE && thicknessMode === 'acoustic') {
     return {
       ok: false,
@@ -357,10 +376,24 @@ function validateStructureTypeConsistency(
     };
   }
 
+  if (structureType === STACK_CONFIG_STRUCTURE_TYPE && thicknessMode === 'hybrid') {
+    return {
+      ok: false,
+      message: 'Quarter-wave stack setup files cannot use hybrid input mode.',
+    };
+  }
+
   if (structureType === LEGACY_BRAGG_STRUCTURE_TYPE && thicknessMode === 'acoustic') {
     return {
       ok: false,
       message: 'Legacy Bragg setup files cannot use acoustic input mode.',
+    };
+  }
+
+  if (structureType === LEGACY_BRAGG_STRUCTURE_TYPE && thicknessMode === 'hybrid') {
+    return {
+      ok: false,
+      message: 'Legacy Bragg setup files cannot use hybrid input mode.',
     };
   }
 
@@ -444,7 +477,11 @@ function isSweepParameter(value: unknown): value is SweepParameter {
     value === 'periodCount' ||
     value === 'acousticFrequencyHz' ||
     value === 'acousticPeriodCount' ||
-    value === 'acousticIndexModulation'
+    value === 'acousticIndexModulation' ||
+    value === 'hybridPeakStrain' ||
+    value === 'hybridStrainCenterMm' ||
+    value === 'hybridStrainWidthMm' ||
+    value === 'hybridIndexModulation'
   );
 }
 /** Checks for a non-negative finite numeric field. */
@@ -513,6 +550,78 @@ function parseAcousticDesign(
       braggOrder: value.braggOrder,
       acousticIndexModulation: value.acousticIndexModulation,
       acousticRepresentationMode: mode,
+    },
+  };
+}
+
+function parseHybridBraggDesign(
+  value: Record<string, unknown>,
+): { ok: true; design: QuarterWaveStackInputs['hybridBraggDesign'] } | ImportFailure {
+  const numericFields = [
+    'lengthMm',
+    'averageIndex',
+    'indexModulation',
+    'gratingPeriodNm',
+    'gratingPhaseRadians',
+    'peakStrain',
+    'strainCenterMm',
+    'strainWidthMm',
+    'effectivePhotoelasticCoefficient',
+    'segmentCount',
+    'fixedLaserWavelengthNm',
+  ] as const;
+  for (const field of numericFields) {
+    if (!isFiniteNumber(value[field])) {
+      return { ok: false, message: `Hybrid Bragg field ${field} must be a finite number.` };
+    }
+  }
+  if (value.strainShape !== 'rectangular' && value.strainShape !== 'gaussian') {
+    return { ok: false, message: 'Hybrid strain shape must be rectangular or gaussian.' };
+  }
+  if (!Number.isInteger(value.segmentCount)) {
+    return { ok: false, message: 'Hybrid segment count must be a whole number.' };
+  }
+  const pulseSweepStartMm = value.pulseSweepStartMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepStartMm;
+  const pulseSweepEndMm = value.pulseSweepEndMm ?? value.lengthMm;
+  const pulseSweepPointCount = value.pulseSweepPointCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepPointCount;
+  if (!isFiniteNumber(pulseSweepStartMm) || !isFiniteNumber(pulseSweepEndMm) || !isFiniteNumber(pulseSweepPointCount)) {
+    return { ok: false, message: 'Hybrid moving-pulse sweep fields must be finite numbers.' };
+  }
+  if (!Number.isInteger(pulseSweepPointCount)) {
+    return { ok: false, message: 'Hybrid pulse sweep points must be a whole number.' };
+  }
+  const design = value as {
+    lengthMm: number;
+    averageIndex: number;
+    indexModulation: number;
+    gratingPeriodNm: number;
+    gratingPhaseRadians: number;
+    peakStrain: number;
+    strainCenterMm: number;
+    strainWidthMm: number;
+    strainShape: 'rectangular' | 'gaussian';
+    effectivePhotoelasticCoefficient: number;
+    segmentCount: number;
+    fixedLaserWavelengthNm: number;
+  };
+  return {
+    ok: true,
+    design: {
+      lengthMm: design.lengthMm,
+      averageIndex: design.averageIndex,
+      indexModulation: design.indexModulation,
+      gratingPeriodNm: design.gratingPeriodNm,
+      gratingPhaseRadians: design.gratingPhaseRadians,
+      peakStrain: design.peakStrain,
+      strainCenterMm: design.strainCenterMm,
+      strainWidthMm: design.strainWidthMm,
+      strainShape: design.strainShape,
+      effectivePhotoelasticCoefficient: design.effectivePhotoelasticCoefficient,
+      segmentCount: design.segmentCount,
+      fixedLaserWavelengthNm: design.fixedLaserWavelengthNm,
+      pulseSweepStartMm,
+      pulseSweepEndMm,
+      pulseSweepPointCount,
     },
   };
 }

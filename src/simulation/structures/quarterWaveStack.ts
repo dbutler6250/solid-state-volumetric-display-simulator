@@ -3,6 +3,7 @@ import type { LayerStack } from '../layers/stack';
 import { AIR, MATERIAL_CATALOG } from '../materials/catalog';
 import { getRefractiveIndexReal } from '../materials/material';
 import { getAcousticDesignSummary, getAcousticSlicesPerPeriod, getAcousticWavelengthNm } from './acoustoOpticGrating';
+import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from './hybridBraggGrating';
 import { DEFAULT_WAVELENGTH_POINT_COUNT } from '../simulationLimits';
 import type { QuarterWaveStackInputs } from '../../types/simulation';
 
@@ -78,6 +79,7 @@ export const DEFAULT_QUARTER_WAVE_STACK_INPUTS: QuarterWaveStackInputs = {
   polarization: 'TE',
   thicknessMode: 'derived',
   acousticDesign: undefined,
+  hybridBraggDesign: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
   wavelengthStartNm: 300,
   wavelengthEndNm: 900,
   wavelengthPointCount: DEFAULT_WAVELENGTH_POINT_COUNT,

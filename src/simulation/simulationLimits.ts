@@ -15,3 +15,12 @@ export const MAX_PARAMETER_SWEEP_POINTS = 200;
 
 /** Caps aggregate layer-by-wavelength evaluations for one parameter sweep. */
 export const MAX_PARAMETER_SWEEP_WORK = 25_000_000;
+
+/** Maximum piecewise-constant spatial samples for the hybrid coupled-mode solver. */
+export const MAX_HYBRID_SEGMENTS = 2_000;
+
+/** Maximum pulse-center positions evaluated in one fixed-laser moving-region experiment. */
+export const MAX_HYBRID_PULSE_POSITIONS = 500;
+
+/** Caps segment-by-position work for one synchronous moving-region experiment. */
+export const MAX_HYBRID_MOVING_PULSE_WORK = 500_000;

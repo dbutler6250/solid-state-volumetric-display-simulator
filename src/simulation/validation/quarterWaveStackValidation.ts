@@ -3,6 +3,9 @@ import { getAcousticSlicesPerPeriod, isAcousticRepresentationMode } from '../str
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
   MAX_AUTOMATIC_ACOUSTIC_LAYERS,
+  MAX_HYBRID_MOVING_PULSE_WORK,
+  MAX_HYBRID_PULSE_POSITIONS,
+  MAX_HYBRID_SEGMENTS,
   MAX_OPTICAL_PERIODS,
   MAX_WAVELENGTH_POINTS,
 } from '../simulationLimits';
@@ -87,7 +90,7 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       field: 'periodCount',
       message: 'Period count must be a whole number greater than 0.',
     });
-  } else if (thicknessMode !== 'acoustic' && inputs.periodCount > MAX_OPTICAL_PERIODS) {
+  } else if (thicknessMode !== 'acoustic' && thicknessMode !== 'hybrid' && inputs.periodCount > MAX_OPTICAL_PERIODS) {
     issues.push({
       field: 'periodCount',
       message: `Period count must not exceed ${MAX_OPTICAL_PERIODS.toLocaleString()} for direct optical or manual solving.`,
@@ -119,10 +122,10 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
     });
   }
 
-  if (thicknessMode !== 'derived' && thicknessMode !== 'manual' && thicknessMode !== 'acoustic') {
+  if (thicknessMode !== 'derived' && thicknessMode !== 'manual' && thicknessMode !== 'acoustic' && thicknessMode !== 'hybrid') {
     issues.push({
       field: 'thicknessMode',
-      message: 'Input mode must be optical, manual, or acoustic.',
+      message: 'Input mode must be optical, manual, acoustic, or hybrid.',
     });
   }
 
@@ -202,6 +205,79 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
           field: 'thicknessMode',
           message: 'Acoustic index modulation must be 0 or greater.',
         });
+      }
+    }
+  }
+
+  if (thicknessMode === 'hybrid') {
+    const design = inputs.hybridBraggDesign;
+    if (!design) {
+      issues.push({
+        field: 'thicknessMode',
+        message: 'Hybrid input mode requires hybrid Bragg grating inputs.',
+      });
+    } else {
+      if (!isFiniteNumber(design.lengthMm) || design.lengthMm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid grating length must be greater than 0 mm.' });
+      }
+      if (!isFiniteNumber(design.averageIndex) || design.averageIndex <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid average index must be greater than 0.' });
+      }
+      if (!isFiniteNumber(design.indexModulation) || design.indexModulation < 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid index modulation must be 0 or greater.' });
+      }
+      if (!isFiniteNumber(design.gratingPeriodNm) || design.gratingPeriodNm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid grating period must be greater than 0 nm.' });
+      }
+      if (!isFiniteNumber(design.peakStrain)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid peak strain must be finite.' });
+      }
+      if (!isFiniteNumber(design.strainCenterMm) || design.strainCenterMm < 0 || design.strainCenterMm > design.lengthMm) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid strain center must be inside the grating length.' });
+      }
+      if (!isFiniteNumber(design.strainWidthMm) || design.strainWidthMm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid strain width must be greater than 0 mm.' });
+      }
+      if (design.strainShape !== 'rectangular' && design.strainShape !== 'gaussian') {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid strain shape must be rectangular or gaussian.' });
+      }
+      if (!isFiniteNumber(design.effectivePhotoelasticCoefficient)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid photoelastic coefficient must be finite.' });
+      }
+      if (!isFiniteNumber(design.segmentCount) || design.segmentCount < 1 || !Number.isInteger(design.segmentCount)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid segment count must be a whole number greater than 0.' });
+      } else if (design.segmentCount > MAX_HYBRID_SEGMENTS) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid segment count must not exceed ${MAX_HYBRID_SEGMENTS.toLocaleString()}.` });
+      }
+      if (!isFiniteNumber(design.fixedLaserWavelengthNm) || design.fixedLaserWavelengthNm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid fixed laser wavelength must be greater than 0 nm.' });
+      }
+      if (!isFiniteNumber(design.pulseSweepStartMm) || design.pulseSweepStartMm < 0 || design.pulseSweepStartMm > design.lengthMm) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid pulse sweep start must be inside the grating length.' });
+      }
+      if (!isFiniteNumber(design.pulseSweepEndMm) || design.pulseSweepEndMm < 0 || design.pulseSweepEndMm > design.lengthMm) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid pulse sweep end must be inside the grating length.' });
+      }
+      if (
+        isFiniteNumber(design.pulseSweepStartMm) &&
+        isFiniteNumber(design.pulseSweepEndMm) &&
+        design.pulseSweepEndMm <= design.pulseSweepStartMm
+      ) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid pulse sweep end must be greater than start.' });
+      }
+      if (!isFiniteNumber(design.pulseSweepPointCount) || design.pulseSweepPointCount < 2 || !Number.isInteger(design.pulseSweepPointCount)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid pulse sweep points must be a whole number of at least 2.' });
+      } else if (design.pulseSweepPointCount > MAX_HYBRID_PULSE_POSITIONS) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid pulse sweep points must not exceed ${MAX_HYBRID_PULSE_POSITIONS.toLocaleString()}.` });
+      }
+      if (
+        isFiniteNumber(design.segmentCount) &&
+        Number.isInteger(design.segmentCount) &&
+        isFiniteNumber(design.pulseSweepPointCount) &&
+        Number.isInteger(design.pulseSweepPointCount) &&
+        design.segmentCount * design.pulseSweepPointCount > MAX_HYBRID_MOVING_PULSE_WORK
+      ) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid moving-region work must not exceed ${MAX_HYBRID_MOVING_PULSE_WORK.toLocaleString()} segment-position evaluations.` });
       }
     }
   }

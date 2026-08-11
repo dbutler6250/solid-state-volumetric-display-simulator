@@ -5,7 +5,7 @@ import type { SpectrumPoint } from '../simulation/results/spectrum';
 export type Polarization = 'TE' | 'TM';
 
 /** Selects how layer thicknesses are sourced for the current stack. */
-export type ThicknessMode = 'derived' | 'manual' | 'acoustic';
+export type ThicknessMode = 'derived' | 'manual' | 'acoustic' | 'hybrid';
 
 /** Selects how the acoustic waveform is approximated when generating layers. */
 export type AcousticRepresentationMode = 'binary' | 'fast' | 'accurate' | 'reference';
@@ -21,6 +21,27 @@ export type AcousticDesignInputs = {
   acousticRepresentationMode: AcousticRepresentationMode;
 };
 
+export type HybridStrainShape = 'rectangular' | 'gaussian';
+
+/** Headless v2 inputs for a permanent Bragg grating plus prescribed local strain. */
+export type HybridBraggDesignInputs = {
+  lengthMm: number;
+  averageIndex: number;
+  indexModulation: number;
+  gratingPeriodNm: number;
+  gratingPhaseRadians: number;
+  peakStrain: number;
+  strainCenterMm: number;
+  strainWidthMm: number;
+  strainShape: HybridStrainShape;
+  effectivePhotoelasticCoefficient: number;
+  segmentCount: number;
+  fixedLaserWavelengthNm: number;
+  pulseSweepStartMm: number;
+  pulseSweepEndMm: number;
+  pulseSweepPointCount: number;
+};
+
 /** Input bundle shared by the form, importer, solver, and exports. */
 export type QuarterWaveStackInputs = {
   highIndexMaterial: Material;
@@ -33,6 +54,7 @@ export type QuarterWaveStackInputs = {
   highIndexThicknessNm?: number;
   lowIndexThicknessNm?: number;
   acousticDesign?: AcousticDesignInputs;
+  hybridBraggDesign?: HybridBraggDesignInputs;
   wavelengthStartNm?: number;
   wavelengthEndNm?: number;
   wavelengthPointCount?: number;
@@ -67,7 +89,15 @@ export type AcoustoOpticGratingDefinition = {
   design: AcousticDesignInputs;
 };
 
-export type StructureDefinition = QuarterWaveStructureDefinition | AcoustoOpticGratingDefinition;
+export type HybridBraggGratingDefinition = {
+  type: 'hybrid-bragg-grating';
+  design: HybridBraggDesignInputs;
+};
+
+export type StructureDefinition =
+  | QuarterWaveStructureDefinition
+  | AcoustoOpticGratingDefinition
+  | HybridBraggGratingDefinition;
 
 /** Canonical simulation document consumed by resolution and solving. */
 export type SimulationDocument = {
@@ -91,7 +121,11 @@ export type SweepParameter =
   | 'periodCount'
   | 'acousticFrequencyHz'
   | 'acousticPeriodCount'
-  | 'acousticIndexModulation';
+  | 'acousticIndexModulation'
+  | 'hybridPeakStrain'
+  | 'hybridStrainCenterMm'
+  | 'hybridStrainWidthMm'
+  | 'hybridIndexModulation';
 
 export type ParameterSweepSettings = {
   parameter: SweepParameter;

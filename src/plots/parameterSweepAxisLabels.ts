@@ -8,6 +8,10 @@ export const PARAMETER_SWEEP_AXIS_LABELS = {
   acousticFrequencyHz: 'Acoustic frequency (Hz)',
   acousticPeriodCount: 'Acoustic periods',
   acousticIndexModulation: 'Peak index modulation',
+  hybridPeakStrain: 'Hybrid peak strain',
+  hybridStrainCenterMm: 'Hybrid strain center (mm)',
+  hybridStrainWidthMm: 'Hybrid strain width (mm)',
+  hybridIndexModulation: 'Hybrid index modulation',
 } as const satisfies Record<ParameterSweepSettings['parameter'], string>;
 
 export function getParameterSweepAxisLabel(parameter: ParameterSweepSettings['parameter']): string {

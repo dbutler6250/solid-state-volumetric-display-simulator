@@ -7,7 +7,11 @@ Last Updated 6/29/26
 
 Browser-based optics simulation platform for solid-state volumetric display design.
 
-Uses a Transfer Matrix Method (TMM) solver to simulate quarter-wave optical stacks and their reflectance/transmission performance metrics. The simulator now also includes an acoustic generator tab that converts an acoustic drive into an equivalent discretized optical stack with derived acoustic outputs and progress-aware stack generation. Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
+Uses a Transfer Matrix Method (TMM) solver to simulate quarter-wave optical stacks and their reflectance/transmission performance metrics. The simulator also includes an acoustic generator tab that converts an acoustic drive into an equivalent discretized optical stack with derived acoustic outputs and progress-aware stack generation.
+
+An early v2 foundation now adds a headless hybrid permanent Bragg grating model. This separates a fabricated optical grating from a prescribed localized strain perturbation, applies an explicit first-order strain/material response, and evaluates spectra with a spatial coupled-mode solver. This is an architectural foundation and validation path, not a complete acoustic propagation or final volumetric-display model.
+
+Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
 
 ## Demonstration
 
@@ -16,6 +20,23 @@ Screenshots to be added once development is complete.
 ## How To Use
 
 Screenshots and instructions to be added once development is complete.
+
+Current stable capabilities:
+
+- Quarter-wave optical stack spectra through the TMM solver.
+- Manual optical layer thickness tuning.
+- Acoustic index-grating layer generation and shared stack/sweep/export paths.
+- Parameter sweeps, heatmaps, CSV export, and JSON setup import/export.
+
+Early v2 / hybrid capabilities:
+
+- Permanent uniform Bragg grating plus prescribed rectangular or Gaussian local strain.
+- First-order strain response affecting local grating period and refractive index.
+- Spatial coupled-mode spectra with analytic, detuned, convergence, and TMM cross-validation coverage.
+- Fixed-laser moving active-region experiment showing reflectance versus perturbation position with baseline and metrics.
+- Hybrid Bragg UI controls for inspecting spectra and moving-position response.
+
+Planned v2 work includes active-length/coupling trade studies, apodized gratings, more realistic strain profiles, boundary-aware/adaptive segmentation, and eventually acoustic pulse propagation.
 
 ## Local Setup
 

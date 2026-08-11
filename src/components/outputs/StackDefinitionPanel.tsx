@@ -4,6 +4,7 @@ import { getResolvedStackInputs } from '../../simulation/structures/quarterWaveS
 import {
   type ResolvedStructure,
   type AcousticResolvedSummary,
+  type HybridResolvedSummary,
   type QuarterWaveResolvedSummary,
 } from '../../simulation/structures/structureResolver';
 
@@ -104,6 +105,9 @@ export function StackDefinitionPanel({ inputs, isValid, resolvedStructure }: Sta
   if (resolvedStructure?.summary.type === 'acousto-optic-grating') {
     return <AcousticStackDefinition inputs={inputs} summary={resolvedStructure.summary} />;
   }
+  if (resolvedStructure?.summary.type === 'hybrid-bragg-grating') {
+    return <HybridStackDefinition summary={resolvedStructure.summary} />;
+  }
   if (inputs.thicknessMode === 'acoustic') {
     return (
       <section className="stack-panel" aria-label="Acousto-optic grating stack definition">
@@ -188,6 +192,34 @@ export function StackDefinitionPanel({ inputs, isValid, resolvedStructure }: Sta
         </div>
       )}
 
+    </section>
+  );
+}
+
+/** Reports the v2 headless hybrid grating model consumed by the coupled-mode solver. */
+function HybridStackDefinition({ summary }: { summary: HybridResolvedSummary }) {
+  return (
+    <section className="stack-panel acoustic-stack-outputs" aria-label="Hybrid Bragg grating definition">
+      <div className="stack-panel-heading">
+        <h2>Stack Definition</h2>
+        <span>Permanent grating | {formatCount(summary.segmentCount)} solver segments</span>
+      </div>
+      <div className="stack-panel-subtitle">
+        <span className="mode-pill mode-pill-hybrid">Hybrid</span>
+        <span>Permanent optical periodicity is separate from the prescribed strain perturbation.</span>
+      </div>
+      <div className="stack-summary-grid">
+        <StackSummaryItem label="Length" value={`${formatNumber(summary.totalThicknessNm / 1e6, 3)} mm`} />
+        <StackSummaryItem label="Average index" value={formatNumber(summary.averageIndex, 4)} />
+        <StackSummaryItem label="Index modulation" value={formatNumber(summary.indexModulation, 6)} />
+        <StackSummaryItem label="Grating period" value={`${formatNumber(summary.gratingPeriodNm, 3)} nm`} />
+        <StackSummaryItem label="Reference wavelength" value={`${formatNumber(summary.referenceWavelengthNm, 3)} nm`} />
+        <StackSummaryItem label="Peak strain" value={formatNumber(summary.peakStrain, 6)} />
+        <StackSummaryItem label="Strain center" value={`${formatNumber(summary.strainCenterMm, 3)} mm`} />
+        <StackSummaryItem label="Strain width" value={`${formatNumber(summary.strainWidthMm, 3)} mm`} />
+        <StackSummaryItem label="Strain shape" value={summary.strainShape} />
+        <StackSummaryItem label="Fixed laser" value={`${formatNumber(summary.fixedLaserWavelengthNm, 3)} nm`} />
+      </div>
     </section>
   );
 }
