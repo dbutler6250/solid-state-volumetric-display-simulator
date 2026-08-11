@@ -8,7 +8,7 @@ type StackConfigExport = {
   schema: 'ssvds-stack-config-v1';
   app: 'solid-state-volumetric-display-simulator';
   exportedAt: string;
-  structureType: 'quarter-wave-stack' | 'acousto-optic-grating';
+  structureType: 'quarter-wave-stack' | 'acousto-optic-grating' | 'hybrid-bragg-grating';
   units: {
     wavelength: 'nm';
     angle: 'deg';
@@ -24,6 +24,7 @@ type StackConfigExport = {
     highIndexThicknessNm?: number;
     lowIndexThicknessNm?: number;
     acousticDesign?: QuarterWaveStackInputs['acousticDesign'];
+    hybridBraggDesign?: QuarterWaveStackInputs['hybridBraggDesign'];
     wavelengthStartNm?: number;
     wavelengthEndNm?: number;
     wavelengthPointCount?: number;
@@ -48,7 +49,11 @@ export function exportStackConfigJson(
     app: 'solid-state-volumetric-display-simulator',
     exportedAt: new Date().toISOString(),
     structureType:
-      inputs.thicknessMode === 'acoustic' ? 'acousto-optic-grating' : 'quarter-wave-stack',
+      inputs.thicknessMode === 'acoustic'
+        ? 'acousto-optic-grating'
+        : inputs.thicknessMode === 'hybrid'
+          ? 'hybrid-bragg-grating'
+          : 'quarter-wave-stack',
     units: {
       wavelength: 'nm',
       angle: 'deg',
@@ -64,6 +69,7 @@ export function exportStackConfigJson(
       highIndexThicknessNm: inputs.highIndexThicknessNm,
       lowIndexThicknessNm: inputs.lowIndexThicknessNm,
       acousticDesign: inputs.acousticDesign,
+      hybridBraggDesign: inputs.hybridBraggDesign,
       wavelengthStartNm: inputs.wavelengthStartNm,
       wavelengthEndNm: inputs.wavelengthEndNm,
       wavelengthPointCount: inputs.wavelengthPointCount,

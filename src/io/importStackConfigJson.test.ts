@@ -423,7 +423,7 @@ describe('importStackConfigJson', () => {
 
     expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
       ok: false,
-      message: 'Input mode must be derived, manual, or acoustic.',
+      message: 'Input mode must be derived, manual, acoustic, or hybrid.',
     });
   });
 

@@ -8,6 +8,10 @@ export const HEATMAP_AXIS_LABELS = {
   acousticFrequencyHz: 'Acoustic frequency (Hz)',
   acousticPeriodCount: 'Acoustic periods',
   acousticIndexModulation: 'Peak index modulation',
+  hybridPeakStrain: 'Hybrid peak strain',
+  hybridStrainCenterMm: 'Hybrid strain center (mm)',
+  hybridStrainWidthMm: 'Hybrid strain width (mm)',
+  hybridIndexModulation: 'Hybrid index modulation',
 } as const satisfies Record<SweepParameter, string>;
 
 export function getHeatmapAxisLabel(parameter: SweepParameter): string {

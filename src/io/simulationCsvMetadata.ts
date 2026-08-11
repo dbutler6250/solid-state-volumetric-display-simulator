@@ -43,6 +43,30 @@ export function getSimulationCsvMetadata(
     ];
   }
 
+  if (document.structure.type === 'hybrid-bragg-grating') {
+    if (resolved.summary.type !== 'hybrid-bragg-grating') {
+      throw new Error('Resolved structure does not match the hybrid Bragg simulation document.');
+    }
+    const design = document.structure.design;
+    return [
+      ['structureType', document.structure.type],
+      ['thicknessMode', 'hybrid'],
+      ['lengthMm', design.lengthMm],
+      ['averageIndex', design.averageIndex],
+      ['indexModulation', design.indexModulation],
+      ['gratingPeriodNm', design.gratingPeriodNm],
+      ['peakStrain', design.peakStrain],
+      ['strainCenterMm', design.strainCenterMm],
+      ['strainWidthMm', design.strainWidthMm],
+      ['strainShape', design.strainShape],
+      ['effectivePhotoelasticCoefficient', design.effectivePhotoelasticCoefficient],
+      ['segmentCount', design.segmentCount],
+      ['fixedLaserWavelengthNm', design.fixedLaserWavelengthNm],
+      ['referenceWavelengthNm', resolved.summary.referenceWavelengthNm],
+      ['resolvedTotalThicknessNm', resolved.summary.totalThicknessNm],
+    ];
+  }
+
   if (resolved.summary.type !== 'quarter-wave-stack') {
     throw new Error('Resolved structure does not match the quarter-wave simulation document.');
   }

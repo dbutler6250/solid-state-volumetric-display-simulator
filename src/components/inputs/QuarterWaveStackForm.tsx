@@ -152,7 +152,7 @@ export function QuarterWaveStackForm({
     thicknessMode === 'manual'
       ? inputs.lowIndexThicknessNm
       : resolvedStackInputs.lowIndexThicknessNm;
-  const canEditModeInputs = thicknessMode !== 'acoustic';
+  const canEditModeInputs = thicknessMode !== 'acoustic' && thicknessMode !== 'hybrid';
   const visiblePeriodCount = thicknessMode === 'acoustic' ? resolvedStackInputs.periodCount : inputs.periodCount;
   const visibleDesignWavelengthNm =
     thicknessMode === 'acoustic' ? resolvedStackInputs.designWavelengthNm : inputs.designWavelengthNm;
@@ -229,6 +229,7 @@ export function QuarterWaveStackForm({
             <option value="derived">Optical</option>
             <option value="manual">Manual</option>
             <option value="acoustic">Acoustic</option>
+            <option value="hybrid">Hybrid Bragg</option>
           </select>
           <FieldError message={getIssueForField(validationIssues, 'thicknessMode')} />
         </label>
@@ -282,6 +283,17 @@ export function QuarterWaveStackForm({
             <FieldError message={getIssueForField(validationIssues, 'lowIndexThicknessNm')} />
           </label>
         </>
+      ) : thicknessMode === 'hybrid' ? (
+        <div className="acoustic-resolved-readout" aria-label="Resolved hybrid Bragg values">
+          <div className="thickness-readout">
+            <span>Structure</span>
+            <strong>Permanent grating</strong>
+          </div>
+          <div className="thickness-readout">
+            <span>Reference wavelength</span>
+            <strong>{formatNumericInput(visibleDesignWavelengthNm)} nm</strong>
+          </div>
+        </div>
       ) : (
         <>
           <div className="field thickness-readout">

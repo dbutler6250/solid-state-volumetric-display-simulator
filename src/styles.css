@@ -569,6 +569,42 @@ label {
   grid-column: 1 / -1;
 }
 
+.moving-pulse-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.moving-pulse-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #a7b7c8;
+  font-size: 0.88rem;
+}
+
+.moving-pulse-metadata span {
+  border: 1px solid #263443;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  background: #111b25;
+}
+
+.moving-pulse-chart,
+.moving-pulse-chart .plot-container,
+.moving-pulse-chart .svg-container {
+  min-height: 390px;
+}
+
+.moving-pulse-profile-chart,
+.moving-pulse-profile-chart .plot-container,
+.moving-pulse-profile-chart .svg-container {
+  min-height: 250px;
+}
+
+.moving-pulse-metrics {
+  margin-top: 0;
+}
+
 .stack-panel {
   margin-top: 1rem;
   padding-top: 1rem;

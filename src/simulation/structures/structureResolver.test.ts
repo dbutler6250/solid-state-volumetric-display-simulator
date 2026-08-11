@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from './quarterWaveStack';
 import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from './acoustoOpticGrating';
+import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from './hybridBraggGrating';
 import {
   applySweepValue,
   createSimulationDocument,
@@ -190,5 +191,25 @@ describe('structure resolver', () => {
       }),
     );
     expect(resolved.stack.layers[0].material.refractiveIndex).toMatchObject({ imag: 0.02 });
+  });
+
+  it('resolves hybrid Bragg inputs without materializing physical slices as the domain model', () => {
+    const document = createSimulationDocument({
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      thicknessMode: 'hybrid',
+      hybridBraggDesign: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+    });
+    const resolved = resolveSimulationDocument(document);
+
+    expect(document.structure.type).toBe('hybrid-bragg-grating');
+    expect(resolved.summary.type).toBe('hybrid-bragg-grating');
+    expect(resolved.stack.layers).toHaveLength(0);
+    expect(resolved.hybridModel).toBeDefined();
+    expect(resolved.sweepParameters).toEqual([
+      'hybridPeakStrain',
+      'hybridStrainCenterMm',
+      'hybridStrainWidthMm',
+      'hybridIndexModulation',
+    ]);
   });
 });

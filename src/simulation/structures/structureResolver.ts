@@ -1,4 +1,5 @@
 import type { LayerStack } from '../layers/stack';
+import { AIR } from '../materials/catalog';
 import { getRefractiveIndexReal } from '../materials/material';
 import type {
   AnalysisSettings,
@@ -15,6 +16,12 @@ import {
   buildAcousticGratingStackAsync,
   getAcousticDesignSummary,
 } from './acoustoOpticGrating';
+import {
+  createHybridBraggModel,
+  getHybridDesignBraggWavelengthNm,
+  getHybridLengthNm,
+  type HybridBraggModel,
+} from './hybridBraggGrating';
 
 export type QuarterWaveResolvedSummary = {
   type: 'quarter-wave-stack';
@@ -40,11 +47,28 @@ export type AcousticResolvedSummary = {
   indexModulation: number;
 };
 
+export type HybridResolvedSummary = {
+  type: 'hybrid-bragg-grating';
+  layerCount: number;
+  segmentCount: number;
+  totalThicknessNm: number;
+  referenceWavelengthNm: number;
+  averageIndex: number;
+  indexModulation: number;
+  gratingPeriodNm: number;
+  peakStrain: number;
+  strainCenterMm: number;
+  strainWidthMm: number;
+  strainShape: string;
+  fixedLaserWavelengthNm: number;
+};
+
 export type ResolvedStructure = {
   stack: LayerStack;
-  summary: QuarterWaveResolvedSummary | AcousticResolvedSummary;
+  summary: QuarterWaveResolvedSummary | AcousticResolvedSummary | HybridResolvedSummary;
   sweepParameters: SweepParameter[];
   referenceWavelengthNm: number;
+  hybridModel?: HybridBraggModel;
 };
 
 /** Converts the legacy flat UI/import shape into the canonical discriminated document. */
@@ -61,6 +85,13 @@ export function createSimulationDocument(inputs: QuarterWaveStackInputs): Simula
     return {
       analysis,
       structure: { type: 'acousto-optic-grating', design: inputs.acousticDesign },
+    };
+  }
+
+  if (inputs.thicknessMode === 'hybrid' && inputs.hybridBraggDesign) {
+    return {
+      analysis,
+      structure: { type: 'hybrid-bragg-grating', design: inputs.hybridBraggDesign },
     };
   }
 
@@ -91,6 +122,36 @@ export function resolveSimulationDocument(document: SimulationDocument): Resolve
     const acoustic = getAcousticDesignSummary(legacyInputs);
     if (!stack || !acoustic) throw new Error('The acoustic grating could not be resolved.');
     return createAcousticResolvedStructure(document.structure, stack, acoustic);
+  }
+
+  if (document.structure.type === 'hybrid-bragg-grating') {
+    const design = document.structure.design;
+    return {
+      stack: { incidentMedium: AIR, layers: [], exitMedium: AIR },
+      referenceWavelengthNm: getHybridDesignBraggWavelengthNm(design),
+      hybridModel: createHybridBraggModel(design),
+      sweepParameters: [
+        'hybridPeakStrain',
+        'hybridStrainCenterMm',
+        'hybridStrainWidthMm',
+        'hybridIndexModulation',
+      ],
+      summary: {
+        type: 'hybrid-bragg-grating',
+        layerCount: Math.round(design.segmentCount),
+        segmentCount: Math.round(design.segmentCount),
+        totalThicknessNm: getHybridLengthNm(design),
+        referenceWavelengthNm: getHybridDesignBraggWavelengthNm(design),
+        averageIndex: design.averageIndex,
+        indexModulation: design.indexModulation,
+        gratingPeriodNm: design.gratingPeriodNm,
+        peakStrain: design.peakStrain,
+        strainCenterMm: design.strainCenterMm,
+        strainWidthMm: design.strainWidthMm,
+        strainShape: design.strainShape,
+        fixedLaserWavelengthNm: design.fixedLaserWavelengthNm,
+      },
+    };
   }
 
   const legacyInputs = documentToLegacyInputs(document);
@@ -207,7 +268,7 @@ export function applySweepValue(
         },
       };
     }
-  } else {
+  } else if (document.structure.type === 'acousto-optic-grating') {
     const field = settings.parameter;
     if (
       field === 'acousticFrequencyHz' ||
@@ -222,6 +283,30 @@ export function applySweepValue(
             ...document.structure.design,
             [field]: field === 'acousticPeriodCount' ? Math.round(value) : value,
           },
+        },
+      };
+    }
+  } else {
+    const field = settings.parameter;
+    if (
+      field === 'hybridPeakStrain' ||
+      field === 'hybridStrainCenterMm' ||
+      field === 'hybridStrainWidthMm' ||
+      field === 'hybridIndexModulation'
+    ) {
+      const key =
+        field === 'hybridPeakStrain'
+          ? 'peakStrain'
+          : field === 'hybridStrainCenterMm'
+            ? 'strainCenterMm'
+            : field === 'hybridStrainWidthMm'
+              ? 'strainWidthMm'
+              : 'indexModulation';
+      return {
+        ...document,
+        structure: {
+          ...document.structure,
+          design: { ...document.structure.design, [key]: value },
         },
       };
     }
@@ -248,6 +333,17 @@ export function documentToLegacyInputs(document: SimulationDocument): QuarterWav
       })?.braggWavelengthNm ?? 1,
       thicknessMode: 'acoustic',
       acousticDesign: document.structure.design,
+      ...analysis,
+    };
+  }
+  if (document.structure.type === 'hybrid-bragg-grating') {
+    return {
+      highIndexMaterial: { id: 'hybrid-medium', name: 'Hybrid medium', refractiveIndex: document.structure.design.averageIndex },
+      lowIndexMaterial: { id: 'hybrid-medium', name: 'Hybrid medium', refractiveIndex: document.structure.design.averageIndex },
+      periodCount: 1,
+      designWavelengthNm: getHybridDesignBraggWavelengthNm(document.structure.design),
+      thicknessMode: 'hybrid',
+      hybridBraggDesign: document.structure.design,
       ...analysis,
     };
   }
