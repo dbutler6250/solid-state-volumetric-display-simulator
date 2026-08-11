@@ -568,7 +568,33 @@ This is a fundamental momentum-matching result for the assumed first-order colli
 
 ## 4.2 Why ordinary AOMs deflect instead of backreflect
 
-Ordinary AOMs use much longer acoustic wavelengths, often on the order of tens of micrometers. Their grating momentum is therefore far smaller than the optical momentum needed for complete reversal.
+The difference between fiber Bragg grating behavior and ordinary AOM behavior is primarily a difference in available grating momentum, not a claim that one device is phase matched over arbitrary incidence angles or inherently capable of stronger diffraction.
+
+A fiber Bragg grating contains a static refractive-index modulation written along the fiber axis. The fiber constrains the incident light to a guided mode, so the optical propagation geometry is effectively fixed rather than broadly angle independent. The grating couples the forward guided mode, with propagation constant $+\beta$, to the backward guided mode, with propagation constant $-\beta$, when
+
+$$
+\boxed{
+K=2\beta,
+\qquad
+\lambda_B=2n_{\text{eff}}\Lambda.
+}
+$$
+
+The required short spatial period is permanently fabricated into the fiber. It does not need to propagate mechanically and therefore is not tied to an acoustic relation of the form $f=v/\Lambda$. A small static index modulation can consequently accumulate coherently over many periods and produce strong backward coupling.
+
+This does not mean that an FBG operates at most free-space angles of incidence. Its normal operating geometry is a guided wave traveling along the fiber axis, and reflection remains wavelength and mode selective. A comparable free-space volume Bragg grating is also angle selective.
+
+An AOM instead creates a moving refractive-index grating. Its spatial and temporal frequencies are linked by
+
+$$
+\boxed{
+K=\frac{2\pi f_a}{v_a},
+\qquad
+\Lambda_a=\frac{v_a}{f_a}.
+}
+$$
+
+Ordinary AOMs use acoustic wavelengths often on the order of tens of micrometers. Their grating momentum is therefore far smaller than the optical momentum needed for complete reversal. The incident beam must still be aligned at the appropriate Bragg angle relative to the acoustic wavefronts, but the small magnitude of $K$ can connect only two optical wavevectors that point in nearby forward directions.
 
 In a simple small-angle AO geometry,
 
@@ -578,9 +604,161 @@ $$
 }
 $$
 
-Thus moderate RF frequencies naturally produce modest angular deflection rather than retroreflection.
+Thus moderate RF frequencies naturally produce modest angular deflection rather than retroreflection. An ordinary AOM can still transfer a large fraction of the incident optical power into the phase-matched diffracted order; the limitation discussed here concerns the direction of that order, not necessarily its diffraction efficiency.
 
-This explains the difference between conventional AOM behavior and first-order fiber-Bragg-like backreflection.
+Rotating the acoustic grating changes the direction of $\mathbf K$ but not its magnitude. If
+
+$$
+|\mathbf K|\ll2|\mathbf k|,
+$$
+
+no grating orientation can connect the forward optical wavevector directly to the backward wavevector. First-order backreflection requires both the correct orientation and
+
+$$
+\boxed{
+|\mathbf K|\approx2|\mathbf k|.
+}
+$$
+
+For an acoustic grating, satisfying that condition for visible light leads to the multi-GHz or tens-of-GHz frequency requirement derived in Section 4.1.
+
+The concise comparison is therefore:
+
+- **FBG:** fixed guided incidence geometry plus a short, static grating period couples a forward mode directly to its backward mode.
+- **Ordinary AOM:** phase-matched incidence plus a longer, moving acoustic grating period couples the incident beam to a nearby forward-going direction.
+
+Both interactions are phase matched and selective. The FBG does not accept arbitrary incidence angles; it avoids the ordinary AOM frequency problem because its required high-spatial-frequency grating is permanently written rather than generated as a propagating acoustic wave.
+
+## 4.3 Why a modest acoustic period count can still produce high AOM diffraction efficiency
+
+The number of acoustic periods across an optical beam should not be interpreted as the number of sequential weak interactions experienced by a geometrical ray.
+
+In an ordinary bulk AOM, the acoustic grating wavevector is commonly oriented approximately transverse to the optical propagation direction. Two different physical dimensions must therefore be distinguished:
+
+$$
+\boxed{
+N_{\text{transverse}}\approx\frac{W}{\Lambda_a}
+}
+$$
+
+and
+
+$$
+\boxed{
+L_{\text{eff}}
+=
+\text{coherent optical/acoustic overlap length}.
+}
+$$
+
+Here $W$ is the optical beam width measured along the acoustic grating wavevector. The transverse period count primarily controls how well the finite grating defines its momentum, angular selectivity, frequency resolution, and separation of diffraction orders. It is not, by itself, the principal measure of accumulated coupling strength.
+
+The incident optical field polarizes the acoustically modulated material throughout the interaction volume. Each small region generates a weak scattered field. When
+
+$$
+\mathbf k_{\text{out}}
+=
+\mathbf k_{\text{in}}+\mathbf K
+$$
+
+is phase matched, those distributed scattered fields add coherently along $L_{\text{eff}}$. In an idealized, lossless, exactly phase-matched transmission-style AOM, the first-order diffraction efficiency can be approximated by
+
+$$
+\boxed{
+\eta\approx\sin^2(\kappa L_{\text{eff}})
+}
+$$
+
+with a simplified coupling estimate
+
+$$
+\boxed{
+\kappa\approx\frac{\pi\Delta n}{\lambda_0},
+}
+$$
+
+subject to polarization, modal-overlap, acoustic-field, and geometry factors.
+
+A useful complementary interpretation is the accumulated phase modulation
+
+$$
+\boxed{
+\Delta\phi
+\approx
+\frac{2\pi}{\lambda_0}\Delta n L_{\text{eff}}.
+}
+$$
+
+For example, if
+
+$$
+\Delta n=10^{-5},
+\qquad
+L_{\text{eff}}=10\text{ mm},
+\qquad
+\lambda_0=532\text{ nm},
+$$
+
+then
+
+$$
+\Delta\phi\approx1.18\text{ rad}
+$$
+
+and
+
+$$
+\kappa L_{\text{eff}}\approx0.59.
+$$
+
+The corresponding idealized Bragg-regime estimate is
+
+$$
+\eta\approx\sin^2(0.59)\approx31\%.
+$$
+
+An index modulation of approximately
+
+$$
+\Delta n\approx2.7\times10^{-5}
+$$
+
+over the same interaction length gives $\kappa L_{\text{eff}}\approx1.6$ and can approach complete transfer in the idealized model. Practical efficiency is reduced by acoustic attenuation, imperfect optical/acoustic overlap, beam shape, polarization, walk-off, material loss, and phase mismatch.
+
+### Comparison with fiber Bragg gratings
+
+In an FBG, the grating wavevector and optical propagation direction are approximately collinear. Its physical period count is consequently
+
+$$
+N_{\text{FBG}}=\frac{L}{\Lambda_{\text{FBG}}}.
+$$
+
+A centimeter-scale FBG naturally contains many thousands of periods because the period required for forward-to-backward phase matching is sub-micrometer. Those periods should not be treated as independent microscopic reflections. Their short spacing establishes the required grating momentum, while the product $\kappa L$ determines how strongly the phase-matched forward and backward modes couple.
+
+The ideal uniform reflection-grating result
+
+$$
+R\approx\tanh^2(\kappa L)
+$$
+
+and the ideal transmission-style AOM result
+
+$$
+\eta\approx\sin^2(\kappa L_{\text{eff}})
+$$
+
+describe different coupled-mode geometries, but both demonstrate that efficiency depends on coherent coupling strength integrated over length rather than on period count alone.
+
+### Architecture and simulator implication
+
+A realistic low-frequency acoustic grating may efficiently transfer light into a nearby forward-going diffracted mode even when only tens of acoustic periods span the optical beam. This does not make it an efficient backreflector. If the desired backward mode is severely phase mismatched, increasing the transverse period count or physical interaction length cannot compensate; contributions toward that mode cancel rather than accumulate.
+
+Future simulation should therefore represent at least two independent geometric quantities:
+
+- transverse grating aperture and period count, which control momentum resolution and angular selectivity;
+- coherent optical/acoustic overlap length, which controls accumulated coupling efficiency.
+
+Codirectional small-angle AOM coupling and contradirectional reflection-grating coupling should not use the same efficiency expression without accounting for their different coupled-mode boundary conditions.
 
 ---
 
@@ -2034,3 +2212,71 @@ L_{\text{effective}}\text{ and }\Delta n\\
 $$
 
 The next research batch should therefore prioritize optical deflection geometry, frequency-dependent material attenuation, and practical hypersonic acoustic generation before optimizing projector timing or wide-angle viewing details.
+
+---
+
+# 18. Simulator Implication Update: Hybrid Permanent-Grating Tuning
+
+The current leading simulator architecture is now:
+
+$$
+\boxed{
+\text{permanent Bragg grating}
++
+\text{localized dynamic tuning}
+}
+$$
+
+This is materially different from the earlier fully acoustic grating concept. The acoustic or strain field is no longer assumed to create the optical-periodicity requirement by itself. Instead, a fabricated static grating supplies the short optical period, momentum matching, and baseline coupling strength. A localized strain, thermal, or other perturbation shifts the local Bragg condition of that existing structure.
+
+## 18.1 Simulation requirements
+
+The simulator should therefore model these as separate concepts:
+
+- permanent optical structure;
+- physical perturbation field;
+- material response;
+- optical solver;
+- experiment definition;
+- derived metrics.
+
+For the first hybrid implementation, localized strain affects both:
+
+$$
+\Delta n
+$$
+
+through the strain-optic response and
+
+$$
+\Delta\Lambda
+$$
+
+through local period stretch. The useful local quantity is therefore not one global Bragg wavelength, but a spatially resolved local Bragg condition.
+
+## 18.2 Consequences for interpretation
+
+A localized perturbation may deform the spectrum rather than shifting the full grating response rigidly. Active grating length versus reflectivity is therefore a critical design trade-off. Off-state leakage at the fixed laser wavelength must also be treated as a first-class metric, because a high apparent on-state reflectivity is not enough if the permanent grating reflects too strongly outside the intended active region.
+
+The TMM solver remains useful as an independent discretized reference calculation for manageable structures. The coupled-mode solver should document its coupling, detuning, boundary-condition, and normalization conventions and should be validated against both analytic uniform-grating limits and TMM discretizations where the assumptions overlap.
+
+## 18.3 Solver-validation implication
+
+The v2 validation pass reinforces that a localized tuned region inside a finite uniform grating should not be interpreted as a perfectly independent moving reflective plane. With a fixed strain shape and amplitude, moving the perturbation changes the distributed interference between strained and unstrained grating sections. In the tested regime the position-dependent reflectance spread was large enough to matter for display architecture decisions.
+
+This makes the next fixed-laser active-plane experiment more important, not less. It should measure usable on/off contrast versus position and active length, rather than assuming that translating the same strain packet only translates the image plane.
+
+## 18.4 Fixed-laser moving-region simulation findings
+
+The first fixed-laser moving-region experiment is a simulation result under the current scalar, lossless, prescribed-strain model. It is not yet an experimental result.
+
+Representative 4 mm grating cases with `Delta n = 2e-4`, 500 solver segments, 61 pulse positions, and a 0.35 mm rectangular strain region showed:
+
+- Below the static Bragg wavelength, static reflectance was about `1.1e-3` and the moving-pulse peak was about `2.6e-3`.
+- Near the static band edge, static reflectance was about `2.9e-2` and the moving-pulse peak was about `7.0e-2`, but the position response had multiple comparable peaks and very poor uniformity.
+- At the static Bragg wavelength, the no-strain grating already reflected nearly all incident power, so the moving perturbation did not create useful positive enhancement.
+- Above the static Bragg wavelength, enhancement returned, but the response again showed multiple comparable peaks and strong position dependence.
+- Increasing strain amplitude increased peak enhancement in the tested band-edge case, but it also increased position variation rather than producing a clean isolated active plane.
+- Gaussian strain produced a smoother and weaker response than the rectangular case in the tested regime, but still did not yield a unique optical response width.
+
+These results reinforce that the useful display metric is not just peak reflected power. It must include off-state leakage, position uniformity, and whether the response has a single dominant spatial peak. The effective optical response width can differ substantially from the prescribed strain-region width and should only be reported when the response is not multi-peaked.
