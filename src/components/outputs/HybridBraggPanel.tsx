@@ -16,11 +16,11 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
   const isActiveMode = inputs.thicknessMode === 'hybrid';
   const updateDesign = (patch: Partial<HybridBraggDesignInputs>) => {
     const nextLengthMm = patch.lengthMm ?? design.lengthMm;
+    const nextPulseRange = getNextPulseSweepRange(design, patch, nextLengthMm);
     const nextDesign = {
       ...design,
       ...patch,
-      pulseSweepStartMm: Math.min(patch.pulseSweepStartMm ?? design.pulseSweepStartMm, nextLengthMm),
-      pulseSweepEndMm: Math.min(patch.pulseSweepEndMm ?? design.pulseSweepEndMm, nextLengthMm),
+      ...nextPulseRange,
     };
     onChange({
       ...inputs,
@@ -71,6 +71,21 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
       </div>
     </section>
   );
+}
+
+function getNextPulseSweepRange(
+  design: HybridBraggDesignInputs,
+  patch: Partial<HybridBraggDesignInputs>,
+  nextLengthMm: number,
+): Pick<HybridBraggDesignInputs, 'pulseSweepStartMm' | 'pulseSweepEndMm'> {
+  const pulseSweepStartMm = Math.min(patch.pulseSweepStartMm ?? design.pulseSweepStartMm, nextLengthMm);
+  const pulseSweepEndMm = Math.min(patch.pulseSweepEndMm ?? design.pulseSweepEndMm, nextLengthMm);
+
+  if (patch.lengthMm !== undefined && pulseSweepEndMm <= pulseSweepStartMm) {
+    return { pulseSweepStartMm: 0, pulseSweepEndMm: nextLengthMm };
+  }
+
+  return { pulseSweepStartMm, pulseSweepEndMm };
 }
 
 function HybridNumber({

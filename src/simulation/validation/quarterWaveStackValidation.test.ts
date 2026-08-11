@@ -3,11 +3,15 @@ import type { Material } from '../materials/material';
 import type { AcousticRepresentationMode, QuarterWaveStackInputs } from '../../types/simulation';
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
+  MAX_HYBRID_MOVING_PULSE_WORK,
+  MAX_HYBRID_PULSE_POSITIONS,
+  MAX_HYBRID_SEGMENTS,
   MAX_OPTICAL_PERIODS,
   MAX_WAVELENGTH_POINTS,
 } from '../simulationLimits';
 import { validateQuarterWaveStackInputs } from './quarterWaveStackValidation';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../structures/quarterWaveStack';
+import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../structures/hybridBraggGrating';
 import { createSimulationDocument } from '../structures/structureResolver';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
@@ -130,5 +134,47 @@ describe('validateQuarterWaveStackInputs', () => {
     const document = createSimulationDocument(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
 
     expect(document.analysis.wavelengthPointCount).toBe(500);
+  });
+
+  it('caps hybrid moving-region segment and position workload', () => {
+    const hybridInputs: QuarterWaveStackInputs = {
+      ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+      thicknessMode: 'hybrid',
+      hybridBraggDesign: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+    };
+
+    expect(validateQuarterWaveStackInputs({
+      ...hybridInputs,
+      hybridBraggDesign: {
+        ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        segmentCount: MAX_HYBRID_SEGMENTS + 1,
+      },
+    })).toContainEqual({
+      field: 'thicknessMode',
+      message: `Hybrid segment count must not exceed ${MAX_HYBRID_SEGMENTS.toLocaleString()}.`,
+    });
+
+    expect(validateQuarterWaveStackInputs({
+      ...hybridInputs,
+      hybridBraggDesign: {
+        ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        pulseSweepPointCount: MAX_HYBRID_PULSE_POSITIONS + 1,
+      },
+    })).toContainEqual({
+      field: 'thicknessMode',
+      message: `Hybrid pulse sweep points must not exceed ${MAX_HYBRID_PULSE_POSITIONS.toLocaleString()}.`,
+    });
+
+    expect(validateQuarterWaveStackInputs({
+      ...hybridInputs,
+      hybridBraggDesign: {
+        ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        segmentCount: MAX_HYBRID_SEGMENTS,
+        pulseSweepPointCount: Math.floor(MAX_HYBRID_MOVING_PULSE_WORK / MAX_HYBRID_SEGMENTS) + 1,
+      },
+    })).toContainEqual({
+      field: 'thicknessMode',
+      message: `Hybrid moving-region work must not exceed ${MAX_HYBRID_MOVING_PULSE_WORK.toLocaleString()} segment-position evaluations.`,
+    });
   });
 });

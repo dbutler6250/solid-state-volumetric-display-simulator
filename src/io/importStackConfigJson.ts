@@ -582,7 +582,7 @@ function parseHybridBraggDesign(
     return { ok: false, message: 'Hybrid segment count must be a whole number.' };
   }
   const pulseSweepStartMm = value.pulseSweepStartMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepStartMm;
-  const pulseSweepEndMm = value.pulseSweepEndMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepEndMm;
+  const pulseSweepEndMm = value.pulseSweepEndMm ?? value.lengthMm;
   const pulseSweepPointCount = value.pulseSweepPointCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepPointCount;
   if (!isFiniteNumber(pulseSweepStartMm) || !isFiniteNumber(pulseSweepEndMm) || !isFiniteNumber(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid moving-pulse sweep fields must be finite numbers.' };

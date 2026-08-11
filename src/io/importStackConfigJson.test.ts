@@ -3,6 +3,7 @@ import { exportStackConfigJson } from './exportStackConfigJson';
 import { importStackConfigJson } from './importStackConfigJson';
 import type { Material } from '../simulation/materials/material';
 import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
+import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
@@ -373,6 +374,50 @@ describe('importStackConfigJson', () => {
     expect(imported).toEqual({
       ok: true,
       inputs: acousticInputs,
+    });
+  });
+
+  it('defaults missing hybrid pulse sweep end to the imported grating length', () => {
+    const legacyHybridDesign = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      lengthMm: 4,
+      strainCenterMm: 2,
+    };
+    const hybridWithoutMovingPulseFields = {
+      lengthMm: legacyHybridDesign.lengthMm,
+      averageIndex: legacyHybridDesign.averageIndex,
+      indexModulation: legacyHybridDesign.indexModulation,
+      gratingPeriodNm: legacyHybridDesign.gratingPeriodNm,
+      gratingPhaseRadians: legacyHybridDesign.gratingPhaseRadians,
+      peakStrain: legacyHybridDesign.peakStrain,
+      strainCenterMm: legacyHybridDesign.strainCenterMm,
+      strainWidthMm: legacyHybridDesign.strainWidthMm,
+      strainShape: legacyHybridDesign.strainShape,
+      effectivePhotoelasticCoefficient: legacyHybridDesign.effectivePhotoelasticCoefficient,
+      segmentCount: legacyHybridDesign.segmentCount,
+      fixedLaserWavelengthNm: legacyHybridDesign.fixedLaserWavelengthNm,
+    };
+    const payload = makeModernPayload({
+      structureType: 'hybrid-bragg-grating',
+      inputs: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: hybridWithoutMovingPulseFields,
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: true,
+      inputs: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: {
+          ...legacyHybridDesign,
+          pulseSweepStartMm: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepStartMm,
+          pulseSweepEndMm: 4,
+          pulseSweepPointCount: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepPointCount,
+        },
+      },
     });
   });
 

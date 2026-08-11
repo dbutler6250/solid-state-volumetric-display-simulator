@@ -3,6 +3,9 @@ import { getAcousticSlicesPerPeriod, isAcousticRepresentationMode } from '../str
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
   MAX_AUTOMATIC_ACOUSTIC_LAYERS,
+  MAX_HYBRID_MOVING_PULSE_WORK,
+  MAX_HYBRID_PULSE_POSITIONS,
+  MAX_HYBRID_SEGMENTS,
   MAX_OPTICAL_PERIODS,
   MAX_WAVELENGTH_POINTS,
 } from '../simulationLimits';
@@ -243,6 +246,8 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       }
       if (!isFiniteNumber(design.segmentCount) || design.segmentCount < 1 || !Number.isInteger(design.segmentCount)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid segment count must be a whole number greater than 0.' });
+      } else if (design.segmentCount > MAX_HYBRID_SEGMENTS) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid segment count must not exceed ${MAX_HYBRID_SEGMENTS.toLocaleString()}.` });
       }
       if (!isFiniteNumber(design.fixedLaserWavelengthNm) || design.fixedLaserWavelengthNm <= 0) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid fixed laser wavelength must be greater than 0 nm.' });
@@ -262,6 +267,17 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       }
       if (!isFiniteNumber(design.pulseSweepPointCount) || design.pulseSweepPointCount < 2 || !Number.isInteger(design.pulseSweepPointCount)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid pulse sweep points must be a whole number of at least 2.' });
+      } else if (design.pulseSweepPointCount > MAX_HYBRID_PULSE_POSITIONS) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid pulse sweep points must not exceed ${MAX_HYBRID_PULSE_POSITIONS.toLocaleString()}.` });
+      }
+      if (
+        isFiniteNumber(design.segmentCount) &&
+        Number.isInteger(design.segmentCount) &&
+        isFiniteNumber(design.pulseSweepPointCount) &&
+        Number.isInteger(design.pulseSweepPointCount) &&
+        design.segmentCount * design.pulseSweepPointCount > MAX_HYBRID_MOVING_PULSE_WORK
+      ) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid moving-region work must not exceed ${MAX_HYBRID_MOVING_PULSE_WORK.toLocaleString()} segment-position evaluations.` });
       }
     }
   }
