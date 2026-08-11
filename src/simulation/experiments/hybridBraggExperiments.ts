@@ -49,6 +49,16 @@ export type MovingPulseExperimentResult = {
   metrics: MovingPulseMetrics;
 };
 
+export type MovingPulseProgress = {
+  completed: number;
+  total: number;
+};
+
+export type MovingPulseSolveOptions = {
+  signal?: AbortSignal;
+  onProgress?: (progress: MovingPulseProgress) => void;
+};
+
 const MINIMUM_RATIO_DENOMINATOR = 1e-9;
 
 /** Runs the permanent or strained hybrid spectrum for caller-supplied wavelength samples. */
@@ -65,18 +75,7 @@ export function solveFixedLaserPulseResponse(
   strainCentersMm: number[],
 ): FixedLaserPulsePoint[] {
   const staticReflectance = solveStaticReflectance(design);
-  return strainCentersMm.map((strainCenterMm) => {
-    const reflectance = solveHybridBraggCoupledModePoint(
-      createHybridBraggModel({ ...design, strainCenterMm }),
-      design.fixedLaserWavelengthNm,
-    ).reflectance;
-    return {
-      strainCenterMm,
-      reflectance,
-      enhancement: reflectance - staticReflectance,
-      ...calculatePulseOverlapMetadata(design, strainCenterMm),
-    };
-  });
+  return strainCentersMm.map((strainCenterMm) => solveFixedLaserPulsePoint(design, strainCenterMm, staticReflectance));
 }
 
 /** Calculates a guarded on/off contrast ratio for a selected fixed-laser response. */
@@ -98,7 +97,8 @@ export function solveMovingPulseExperiment(design: HybridBraggDesignInputs): Mov
   const positionsMm = Array.from({ length: design.pulseSweepPointCount }, (_, index) =>
     Number((design.pulseSweepStartMm + positionStepMm * index).toPrecision(12)),
   );
-  const points = solveFixedLaserPulseResponse(design, positionsMm);
+  const staticReflectance = solveStaticReflectance(design);
+  const points = positionsMm.map((strainCenterMm) => solveFixedLaserPulsePoint(design, strainCenterMm, staticReflectance));
 
   return {
     laserWavelengthNm: design.fixedLaserWavelengthNm,
@@ -108,7 +108,40 @@ export function solveMovingPulseExperiment(design: HybridBraggDesignInputs): Mov
     segmentCount: design.segmentCount,
     positionStepMm,
     points,
-    metrics: calculateMovingPulseMetrics(points, solveStaticReflectance(design)),
+    metrics: calculateMovingPulseMetrics(points, staticReflectance),
+  };
+}
+
+/** Runs the fixed-laser moving active-region experiment in cancellable position chunks. */
+export async function solveMovingPulseExperimentAsync(
+  design: HybridBraggDesignInputs,
+  options: MovingPulseSolveOptions = {},
+): Promise<MovingPulseExperimentResult> {
+  const positionStepMm = (design.pulseSweepEndMm - design.pulseSweepStartMm) / (design.pulseSweepPointCount - 1);
+  const positionsMm = Array.from({ length: design.pulseSweepPointCount }, (_, index) =>
+    Number((design.pulseSweepStartMm + positionStepMm * index).toPrecision(12)),
+  );
+  const staticReflectance = solveStaticReflectance(design);
+  const points: FixedLaserPulsePoint[] = [];
+  options.onProgress?.({ completed: 0, total: positionsMm.length });
+
+  for (const strainCenterMm of positionsMm) {
+    throwIfAborted(options.signal);
+    points.push(solveFixedLaserPulsePoint(design, strainCenterMm, staticReflectance));
+    options.onProgress?.({ completed: points.length, total: positionsMm.length });
+    await yieldToBrowser();
+  }
+
+  throwIfAborted(options.signal);
+  return {
+    laserWavelengthNm: design.fixedLaserWavelengthNm,
+    staticBraggWavelengthNm: getHybridDesignBraggWavelengthNm(design),
+    strainWidthMm: design.strainWidthMm,
+    strainShape: design.strainShape,
+    segmentCount: design.segmentCount,
+    positionStepMm,
+    points,
+    metrics: calculateMovingPulseMetrics(points, staticReflectance),
   };
 }
 
@@ -170,6 +203,23 @@ function solveStaticReflectance(design: HybridBraggDesignInputs): number {
   ).reflectance;
 }
 
+function solveFixedLaserPulsePoint(
+  design: HybridBraggDesignInputs,
+  strainCenterMm: number,
+  staticReflectance: number,
+): FixedLaserPulsePoint {
+  const reflectance = solveHybridBraggCoupledModePoint(
+    createHybridBraggModel({ ...design, strainCenterMm }),
+    design.fixedLaserWavelengthNm,
+  ).reflectance;
+  return {
+    strainCenterMm,
+    reflectance,
+    enhancement: reflectance - staticReflectance,
+    ...calculatePulseOverlapMetadata(design, strainCenterMm),
+  };
+}
+
 function calculatePulseOverlapMetadata(
   design: HybridBraggDesignInputs,
   strainCenterMm: number,
@@ -222,4 +272,15 @@ function interpolateCrossing(
   const fraction = upperValue === lowerValue ? 0 : (threshold - lowerValue) / (upperValue - lowerValue);
   return points[lowerIndex].strainCenterMm +
     (points[upperIndex].strainCenterMm - points[lowerIndex].strainCenterMm) * fraction;
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  const error = new Error('The stale moving-region calculation was cancelled.');
+  error.name = 'AbortError';
+  throw error;
+}
+
+async function yieldToBrowser(): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
 }

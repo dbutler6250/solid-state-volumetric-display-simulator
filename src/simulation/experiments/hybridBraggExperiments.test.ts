@@ -7,6 +7,7 @@ import {
   solveFixedLaserPulseResponse,
   solveHybridStaticSpectrum,
   solveMovingPulseExperiment,
+  solveMovingPulseExperimentAsync,
   type FixedLaserPulsePoint,
 } from './hybridBraggExperiments';
 
@@ -84,6 +85,43 @@ describe('hybrid Bragg experiments', () => {
     expect(rectangular.points[rectangular.points.length - 1].strainCenterMm).toBeCloseTo(3.6);
     expect(gaussian.strainShape).toBe('gaussian');
     expect(gaussian.strainWidthMm).toBeCloseTo(0.8);
+  });
+
+  it('reports progress while solving the moving-pulse experiment asynchronously', async () => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      pulseSweepStartMm: 0,
+      pulseSweepEndMm: 2,
+      pulseSweepPointCount: 5,
+    };
+    const progress: Array<{ completed: number; total: number }> = [];
+
+    const result = await solveMovingPulseExperimentAsync(design, {
+      onProgress: (nextProgress) => progress.push(nextProgress),
+    });
+
+    expect(result.points).toHaveLength(5);
+    expect(progress[0]).toEqual({ completed: 0, total: 5 });
+    expect(progress[progress.length - 1]).toEqual({ completed: 5, total: 5 });
+  });
+
+  it('cancels stale asynchronous moving-pulse solves', async () => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      pulseSweepStartMm: 0,
+      pulseSweepEndMm: 2,
+      pulseSweepPointCount: 5,
+    };
+    const controller = new AbortController();
+
+    const solvePromise = solveMovingPulseExperimentAsync(design, {
+      signal: controller.signal,
+      onProgress: (progress) => {
+        if (progress.completed === 1) controller.abort();
+      },
+    });
+
+    await expect(solvePromise).rejects.toMatchObject({ name: 'AbortError' });
   });
 
   it('calculates moving-pulse metrics with guarded ratios and uniformity', () => {

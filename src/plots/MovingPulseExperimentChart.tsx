@@ -3,11 +3,13 @@ import { createHybridBraggModel } from '../simulation/structures/hybridBraggGrat
 import { sampleStrainField } from '../simulation/perturbations/strainField';
 import type { MovingPulseExperimentResult } from '../simulation/experiments/hybridBraggExperiments';
 import type { HybridBraggDesignInputs } from '../types/simulation';
+import { ChartProgressOverlay, type ChartProgress } from './ChartProgressOverlay';
 import { ChartUnavailableFallback, LazyPlot, LazyPlotErrorBoundary } from './LazyPlot';
 
 type MovingPulseExperimentChartProps = {
   result: MovingPulseExperimentResult | null;
   design: HybridBraggDesignInputs | null;
+  progress: ChartProgress | null;
 };
 
 const formatMetric = (value: number | null, digits = 4): string =>
@@ -21,7 +23,7 @@ const formatWidth = (result: MovingPulseExperimentResult): string => {
 };
 
 /** Renders fixed-laser reflectance versus moving strain-region position. */
-export function MovingPulseExperimentChart({ result, design }: MovingPulseExperimentChartProps) {
+export function MovingPulseExperimentChart({ result, design, progress }: MovingPulseExperimentChartProps) {
   const [responseRetryKey, setResponseRetryKey] = useState(0);
   const [profileRetryKey, setProfileRetryKey] = useState(0);
   const strainProfile = useMemo(() => {
@@ -41,7 +43,8 @@ export function MovingPulseExperimentChart({ result, design }: MovingPulseExperi
   if (!result || !design || !strainProfile) {
     return (
       <div className="chart-placeholder" role="status">
-        The moving-region experiment will update when a valid hybrid grating is resolved.
+        {progress ? null : 'The moving-region experiment will update when a valid hybrid grating is resolved.'}
+        <ChartProgressOverlay label="Calculating moving-region response..." progress={progress} />
       </div>
     );
   }
@@ -112,6 +115,7 @@ export function MovingPulseExperimentChart({ result, design }: MovingPulseExperi
             />
           </Suspense>
         </LazyPlotErrorBoundary>
+        <ChartProgressOverlay label="Calculating moving-region response..." progress={progress} />
       </div>
       <div className="metric-grid moving-pulse-metrics" aria-label="Moving-region metrics">
         {metrics.map(([label, value]) => (
@@ -160,4 +164,3 @@ export function MovingPulseExperimentChart({ result, design }: MovingPulseExperi
     </div>
   );
 }
-

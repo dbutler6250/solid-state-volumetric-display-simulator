@@ -44,7 +44,10 @@ import { exportParameterSweepCsv } from '../io/exportParameterSweepCsv';
 import { exportMovingPulseCsv } from '../io/exportMovingPulseCsv';
 import { downloadTextFile } from '../io/download';
 import { importStackConfigJson } from '../io/importStackConfigJson';
-import { solveMovingPulseExperiment } from '../simulation/experiments/hybridBraggExperiments';
+import {
+  solveMovingPulseExperimentAsync,
+  type MovingPulseExperimentResult,
+} from '../simulation/experiments/hybridBraggExperiments';
 import type {
   ParameterSweepResult,
   ParameterSweepSettings,
@@ -102,6 +105,9 @@ export function SimulationShell() {
   const [heatmapError, setHeatmapError] = useState<string | null>(null);
   const [heatmapIsSolving, setHeatmapIsSolving] = useState(false);
   const [heatmapProgress, setHeatmapProgress] = useState<ChartProgress | null>(null);
+  const [movingPulseResult, setMovingPulseResult] = useState<MovingPulseExperimentResult | null>(null);
+  const [movingPulseError, setMovingPulseError] = useState<string | null>(null);
+  const [movingPulseProgress, setMovingPulseProgress] = useState<ChartProgress | null>(null);
   const [referenceRangeError, setReferenceRangeError] = useState<string | null>(null);
   const [opticalResult, setOpticalResult] = useState<SimulationResult | null>(null);
   const [opticalSolveError, setOpticalSolveError] = useState<string | null>(null);
@@ -112,6 +118,7 @@ export function SimulationShell() {
   const parameterSweepController = useRef<AbortController | null>(null);
   const heatmapRequestId = useRef(0);
   const heatmapController = useRef<AbortController | null>(null);
+  const movingPulseRequestId = useRef(0);
   const [acousticOutput, setAcousticOutput] = useState<{
     document: SimulationDocument;
     resolved: ResolvedStructure;
@@ -148,15 +155,6 @@ export function SimulationShell() {
   const result = simulationDocument?.structure.type === 'acousto-optic-grating'
     ? acousticOutput?.document === simulationDocument ? acousticOutput.result : null
     : opticalResult;
-  const movingPulseResult = useMemo(
-    () =>
-      validationIssues.length === 0 &&
-      simulationDocument?.structure.type === 'hybrid-bragg-grating' &&
-      inputs.hybridBraggDesign
-        ? solveMovingPulseExperiment(inputs.hybridBraggDesign)
-        : null,
-    [inputs.hybridBraggDesign, simulationDocument?.structure.type, validationIssues.length],
-  );
   const supportedHeatmapParameters = useMemo(
     () => resolvedStructure?.sweepParameters ?? [],
     [resolvedStructure],
@@ -248,6 +246,53 @@ export function SimulationShell() {
       setSpectrumProgress(null);
     };
   }, [opticalResolvedStructure, simulationDocument]);
+
+  useEffect(() => {
+    if (
+      validationIssues.length > 0 ||
+      simulationDocument?.structure.type !== 'hybrid-bragg-grating' ||
+      !inputs.hybridBraggDesign
+    ) {
+      movingPulseRequestId.current += 1;
+      setMovingPulseResult(null);
+      setMovingPulseError(null);
+      setMovingPulseProgress(null);
+      return;
+    }
+
+    const design = inputs.hybridBraggDesign;
+    const requestId = ++movingPulseRequestId.current;
+    const controller = new AbortController();
+    setMovingPulseResult(null);
+    setMovingPulseError(null);
+    setMovingPulseProgress({ completed: 0, total: design.pulseSweepPointCount });
+
+    void (async () => {
+      try {
+        const nextResult = await solveMovingPulseExperimentAsync(design, {
+          signal: controller.signal,
+          onProgress: (progress) => {
+            if (requestId === movingPulseRequestId.current) setMovingPulseProgress(progress);
+          },
+        });
+        if (controller.signal.aborted || requestId !== movingPulseRequestId.current) return;
+        setMovingPulseResult(nextResult);
+        setMovingPulseProgress(null);
+      } catch (error) {
+        if (controller.signal.aborted || requestId !== movingPulseRequestId.current) return;
+        setMovingPulseProgress(null);
+        setMovingPulseError(
+          error instanceof Error ? error.message : 'The moving-region experiment could not be calculated.',
+        );
+      }
+    })();
+
+    return () => {
+      controller.abort();
+      movingPulseRequestId.current += 1;
+      setMovingPulseProgress(null);
+    };
+  }, [inputs.hybridBraggDesign, simulationDocument?.structure.type, validationIssues.length]);
 
   useEffect(() => {
     parameterSweepController.current?.abort();
@@ -729,7 +774,11 @@ export function SimulationShell() {
                 <MovingPulseExperimentChart
                   result={movingPulseResult}
                   design={simulationDocument?.structure.type === 'hybrid-bragg-grating' && inputs.hybridBraggDesign ? inputs.hybridBraggDesign : null}
+                  progress={movingPulseProgress}
                 />
+                {movingPulseError ? (
+                  <p className="chart-toolbar-message" role="alert">{movingPulseError}</p>
+                ) : null}
               </>
             ) : null}
           </section>

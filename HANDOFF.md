@@ -22,6 +22,7 @@
 - Added Moving Region output tab with fixed-laser reflectance plot, no-strain baseline, current strain profile, metrics, and CSV export.
 - Added Hybrid Bragg UI controls for fixed laser and pulse-position sweep settings.
 - Added explicit caps for hybrid segment count, pulse position count, and aggregate segment-position work.
+- Moved the Moving Region UI calculation onto a cancellable async solver with progress reporting so large bounded jobs do not run in render.
 - Fixed older hybrid setup imports so missing moving-pulse sweep end defaults to the imported grating length.
 - Fixed Hybrid Bragg length edits so pulse sweep start/end do not collapse to an invalid equal range.
 - Added a Hybrid Bragg UI mode and Stack Definition readout.
@@ -36,9 +37,9 @@
 - Detuning validation spans `delta/kappa = -2, -1, -0.5, 0, 0.5, 1, 2`.
 - Localized rectangular strain convergence shows 25 segments can differ from a 1600-segment reference by about 0.03 reflectance; 400+ segments are below 0.005 in the tested case.
 - TMM comparison improves with slices per period in the weak-modulation regime and diverges materially as `Delta n` approaches `1e-3`.
-- Focused moving-region tests cover zero-strain baseline, position count, boundary clipping metadata, rectangular/Gaussian movement, metrics, guarded gain, effective-width classification, and CSV export.
+- Focused moving-region tests cover zero-strain baseline, position count, boundary clipping metadata, rectangular/Gaussian movement, async progress/cancellation, metrics, guarded gain, effective-width classification, and CSV export.
 - Representative moving-region runs show exact static resonance is dominated by the no-strain grating, while detuned cases can enhance reflectance but remain strongly position dependent with multiple comparable peaks.
-- Full test: `npm.cmd run test` - passed, 27 files / 173 tests.
+- Full test: `npm.cmd run test` - passed, 27 files / 175 tests.
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
 - Browser smoke: reused existing Vite server on `http://127.0.0.1:5173`, switched to Hybrid Bragg mode, opened Moving Region tab, and confirmed the plots, baseline, metrics, and CSV export control rendered.
