@@ -2,12 +2,13 @@
 
 ## Repository Status
 
-- Current work is on `codex/v2-hybrid-bragg-foundation`.
+- Current work is on `main` at merged PR #55 (`f34f5d2`).
+- The PR #55 feature branch `codex/v2-hybrid-bragg-foundation` has been deleted locally and pruned from `origin`.
 - `RESEARCH.md` already had user edits before this task; the v2 simulator implication section was appended without removing those edits.
 
 ## Latest Task
 
-- Resolved PR #55 review findings after completing WP-v2-03 fixed-laser moving active-region experiment.
+- Merged PR #55 after resolving review findings for WP-v2-03 fixed-laser moving active-region experiment.
 - The core architecture separates permanent optical structure, prescribed perturbation field, material response, solver, experiment helpers, and metrics.
 - v1 quarter-wave stack, TMM solver, acoustic grating, sweeps, heatmaps, plotting, import/export, and UI shell remain in place.
 
