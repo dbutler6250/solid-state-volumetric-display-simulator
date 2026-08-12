@@ -748,7 +748,7 @@ function classifyOverallOutcome(
 function solvePhaseSweepExperiment(design: HybridBraggDesignInputs): MovingPulseExperimentResult {
   const phaseCount = Math.max(3, design.pulseSweepPointCount);
   const staticReflectance = solveStaticReflectance(design);
-  const phaseStep = (2 * Math.PI) / (phaseCount - 1);
+  const phaseStep = (2 * Math.PI) / phaseCount;
   const points = Array.from({ length: phaseCount }, (_, index) => {
     const phase = Number((phaseStep * index).toPrecision(12));
     const reflectance = solveHybridBraggCoupledModePoint(

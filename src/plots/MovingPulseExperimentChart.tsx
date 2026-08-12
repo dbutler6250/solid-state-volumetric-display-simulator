@@ -49,15 +49,18 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
     );
   }
 
+  const isPhaseScan = isPhaseScannedField(result.strainShape);
+  const parameterLabel = isPhaseScan ? 'Phase' : 'Position';
+  const parameterUnit = isPhaseScan ? 'rad' : 'mm';
   const metrics = [
     ['Static reflectance', formatMetric(result.metrics.staticReflectance)],
     ['Peak reflectance', formatMetric(result.metrics.peakReflectance)],
     ['Peak enhancement', formatMetric(result.metrics.peakEnhancement)],
     ['Peak gain', formatMetric(result.metrics.peakGain)],
-    ['Peak position', `${result.metrics.peakPositionMm.toPrecision(4)} mm`],
+    [`Peak ${parameterLabel.toLowerCase()}`, `${result.metrics.peakPositionMm.toPrecision(4)} ${parameterUnit}`],
     ['Minimum reflectance', formatMetric(result.metrics.minReflectance)],
     ['Mean reflectance', formatMetric(result.metrics.meanReflectance)],
-    ['Position std dev', formatMetric(result.metrics.standardDeviationReflectance)],
+    [`${parameterLabel} std dev`, formatMetric(result.metrics.standardDeviationReflectance)],
     ['Uniformity', formatMetric(result.metrics.uniformity)],
     ['Effective optical width', formatWidth(result)],
     ['Response class', result.metrics.localization.responseClassification],
@@ -72,7 +75,7 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
       <div className="moving-pulse-metadata">
         <span>{`Fixed laser: ${result.laserWavelengthNm.toPrecision(6)} nm`}</span>
         <span>{`Static Bragg: ${result.staticBraggWavelengthNm.toPrecision(6)} nm`}</span>
-        <span>{`Position step: ${result.positionStepMm.toPrecision(4)} mm`}</span>
+        <span>{`${parameterLabel} step: ${result.positionStepMm.toPrecision(4)} ${parameterUnit}`}</span>
         <span>{`Segments: ${result.segmentCount}`}</span>
       </div>
       <div className="chart-frame moving-pulse-chart-frame">
@@ -171,8 +174,12 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
 }
 
 function getResponseAxisLabel(strainShape: HybridBraggDesignInputs['strainShape']): string {
-  if (strainShape === 'traveling-sinusoid' || strainShape === 'standing-wave' || strainShape === 'multi-tone') {
+  if (isPhaseScannedField(strainShape)) {
     return 'Field Phase Parameter (rad)';
   }
   return 'Field Center Position (mm)';
+}
+
+function isPhaseScannedField(strainShape: HybridBraggDesignInputs['strainShape']): boolean {
+  return strainShape === 'traveling-sinusoid' || strainShape === 'standing-wave' || strainShape === 'multi-tone';
 }

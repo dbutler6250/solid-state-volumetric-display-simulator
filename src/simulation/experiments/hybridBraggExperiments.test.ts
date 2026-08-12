@@ -102,7 +102,9 @@ describe('hybrid Bragg experiments', () => {
 
     expect(result.points).toHaveLength(5);
     expect(result.points[0].strainCenterMm).toBeCloseTo(0);
-    expect(result.points[result.points.length - 1].strainCenterMm).toBeCloseTo(2 * Math.PI);
+    expect(result.positionStepMm).toBeCloseTo((2 * Math.PI) / 5);
+    expect(result.points[result.points.length - 1].strainCenterMm).toBeLessThan(2 * Math.PI);
+    expect(result.points[result.points.length - 1].strainCenterMm).toBeCloseTo((2 * Math.PI * 4) / 5);
   });
 
   it('compares prescribed perturbation families on one optical setup', () => {

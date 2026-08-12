@@ -8,6 +8,11 @@
 
 ## Latest Task
 
+- Resolved PR #59 review findings:
+  - periodic phase sweeps now use a half-open `[0, 2 pi)` grid to avoid duplicate endpoint peaks;
+  - moving-region metrics now label phase scans in radians instead of millimeters;
+  - regime-map classification colorbar/tick range now covers all eight classification labels.
+- Added focused regression tests for half-open phase scans, phase-scan metric labels, and the expanded classification scale.
 - Generalized the Hybrid Bragg perturbation layer beyond rectangular/Gaussian localized strain.
 - Added prescribed field families: smooth top-hat, triangular, traveling sinusoid, standing wave, carrier-envelope packet, and two-tone superposition.
 - Preserved rectangular full-width and Gaussian FWHM conventions.
@@ -24,6 +29,10 @@
 
 ## Validation Performed
 
+- Focused review-fix test: `npm.cmd run test -- src/simulation/experiments/hybridBraggExperiments.test.ts src/plots/MovingPulseExperimentChart.test.ts src/plots/MovingResponseRegimeMapChart.test.ts src/simulation/perturbations/strainField.test.ts` - passed, 21 tests.
+- Full test: `npm.cmd run test` - passed, 30 files / 187 tests.
+- Lint: `npm.cmd run lint` - passed with no warnings.
+- Build: `npm.cmd run build` - passed.
 - Focused test: `npm.cmd run test -- src/simulation/perturbations/strainField.test.ts src/simulation/experiments/hybridBraggExperiments.test.ts src/io/importStackConfigJson.test.ts` - passed, 46 tests.
 - Full test: `npm.cmd run test` - passed, 28 files / 185 tests.
 - Lint: `npm.cmd run lint` - passed.
@@ -33,5 +42,5 @@
 
 ## Remaining Follow-Up
 
-- Commit, push, and open a draft PR for issue #58.
+- Commit and push PR #59 review-fix changes.
 - Future research should run a larger normalized comparison sweep, especially two-tone/phase-control cases, before choosing a physical actuator architecture.
