@@ -2371,7 +2371,7 @@ Required highlight:
 MOST PROMISING PERTURBATION FIELD: multi-tone
 ```
 
-The best scored case was the two-tone case with beat length near the coupling-length scale. It gave peak enhancement about `0.219`, secondary peak ratio about `0.436`, effective optical width about `1.762 mm`, and two inferred active regions spaced about `5.725 mm`. This is not yet a clean single-plane result, but it is the strongest evidence so far for an electronically phase-addressable perturbation geometry.
+The best scored case was the two-tone case with beat length near the coupling-length scale. It gave peak enhancement about `0.219`, secondary peak ratio about `0.436`, phase-response width about `1.762 rad`, activation-proxy width about `1.100 mm`, and two inferred active regions spaced about `5.725 mm`. This is not yet a clean single-plane result, but it is the strongest evidence so far for an electronically phase-addressable perturbation geometry.
 
 Localized-field conclusion:
 
@@ -2391,7 +2391,7 @@ Traveling sinusoidal fields produced periodic or multi-peak behavior across the 
 
 Standing-wave conclusion:
 
-Standing waves produced useful spatially separated inferred activation regions only conditionally. For `Lambda_ac ~ 2 L_c`, the study found peak enhancement about `0.192`, secondary peak ratio about `0.459`, effective width about `1.277 mm`, and three inferred planes with about `3.825 mm` spacing. Shorter periods produced many regions and optical clutter. The local diagnostic preserves the standing-wave spatial pattern, but the whole-grating reflectance is a coherent integral over that pattern, so Bragg interference can substantially rearrange the apparent optical response.
+Standing waves produced useful spatially separated inferred activation regions only conditionally. For `Lambda_ac ~ 2 L_c`, the study found peak enhancement about `0.192`, secondary peak ratio about `0.459`, phase-response width about `1.277 rad`, activation-proxy width about `3.125 mm`, and three inferred planes with about `3.825 mm` spacing. Shorter periods produced many regions and optical clutter. The local diagnostic preserves the standing-wave spatial pattern, but the whole-grating reflectance is a coherent integral over that pattern, so Bragg interference can substantially rearrange the apparent optical response.
 
 Two-tone and phase-control conclusion:
 
@@ -2420,6 +2420,19 @@ Important dimensionless relationships:
 - Carrier-envelope packets with many carrier cycles tended toward multi-region behavior; sub-cycle packets behaved more like broad Gaussian-localized strain.
 - Traveling and standing periods near or above `L_c` preserved clearer periodic activation than periods far below `L_c`.
 - Two-tone beat lengths of several `L_c` gave the clearest inferred envelope translation, but whole-grating reflectance still did not isolate one plane cleanly.
+
+Higher-segment convergence:
+
+| Case | Segments | Peak enhancement | Secondary ratio | Phase-response width | Activation-proxy width | Active regions | Activation spacing |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| multi-tone-Lc-beat | 700 | `0.219` | `0.436` | `1.762 rad` | `1.100 mm` | 2 | `5.725 mm` |
+| multi-tone-Lc-beat | 1400 | `0.219` | `0.436` | `1.762 rad` | `1.100 mm` | 2 | `5.725 mm` |
+| multi-tone-Lc-beat | 2100 | `0.219` | `0.436` | `1.762 rad` | `1.100 mm` | 2 | `5.725 mm` |
+| standing-Lambda-2Lc | 700 | `0.192` | `0.459` | `1.277 rad` | `3.125 mm` | 3 | `3.825 mm` |
+| standing-Lambda-2Lc | 1400 | `0.192` | `0.459` | `1.277 rad` | `3.125 mm` | 3 | `3.825 mm` |
+| standing-Lambda-2Lc | 2100 | `0.192` | `0.459` | `1.277 rad` | `3.125 mm` | 3 | `3.825 mm` |
+
+The high-segment rerun preserves the qualitative ranking: multi-tone remains the stronger phase-addressable candidate, and the standing-wave case remains conditional with comparable secondary structure.
 
 Display-architecture implications:
 

@@ -26,6 +26,7 @@ type FamilyCase = {
   label: string;
   shape: HybridStrainShape;
   design: HybridBraggDesignInputs;
+  parameterKind: 'position' | 'phase';
   normalization: Normalization;
   result: MovingPulseExperimentResult;
   activation: ActivationSummary;
@@ -60,6 +61,12 @@ type PhaseTranslationPoint = {
   measuredActivationPositionMm: number | null;
   reflectance: number;
   secondaryPeakRatio: number | null;
+};
+
+type ConvergenceCase = {
+  label: string;
+  segmentCount: number;
+  summary: ReturnType<typeof summarize>;
 };
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -143,10 +150,12 @@ function solveCase(
   const shapedDesign = { ...design, strainShape: shape };
   const result = solveMovingPulseExperiment(shapedDesign);
   const lc = couplingLengthMm(shapedDesign);
+  const parameterKind = isPhaseScannedShape(shape) ? 'phase' : 'position';
   return {
     label,
     shape,
     design: shapedDesign,
+    parameterKind,
     normalization,
     result,
     activation: calculateActivationSummary(shapedDesign),
@@ -235,6 +244,10 @@ function positiveEnhancementFraction(design: HybridBraggDesignInputs): number {
 
 function usesCarrier(shape: HybridStrainShape): boolean {
   return shape === 'traveling-sinusoid' || shape === 'standing-wave' || shape === 'carrier-envelope' || shape === 'multi-tone';
+}
+
+function isPhaseScannedShape(shape: HybridStrainShape): boolean {
+  return shape === 'traveling-sinusoid' || shape === 'standing-wave' || shape === 'multi-tone';
 }
 
 function beatLengthMm(design: HybridBraggDesignInputs): number {
@@ -331,6 +344,42 @@ function studyTwoToneCases(): FamilyCase[] {
   );
 }
 
+function bestTwoToneLcDesign(segmentCount: number): HybridBraggDesignInputs {
+  const lc = couplingLengthMm(studyDesign());
+  return studyDesign({
+    strainShape: 'multi-tone',
+    perturbationPeriodMm: lc,
+    perturbationSecondaryPeriodMm: lc * 1.5,
+    perturbationSecondaryAmplitudeRatio: 1,
+    segmentCount,
+  });
+}
+
+function bestStandingDesign(segmentCount: number): HybridBraggDesignInputs {
+  const lc = couplingLengthMm(studyDesign());
+  return studyDesign({
+    strainShape: 'standing-wave',
+    perturbationPeriodMm: lc * 2,
+    segmentCount,
+  });
+}
+
+function studyConvergence(): ConvergenceCase[] {
+  const segmentCounts = [700, 1400, 2100];
+  return [
+    ...segmentCounts.map((segmentCount) => ({
+      label: 'multi-tone-Lc-beat',
+      segmentCount,
+      summary: summarize(solveCase(`multi-tone-Lc-beat-${segmentCount}`, 'multi-tone', bestTwoToneLcDesign(segmentCount), 'equal-peak-strain')),
+    })),
+    ...segmentCounts.map((segmentCount) => ({
+      label: 'standing-Lambda-2Lc',
+      segmentCount,
+      summary: summarize(solveCase(`standing-Lambda-2Lc-${segmentCount}`, 'standing-wave', bestStandingDesign(segmentCount), 'equal-peak-strain')),
+    })),
+  ];
+}
+
 function studyDetuningRobustness(shape: HybridStrainShape): FamilyCase[] {
   const bragg = getHybridDesignBraggWavelengthNm(studyDesign());
   return [-0.14, -0.1, -0.08, -0.06, -0.04, 0.04].map((detuning) =>
@@ -395,9 +444,11 @@ function strongestEnvelopePositionMm(design: HybridBraggDesignInputs): number | 
 
 function summarize(caseItem: FamilyCase) {
   const metrics = caseItem.result.metrics;
+  const responseWidth = metrics.effectiveWidth.widthMm;
   return {
     label: caseItem.label,
     shape: caseItem.shape,
+    parameterKind: caseItem.parameterKind,
     normalization: caseItem.normalization,
     peakStrain: caseItem.design.peakStrain,
     staticReflectance: metrics.staticReflectance,
@@ -406,7 +457,8 @@ function summarize(caseItem: FamilyCase) {
     peakGain: metrics.peakGain,
     secondaryPeakRatio: metrics.localization.secondaryPeakRatio,
     localizedFraction: metrics.localization.localizedFraction,
-    effectiveWidthMm: metrics.effectiveWidth.widthMm,
+    effectiveWidthMm: caseItem.parameterKind === 'position' ? responseWidth : null,
+    phaseResponseWidthRadians: caseItem.parameterKind === 'phase' ? responseWidth : null,
     positionOrPhaseStdReflectance: metrics.standardDeviationReflectance,
     classification: metrics.localization.responseClassification,
     activationRegionCount: caseItem.activation.regionCount,
@@ -429,20 +481,42 @@ function formatNumber(value: number | null | undefined, digits = 3): string {
 function markdownTable(cases: FamilyCase[]): string {
   const rows = cases.map((item) => {
     const summary = summarize(item);
+    const width = item.parameterKind === 'phase'
+      ? `${formatNumber(summary.phaseResponseWidthRadians)} rad`
+      : `${formatNumber(summary.effectiveWidthMm)} mm`;
     return [
       item.shape,
       item.normalization.replace('equal-', ''),
       formatNumber(summary.peakEnhancement),
       formatNumber(summary.secondaryPeakRatio),
-      formatNumber(summary.effectiveWidthMm),
+      width,
       String(summary.activationRegionCount),
       formatNumber(summary.activationSpacingMm),
       summary.classification,
     ].join(' | ');
   });
   return [
-    '| Perturbation | Normalization | Peak enhancement | Secondary ratio | Optical width mm | Active regions | Activation spacing mm | Classification |',
+    '| Perturbation | Normalization | Peak enhancement | Secondary ratio | Response width | Active regions | Activation spacing mm | Classification |',
     '| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |',
+    ...rows.map((row) => `| ${row} |`),
+  ].join('\n');
+}
+
+function convergenceTable(cases: ConvergenceCase[]): string {
+  const rows = cases.map((item) => [
+    item.label,
+    String(item.segmentCount),
+    formatNumber(item.summary.peakEnhancement),
+    formatNumber(item.summary.secondaryPeakRatio),
+    `${formatNumber(item.summary.phaseResponseWidthRadians)} rad`,
+    formatNumber(item.summary.activationProxyWidthMm),
+    String(item.summary.activationRegionCount),
+    formatNumber(item.summary.activationSpacingMm),
+    item.summary.classification,
+  ].join(' | '));
+  return [
+    '| Case | Segments | Peak enhancement | Secondary ratio | Phase response width | Activation proxy width mm | Active regions | Activation spacing mm | Classification |',
+    '| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |',
     ...rows.map((row) => `| ${row} |`),
   ].join('\n');
 }
@@ -470,6 +544,7 @@ function makeReport(payload: {
   standingPeriods: FamilyCase[];
   twoToneCases: FamilyCase[];
   robustness: FamilyCase[];
+  convergence: ConvergenceCase[];
   phaseTranslation: PhaseTranslationPoint[];
 }): string {
   const bragg = getHybridDesignBraggWavelengthNm(payload.base);
@@ -513,7 +588,7 @@ function makeReport(payload: {
     '',
     `MOST PROMISING PERTURBATION FIELD: ${bestOverall.shape}`,
     '',
-    `Best scored case: ${bestOverall.label}; peak enhancement ${formatNumber(bestOverall.result.metrics.peakEnhancement)}, secondary ratio ${formatNumber(bestOverall.result.metrics.localization.secondaryPeakRatio)}, optical width ${formatNumber(bestOverall.result.metrics.effectiveWidth.widthMm)} mm, active regions ${bestOverall.activation.regionCount}.`,
+    `Best scored case: ${bestOverall.label}; peak enhancement ${formatNumber(bestOverall.result.metrics.peakEnhancement)}, secondary ratio ${formatNumber(bestOverall.result.metrics.localization.secondaryPeakRatio)}, phase response width ${formatNumber(summarize(bestOverall).phaseResponseWidthRadians)} rad, activation proxy width ${formatNumber(bestOverall.activation.proxyWidthMm)} mm, active regions ${bestOverall.activation.regionCount}.`,
     '',
     '## E. Localized field conclusion',
     '',
@@ -558,7 +633,11 @@ function makeReport(payload: {
     '',
     '## K. Robustness / numerical convergence',
     '',
-    'The study runner used 700 CMT segments for the main pass. A follow-up validation should rerun the best few cases at higher segment count before treating fine distinctions as durable.',
+    'The study runner used 700 CMT segments for the main pass and reran the best multi-tone and standing-wave candidates at 1400 and 2100 segments.',
+    '',
+    convergenceTable(payload.convergence),
+    '',
+    'The high-segment rerun preserves the qualitative ranking: multi-tone remains the stronger phase-addressable candidate, and the standing-wave case remains conditional with comparable secondary structure. Fine numerical values should still be treated as scalar-CMT results, not experimental predictions.',
     '',
     '## L. TMM spot checks',
     '',
@@ -592,6 +671,7 @@ async function main(): Promise<void> {
   const twoToneCases = studyTwoToneCases();
   const promisingShapes: HybridStrainShape[] = ['smooth-top-hat', 'carrier-envelope', 'multi-tone', 'standing-wave'];
   const robustness = promisingShapes.flatMap((shape) => [...studyDetuningRobustness(shape), ...studyAmplitudeRobustness(shape)]);
+  const convergence = studyConvergence();
   const phaseTranslation = studyPhaseTranslation();
   const comparison = solvePerturbationFieldComparison(base, SHAPES);
   const payload = {
@@ -605,8 +685,10 @@ async function main(): Promise<void> {
         peakEnhancement: family.peakEnhancement,
         secondaryPeakRatio: family.secondaryPeakRatio,
         localizedFraction: family.localizedFraction,
-        effectiveWidthMm: family.effectiveWidthMm,
-        repeatSpacingMm: family.repeatSpacingMm,
+        effectiveWidthMm: family.parameterKind === 'position' ? family.effectiveWidthMm : null,
+        phaseResponseWidthRadians: family.parameterKind === 'phase' ? family.effectiveWidthMm : null,
+        repeatSpacingMm: family.parameterKind === 'position' ? family.repeatSpacingMm : null,
+        phaseRepeatSpacingRadians: family.parameterKind === 'phase' ? family.repeatSpacingMm : null,
         phaseSensitivity: family.phaseSensitivity,
         classification: family.classification,
         opticalAssessment: family.opticalAssessment,
@@ -620,6 +702,7 @@ async function main(): Promise<void> {
     standingPeriods: standingPeriods.map(summarize),
     twoToneCases: twoToneCases.map(summarize),
     robustness: robustness.map(summarize),
+    convergence,
     phaseTranslation,
   };
   await mkdir(OUT_DIR, { recursive: true });
@@ -633,6 +716,7 @@ async function main(): Promise<void> {
     standingPeriods,
     twoToneCases,
     robustness,
+    convergence,
     phaseTranslation,
   }), 'utf8');
   console.log(`Wrote ${DATA_PATH}`);

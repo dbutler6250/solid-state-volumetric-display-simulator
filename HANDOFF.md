@@ -18,7 +18,7 @@
 ## Key Result
 
 - `MOST PROMISING PERTURBATION FIELD: multi-tone`
-- The best two-tone case is conditional, not a clean single plane: peak enhancement about `0.219`, secondary peak ratio about `0.436`, effective optical width about `1.762 mm`, and two inferred active regions.
+- The best two-tone case is conditional, not a clean single plane: peak enhancement about `0.219`, secondary peak ratio about `0.436`, phase-response width about `1.762 rad`, activation-proxy width about `1.100 mm`, and two inferred active regions.
 - `LOCALIZED MOVING-FIELD LIMITATION REMAINS`; smooth top-hat, triangular, and carrier-envelope packets did not materially clean up the moving localized response under the current scalar-CMT model.
 - Continuous traveling excitation behaves as a periodic multi-plane candidate, not a single moving plane.
 - Standing waves can form separated inferred regions when the period is near or above `L_c`, but coherent Bragg interference still rearranges the apparent response.
@@ -27,6 +27,7 @@
 ## Validation Performed
 
 - Study runner: `npx.cmd tsx scripts/comparativePerturbationStudy.mts` - passed and regenerated artifacts.
+- Higher-segment convergence: best multi-tone and standing-wave candidates rerun at 700, 1400, and 2100 CMT segments; qualitative ranking persisted.
 - Unit tests: `npm.cmd run test` - passed, 30 files / 187 tests.
 - Lint: `npm.cmd run lint` - passed with no reported issues.
 - Build: `npm.cmd run build` - passed.
@@ -36,4 +37,4 @@
 
 ## Remaining Follow-Up
 
-- Commit, push, and open a draft PR for issue #60.
+- Commit and push the review-fix update to PR #61.
