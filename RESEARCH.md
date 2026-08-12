@@ -2339,3 +2339,93 @@ MOST PROMISING PERTURBATION FIELD: no clearly superior field found yet.
 ```
 
 The most promising next numerical direction is a broader comparison of two-tone/phase-controlled fields against smooth localized packets at matched peak strain and matched integrated absolute strain or strain-energy proxy. Optical desirability must remain separate from physical generation feasibility; whether required acoustic, piezoelectric, electro-optic, thermal, or mechanical fields can be generated in bulk glass remains unverified.
+
+## 18.7 Comparative perturbation-field physics study
+
+WP-v2-05A ran the broader comparison enabled by the generalized perturbation-field architecture. The reproducible study artifacts are:
+
+- `artifacts/issue-60/comparative-perturbation-study.md`;
+- `artifacts/issue-60/comparative-perturbation-study.json`;
+- `scripts/comparativePerturbationStudy.mts`.
+
+These findings are simulation results under the current scalar, lossless, prescribed-strain spatial CMT model. The current solver reports whole-grating reflectance, not reflected-power density versus depth, so periodic-field plane counts use a local Bragg-alignment proxy as an inferred spatial activation diagnostic.
+
+Common configuration:
+
+- `lambda_B = 600.0100 nm`;
+- primary `lambda_laser = 600.1100 nm`, so `Delta lambda = +0.1000 nm`;
+- `n_bar = 1.45`;
+- `Delta n = 1e-4`;
+- `kappa = 523.590 1/m`;
+- grating length `10 mm`;
+- `kappa L = 5.236`;
+- `L_c = 1 / kappa = 1.910 mm`;
+- `segmentCount = 700`;
+- baseline peak strain `1e-4`.
+
+The comparison used both equal peak strain and an equal strain-energy proxy, where the proxy rescales peak strain so `integral epsilon(z)^2 dz` matches the rectangular localized baseline. This separates field shape from simply applying more total perturbation.
+
+Required highlight:
+
+```text
+MOST PROMISING PERTURBATION FIELD: multi-tone
+```
+
+The best scored case was the two-tone case with beat length near the coupling-length scale. It gave peak enhancement about `0.219`, secondary peak ratio about `0.436`, effective optical width about `1.762 mm`, and two inferred active regions spaced about `5.725 mm`. This is not yet a clean single-plane result, but it is the strongest evidence so far for an electronically phase-addressable perturbation geometry.
+
+Localized-field conclusion:
+
+```text
+LOCALIZED MOVING-FIELD LIMITATION REMAINS
+```
+
+Among rectangular, Gaussian, smooth top-hat, triangular, and carrier-envelope localized fields, smooth or shaped edges did not materially produce a clean moving optical response. Representative best localized cases still had secondary peak ratios near `1.0`, or in the carrier-envelope case about `0.656` with a broad `3.180 mm` effective width. Smooth top-hat edge sweeps changed peak strength and interference details, but did not reveal a robust transition where secondary interference collapsed without sacrificing useful response.
+
+Continuous traveling-wave conclusion:
+
+```text
+CONTINUOUS TRAVELING ULTRASOUND PRODUCES PERIODIC MULTI-PLANE RESPONSE
+```
+
+Traveling sinusoidal fields produced periodic or multi-peak behavior across the period sweep. Periods near and above `L_c` gave stronger whole-grating response, with inferred activation spacings tracking the imposed acoustic period or half-period scale, but they did not behave as one isolated moving plane.
+
+Standing-wave conclusion:
+
+Standing waves produced useful spatially separated inferred activation regions only conditionally. For `Lambda_ac ~ 2 L_c`, the study found peak enhancement about `0.192`, secondary peak ratio about `0.459`, effective width about `1.277 mm`, and three inferred planes with about `3.825 mm` spacing. Shorter periods produced many regions and optical clutter. The local diagnostic preserves the standing-wave spatial pattern, but the whole-grating reflectance is a coherent integral over that pattern, so Bragg interference can substantially rearrange the apparent optical response.
+
+Two-tone and phase-control conclusion:
+
+Relative phase control of multiple continuous perturbation waves can translate an inferred optical activation region under the local Bragg-alignment diagnostic. In the sampled two-tone case, changing relative phase moved the inferred activation maximum across roughly the full `10 mm` grating while whole-grating reflectance varied by about `0.048`. The measured activation maximum often followed the predicted strain-envelope maximum, but not perfectly; this confirms that optical activation should not be assumed identical to the strain envelope.
+
+Overall ranking:
+
+```text
+MOST PROMISING
+- Two-tone / multi-tone phase-controlled fields, conditional on controlling secondary peaks.
+
+PROMISING / CONDITIONAL
+- Standing-wave plane arrays when the spatial period is near or above the coupling length.
+- Continuous traveling waves for periodic moving plane-array architectures, not single moving planes.
+
+WEAK OR PROBLEMATIC
+- Smooth top-hat and carrier-envelope localized packets under the tested scalar-CMT cases.
+
+POOR UNDER CURRENT MODEL
+- Rectangular, Gaussian, and triangular localized moving-pulse fields as clean single-plane display mechanisms.
+```
+
+Important dimensionless relationships:
+
+- Localized widths near `0.5 L_c` to `1 L_c` gave stronger responses but retained comparable secondary peaks.
+- Carrier-envelope packets with many carrier cycles tended toward multi-region behavior; sub-cycle packets behaved more like broad Gaussian-localized strain.
+- Traveling and standing periods near or above `L_c` preserved clearer periodic activation than periods far below `L_c`.
+- Two-tone beat lengths of several `L_c` gave the clearest inferred envelope translation, but whole-grating reflectance still did not isolate one plane cleanly.
+
+Display-architecture implications:
+
+- Localized packets imply one scanned active depth plane, but the current permanent uniform grating still creates strong finite-grating interference.
+- Traveling sinusoidal excitation implies periodic moving activation planes.
+- Standing waves imply simultaneous stationary periodic planes.
+- Two-tone fields imply electronically translated or rearranged activation envelopes.
+
+Physical generation was deliberately not ranked in this study. The remaining physical questions are whether the required strain amplitudes, periods, phase stability, and beat envelopes can be generated in the target optical medium by acoustic, piezoelectric, electro-optic, thermal, or mechanical mechanisms.
