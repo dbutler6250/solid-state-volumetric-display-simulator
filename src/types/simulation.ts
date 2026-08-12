@@ -31,6 +31,15 @@ export type HybridStrainShape =
   | 'carrier-envelope'
   | 'multi-tone';
 
+export type HybridPermanentGratingMode = 'global' | 'segmented';
+
+export type HybridSectionPhaseMode =
+  | 'continuous'
+  | 'fixed-reset'
+  | 'alternating'
+  | 'explicit'
+  | 'seeded-random';
+
 /** Headless v2 inputs for a permanent Bragg grating plus prescribed local strain. */
 export type HybridBraggDesignInputs = {
   lengthMm: number;
@@ -38,6 +47,12 @@ export type HybridBraggDesignInputs = {
   indexModulation: number;
   gratingPeriodNm: number;
   gratingPhaseRadians: number;
+  permanentGratingMode: HybridPermanentGratingMode;
+  braggSectionCount: number;
+  braggSectionGapMm: number;
+  braggSectionPhaseMode: HybridSectionPhaseMode;
+  braggSectionPhaseSequenceRadians: number[];
+  braggSectionRandomSeed: number;
   peakStrain: number;
   strainCenterMm: number;
   strainWidthMm: number;

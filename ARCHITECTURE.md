@@ -128,3 +128,13 @@ The earlier fully acoustic-grating direction made the acoustic field synonymous 
 - strain affects both grating period and refractive index;
 - fixed-laser on/off contrast and active-region thickness become first-class outputs;
 - TMM remains useful as an independent discretized reference solver.
+## WP-v2-06 Segmented Hybrid Bragg Baseline
+
+Hybrid Bragg permanent gratings now support two structure modes:
+
+- `global`: the previous globally coherent uniform grating reference.
+- `segmented`: multiple locally coherent Bragg sections separated optionally by unmodulated regions inside the same bulk medium.
+
+Segmented mode tracks section count, section length, gap length, and an inter-section grating phase mode. Supported phase relationships are continuous phase, fixed phase reset, alternating phase, explicit phase sequence, and deterministic seeded pseudo-random phase. These phase modes alter the permanent grating phase relationship between sections; they do not imply temporal decoherence of the optical source.
+
+The scalar spatial CMT solver now exposes calculated forward and backward optical amplitudes along the medium. The UI and analysis helpers use normalized backward intensity `|B(z)|^2` as the current reflection-region metric, while total reflectance remains the externally measured boundary result.

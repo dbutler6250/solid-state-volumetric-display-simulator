@@ -2442,3 +2442,12 @@ Display-architecture implications:
 - Two-tone fields imply electronically translated or rearranged activation envelopes.
 
 Physical generation was deliberately not ranked in this study. The remaining physical questions are whether the required strain amplitudes, periods, phase stability, and beat envelopes can be generated in the target optical medium by acoustic, piezoelectric, electro-optic, thermal, or mechanical mechanisms.
+## WP-v2-06 Segmented Bragg Baseline
+
+Issue #62 starts the segmented/local-coherence Bragg investigation. The simulator now represents the permanent grating as either a globally coherent reference or segmented local Bragg sections with optional unmodulated gaps and configurable inter-section grating phase relationships.
+
+The first baseline study is in `artifacts/issue-62/segmented-bragg-study.md` and `.json`. It compares the 10 mm multi-tone reference against 2, 4, 8, and 16 segmented cases using calculated normalized backward optical intensity `|B(z)|^2 >= 50% max` to detect reflection regions.
+
+Initial result: segmentation is executable and can strongly change the calculated response, but this baseline is not yet the final WP-v2-06 conclusion. Some phase-reset cases raise peak enhancement while also increasing secondary ambiguity or static leakage. The next research pass should add convergence sweeps, TMM spot checks for important segmented cases, and a more complete addressability table before declaring whether segmentation materially improves display addressability.
+
+Terminology note: section phase reset means breaking or controlling the permanent grating phase relationship between local sections. It does not make a coherent optical source incoherent across the device.

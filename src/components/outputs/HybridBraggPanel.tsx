@@ -53,6 +53,40 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
         <HybridNumber label="Average index" value={design.averageIndex} min={0.1} step={0.001} disabled={!isActiveMode} onChange={(averageIndex) => updateDesign({ averageIndex })} />
         <HybridNumber label="Index modulation" value={design.indexModulation} min={0} step={0.00001} disabled={!isActiveMode} onChange={(indexModulation) => updateDesign({ indexModulation })} />
         <HybridNumber label="Grating period (nm)" value={design.gratingPeriodNm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(gratingPeriodNm) => updateDesign({ gratingPeriodNm })} />
+        <label className="field">
+          <span>Grating mode</span>
+          <select
+            value={design.permanentGratingMode}
+            disabled={!isActiveMode}
+            onChange={(event) => updateDesign({ permanentGratingMode: event.target.value as HybridBraggDesignInputs['permanentGratingMode'] })}
+          >
+            <option value="global">Global coherent</option>
+            <option value="segmented">Segmented local sections</option>
+          </select>
+        </label>
+        {design.permanentGratingMode === 'segmented' ? (
+          <>
+            <HybridNumber label="Bragg sections" value={design.braggSectionCount} min={1} step={1} integer disabled={!isActiveMode} onChange={(braggSectionCount) => updateDesign({ braggSectionCount })} />
+            <HybridNumber label="Section gap (mm)" value={design.braggSectionGapMm} min={0} step={0.01} disabled={!isActiveMode} onChange={(braggSectionGapMm) => updateDesign({ braggSectionGapMm })} />
+            <label className="field">
+              <span>Section phase</span>
+              <select
+                value={design.braggSectionPhaseMode}
+                disabled={!isActiveMode}
+                onChange={(event) => updateDesign({ braggSectionPhaseMode: event.target.value as HybridBraggDesignInputs['braggSectionPhaseMode'] })}
+              >
+                <option value="continuous">Continuous phase</option>
+                <option value="fixed-reset">Fixed phase reset</option>
+                <option value="alternating">Alternating phase</option>
+                <option value="explicit">Explicit sequence</option>
+                <option value="seeded-random">Seeded pseudo-random</option>
+              </select>
+            </label>
+            {design.braggSectionPhaseMode === 'seeded-random' ? (
+              <HybridNumber label="Phase seed" value={design.braggSectionRandomSeed} min={0} step={1} integer disabled={!isActiveMode} onChange={(braggSectionRandomSeed) => updateDesign({ braggSectionRandomSeed })} />
+            ) : null}
+          </>
+        ) : null}
         <HybridNumber label="Peak strain" value={design.peakStrain} step={0.00001} disabled={!isActiveMode} onChange={(peakStrain) => updateDesign({ peakStrain })} />
         <label className="field">
           <span>Perturbation type</span>
