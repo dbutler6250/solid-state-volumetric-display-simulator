@@ -605,6 +605,37 @@ label {
   margin-top: 0;
 }
 
+.regime-map-panel {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2d3a4b;
+}
+
+.regime-map-toolbar,
+.regime-map-drilldown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.regime-map-chart,
+.regime-map-chart .plot-container,
+.regime-map-chart .svg-container {
+  min-height: 370px;
+}
+
+.regime-map-cell {
+  display: grid;
+  gap: 1rem;
+}
+
+.regime-map-drilldown-chart,
+.regime-map-drilldown-chart .plot-container,
+.regime-map-drilldown-chart .svg-container {
+  min-height: 270px;
+}
+
 .stack-panel {
   margin-top: 1rem;
   padding-top: 1rem;

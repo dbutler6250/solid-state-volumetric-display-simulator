@@ -18,6 +18,7 @@ import { ParameterSweepChart } from '../plots/ParameterSweepChart';
 import { ReflectanceHeatmapChart } from '../plots/ReflectanceHeatmapChart';
 import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { MovingPulseExperimentChart } from '../plots/MovingPulseExperimentChart';
+import { MovingResponseRegimeMapChart } from '../plots/MovingResponseRegimeMapChart';
 import type { ChartProgress } from '../plots/ChartProgressOverlay';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
 import {
@@ -46,7 +47,10 @@ import { downloadTextFile } from '../io/download';
 import { importStackConfigJson } from '../io/importStackConfigJson';
 import {
   solveMovingPulseExperimentAsync,
+  solveMovingResponseRegimeMapAsync,
   type MovingPulseExperimentResult,
+  type MovingResponseRegimeMapQuantity,
+  type MovingResponseRegimeMapResult,
 } from '../simulation/experiments/hybridBraggExperiments';
 import type {
   ParameterSweepResult,
@@ -108,6 +112,11 @@ export function SimulationShell() {
   const [movingPulseResult, setMovingPulseResult] = useState<MovingPulseExperimentResult | null>(null);
   const [movingPulseError, setMovingPulseError] = useState<string | null>(null);
   const [movingPulseProgress, setMovingPulseProgress] = useState<ChartProgress | null>(null);
+  const [regimeMapResult, setRegimeMapResult] = useState<MovingResponseRegimeMapResult | null>(null);
+  const [regimeMapError, setRegimeMapError] = useState<string | null>(null);
+  const [regimeMapProgress, setRegimeMapProgress] = useState<ChartProgress | null>(null);
+  const [regimeMapIsSolving, setRegimeMapIsSolving] = useState(false);
+  const [regimeMapQuantity, setRegimeMapQuantity] = useState<MovingResponseRegimeMapQuantity>('classification');
   const [referenceRangeError, setReferenceRangeError] = useState<string | null>(null);
   const [opticalResult, setOpticalResult] = useState<SimulationResult | null>(null);
   const [opticalSolveError, setOpticalSolveError] = useState<string | null>(null);
@@ -119,6 +128,8 @@ export function SimulationShell() {
   const heatmapRequestId = useRef(0);
   const heatmapController = useRef<AbortController | null>(null);
   const movingPulseRequestId = useRef(0);
+  const regimeMapRequestId = useRef(0);
+  const regimeMapController = useRef<AbortController | null>(null);
   const [acousticOutput, setAcousticOutput] = useState<{
     document: SimulationDocument;
     resolved: ResolvedStructure;
@@ -299,8 +310,11 @@ export function SimulationShell() {
     parameterSweepController.current = null;
     heatmapController.current?.abort();
     heatmapController.current = null;
+    regimeMapController.current?.abort();
+    regimeMapController.current = null;
     parameterSweepRequestId.current += 1;
     heatmapRequestId.current += 1;
+    regimeMapRequestId.current += 1;
     setParameterSweepIsSolving(false);
     setParameterSweepProgress(null);
     setParameterSweepResult(null);
@@ -309,6 +323,10 @@ export function SimulationShell() {
     setHeatmapError(null);
     setHeatmapIsSolving(false);
     setHeatmapProgress(null);
+    setRegimeMapResult(null);
+    setRegimeMapError(null);
+    setRegimeMapIsSolving(false);
+    setRegimeMapProgress(null);
     setReferenceRangeError(null);
   }, [inputs]);
 
@@ -395,6 +413,46 @@ export function SimulationShell() {
     heatmapRequestId.current += 1;
     setHeatmapIsSolving(false);
     setHeatmapProgress(null);
+  };
+
+  const runRegimeMap = () => {
+    if (validationIssues.length > 0 || simulationDocument?.structure.type !== 'hybrid-bragg-grating' || !inputs.hybridBraggDesign) {
+      setRegimeMapError('Switch to a valid hybrid grating before running a regime map.');
+      return;
+    }
+
+    const design = inputs.hybridBraggDesign;
+    const requestId = ++regimeMapRequestId.current;
+    regimeMapController.current?.abort();
+    const controller = new AbortController();
+    regimeMapController.current = controller;
+    setRegimeMapResult(null);
+    setRegimeMapError(null);
+    setRegimeMapIsSolving(true);
+    setRegimeMapProgress({ completed: 0, total: 1 });
+
+    void (async () => {
+      try {
+        const nextResult = await solveMovingResponseRegimeMapAsync(design, undefined, {
+          signal: controller.signal,
+          onProgress: (progress) => {
+            if (requestId === regimeMapRequestId.current) setRegimeMapProgress(progress);
+          },
+        });
+        if (controller.signal.aborted || requestId !== regimeMapRequestId.current) return;
+        setRegimeMapResult(nextResult);
+      } catch (error) {
+        if (controller.signal.aborted || requestId !== regimeMapRequestId.current) return;
+        setRegimeMapResult(null);
+        setRegimeMapError(error instanceof Error ? error.message : 'The regime map could not be completed.');
+      } finally {
+        if (requestId === regimeMapRequestId.current) {
+          regimeMapController.current = null;
+          setRegimeMapIsSolving(false);
+          setRegimeMapProgress(null);
+        }
+      }
+    })();
   };
 
   const updateParameterRow = (parameter: SweepParameter, nextSettings: ParameterSweepSettings) => {
@@ -767,9 +825,14 @@ export function SimulationShell() {
               <>
                 <div className="chart-heading">
                   <h2>Moving Active Region</h2>
-                  <button type="button" className="action-button" onClick={exportMovingRegionCsv} disabled={!movingPulseResult}>
-                    Export Moving Region CSV
-                  </button>
+                  <div className="chart-toolbar">
+                    <button type="button" className="action-button" onClick={runRegimeMap} disabled={regimeMapIsSolving || validationIssues.length > 0}>
+                      {regimeMapIsSolving ? 'Running Regime Map...' : 'Run Regime Map'}
+                    </button>
+                    <button type="button" className="action-button" onClick={exportMovingRegionCsv} disabled={!movingPulseResult}>
+                      Export Moving Region CSV
+                    </button>
+                  </div>
                 </div>
                 <MovingPulseExperimentChart
                   result={movingPulseResult}
@@ -778,6 +841,15 @@ export function SimulationShell() {
                 />
                 {movingPulseError ? (
                   <p className="chart-toolbar-message" role="alert">{movingPulseError}</p>
+                ) : null}
+                <MovingResponseRegimeMapChart
+                  result={regimeMapResult}
+                  progress={regimeMapProgress}
+                  quantity={regimeMapQuantity}
+                  onQuantityChange={setRegimeMapQuantity}
+                />
+                {regimeMapError ? (
+                  <p className="chart-toolbar-message" role="alert">{regimeMapError}</p>
                 ) : null}
               </>
             ) : null}

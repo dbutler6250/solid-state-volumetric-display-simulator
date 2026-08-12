@@ -60,6 +60,11 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
     ['Position std dev', formatMetric(result.metrics.standardDeviationReflectance)],
     ['Uniformity', formatMetric(result.metrics.uniformity)],
     ['Effective optical width', formatWidth(result)],
+    ['Response class', result.metrics.localization.responseClassification],
+    ['Secondary peak ratio', formatMetric(result.metrics.localization.secondaryPeakRatio)],
+    ['Peak dominance', formatMetric(result.metrics.localization.peakDominance)],
+    ['Localized fraction', formatMetric(result.metrics.localization.localizedFraction)],
+    ['Boundary-dominated peak', result.metrics.localization.boundaryDominated ? 'yes' : 'no'],
   ];
 
   return (

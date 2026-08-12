@@ -104,6 +104,8 @@ TMM remains an independent numerical reference, not the solver source of truth. 
 
 The fixed-laser moving-pulse experiment reports the no-strain static baseline, peak reflectance, peak enhancement, guarded peak gain, position statistics, and an effective optical response width only when a single dominant enhancement peak exists. The prescribed strain-region width and the effective optical response width are separate quantities.
 
+The moving-response regime map is also an experiment-layer feature. It sweeps laser detuning, prescribed strain width, permanent grating coupling, and strain shape while reusing the same fixed-laser moving-pulse solve at each cell. Classification stays transparent: peak enhancement, primary and secondary local maxima, secondary-peak ratio, localized positive-enhancement fraction, effective width, and boundary-dominated peak flags are retained as separate fields. The `single-dominant`, `multi-peak`, `broad`, `weak`, and `no-enhancement` labels are research conveniences for comparing modeled response shapes, not display-quality judgments.
+
 ## Why The Change Happened
 
 The earlier fully acoustic-grating direction made the acoustic field synonymous with optical periodicity. The newer hybrid hypothesis uses a fabricated Bragg grating for optical momentum matching and strong coupling, while a localized perturbation tunes only a region of that permanent grating. That changes the simulator requirements:
