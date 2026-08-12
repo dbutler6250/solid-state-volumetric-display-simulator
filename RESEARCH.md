@@ -2280,3 +2280,36 @@ Representative 4 mm grating cases with `Delta n = 2e-4`, 500 solver segments, 61
 - Gaussian strain produced a smoother and weaker response than the rectangular case in the tested regime, but still did not yield a unique optical response width.
 
 These results reinforce that the useful display metric is not just peak reflected power. It must include off-state leakage, position uniformity, and whether the response has a single dominant spatial peak. The effective optical response width can differ substantially from the prescribed strain-region width and should only be reported when the response is not multi-peaked.
+
+## 18.5 Moving-response regime-map findings
+
+WP-v2-04 adds a research map for the fixed-laser moving-response shape under the current scalar, lossless, prescribed-strain CMT model. The map classifies each detuning, strain-width, coupling, and strain-shape cell using explicit metrics:
+
+- peak enhancement over the no-strain static baseline;
+- primary and secondary positive local maxima;
+- secondary-peak ratio and peak dominance;
+- localized positive-enhancement fraction around the dominant peak;
+- effective optical FWHM when a unique response width exists;
+- boundary-dominated peak detection;
+- prescribed and optical widths normalized by `L_c ~ 1 / kappa`.
+
+The implemented working definition of an oscillation-collapse candidate requires meaningful positive enhancement, one dominant interior peak, `secondaryPeakRatio < 0.35`, localized fraction at least `0.55`, and a finite effective width that is not broad compared with the full grating. These thresholds are stored as transparent constants and the raw metrics are retained so later research can reclassify cells without rerunning the optical solve.
+
+A compact verification sweep used:
+
+- `Delta n = 1e-5, 1e-4, 1e-3`;
+- rectangular and Gaussian strain profiles;
+- `W_strain / L_c = 0.1, 0.25, 0.5, 1, 2`;
+- detuning values `-0.5, -0.2, -0.05, 0, 0.05, 0.2, 0.5 nm`;
+- baseline strain amplitude `300e-6`;
+- 41 pulse positions and 240 solver segments.
+
+Result classification:
+
+```text
+B. Only marginal / fragile regimes were found.
+```
+
+The sweep produced one `single-dominant` cell, but it was weak: Gaussian strain, `Delta n = 1e-4`, detuning `-0.05 nm`, `W_strain / L_c = 2`, peak enhancement about `0.0062`, effective optical width about `0.68 mm`, and `W_optical / L_c` about `0.36`. The stronger enhancement cases occurred near positive detuning for `Delta n = 1e-4`, but they remained `multi-peak` with secondary-peak ratios near `1`, so they do not represent oscillation collapse.
+
+Gaussian profiles reduced harsh rectangular discontinuities and sometimes concentrated the response better, but the best high-enhancement Gaussian cells were still multi-peaked. Within this tested space, simply choosing detuning, strain width, and uniform permanent coupling does not yet produce a robust localized active optical plane. The next likely research direction remains permanent-grating architecture changes such as apodization, controlled coupling profiles, or phase engineering, followed by robustness checks at higher segment and pulse-position resolution for any future candidate region.
