@@ -2,9 +2,9 @@
 
 ## Repository Status
 
-- Current work is on `codex/issue-56-moving-response-regime-map`.
-- GitHub issue #56 tracks WP-v2-04: Moving-response regime map.
-- PR #55 is merged into `main`; this branch starts from the merged v2 foundation.
+- Current work is on `main` at merged PR #57 (`ec3161e`).
+- GitHub issue #56 is closed as completed.
+- The PR #57 feature branch `codex/issue-56-moving-response-regime-map` has been deleted locally and from `origin`, then pruned.
 
 ## Latest Task
 
