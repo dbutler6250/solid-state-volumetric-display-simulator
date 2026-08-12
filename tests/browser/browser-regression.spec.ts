@@ -9,7 +9,9 @@ async function openSpectrum(page: Page) {
 }
 
 async function waitForChartText(page: Page, text: string) {
-  await expect(page.getByText(text, { exact: true })).toBeVisible();
+  await expect.poll(async () => page.locator('.main-svg text').evaluateAll((nodes) =>
+    nodes.map((node) => node.textContent ?? '').join('\n'),
+  )).toContain(text);
 }
 
 test.describe('browser regression harness', () => {
@@ -52,8 +54,10 @@ test.describe('browser regression harness', () => {
     await page.getByRole('combobox', { name: 'Input mode' }).selectOption('acoustic');
     await page.getByRole('tab', { name: 'Parameter Sweep' }).click();
 
-    await page.getByRole('region', { name: 'Parameter sweep controls' }).getByRole('combobox').selectOption({ label: 'Acoustic frequency' });
-    await page.getByRole('button', { name: 'Run Sweep' }).click();
+    const acousticFrequencyRow = page.locator('.parameter-sweep-row').filter({
+      has: page.getByRole('heading', { name: 'Acoustic frequency' }),
+    });
+    await acousticFrequencyRow.getByRole('button', { name: 'Run Sweep' }).click();
 
     await waitForChartText(page, 'Acoustic frequency (Hz)');
     await expect(page.getByText('Design wavelength (nm)', { exact: true })).toHaveCount(0);
