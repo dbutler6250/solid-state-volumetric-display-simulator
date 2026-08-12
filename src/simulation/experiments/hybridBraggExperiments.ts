@@ -33,7 +33,10 @@ export type MovingResponseClassification =
   | 'multi-peak'
   | 'broad'
   | 'weak'
-  | 'no-enhancement';
+  | 'no-enhancement'
+  | 'periodic-multi-plane'
+  | 'stationary-plane-array'
+  | 'moving-envelope';
 
 export type MovingResponsePeak = {
   positionMm: number;
@@ -151,6 +154,29 @@ export type MovingResponseRegimeMapSettings = {
   strainShapes?: HybridBraggDesignInputs['strainShape'][];
 };
 
+export type PerturbationFieldComparisonFamily = {
+  strainShape: HybridBraggDesignInputs['strainShape'];
+  parameterKind: 'position' | 'phase';
+  staticReflectance: number;
+  peakReflectance: number;
+  peakEnhancement: number;
+  secondaryPeakRatio: number | null;
+  localizedFraction: number | null;
+  effectiveWidthMm: number | null;
+  repeatSpacingMm: number | null;
+  phaseSensitivity: number | null;
+  classification: MovingResponseClassification;
+  opticalAssessment: 'most-promising' | 'promising-conditional' | 'unclear' | 'poor-current-model';
+  result: MovingPulseExperimentResult;
+};
+
+export type PerturbationFieldComparisonResult = {
+  staticBraggWavelengthNm: number;
+  laserWavelengthNm: number;
+  families: PerturbationFieldComparisonFamily[];
+  mostPromising: PerturbationFieldComparisonFamily | null;
+};
+
 const MINIMUM_RATIO_DENOMINATOR = 1e-9;
 const LOCALIZATION_MINIMUM_ENHANCEMENT = 1e-4;
 const SINGLE_DOMINANT_SECONDARY_RATIO = 0.35;
@@ -159,6 +185,16 @@ const BROAD_WIDTH_TO_GRATING_LENGTH = 0.45;
 const DEFAULT_WIDTH_RATIOS_TO_COUPLING_LENGTH = [0.1, 0.25, 0.5, 1, 2];
 const DEFAULT_INDEX_MODULATIONS = [1e-5, 1e-4, 1e-3];
 const DEFAULT_DETUNING_EDGE_MULTIPLES = [-4, -2, -1.1, -0.5, 0, 0.5, 1.1, 2, 4];
+const DEFAULT_COMPARISON_SHAPES: HybridBraggDesignInputs['strainShape'][] = [
+  'rectangular',
+  'gaussian',
+  'smooth-top-hat',
+  'carrier-envelope',
+  'traveling-sinusoid',
+  'standing-wave',
+  'multi-tone',
+  'triangular',
+];
 
 /** Runs the permanent or strained hybrid spectrum for caller-supplied wavelength samples. */
 export function solveHybridStaticSpectrum(
@@ -192,6 +228,7 @@ export function calculateOpticalContrast(
 
 /** Runs the fixed-laser moving active-region experiment over the configured pulse-center range. */
 export function solveMovingPulseExperiment(design: HybridBraggDesignInputs): MovingPulseExperimentResult {
+  if (isPhaseScannedField(design.strainShape)) return solvePhaseSweepExperiment(design);
   const positionStepMm = (design.pulseSweepEndMm - design.pulseSweepStartMm) / (design.pulseSweepPointCount - 1);
   const positionsMm = Array.from({ length: design.pulseSweepPointCount }, (_, index) =>
     Number((design.pulseSweepStartMm + positionStepMm * index).toPrecision(12)),
@@ -216,6 +253,12 @@ export async function solveMovingPulseExperimentAsync(
   design: HybridBraggDesignInputs,
   options: MovingPulseSolveOptions = {},
 ): Promise<MovingPulseExperimentResult> {
+  if (isPhaseScannedField(design.strainShape)) {
+    const result = solvePhaseSweepExperiment(design);
+    options.onProgress?.({ completed: result.points.length, total: result.points.length });
+    await yieldToBrowser();
+    return result;
+  }
   const positionStepMm = (design.pulseSweepEndMm - design.pulseSweepStartMm) / (design.pulseSweepPointCount - 1);
   const positionsMm = Array.from({ length: design.pulseSweepPointCount }, (_, index) =>
     Number((design.pulseSweepStartMm + positionStepMm * index).toPrecision(12)),
@@ -429,6 +472,48 @@ export async function solveMovingResponseRegimeMapAsync(
       classificationCounts,
       overallOutcome: classifyOverallOutcome(classificationCounts),
     },
+  };
+}
+
+/** Compares prescribed perturbation-field families on one permanent grating and fixed laser setup. */
+export function solvePerturbationFieldComparison(
+  design: HybridBraggDesignInputs,
+  strainShapes: HybridBraggDesignInputs['strainShape'][] = DEFAULT_COMPARISON_SHAPES,
+): PerturbationFieldComparisonResult {
+  const families = strainShapes.map((strainShape) => {
+    const parameterKind = isPhaseScannedField(strainShape) ? 'phase' : 'position';
+    const familyDesign = { ...design, strainShape };
+    const result = parameterKind === 'position'
+      ? solveMovingPulseExperiment(familyDesign)
+      : solvePhaseSweepExperiment(familyDesign);
+    const metrics = result.metrics;
+    const repeatSpacingMm = parameterKind === 'phase'
+      ? estimateRepeatSpacingMm(result.points)
+      : null;
+    const classification = classifyComparisonFamily(strainShape, metrics.localization.responseClassification);
+    return {
+      strainShape,
+      parameterKind,
+      staticReflectance: metrics.staticReflectance,
+      peakReflectance: metrics.peakReflectance,
+      peakEnhancement: metrics.peakEnhancement,
+      secondaryPeakRatio: metrics.localization.secondaryPeakRatio,
+      localizedFraction: metrics.localization.localizedFraction,
+      effectiveWidthMm: metrics.effectiveWidth.widthMm,
+      repeatSpacingMm,
+      phaseSensitivity: parameterKind === 'phase' ? metrics.standardDeviationReflectance : null,
+      classification,
+      opticalAssessment: assessComparisonFamily(metrics, classification),
+      result: { ...result, metrics: { ...metrics, localization: { ...metrics.localization, responseClassification: classification } } },
+    } satisfies PerturbationFieldComparisonFamily;
+  });
+
+  const rankedFamilies = [...families].sort((left, right) => scoreComparisonFamily(right) - scoreComparisonFamily(left));
+  return {
+    staticBraggWavelengthNm: getHybridDesignBraggWavelengthNm(design),
+    laserWavelengthNm: design.fixedLaserWavelengthNm,
+    families,
+    mostPromising: rankedFamilies[0]?.opticalAssessment === 'poor-current-model' ? null : rankedFamilies[0] ?? null,
   };
 }
 
@@ -646,6 +731,9 @@ function createClassificationCounts(): Record<MovingResponseClassification, numb
     broad: 0,
     weak: 0,
     'no-enhancement': 0,
+    'periodic-multi-plane': 0,
+    'stationary-plane-array': 0,
+    'moving-envelope': 0,
   };
 }
 
@@ -655,6 +743,91 @@ function classifyOverallOutcome(
   if (counts['single-dominant'] >= 3) return 'clear-regime-found';
   if (counts['single-dominant'] > 0) return 'marginal-fragile-regimes-found';
   return 'no-collapse-regime-found';
+}
+
+function solvePhaseSweepExperiment(design: HybridBraggDesignInputs): MovingPulseExperimentResult {
+  const phaseCount = Math.max(3, design.pulseSweepPointCount);
+  const staticReflectance = solveStaticReflectance(design);
+  const phaseStep = (2 * Math.PI) / (phaseCount - 1);
+  const points = Array.from({ length: phaseCount }, (_, index) => {
+    const phase = Number((phaseStep * index).toPrecision(12));
+    const reflectance = solveHybridBraggCoupledModePoint(
+      createHybridBraggModel({ ...design, perturbationTemporalPhaseRadians: phase }),
+      design.fixedLaserWavelengthNm,
+    ).reflectance;
+    return {
+      strainCenterMm: phase,
+      reflectance,
+      enhancement: reflectance - staticReflectance,
+      nominalSupportStartMm: phase - phaseStep / 2,
+      nominalSupportEndMm: phase + phaseStep / 2,
+      clippedSupportStartMm: phase - phaseStep / 2,
+      clippedSupportEndMm: phase + phaseStep / 2,
+      nominalOverlapMm: phaseStep,
+    };
+  });
+  return {
+    laserWavelengthNm: design.fixedLaserWavelengthNm,
+    staticBraggWavelengthNm: getHybridDesignBraggWavelengthNm(design),
+    strainWidthMm: design.strainWidthMm,
+    strainShape: design.strainShape,
+    segmentCount: design.segmentCount,
+    positionStepMm: phaseStep,
+    points,
+    metrics: calculateMovingPulseMetrics(points, staticReflectance),
+  };
+}
+
+function isPhaseScannedField(strainShape: HybridBraggDesignInputs['strainShape']): boolean {
+  return strainShape === 'traveling-sinusoid' || strainShape === 'standing-wave' || strainShape === 'multi-tone';
+}
+
+function classifyComparisonFamily(
+  strainShape: HybridBraggDesignInputs['strainShape'],
+  baseClassification: MovingResponseClassification,
+): MovingResponseClassification {
+  if (baseClassification === 'no-enhancement' || baseClassification === 'weak') return baseClassification;
+  if (strainShape === 'traveling-sinusoid' || strainShape === 'multi-tone') return 'periodic-multi-plane';
+  if (strainShape === 'standing-wave') return 'stationary-plane-array';
+  if (strainShape === 'carrier-envelope') return 'moving-envelope';
+  return baseClassification;
+}
+
+function assessComparisonFamily(
+  metrics: MovingPulseMetrics,
+  classification: MovingResponseClassification,
+): PerturbationFieldComparisonFamily['opticalAssessment'] {
+  if (metrics.peakEnhancement < LOCALIZATION_MINIMUM_ENHANCEMENT) return 'poor-current-model';
+  if (classification === 'single-dominant') return 'most-promising';
+  if (classification === 'moving-envelope' || classification === 'periodic-multi-plane' || classification === 'stationary-plane-array') {
+    return metrics.localization.secondaryPeakRatio !== null && metrics.localization.secondaryPeakRatio > 0.85
+      ? 'unclear'
+      : 'promising-conditional';
+  }
+  if (classification === 'multi-peak' || classification === 'broad') return 'unclear';
+  return 'poor-current-model';
+}
+
+function scoreComparisonFamily(family: PerturbationFieldComparisonFamily): number {
+  const localizedFraction = family.localizedFraction ?? 0;
+  const secondaryPenalty = family.secondaryPeakRatio ?? 0;
+  const assessmentBonus = family.opticalAssessment === 'most-promising'
+    ? 2
+    : family.opticalAssessment === 'promising-conditional'
+      ? 1
+      : family.opticalAssessment === 'unclear'
+        ? 0.25
+        : -1;
+  return family.peakEnhancement * 10 + localizedFraction - secondaryPenalty + assessmentBonus;
+}
+
+function estimateRepeatSpacingMm(points: FixedLaserPulsePoint[]): number | null {
+  const peakIndexes = findLocalPeakIndexes(points.map((point) => Math.max(0, point.enhancement)));
+  if (peakIndexes.length < 2) return null;
+  const spacings = peakIndexes.slice(1).map((index, offset) =>
+    points[index].strainCenterMm - points[peakIndexes[offset]].strainCenterMm,
+  );
+  return spacings.reduce((sum, spacing) => sum + spacing, 0) / spacings.length;
 }
 
 function interpolateThresholdWidth(

@@ -13,7 +13,7 @@ const formatCommentValue = (value: string | number): string =>
 const formatCommentLine = (label: string, value: string | number): string =>
   `# ${label}: ${formatCommentValue(value)}`;
 
-/** Exports the fixed-laser moving strain-region experiment as a self-describing CSV file. */
+/** Exports the fixed-laser perturbation-parameter experiment as a self-describing CSV file. */
 export function exportMovingPulseCsv(
   inputs: QuarterWaveStackInputs,
   result: MovingPulseExperimentResult,
@@ -25,7 +25,7 @@ export function exportMovingPulseCsv(
   );
   const lines = [
     '# Solid State Volumetric Display Simulator',
-    '# Fixed-laser moving strain-region export',
+    '# Fixed-laser perturbation-field export',
     '# schema: ssvds-moving-pulse-csv-v1',
     ...structureLines,
     formatCommentLine('laserWavelengthNm', result.laserWavelengthNm),
@@ -55,7 +55,7 @@ export function exportMovingPulseCsv(
           formatCommentLine('peakStrain', design.peakStrain),
         ]
       : []),
-    'pulse_position_mm,reflectance,enhancement,nominal_overlap_mm,clipped_support_start_mm,clipped_support_end_mm',
+    'perturbation_parameter,reflectance,enhancement,nominal_overlap_mm,clipped_support_start_mm,clipped_support_end_mm',
     ...result.points.map((point) =>
       formatCsvRow([
         formatNumber(point.strainCenterMm),

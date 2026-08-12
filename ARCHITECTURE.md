@@ -36,14 +36,14 @@ PermanentBraggGrating
 -> Outputs
 ```
 
-The first v2 implementation supports a permanent uniform Bragg grating plus a prescribed rectangular or Gaussian local strain field. The strain field changes the local period and refractive index through explicit first-order material-response logic. The coupled-mode solver samples the physical model into segments only at solver time, so future solvers can choose their own discretization.
+The first v2 implementation supports a permanent uniform Bragg grating plus prescribed perturbation fields. Rectangular and Gaussian localized strain remain the legacy reference cases, and the same abstraction now also supports smooth top-hat, triangular, traveling sinusoid, standing wave, carrier-envelope packet, and two-tone superposition fields. The field changes the local period and refractive index through explicit first-order material-response logic. The coupled-mode solver samples the physical model into segments only at solver time, so future solvers can choose their own discretization.
 
 This architecture is a guide, not a frozen API. The goal is to keep physical structure, perturbation, material response, solver, experiment setup, and metrics separable enough for unit tests, sweeps, worker execution, and later validation against TMM or measured data.
 
 Current code boundaries:
 
 - `structures/hybridBraggGrating.ts` owns the permanent grating model, UI-unit to SI conversion, and solver-time sampling orchestration.
-- `perturbations/strainField.ts` owns dimensionless prescribed strain fields. Rectangular width is full width. Gaussian width is FWHM.
+- `perturbations/strainField.ts` owns dimensionless prescribed perturbation fields. Rectangular width is full width. Gaussian width is FWHM. Periodic fields are prescribed directly and are not physical actuator simulations.
 - `responses/strainOpticResponse.ts` maps strain to local average index, local period, and local Bragg wavelength.
 - `solvers/coupledMode/spatialBraggSolver.ts` consumes sampled local physical state and solves the scalar normal-incidence coupled-mode problem.
 - `experiments/hybridBraggExperiments.ts` orchestrates spectra, fixed-laser pulse scans, and contrast metrics.
@@ -52,10 +52,10 @@ The moving active-region experiment follows the same layering:
 
 ```text
 HybridBraggGrating
-+ StrainField
-+ StrainOpticResponse
++ PerturbationField
++ MaterialResponse
 + SpatialBraggSolver
--> MovingPulseExperiment
+-> MovingPulseExperiment / FieldComparison
 -> metrics / CSV / plot
 ```
 
@@ -104,7 +104,19 @@ TMM remains an independent numerical reference, not the solver source of truth. 
 
 The fixed-laser moving-pulse experiment reports the no-strain static baseline, peak reflectance, peak enhancement, guarded peak gain, position statistics, and an effective optical response width only when a single dominant enhancement peak exists. The prescribed strain-region width and the effective optical response width are separate quantities.
 
-The moving-response regime map is also an experiment-layer feature. It sweeps laser detuning, prescribed strain width, permanent grating coupling, and strain shape while reusing the same fixed-laser moving-pulse solve at each cell. Classification stays transparent: peak enhancement, primary and secondary local maxima, secondary-peak ratio, localized positive-enhancement fraction, effective width, and boundary-dominated peak flags are retained as separate fields. The `single-dominant`, `multi-peak`, `broad`, `weak`, and `no-enhancement` labels are research conveniences for comparing modeled response shapes, not display-quality judgments.
+The moving-response regime map is also an experiment-layer feature. It sweeps laser detuning, prescribed strain width, permanent grating coupling, and strain shape while reusing the same fixed-laser moving-pulse solve at each cell. Classification stays transparent: peak enhancement, primary and secondary local maxima, secondary-peak ratio, localized positive-enhancement fraction, effective width, and boundary-dominated peak flags are retained as separate fields. The `single-dominant`, `multi-peak`, `broad`, `weak`, `no-enhancement`, `periodic-multi-plane`, `stationary-plane-array`, and `moving-envelope` labels are research conveniences for comparing modeled response shapes, not display-quality judgments.
+
+The WP-v2-05 comparison helper keeps physical actuator concepts separate from prescribed fields:
+
+```text
+PhysicalActuator (future)
+    -> PerturbationField
+    -> MaterialResponse
+    -> OpticalState
+    -> Solver / Experiment
+```
+
+Current UI controls prescribe the perturbation field directly. Acoustic velocity, phase, and period parameters define ideal field snapshots; they do not yet model transducer bandwidth, cavity modes, attenuation, impedance matching, or thermo/electro-optic generation.
 
 ## Why The Change Happened
 

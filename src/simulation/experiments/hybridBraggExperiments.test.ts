@@ -7,6 +7,7 @@ import {
   calculateMovingPulseMetrics,
   solveFixedLaserPulseResponse,
   solveHybridStaticSpectrum,
+  solvePerturbationFieldComparison,
   solveMovingResponseRegimeMapAsync,
   solveMovingPulseExperiment,
   solveMovingPulseExperimentAsync,
@@ -87,6 +88,39 @@ describe('hybrid Bragg experiments', () => {
     expect(rectangular.points[rectangular.points.length - 1].strainCenterMm).toBeCloseTo(3.6);
     expect(gaussian.strainShape).toBe('gaussian');
     expect(gaussian.strainWidthMm).toBeCloseTo(0.8);
+  });
+
+  it('scans phase for periodic prescribed perturbation fields', () => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      strainShape: 'traveling-sinusoid' as const,
+      peakStrain: 250e-6,
+      pulseSweepPointCount: 5,
+      segmentCount: 40,
+    };
+    const result = solveMovingPulseExperiment(design);
+
+    expect(result.points).toHaveLength(5);
+    expect(result.points[0].strainCenterMm).toBeCloseTo(0);
+    expect(result.points[result.points.length - 1].strainCenterMm).toBeCloseTo(2 * Math.PI);
+  });
+
+  it('compares prescribed perturbation families on one optical setup', () => {
+    const result = solvePerturbationFieldComparison(
+      {
+        ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        peakStrain: 300e-6,
+        pulseSweepStartMm: 0,
+        pulseSweepEndMm: 2,
+        pulseSweepPointCount: 5,
+        segmentCount: 40,
+      },
+      ['rectangular', 'smooth-top-hat', 'traveling-sinusoid', 'multi-tone'],
+    );
+
+    expect(result.families.map((family) => family.strainShape)).toEqual(['rectangular', 'smooth-top-hat', 'traveling-sinusoid', 'multi-tone']);
+    expect(result.families.find((family) => family.strainShape === 'traveling-sinusoid')?.parameterKind).toBe('phase');
+    expect(result.families.every((family) => family.peakReflectance >= 0 && family.peakReflectance <= 1)).toBe(true);
   });
 
   it('reports progress while solving the moving-pulse experiment asynchronously', async () => {

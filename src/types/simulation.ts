@@ -21,7 +21,15 @@ export type AcousticDesignInputs = {
   acousticRepresentationMode: AcousticRepresentationMode;
 };
 
-export type HybridStrainShape = 'rectangular' | 'gaussian';
+export type HybridStrainShape =
+  | 'rectangular'
+  | 'gaussian'
+  | 'smooth-top-hat'
+  | 'triangular'
+  | 'traveling-sinusoid'
+  | 'standing-wave'
+  | 'carrier-envelope'
+  | 'multi-tone';
 
 /** Headless v2 inputs for a permanent Bragg grating plus prescribed local strain. */
 export type HybridBraggDesignInputs = {
@@ -34,6 +42,14 @@ export type HybridBraggDesignInputs = {
   strainCenterMm: number;
   strainWidthMm: number;
   strainShape: HybridStrainShape;
+  perturbationEdgeWidthMm: number;
+  perturbationPeriodMm: number;
+  perturbationPhaseRadians: number;
+  perturbationTemporalPhaseRadians: number;
+  perturbationVelocityMps: number;
+  perturbationSecondaryPeriodMm: number;
+  perturbationSecondaryAmplitudeRatio: number;
+  perturbationSecondaryPhaseRadians: number;
   effectivePhotoelasticCoefficient: number;
   segmentCount: number;
   fixedLaserWavelengthNm: number;

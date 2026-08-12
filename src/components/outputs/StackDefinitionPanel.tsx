@@ -206,7 +206,7 @@ function HybridStackDefinition({ summary }: { summary: HybridResolvedSummary }) 
       </div>
       <div className="stack-panel-subtitle">
         <span className="mode-pill mode-pill-hybrid">Hybrid</span>
-        <span>Permanent optical periodicity is separate from the prescribed strain perturbation.</span>
+        <span>Permanent optical periodicity is separate from the prescribed perturbation field.</span>
       </div>
       <div className="stack-summary-grid">
         <StackSummaryItem label="Length" value={`${formatNumber(summary.totalThicknessNm / 1e6, 3)} mm`} />
@@ -215,9 +215,9 @@ function HybridStackDefinition({ summary }: { summary: HybridResolvedSummary }) 
         <StackSummaryItem label="Grating period" value={`${formatNumber(summary.gratingPeriodNm, 3)} nm`} />
         <StackSummaryItem label="Reference wavelength" value={`${formatNumber(summary.referenceWavelengthNm, 3)} nm`} />
         <StackSummaryItem label="Peak strain" value={formatNumber(summary.peakStrain, 6)} />
-        <StackSummaryItem label="Strain center" value={`${formatNumber(summary.strainCenterMm, 3)} mm`} />
-        <StackSummaryItem label="Strain width" value={`${formatNumber(summary.strainWidthMm, 3)} mm`} />
-        <StackSummaryItem label="Strain shape" value={summary.strainShape} />
+        <StackSummaryItem label="Field center" value={`${formatNumber(summary.strainCenterMm, 3)} mm`} />
+        <StackSummaryItem label="Field width" value={`${formatNumber(summary.strainWidthMm, 3)} mm`} />
+        <StackSummaryItem label="Field type" value={summary.strainShape} />
         <StackSummaryItem label="Fixed laser" value={`${formatNumber(summary.fixedLaserWavelengthNm, 3)} nm`} />
       </div>
     </section>

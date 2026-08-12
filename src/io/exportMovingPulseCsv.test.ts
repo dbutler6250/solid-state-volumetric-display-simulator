@@ -22,7 +22,7 @@ describe('exportMovingPulseCsv', () => {
     expect(csv).toContain('# schema: ssvds-moving-pulse-csv-v1');
     expect(csv).toContain('# laserWavelengthNm: 600');
     expect(csv).toContain('# staticReflectance:');
-    expect(csv).toContain('pulse_position_mm,reflectance,enhancement,nominal_overlap_mm,clipped_support_start_mm,clipped_support_end_mm');
+    expect(csv).toContain('perturbation_parameter,reflectance,enhancement,nominal_overlap_mm,clipped_support_start_mm,clipped_support_end_mm');
     expect(csv.trim().split('\n').slice(-3).map((line) => line.split(',')[0])).toEqual(['0', '0.5', '1']);
   });
 });

@@ -2313,3 +2313,29 @@ B. Only marginal / fragile regimes were found.
 The sweep produced one `single-dominant` cell, but it was weak: Gaussian strain, `Delta n = 1e-4`, detuning `-0.05 nm`, `W_strain / L_c = 2`, peak enhancement about `0.0062`, effective optical width about `0.68 mm`, and `W_optical / L_c` about `0.36`. The stronger enhancement cases occurred near positive detuning for `Delta n = 1e-4`, but they remained `multi-peak` with secondary-peak ratios near `1`, so they do not represent oscillation collapse.
 
 Gaussian profiles reduced harsh rectangular discontinuities and sometimes concentrated the response better, but the best high-enhancement Gaussian cells were still multi-peaked. Within this tested space, simply choosing detuning, strain width, and uniform permanent coupling does not yet produce a robust localized active optical plane. The next likely research direction remains permanent-grating architecture changes such as apodization, controlled coupling profiles, or phase engineering, followed by robustness checks at higher segment and pulse-position resolution for any future candidate region.
+
+## 18.6 Generalized perturbation-field study
+
+WP-v2-05 broadens the design hypothesis from "move one short acoustic strain pulse" to "find the perturbation field geometry the permanent grating optically wants." The simulator now separates:
+
+- prescribed perturbation field;
+- material response;
+- optical state sampled by the scalar CMT solver;
+- experiment metrics and visualization.
+
+Supported prescribed strain-field families are rectangular localized strain, Gaussian localized strain, smooth top-hat with raised-cosine edges, triangular localized ramp, traveling sinusoid, standing wave, Gaussian carrier-envelope packet, and two-tone sinusoidal superposition. Rectangular width remains full width; Gaussian width remains FWHM. Periodic and two-tone fields are ideal instantaneous field snapshots, not transducer models.
+
+Initial simulator-derived interpretation:
+
+- Localized smooth/shaped pulses are useful regression cases but do not by themselves remove the finite-grating multi-peak interference seen in WP-v2-04.
+- Traveling continuous waves are expected to behave as periodic multi-plane or distributed modulation candidates, not as a single moving plane, unless optical selection or multiplexing is added.
+- Standing waves are stationary plane-array candidates; antinode intuition must be checked against the full optical solve because coherent interference can dominate the simple strain picture.
+- Two-tone superposition creates a direct path for beat/interference studies and relative phase control, but the optical solver must evaluate the full instantaneous strain field rather than the mathematical envelope alone.
+
+Current ranking should be treated as architecture-enabled, not final physics:
+
+```text
+MOST PROMISING PERTURBATION FIELD: no clearly superior field found yet.
+```
+
+The most promising next numerical direction is a broader comparison of two-tone/phase-controlled fields against smooth localized packets at matched peak strain and matched integrated absolute strain or strain-energy proxy. Optical desirability must remain separate from physical generation feasibility; whether required acoustic, piezoelectric, electro-optic, thermal, or mechanical fields can be generated in bulk glass remains unverified.

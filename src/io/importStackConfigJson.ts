@@ -575,8 +575,8 @@ function parseHybridBraggDesign(
       return { ok: false, message: `Hybrid Bragg field ${field} must be a finite number.` };
     }
   }
-  if (value.strainShape !== 'rectangular' && value.strainShape !== 'gaussian') {
-    return { ok: false, message: 'Hybrid strain shape must be rectangular or gaussian.' };
+  if (!isHybridStrainShape(value.strainShape)) {
+    return { ok: false, message: 'Hybrid strain shape must be a supported prescribed perturbation field.' };
   }
   if (!Number.isInteger(value.segmentCount)) {
     return { ok: false, message: 'Hybrid segment count must be a whole number.' };
@@ -584,8 +584,28 @@ function parseHybridBraggDesign(
   const pulseSweepStartMm = value.pulseSweepStartMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepStartMm;
   const pulseSweepEndMm = value.pulseSweepEndMm ?? value.lengthMm;
   const pulseSweepPointCount = value.pulseSweepPointCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepPointCount;
+  const perturbationEdgeWidthMm = value.perturbationEdgeWidthMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationEdgeWidthMm;
+  const perturbationPeriodMm = value.perturbationPeriodMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationPeriodMm;
+  const perturbationPhaseRadians = value.perturbationPhaseRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationPhaseRadians;
+  const perturbationTemporalPhaseRadians = value.perturbationTemporalPhaseRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationTemporalPhaseRadians;
+  const perturbationVelocityMps = value.perturbationVelocityMps ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationVelocityMps;
+  const perturbationSecondaryPeriodMm = value.perturbationSecondaryPeriodMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryPeriodMm;
+  const perturbationSecondaryAmplitudeRatio = value.perturbationSecondaryAmplitudeRatio ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryAmplitudeRatio;
+  const perturbationSecondaryPhaseRadians = value.perturbationSecondaryPhaseRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryPhaseRadians;
   if (!isFiniteNumber(pulseSweepStartMm) || !isFiniteNumber(pulseSweepEndMm) || !isFiniteNumber(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid moving-pulse sweep fields must be finite numbers.' };
+  }
+  if (
+    !isFiniteNumber(perturbationEdgeWidthMm) ||
+    !isFiniteNumber(perturbationPeriodMm) ||
+    !isFiniteNumber(perturbationPhaseRadians) ||
+    !isFiniteNumber(perturbationTemporalPhaseRadians) ||
+    !isFiniteNumber(perturbationVelocityMps) ||
+    !isFiniteNumber(perturbationSecondaryPeriodMm) ||
+    !isFiniteNumber(perturbationSecondaryAmplitudeRatio) ||
+    !isFiniteNumber(perturbationSecondaryPhaseRadians)
+  ) {
+    return { ok: false, message: 'Hybrid perturbation fields must be finite numbers.' };
   }
   if (!Number.isInteger(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid pulse sweep points must be a whole number.' };
@@ -599,7 +619,7 @@ function parseHybridBraggDesign(
     peakStrain: number;
     strainCenterMm: number;
     strainWidthMm: number;
-    strainShape: 'rectangular' | 'gaussian';
+    strainShape: NonNullable<QuarterWaveStackInputs['hybridBraggDesign']>['strainShape'];
     effectivePhotoelasticCoefficient: number;
     segmentCount: number;
     fixedLaserWavelengthNm: number;
@@ -616,6 +636,14 @@ function parseHybridBraggDesign(
       strainCenterMm: design.strainCenterMm,
       strainWidthMm: design.strainWidthMm,
       strainShape: design.strainShape,
+      perturbationEdgeWidthMm,
+      perturbationPeriodMm,
+      perturbationPhaseRadians,
+      perturbationTemporalPhaseRadians,
+      perturbationVelocityMps,
+      perturbationSecondaryPeriodMm,
+      perturbationSecondaryAmplitudeRatio,
+      perturbationSecondaryPhaseRadians,
       effectivePhotoelasticCoefficient: design.effectivePhotoelasticCoefficient,
       segmentCount: design.segmentCount,
       fixedLaserWavelengthNm: design.fixedLaserWavelengthNm,
@@ -624,4 +652,17 @@ function parseHybridBraggDesign(
       pulseSweepPointCount,
     },
   };
+}
+
+function isHybridStrainShape(value: unknown): value is NonNullable<QuarterWaveStackInputs['hybridBraggDesign']>['strainShape'] {
+  return (
+    value === 'rectangular' ||
+    value === 'gaussian' ||
+    value === 'smooth-top-hat' ||
+    value === 'triangular' ||
+    value === 'traveling-sinusoid' ||
+    value === 'standing-wave' ||
+    value === 'carrier-envelope' ||
+    value === 'multi-tone'
+  );
 }

@@ -20,9 +20,21 @@ const CLASSIFICATION_VALUES: Record<MovingResponseClassification, number> = {
   broad: 2,
   'multi-peak': 3,
   'single-dominant': 4,
+  'periodic-multi-plane': 5,
+  'stationary-plane-array': 6,
+  'moving-envelope': 7,
 };
 
-const CLASSIFICATION_LABELS = ['no-enhancement', 'weak', 'broad', 'multi-peak', 'single-dominant'];
+const CLASSIFICATION_LABELS = [
+  'no-enhancement',
+  'weak',
+  'broad',
+  'multi-peak',
+  'single-dominant',
+  'periodic-multi-plane',
+  'stationary-plane-array',
+  'moving-envelope',
+];
 
 const QUANTITY_LABELS: Record<MovingResponseRegimeMapQuantity, string> = {
   classification: 'Classification',
