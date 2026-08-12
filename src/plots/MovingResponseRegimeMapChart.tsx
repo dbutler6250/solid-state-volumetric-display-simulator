@@ -101,7 +101,7 @@ export function MovingResponseRegimeMapChart({
               className="regime-map-chart"
               data={[
                 {
-                  x: result.detuningValuesNm,
+                  x: slice.detuningValuesNm,
                   y: slice.cells.map((row) => row[0]?.strainWidthMm ?? 0),
                   z: heatmap.z,
                   type: 'heatmap' as const,
@@ -150,7 +150,7 @@ export function MovingResponseRegimeMapChart({
         <label className="field">
           <span>Inspect detuning</span>
           <select value={columnIndex} onChange={(event) => setColumnIndex(Number(event.target.value))}>
-            {result.detuningValuesNm.map((detuningNm, index) => (
+            {slice.detuningValuesNm.map((detuningNm, index) => (
               <option key={detuningNm} value={index}>{`${detuningNm.toPrecision(4)} nm`}</option>
             ))}
           </select>

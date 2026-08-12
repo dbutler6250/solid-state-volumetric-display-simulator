@@ -128,6 +128,7 @@ export type MovingResponseRegimeMapSlice = {
   couplingCoefficientPerM: number;
   couplingLengthMm: number | null;
   kappaLengthProduct: number;
+  detuningValuesNm: number[];
   cells: MovingResponseRegimeMapCell[][];
 };
 
@@ -157,6 +158,7 @@ const SINGLE_DOMINANT_LOCALIZED_FRACTION = 0.55;
 const BROAD_WIDTH_TO_GRATING_LENGTH = 0.45;
 const DEFAULT_WIDTH_RATIOS_TO_COUPLING_LENGTH = [0.1, 0.25, 0.5, 1, 2];
 const DEFAULT_INDEX_MODULATIONS = [1e-5, 1e-4, 1e-3];
+const DEFAULT_DETUNING_EDGE_MULTIPLES = [-4, -2, -1.1, -0.5, 0, 0.5, 1.1, 2, 4];
 
 /** Runs the permanent or strained hybrid spectrum for caller-supplied wavelength samples. */
 export function solveHybridStaticSpectrum(
@@ -347,9 +349,9 @@ export async function solveMovingResponseRegimeMapAsync(
   const staticBraggWavelengthNm = getHybridDesignBraggWavelengthNm(design);
   const strainShapes = settings.strainShapes ?? ['rectangular', 'gaussian'];
   const indexModulations = settings.indexModulations ?? DEFAULT_INDEX_MODULATIONS;
-  const detuningValuesNm = settings.detuningValuesNm ?? getDefaultDetuningValuesNm(design);
   const widthRatios = settings.strainWidthRatiosToCouplingLength ?? DEFAULT_WIDTH_RATIOS_TO_COUPLING_LENGTH;
-  const total = strainShapes.length * indexModulations.length * widthRatios.length * detuningValuesNm.length;
+  const detuningCount = settings.detuningValuesNm?.length ?? DEFAULT_DETUNING_EDGE_MULTIPLES.length;
+  const total = strainShapes.length * indexModulations.length * widthRatios.length * detuningCount;
   const classificationCounts = createClassificationCounts();
   const slices: MovingResponseRegimeMapSlice[] = [];
   let completed = 0;
@@ -362,6 +364,7 @@ export async function solveMovingResponseRegimeMapAsync(
         ? 1e3 / couplingCoefficientPerM
         : null;
       const kappaLengthProduct = couplingCoefficientPerM * design.lengthMm / 1e3;
+      const detuningValuesNm = settings.detuningValuesNm ?? getDefaultDetuningValuesNm({ ...design, indexModulation });
       const strainWidthValuesMm = widthRatios.map((ratio) =>
         couplingLengthMm === null ? design.strainWidthMm : Math.min(design.lengthMm, Math.max(0.001, ratio * couplingLengthMm)),
       );
@@ -412,13 +415,13 @@ export async function solveMovingResponseRegimeMapAsync(
         cells.push(row);
       }
 
-      slices.push({ strainShape, indexModulation, couplingCoefficientPerM, couplingLengthMm, kappaLengthProduct, cells });
+      slices.push({ strainShape, indexModulation, couplingCoefficientPerM, couplingLengthMm, kappaLengthProduct, detuningValuesNm, cells });
     }
   }
 
   return {
     staticBraggWavelengthNm,
-    detuningValuesNm,
+    detuningValuesNm: slices[0]?.detuningValuesNm ?? [],
     strainWidthValuesMm: slices[0]?.cells.map((row) => row[0]?.strainWidthMm ?? 0) ?? [],
     strainShapes,
     slices,
@@ -531,11 +534,8 @@ function calculateLocalizedFraction(
   const peakPositionMm = points[primaryIndex].strainCenterMm;
   const startMm = peakPositionMm - windowWidthMm / 2;
   const endMm = peakPositionMm + windowWidthMm / 2;
-  const localizedArea = points.reduce((sum, point, index) => (
-    point.strainCenterMm >= startMm && point.strainCenterMm <= endMm ? sum + enhancements[index] : sum
-  ), 0);
-  const discreteArea = localizedArea * Math.max(sampleStepMm, 1);
-  return Math.min(1, discreteArea / totalPositiveArea);
+  const localizedArea = integratePositiveEnhancementWindow(points, enhancements, startMm, endMm);
+  return Math.min(1, localizedArea / totalPositiveArea);
 }
 
 function integratePositiveEnhancement(
@@ -551,6 +551,41 @@ function integratePositiveEnhancement(
     area += Math.max(0, widthMm) * (enhancements[index] + enhancements[index + 1]) / 2;
   }
   return area;
+}
+
+function integratePositiveEnhancementWindow(
+  points: FixedLaserPulsePoint[],
+  enhancements: number[],
+  startMm: number,
+  endMm: number,
+): number {
+  if (points.length < 2 || endMm <= startMm) return 0;
+
+  let area = 0;
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const x0 = points[index].strainCenterMm;
+    const x1 = points[index + 1].strainCenterMm;
+    const segmentStartMm = Math.max(startMm, x0);
+    const segmentEndMm = Math.min(endMm, x1);
+    if (segmentEndMm <= segmentStartMm || x1 <= x0) continue;
+
+    const y0 = interpolateValueAtPosition(x0, enhancements[index], x1, enhancements[index + 1], segmentStartMm);
+    const y1 = interpolateValueAtPosition(x0, enhancements[index], x1, enhancements[index + 1], segmentEndMm);
+    area += (segmentEndMm - segmentStartMm) * (y0 + y1) / 2;
+  }
+  return area;
+}
+
+function interpolateValueAtPosition(
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  x: number,
+): number {
+  if (x1 === x0) return y0;
+  const fraction = (x - x0) / (x1 - x0);
+  return y0 + (y1 - y0) * fraction;
 }
 
 function classifyMovingResponse({
@@ -599,7 +634,7 @@ function inferGratingLengthMm(points: FixedLaserPulsePoint[]): number {
 function getDefaultDetuningValuesNm(design: HybridBraggDesignInputs): number[] {
   const braggWavelengthNm = getHybridDesignBraggWavelengthNm(design);
   const edgeEstimateNm = Math.max(0.01, braggWavelengthNm * Math.max(Math.abs(design.indexModulation), 1e-5) / design.averageIndex);
-  return [-4, -2, -1.1, -0.5, 0, 0.5, 1.1, 2, 4].map((multiple) =>
+  return DEFAULT_DETUNING_EDGE_MULTIPLES.map((multiple) =>
     Number((multiple * edgeEstimateNm).toPrecision(8)),
   );
 }

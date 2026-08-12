@@ -183,6 +183,15 @@ describe('hybrid Bragg experiments', () => {
     expect(noEnhancement.responseClassification).toBe('no-enhancement');
   });
 
+  it('integrates localized enhancement on the same area basis as total enhancement', () => {
+    const localization = calculateMovingResponseLocalization(
+      [makePoint(0, 0), makePoint(0.25, 1), makePoint(0.5, 0), makePoint(0.75, 0)],
+      0,
+    );
+
+    expect(localization.localizedFraction).toBeCloseTo(0.75);
+  });
+
   it('marks boundary-only peaks separately from interior localization', () => {
     const boundaryPoint = {
       ...makePoint(0, 0.1),
@@ -222,6 +231,29 @@ describe('hybrid Bragg experiments', () => {
     expect(result.slices[0].cells[0]).toHaveLength(3);
     expect(result.slices[0].cells[0][0].strainWidthToCouplingLength).toBeCloseTo(0.25);
     expect(result.summary.classificationCounts['single-dominant'] + result.summary.classificationCounts['multi-peak'] + result.summary.classificationCounts.broad + result.summary.classificationCounts.weak + result.summary.classificationCounts['no-enhancement']).toBe(6);
+  });
+
+  it('derives default detuning samples separately for each coupling slice', async () => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      lengthMm: 1,
+      peakStrain: 0,
+      pulseSweepStartMm: 0,
+      pulseSweepEndMm: 1,
+      pulseSweepPointCount: 3,
+      segmentCount: 20,
+    };
+    const result = await solveMovingResponseRegimeMapAsync(design, {
+      indexModulations: [1e-5, 1e-3],
+      strainShapes: ['gaussian'],
+      strainWidthRatiosToCouplingLength: [0.25],
+    });
+
+    expect(result.slices).toHaveLength(2);
+    expect(result.slices[0].detuningValuesNm).not.toEqual(result.slices[1].detuningValuesNm);
+    expect(Math.max(...result.slices[1].detuningValuesNm)).toBeGreaterThan(Math.max(...result.slices[0].detuningValuesNm));
+    expect(result.slices[0].cells[0]).toHaveLength(result.slices[0].detuningValuesNm.length);
+    expect(result.slices[1].cells[0]).toHaveLength(result.slices[1].detuningValuesNm.length);
   });
 });
 

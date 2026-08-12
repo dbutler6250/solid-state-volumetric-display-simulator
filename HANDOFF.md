@@ -12,6 +12,7 @@
 - Added a headless moving-response regime-map sweep across laser detuning, strain width normalized to `L_c ~ 1 / kappa`, permanent `Delta n`, and rectangular/Gaussian strain shape.
 - Added a Moving Region UI regime-map runner with selectable classification/scalar maps and drill-down into the selected cell's enhancement curve.
 - Extended moving-region CSV metadata with classification, secondary-peak ratio, peak dominance, localized fraction, and boundary-dominated peak status.
+- Resolved PR #57 review findings by using consistent area integration for localized fraction and deriving default detuning samples separately for each swept coupling slice.
 - Updated `ARCHITECTURE.md`, `RESEARCH.md`, and `MILESTONES.md`.
 
 ## Key Result
@@ -22,8 +23,8 @@
 
 ## Validation Performed
 
-- Focused test: `npm.cmd run test -- src/simulation/experiments/hybridBraggExperiments.test.ts` - passed, 12 tests.
-- Full test: `npm.cmd run test` - passed, 27 files / 178 tests.
+- Focused test: `npm.cmd run test -- src/simulation/experiments/hybridBraggExperiments.test.ts` - passed, 14 tests.
+- Full test: `npm.cmd run test` - passed, 27 files / 180 tests.
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
 - Compact headless sweep run by importing the TypeScript modules through a one-off transpile hook.
