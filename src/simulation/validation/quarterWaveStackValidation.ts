@@ -19,6 +19,15 @@ export type ValidationIssue = {
 const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
+const isHybridStrainShape = (value: unknown): boolean =>
+  value === 'rectangular' ||
+  value === 'gaussian' ||
+  value === 'smooth-top-hat' ||
+  value === 'triangular' ||
+  value === 'traveling-sinusoid' ||
+  value === 'standing-wave' ||
+  value === 'carrier-envelope' ||
+  value === 'multi-tone';
 
 const validateRefractiveIndex = (
   value: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex'],
@@ -238,8 +247,29 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       if (!isFiniteNumber(design.strainWidthMm) || design.strainWidthMm <= 0) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid strain width must be greater than 0 mm.' });
       }
-      if (design.strainShape !== 'rectangular' && design.strainShape !== 'gaussian') {
-        issues.push({ field: 'thicknessMode', message: 'Hybrid strain shape must be rectangular or gaussian.' });
+      if (!isHybridStrainShape(design.strainShape)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid perturbation type must be supported.' });
+      }
+      if (!isFiniteNumber(design.perturbationEdgeWidthMm) || design.perturbationEdgeWidthMm < 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid perturbation edge width must be 0 or greater.' });
+      }
+      if (!isFiniteNumber(design.perturbationPeriodMm) || design.perturbationPeriodMm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid perturbation period must be greater than 0 mm.' });
+      }
+      if (!isFiniteNumber(design.perturbationPhaseRadians) || !isFiniteNumber(design.perturbationTemporalPhaseRadians)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid perturbation phases must be finite.' });
+      }
+      if (!isFiniteNumber(design.perturbationVelocityMps) || design.perturbationVelocityMps < 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid perturbation velocity must be 0 or greater.' });
+      }
+      if (!isFiniteNumber(design.perturbationSecondaryPeriodMm) || design.perturbationSecondaryPeriodMm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid secondary perturbation period must be greater than 0 mm.' });
+      }
+      if (!isFiniteNumber(design.perturbationSecondaryAmplitudeRatio) || design.perturbationSecondaryAmplitudeRatio < 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid secondary perturbation amplitude ratio must be 0 or greater.' });
+      }
+      if (!isFiniteNumber(design.perturbationSecondaryPhaseRadians)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid secondary perturbation phase must be finite.' });
       }
       if (!isFiniteNumber(design.effectivePhotoelasticCoefficient)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid photoelastic coefficient must be finite.' });

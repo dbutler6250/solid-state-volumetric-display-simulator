@@ -10,10 +10,15 @@ type HybridBraggPanelProps = {
 const formatNumber = (value: number | undefined): string =>
   typeof value === 'number' && Number.isFinite(value) ? Number(value.toString()).toString() : '';
 
-/** Minimal v2 controls for the permanent grating plus prescribed localized strain model. */
+/** Controls for the permanent grating plus prescribed perturbation-field model. */
 export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
   const design = inputs.hybridBraggDesign ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS;
   const isActiveMode = inputs.thicknessMode === 'hybrid';
+  const usesWidth = ['rectangular', 'gaussian', 'smooth-top-hat', 'triangular', 'carrier-envelope'].includes(design.strainShape);
+  const usesCenter = ['rectangular', 'gaussian', 'smooth-top-hat', 'triangular', 'carrier-envelope'].includes(design.strainShape);
+  const usesEdge = design.strainShape === 'smooth-top-hat';
+  const usesWave = ['traveling-sinusoid', 'standing-wave', 'carrier-envelope', 'multi-tone'].includes(design.strainShape);
+  const usesSecondaryWave = design.strainShape === 'multi-tone';
   const updateDesign = (patch: Partial<HybridBraggDesignInputs>) => {
     const nextLengthMm = patch.lengthMm ?? design.lengthMm;
     const nextPulseRange = getNextPulseSweepRange(design, patch, nextLengthMm);
@@ -37,11 +42,11 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
     <section className="acoustic-panel" aria-label="Hybrid Bragg grating inputs">
       <div className="stack-panel-heading">
         <h2>Hybrid Bragg Grating</h2>
-        <span>Permanent grating with a prescribed localized strain region.</span>
+        <span>Permanent grating with a prescribed perturbation field.</span>
       </div>
       <div className="stack-panel-subtitle">
         <span className="mode-pill mode-pill-hybrid">Hybrid</span>
-        <span>Headless v2 coupled-mode solver; acoustic propagation is not included yet.</span>
+        <span>Prescribed field study; physical actuator propagation is not included yet.</span>
       </div>
       <div className="form-grid form-grid-global acoustic-form">
         <HybridNumber label="Length (mm)" value={design.lengthMm} min={0.001} disabled={!isActiveMode} onChange={(lengthMm) => updateDesign({ lengthMm })} />
@@ -49,10 +54,8 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
         <HybridNumber label="Index modulation" value={design.indexModulation} min={0} step={0.00001} disabled={!isActiveMode} onChange={(indexModulation) => updateDesign({ indexModulation })} />
         <HybridNumber label="Grating period (nm)" value={design.gratingPeriodNm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(gratingPeriodNm) => updateDesign({ gratingPeriodNm })} />
         <HybridNumber label="Peak strain" value={design.peakStrain} step={0.00001} disabled={!isActiveMode} onChange={(peakStrain) => updateDesign({ peakStrain })} />
-        <HybridNumber label="Strain center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} />
-        <HybridNumber label="Strain width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} />
         <label className="field">
-          <span>Strain shape</span>
+          <span>Perturbation type</span>
           <select
             value={design.strainShape}
             disabled={!isActiveMode}
@@ -60,8 +63,24 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
           >
             <option value="rectangular">Rectangular</option>
             <option value="gaussian">Gaussian</option>
+            <option value="smooth-top-hat">Smooth top-hat</option>
+            <option value="triangular">Triangular ramp</option>
+            <option value="traveling-sinusoid">Traveling sinusoid</option>
+            <option value="standing-wave">Standing wave</option>
+            <option value="carrier-envelope">Carrier-envelope packet</option>
+            <option value="multi-tone">Two-tone superposition</option>
           </select>
         </label>
+        {usesCenter ? <HybridNumber label="Field center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
+        {usesWidth ? <HybridNumber label="Field width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} /> : null}
+        {usesEdge ? <HybridNumber label="Edge width (mm)" value={design.perturbationEdgeWidthMm} min={0} step={0.05} disabled={!isActiveMode} onChange={(perturbationEdgeWidthMm) => updateDesign({ perturbationEdgeWidthMm })} /> : null}
+        {usesWave ? <HybridNumber label="Wave period (mm)" value={design.perturbationPeriodMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(perturbationPeriodMm) => updateDesign({ perturbationPeriodMm })} /> : null}
+        {usesWave ? <HybridNumber label="Spatial phase (rad)" value={design.perturbationPhaseRadians} step={0.1} disabled={!isActiveMode} onChange={(perturbationPhaseRadians) => updateDesign({ perturbationPhaseRadians })} /> : null}
+        {usesWave ? <HybridNumber label="Time phase (rad)" value={design.perturbationTemporalPhaseRadians} step={0.1} disabled={!isActiveMode} onChange={(perturbationTemporalPhaseRadians) => updateDesign({ perturbationTemporalPhaseRadians })} /> : null}
+        {usesWave ? <HybridNumber label="Velocity (m/s)" value={design.perturbationVelocityMps} min={0} step={100} disabled={!isActiveMode} onChange={(perturbationVelocityMps) => updateDesign({ perturbationVelocityMps })} /> : null}
+        {usesSecondaryWave ? <HybridNumber label="Second period (mm)" value={design.perturbationSecondaryPeriodMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(perturbationSecondaryPeriodMm) => updateDesign({ perturbationSecondaryPeriodMm })} /> : null}
+        {usesSecondaryWave ? <HybridNumber label="Second amplitude" value={design.perturbationSecondaryAmplitudeRatio} min={0} step={0.1} disabled={!isActiveMode} onChange={(perturbationSecondaryAmplitudeRatio) => updateDesign({ perturbationSecondaryAmplitudeRatio })} /> : null}
+        {usesSecondaryWave ? <HybridNumber label="Second phase (rad)" value={design.perturbationSecondaryPhaseRadians} step={0.1} disabled={!isActiveMode} onChange={(perturbationSecondaryPhaseRadians) => updateDesign({ perturbationSecondaryPhaseRadians })} /> : null}
         <HybridNumber label="Photoelastic pe" value={design.effectivePhotoelasticCoefficient} step={0.01} disabled={!isActiveMode} onChange={(effectivePhotoelasticCoefficient) => updateDesign({ effectivePhotoelasticCoefficient })} />
         <HybridNumber label="Segments" value={design.segmentCount} min={1} step={1} integer disabled={!isActiveMode} onChange={(segmentCount) => updateDesign({ segmentCount })} />
         <HybridNumber label="Fixed laser (nm)" value={design.fixedLaserWavelengthNm} min={1} step={1} disabled={!isActiveMode} onChange={(fixedLaserWavelengthNm) => updateDesign({ fixedLaserWavelengthNm })} />

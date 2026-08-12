@@ -6,6 +6,11 @@ import type {
 } from '../simulation/experiments/hybridBraggExperiments';
 import { ChartProgressOverlay, type ChartProgress } from './ChartProgressOverlay';
 import { ChartUnavailableFallback, LazyPlot, LazyPlotErrorBoundary } from './LazyPlot';
+import {
+  MOVING_RESPONSE_CLASSIFICATION_LABELS,
+  MOVING_RESPONSE_CLASSIFICATION_MAX_VALUE,
+  MOVING_RESPONSE_CLASSIFICATION_TICK_VALUES,
+} from './movingResponseClassificationScale';
 
 type MovingResponseRegimeMapChartProps = {
   result: MovingResponseRegimeMapResult | null;
@@ -20,9 +25,10 @@ const CLASSIFICATION_VALUES: Record<MovingResponseClassification, number> = {
   broad: 2,
   'multi-peak': 3,
   'single-dominant': 4,
+  'periodic-multi-plane': 5,
+  'stationary-plane-array': 6,
+  'moving-envelope': 7,
 };
-
-const CLASSIFICATION_LABELS = ['no-enhancement', 'weak', 'broad', 'multi-peak', 'single-dominant'];
 
 const QUANTITY_LABELS: Record<MovingResponseRegimeMapQuantity, string> = {
   classification: 'Classification',
@@ -108,13 +114,13 @@ export function MovingResponseRegimeMapChart({
                   zsmooth: false,
                   colorscale: quantity === 'classification' ? classificationColorscale() : 'Viridis',
                   zmin: quantity === 'classification' ? 0 : undefined,
-                  zmax: quantity === 'classification' ? 4 : undefined,
+                  zmax: quantity === 'classification' ? MOVING_RESPONSE_CLASSIFICATION_MAX_VALUE : undefined,
                   xgap: 1,
                   ygap: 1,
                   colorbar: {
                     title: { text: QUANTITY_LABELS[quantity] },
-                    tickvals: quantity === 'classification' ? [0, 1, 2, 3, 4] : undefined,
-                    ticktext: quantity === 'classification' ? CLASSIFICATION_LABELS : undefined,
+                    tickvals: quantity === 'classification' ? MOVING_RESPONSE_CLASSIFICATION_TICK_VALUES : undefined,
+                    ticktext: quantity === 'classification' ? MOVING_RESPONSE_CLASSIFICATION_LABELS : undefined,
                   },
                   text: heatmap.text as unknown as string[],
                   hovertemplate: '%{text}<extra></extra>',
@@ -246,18 +252,12 @@ function getCellQuantity(
 }
 
 function classificationColorscale(): Array<[number, string]> {
-  return [
-    [0, '#5d6773'],
-    [0.24, '#5d6773'],
-    [0.25, '#8b6f3d'],
-    [0.49, '#8b6f3d'],
-    [0.5, '#4f78a7'],
-    [0.74, '#4f78a7'],
-    [0.75, '#b45f5f'],
-    [0.89, '#b45f5f'],
-    [0.9, '#68b6a3'],
-    [1, '#68b6a3'],
-  ];
+  const colors = ['#5d6773', '#8b6f3d', '#4f78a7', '#b45f5f', '#68b6a3', '#8d75c7', '#5aa7c8', '#c68a54'];
+  return colors.flatMap((color, index) => {
+    const start = index / colors.length;
+    const end = (index + 1) / colors.length;
+    return [[start, color], [end, color]] satisfies Array<[number, string]>;
+  });
 }
 
 function formatNumber(value: number | null): string {

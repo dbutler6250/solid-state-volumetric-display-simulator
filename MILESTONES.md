@@ -61,6 +61,7 @@ Keep this section as the historical record. Do not create issues for these items
 - v2 coupled-mode solver validation expansion with separated perturbation/response modules, analytic detuning coverage, spatial convergence checks, TMM slice-density and grating-strength comparisons, localized-strain behavior checks, and stability coverage
 - Fixed-laser moving active-region experiment with `R_laser(z_pulse)` plot, no-strain baseline, position-uniformity metrics, guarded enhancement ratios, effective-width classification, strain profile view, CSV export, and persisted experiment controls
 - Moving-response regime map with detuning x strain-width x permanent-coupling sweeps, transparent localization metrics, classification maps, cell drill-down curves, and an initial marginal/fragile oscillation-collapse finding
+- Generalized perturbation-field architecture with prescribed localized, periodic, packet, and two-tone strain fields; phase-scanned periodic response; field-profile visualization; comparison helper; import/export metadata; and documented actuator/field separation
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -73,7 +74,9 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Solver validation and convergence expansion
 - [x] Fixed-laser moving active-region UI and CSV export
 - [x] Active-length / coupling trade study
-- [ ] Realistic strain profiles
+- [x] Generalized prescribed perturbation fields
+- [ ] Quantitative full perturbation-family sweep
+- [ ] Realistic actuator-to-field models
 - [ ] Apodized grating support
 - [ ] Acoustic pulse propagation
 - [ ] Disorder / fabrication tolerance model

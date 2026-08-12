@@ -26,7 +26,7 @@ const formatWidth = (result: MovingPulseExperimentResult): string => {
 export function MovingPulseExperimentChart({ result, design, progress }: MovingPulseExperimentChartProps) {
   const [responseRetryKey, setResponseRetryKey] = useState(0);
   const [profileRetryKey, setProfileRetryKey] = useState(0);
-  const strainProfile = useMemo(() => {
+  const perturbationProfile = useMemo(() => {
     if (!design) return null;
     const model = createHybridBraggModel(design);
     const sampleCount = 121;
@@ -35,12 +35,12 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
       const zM = stepM * index;
       return {
         zMm: zM * 1e3,
-        strain: sampleStrainField(model.strain, zM),
+        value: sampleStrainField(model.strain, zM),
       };
     });
   }, [design]);
 
-  if (!result || !design || !strainProfile) {
+  if (!result || !design || !perturbationProfile) {
     return (
       <div className="chart-placeholder" role="status">
         {progress ? null : 'The moving-region experiment will update when a valid hybrid grating is resolved.'}
@@ -49,15 +49,18 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
     );
   }
 
+  const isPhaseScan = isPhaseScannedField(result.strainShape);
+  const parameterLabel = isPhaseScan ? 'Phase' : 'Position';
+  const parameterUnit = isPhaseScan ? 'rad' : 'mm';
   const metrics = [
     ['Static reflectance', formatMetric(result.metrics.staticReflectance)],
     ['Peak reflectance', formatMetric(result.metrics.peakReflectance)],
     ['Peak enhancement', formatMetric(result.metrics.peakEnhancement)],
     ['Peak gain', formatMetric(result.metrics.peakGain)],
-    ['Peak position', `${result.metrics.peakPositionMm.toPrecision(4)} mm`],
+    [`Peak ${parameterLabel.toLowerCase()}`, `${result.metrics.peakPositionMm.toPrecision(4)} ${parameterUnit}`],
     ['Minimum reflectance', formatMetric(result.metrics.minReflectance)],
     ['Mean reflectance', formatMetric(result.metrics.meanReflectance)],
-    ['Position std dev', formatMetric(result.metrics.standardDeviationReflectance)],
+    [`${parameterLabel} std dev`, formatMetric(result.metrics.standardDeviationReflectance)],
     ['Uniformity', formatMetric(result.metrics.uniformity)],
     ['Effective optical width', formatWidth(result)],
     ['Response class', result.metrics.localization.responseClassification],
@@ -72,7 +75,7 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
       <div className="moving-pulse-metadata">
         <span>{`Fixed laser: ${result.laserWavelengthNm.toPrecision(6)} nm`}</span>
         <span>{`Static Bragg: ${result.staticBraggWavelengthNm.toPrecision(6)} nm`}</span>
-        <span>{`Position step: ${result.positionStepMm.toPrecision(4)} mm`}</span>
+        <span>{`${parameterLabel} step: ${result.positionStepMm.toPrecision(4)} ${parameterUnit}`}</span>
         <span>{`Segments: ${result.segmentCount}`}</span>
       </div>
       <div className="chart-frame moving-pulse-chart-frame">
@@ -93,7 +96,7 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                   name: 'Fixed-laser reflectance',
                   line: { color: '#68b6a3', width: 3 },
                   marker: { size: 5, color: '#68b6a3' },
-                  hovertemplate: 'center=%{x:.4f} mm<br>R=%{y:.5f}<extra></extra>',
+                  hovertemplate: 'parameter=%{x:.4f}<br>R=%{y:.5f}<extra></extra>',
                 },
                 {
                   x: result.points.map((point) => point.strainCenterMm),
@@ -111,7 +114,7 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                 plot_bgcolor: '#101720',
                 font: { color: '#dce7f2', family: 'Inter, system-ui, sans-serif' },
                 margin: { t: 22, r: 22, b: 58, l: 66 },
-                xaxis: { title: { text: 'Strain Region Center Position (mm)' }, gridcolor: '#263443', zerolinecolor: '#334457' },
+                xaxis: { title: { text: getResponseAxisLabel(result.strainShape) }, gridcolor: '#263443', zerolinecolor: '#334457' },
                 yaxis: { title: { text: 'Reflectance at Fixed Laser Wavelength' }, range: [0, 1], gridcolor: '#263443', zerolinecolor: '#334457' },
                 legend: { orientation: 'h', x: 0, y: 1.14 },
               }}
@@ -141,13 +144,13 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
               className="moving-pulse-profile-chart"
               data={[
                 {
-                  x: strainProfile.map((point) => point.zMm),
-                  y: strainProfile.map((point) => point.strain),
+                  x: perturbationProfile.map((point) => point.zMm),
+                  y: perturbationProfile.map((point) => point.value),
                   type: 'scatter' as const,
                   mode: 'lines' as const,
-                  name: 'Strain profile',
+                  name: 'Perturbation field',
                   line: { color: '#9fb7ff', width: 2 },
-                  hovertemplate: 'z=%{x:.4f} mm<br>strain=%{y:.6g}<extra></extra>',
+                  hovertemplate: 'z=%{x:.4f} mm<br>epsilon=%{y:.6g}<extra></extra>',
                 },
               ]}
               layout={{
@@ -157,7 +160,7 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                 font: { color: '#dce7f2', family: 'Inter, system-ui, sans-serif' },
                 margin: { t: 18, r: 22, b: 48, l: 66 },
                 xaxis: { title: { text: 'Position z (mm)' }, gridcolor: '#263443', zerolinecolor: '#334457' },
-                yaxis: { title: { text: 'Strain' }, gridcolor: '#263443', zerolinecolor: '#334457' },
+                yaxis: { title: { text: 'Perturbation epsilon(z)' }, gridcolor: '#263443', zerolinecolor: '#334457' },
                 showlegend: false,
               }}
               config={{ displaylogo: false, responsive: true }}
@@ -168,4 +171,15 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
       </div>
     </div>
   );
+}
+
+function getResponseAxisLabel(strainShape: HybridBraggDesignInputs['strainShape']): string {
+  if (isPhaseScannedField(strainShape)) {
+    return 'Field Phase Parameter (rad)';
+  }
+  return 'Field Center Position (mm)';
+}
+
+function isPhaseScannedField(strainShape: HybridBraggDesignInputs['strainShape']): boolean {
+  return strainShape === 'traveling-sinusoid' || strainShape === 'standing-wave' || strainShape === 'multi-tone';
 }
