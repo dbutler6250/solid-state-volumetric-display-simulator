@@ -2513,3 +2513,55 @@ BIASED TROUGH REMAINS PROMISING BUT REQUIRES A HIGHER-FIDELITY OPTICAL MODEL
 ```
 
 The prior moving-trough CMT tracking result (`mean |Delta z| ~= 0.109 mm`) and the 4-actuator biased-trough array median selectivity (`~7.62`) are preserved as CMT-only findings, not independent optical validation. Do not proceed to detailed PZT mechanics from this result alone; first constrain the architecture to an independently validated optical range or promote a higher-fidelity optical solver for future architecture studies.
+
+## WP-v2-09 High-Fidelity Long-Grating Maxwell Reference
+
+Issue #68 adds the first high-fidelity Maxwell reference path in `src/simulation/solvers/maxwell/longGratingScatteringSolver.ts` and the reproducible study `scripts/highFidelityBraggValidationStudy.mts`. The generated artifacts are `artifacts/issue-68/high-fidelity-bragg-validation-study.md` and `.json`.
+
+The new solver is a normal-incidence scalar 1D Maxwell scattering formulation. It composes two-port scattering matrices with Redheffer composition and uses binary exponentiation for uniform repeated cells. This is the correct numerical direction for long Bragg structures because it avoids naive transfer-matrix chains whose internal amplitudes can overflow or become ill-conditioned in stop-band cases.
+
+The study preserves the canonical WP-v2-08C model:
+
+```text
+n(z) = n_bar(z) + Delta_n cos(phi(z))
+```
+
+with reference-coordinate strain sampling, photoelastic average-index response, local period stretch by `(1 + epsilon)`, peak sinusoidal `Delta n`, and continuously accumulated microscopic phase. The old full-length TMM results at 1 and 2 slices per optical period remain historical under-resolution diagnostics only.
+
+Validation status:
+
+- Fresnel / simple slab: PASS in focused solver tests with lossless energy conservation.
+- Short sinusoidal grating: PASS; 64 samples/period gives energy error about `4.5e-13` in the short uniform convergence case.
+- Repeated uniform sinusoidal grating: PASS for bounded brute-force equality and finite repeated-cell composition.
+- Long uniform grating: PASS/PARTIAL; weak-grating repeated-cell reflectance tracks analytic CMT from 10 to 10,000 periods (`R_Maxwell = 0.011607`, `R_CMT = 0.011644` at 10,000 periods).
+- Uniform strained grating: PASS; `R_CMT = 0.00056544`, `R_Maxwell = 0.00055514`.
+- Piecewise strained trough: PARTIAL; short sharp-trough comparison gives `R_CMT = 0.00064988`, `R_Maxwell = 0.00063919`.
+- Smooth biased trough: PARTIAL only; the bounded `0.25 mm` proxy gives `R_CMT = 0.014832`, `R_Maxwell = 0.014086`, but full `10 mm` convergence is not yet accepted.
+
+Energy conservation is confirmed for the bounded Maxwell calculations:
+
+```text
+MAXWELL SOLVER ENERGY CONSERVATION CONFIRMED
+```
+
+Worst relevant `|R + T - 1|` in the study is about `1.02e-11`.
+
+The practical CMT status from this bounded pass is:
+
+```text
+SCALAR CMT IS QUALITATIVELY USEFUL BUT QUANTITATIVELY INACCURATE FOR THE TROUGH
+```
+
+The required architecture conclusion for this partial WP-v2-09 pass is:
+
+```text
+HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFORMANCE
+```
+
+The required mechanical gate is:
+
+```text
+BIASED TROUGH REMAINS PROMISING BUT OPTICAL MODELING STILL NEEDS REFINEMENT
+```
+
+Maxwell spatial field reconstruction is not implemented yet, so no Maxwell localization claim is made from boundary reflectance alone. Moving-trough tracking and 4-actuator validation remain gated until the static full-length smooth trough has accepted high-fidelity convergence.
