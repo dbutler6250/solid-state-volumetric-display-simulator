@@ -2,10 +2,11 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-64-target-reflection-optimization`.
+- Current branch: `main`.
 - PR #63 for Issue #62 / WP-v2-06 segmented Bragg media and reflection-region visualization was squash-merged into `main` as `b8694c8`.
 - The remote and local `codex/issue-62-segmented-bragg-reflection-visualization` branches have been cleaned up.
-- Issue #64 was created for WP-v2-07 target reflection-state optimization foundation.
+- PR #65 for Issue #64 / WP-v2-07 target reflection-state optimization foundation was squash-merged into `main` as `b5b4069`.
+- The remote and local `codex/issue-64-target-reflection-optimization` branches have been cleaned up.
 
 ## Latest Task
 
@@ -30,6 +31,5 @@
 
 ## Remaining Follow-Up
 
-- Run full test/lint/build verification.
 - Add UI/browser coverage for selecting/editing profile parameters and comparing optimized reflection fields.
 - Run convergence and TMM spot checks for top apodized, piecewise, and phase-engineered candidates.
