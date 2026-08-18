@@ -44,6 +44,15 @@ export type HybridMaxwellOptions = {
   envelopeBlocks: number;
 };
 
+export type LocallyPeriodicBlock = {
+  averageIndex: number;
+  indexModulation: number;
+  periodM: number;
+  lengthM: number;
+  phaseRadians: number;
+  samplesPerPeriod: number;
+};
+
 const ZERO = complex(0);
 const ONE = complex(1);
 
@@ -150,6 +159,56 @@ export function solveRepeatedUnitCell(
   };
 }
 
+/** Builds a phase-continuous partial sinusoidal period without rounding its physical length. */
+export function buildSinusoidalPartialPeriod(
+  cell: Omit<SinusoidalGratingCell, 'samplesPerPeriod'>,
+  fraction: number,
+  samplesPerPeriod: number,
+): LayerSlice[] {
+  const boundedFraction = Math.min(1, Math.max(0, fraction));
+  if (boundedFraction === 0) return [];
+  const samples = Math.max(1, Math.ceil(samplesPerPeriod * boundedFraction));
+  const thicknessM = (cell.periodM * boundedFraction) / samples;
+  return Array.from({ length: samples }, (_, index) => {
+    const phase = cell.phaseRadians + (2 * Math.PI * boundedFraction * (index + 0.5)) / samples;
+    return {
+      refractiveIndex: cell.averageIndex + cell.indexModulation * Math.cos(phase),
+      thicknessM,
+    };
+  });
+}
+
+/** Solves one locally uniform block as repeated full periods plus an exact-length partial tail. */
+export function solveLocallyPeriodicBlock(
+  block: LocallyPeriodicBlock,
+  wavelengthNm: number,
+  incidentIndex = block.averageIndex,
+): MaxwellPointResult {
+  const scattering = solveLocallyPeriodicBlockScattering(block, wavelengthNm, incidentIndex);
+  const reflectance = clampUnitInterval(magnitudeSquared(scattering.rLeft));
+  const transmission = clampUnitInterval(magnitudeSquared(scattering.tLeftRight));
+  return {
+    wavelengthNm,
+    reflectance,
+    transmission,
+    energyError: Math.abs(reflectance + transmission - 1),
+  };
+}
+
+/** Builds an explicit high-resolution layer chain for a single locally uniform block. */
+export function buildExplicitLocallyPeriodicBlockLayers(block: LocallyPeriodicBlock): LayerSlice[] {
+  const phaseSpanRadians = (2 * Math.PI * block.lengthM) / block.periodM;
+  const sliceCount = Math.max(1, Math.ceil((phaseSpanRadians / (2 * Math.PI)) * block.samplesPerPeriod));
+  const thicknessM = block.lengthM / sliceCount;
+  return Array.from({ length: sliceCount }, (_, index) => {
+    const phase = block.phaseRadians + (phaseSpanRadians * (index + 0.5)) / sliceCount;
+    return {
+      refractiveIndex: block.averageIndex + block.indexModulation * Math.cos(phase),
+      thicknessM,
+    };
+  });
+}
+
 /** Samples the canonical strained hybrid grating into continuous-phase Maxwell layers. */
 export function buildHybridBraggMaxwellLayers(
   design: HybridBraggDesignInputs,
@@ -180,6 +239,45 @@ export function buildHybridBraggMaxwellLayers(
   return layers;
 }
 
+/** Solves the canonical hybrid grating with phase-continuous locally periodic mechanical blocks. */
+export function solveHybridBraggMaxwellLocallyPeriodicPoint(
+  design: HybridBraggDesignInputs,
+  wavelengthNm: number,
+  options: HybridMaxwellOptions,
+): MaxwellPointResult {
+  const model = createHybridBraggModel(design);
+  const blockCount = Math.max(1, Math.round(options.envelopeBlocks));
+  const blockLengthM = model.grating.lengthM / blockCount;
+  let scattering = identityScattering();
+  let phaseRadians = design.gratingPhaseRadians;
+
+  for (let index = 0; index < blockCount; index += 1) {
+    const startM = index * blockLengthM;
+    const zM = startM + blockLengthM / 2;
+    const strain = sampleStrainField(model.strain, zM);
+    const local = applyMaterialStrainResponse(model.grating, model.materialResponse, strain);
+    const block: LocallyPeriodicBlock = {
+      averageIndex: local.averageIndex,
+      indexModulation: design.indexModulation,
+      periodM: local.periodM,
+      lengthM: blockLengthM,
+      phaseRadians,
+      samplesPerPeriod: options.samplesPerPeriod,
+    };
+    scattering = composeScattering(scattering, solveLocallyPeriodicBlockScattering(block, wavelengthNm, design.averageIndex));
+    phaseRadians += (2 * Math.PI * blockLengthM) / local.periodM;
+  }
+
+  const reflectance = clampUnitInterval(magnitudeSquared(scattering.rLeft));
+  const transmission = clampUnitInterval(magnitudeSquared(scattering.tLeftRight));
+  return {
+    wavelengthNm,
+    reflectance,
+    transmission,
+    energyError: Math.abs(reflectance + transmission - 1),
+  };
+}
+
 /** Solves the canonical hybrid grating with the independent Maxwell scattering path. */
 export function solveHybridBraggMaxwellPoint(
   design: HybridBraggDesignInputs,
@@ -192,6 +290,31 @@ export function solveHybridBraggMaxwellPoint(
     design.averageIndex,
     design.averageIndex,
   );
+}
+
+function solveLocallyPeriodicBlockScattering(
+  block: LocallyPeriodicBlock,
+  wavelengthNm: number,
+  incidentIndex: number,
+): ScatteringMatrix {
+  const periods = block.lengthM / block.periodM;
+  const fullPeriods = Math.floor(periods);
+  const fractionalPeriod = periods - fullPeriods;
+  const cellScattering = solveInternalBlock(
+    buildSinusoidalUnitCell(block),
+    wavelengthNm,
+    incidentIndex,
+    incidentIndex,
+  );
+  const repeated = repeatScattering(cellScattering, fullPeriods);
+  const tailPhase = block.phaseRadians + fullPeriods * 2 * Math.PI;
+  const tail = solveInternalBlock(
+    buildSinusoidalPartialPeriod({ ...block, phaseRadians: tailPhase }, fractionalPeriod, block.samplesPerPeriod),
+    wavelengthNm,
+    incidentIndex,
+    incidentIndex,
+  );
+  return composeScattering(repeated, tail);
 }
 
 function solveInternalBlock(

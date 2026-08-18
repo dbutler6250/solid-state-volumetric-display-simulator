@@ -1,99 +1,129 @@
-# WP-v2-09 High-Fidelity Bragg Maxwell Validation
+# WP-v2-09B Locally Periodic Long-Grating Maxwell Validation
 
-## A. New Maxwell solver
-Implemented a headless normal-incidence 1D Maxwell scattering solver using scalar two-port scattering matrices, Redheffer composition, and binary exponentiation for repeated cells. This is numerically preferable to naive long transfer-matrix multiplication because the composed state remains boundary scattering amplitudes rather than exponentially large internal forward/backward amplitudes.
+## A. Solver extension
+The Maxwell solver now supports locally periodic mechanical-envelope blocks. Each block samples the existing strain/material model once, treats the microscopic carrier as an explicit sinusoidal Maxwell medium, composes complete periods with stable repeated-cell scattering, and appends an exact-length partial period when the block does not end on a period boundary.
 
-## B. Canonical physical model
-The hybrid-design entry point reuses `createHybridBraggModel`, `sampleStrainField`, and `applyMaterialStrainResponse`. The microscopic index is sampled as `n(z) = n_bar(z) + Delta_n cos(phi(z))`; local strain changes average index and period, and `phi(z)` is accumulated continuously across slices.
+## B. Phase continuity
+The solver carries a running microscopic phase between mechanical blocks using `d phi / dz = 2 pi / Lambda(z)`. Blocks do not reset to a cosine maximum unless the physical input phase says so.
 
-## C. Optical resolution convergence
-| samples/period | R_Maxwell | T_Maxwell | |R+T-1| |
+## C. Fractional-period handling
+The fractional validation used 10.65 periods and preserved length 2.2035e-6 m. R error versus explicit discretization was 1.9867e-13.
+
+## D. Acceleration validation
+| N periods | R explicit | R accelerated | |Delta R| | |Delta T| |
+| --- | --- | --- | --- | --- |
+| 1 | 1.1693e-8 | 1.1693e-8 | 0.0000 | 0.0000 |
+| 2 | 4.6770e-8 | 4.6770e-8 | 3.3087e-23 | 0.0000 |
+| 5 | 2.9231e-7 | 2.9231e-7 | 2.6470e-22 | 2.6645e-15 |
+| 10 | 1.1692e-6 | 1.1692e-6 | 2.1176e-21 | 8.5487e-15 |
+| 50 | 2.9224e-5 | 2.9224e-5 | 1.9617e-18 | 1.1524e-13 |
+| 100 | 0.00011681 | 0.00011681 | 1.4704e-17 | 1.7963e-13 |
+
+## E. Split-grating identity
+| blocks | R | T | |R+T-1| |
 | --- | --- | --- | --- |
-| 4 | 0.00055278 | 0.99945 | 2.4425e-15 |
-| 8 | 0.00064732 | 0.99935 | 3.9302e-14 |
-| 16 | 0.00067285 | 0.99933 | 4.0190e-14 |
-| 32 | 0.00067937 | 0.99932 | 1.3256e-13 |
-| 64 | 0.00068100 | 0.99932 | 4.5075e-13 |
+| 1 | 0.0059841 | 0.99402 | 5.8772e-11 |
+| 2 | 0.0059841 | 0.99402 | 1.1703e-11 |
+| 10 | 0.0059841 | 0.99402 | 3.8920e-12 |
+| 100 | 0.0059841 | 0.99402 | 1.3914e-11 |
 
-## D. Mechanical-envelope convergence
-The current bounded smooth-trough proxy uses a 0.25 mm domain to keep the explicit continuous-phase Maxwell sampling practical.
-| envelope blocks | R_Maxwell | T_Maxwell | |R+T-1| |
-| --- | --- | --- | --- |
-| 25 | 0.014086 | 0.98591 | 3.1086e-15 |
-| 50 | 0.014086 | 0.98591 | 3.1086e-15 |
-| 100 | 0.014086 | 0.98591 | 3.1086e-15 |
-| 200 | 0.014086 | 0.98591 | 3.1086e-15 |
+## F. Optical-period convergence
+| samples/period | R_Maxwell | T_Maxwell | |R+T-1| | runtime ms |
+| --- | --- | --- | --- | --- |
+| 8 | 0.0049644 | 0.99504 | 5.6611e-12 | 0.080500 |
+| 16 | 0.0057674 | 0.99423 | 2.4913e-11 | 0.042800 |
+| 32 | 0.0059841 | 0.99402 | 5.8772e-11 | 0.50990 |
+| 64 | 0.0060394 | 0.99396 | 9.3829e-11 | 0.068900 |
 
-## E. Energy conservation
-MAXWELL SOLVER ENERGY CONSERVATION CONFIRMED
-Worst relevant energy error: 1.0187e-11.
+## G. Mechanical-envelope convergence
+| blocks | R_Maxwell | T_Maxwell | |R+T-1| | runtime ms |
+| --- | --- | --- | --- | --- |
+| 25 | 0.0028266 | 0.99717 | 1.1053e-11 | 0.88000 |
+| 50 | 0.055712 | 0.94429 | 1.6928e-11 | 1.6363 |
+| 100 | 0.025304 | 0.97470 | 1.6906e-12 | 3.2976 |
+| 200 | 0.021831 | 0.97817 | 1.5501e-12 | 4.5113 |
+| 400 | 0.021204 | 0.97880 | 1.5440e-12 | 8.3364 |
 
-## F. Short-grating validation
-| samples/period | R brute force | R repeated cell | absolute difference |
-| --- | --- | --- | --- |
-| 16 | 7.4110e-7 | 7.4110e-7 | 2.3293e-21 |
-| 32 | 7.4829e-7 | 7.4829e-7 | 7.9409e-21 |
-| 64 | 7.5009e-7 | 7.5009e-7 | 3.2823e-21 |
+## H. Energy conservation
+MAXWELL ENERGY CONSERVATION ACCEPTABLE
+Maximum relevant |R + T - 1|: 1.1583e-10.
 
-## G. Long uniform-grating validation
-| periods | R_Maxwell | R_CMT analytic | |R+T-1| |
-| --- | --- | --- | --- |
-| 10 | 1.1698e-8 | 1.1736e-8 | 9.9920e-15 |
-| 100 | 1.1698e-6 | 1.1736e-6 | 1.0270e-13 |
-| 1000 | 0.00011697 | 0.00011735 | 1.0251e-12 |
-| 10000 | 0.011607 | 0.011644 | 1.0187e-11 |
+## I. Full-length uniform-grating result
+10 mm uniform spectrum peak R = 0.99938 at 600.02 nm; sampled bandwidth = n/a nm.
 
-## H. Uniform-strain validation
-R_CMT(lambda_laser) = 0.00056544; R_Maxwell(lambda_laser) = 0.00055514.
+## J. Full-length uniform-strain result
+R_CMT(lambda_laser) = 0.0012026; R_Maxwell(lambda_laser) = 0.0011831.
 
-## I. Piecewise trough result
-R_CMT(lambda_laser) = 0.00064988; R_Maxwell(lambda_laser) = 0.00063919.
+## K. Piecewise trough result
+R_exact_CMT = 0.041461; R_spatial_CMT = 0.041461; R_Maxwell = 0.043915.
 
-## J. Smooth biased-trough result - REQUIRED
-Bounded proxy result at 600.11 nm: R_CMT = 0.014832, R_Maxwell = 0.014086. Full 10 mm convergence is not yet accepted because explicit optical sampling remains too large for this first bounded study run.
+## L. Smooth 10 mm trough - REQUIRED
+R_CMT(lambda_laser) = 0.021257; R_Maxwell(lambda_laser) = 0.021204; absolute error = 5.2461e-5; relative error = 0.0024680.
+Maxwell peak R = 0.25584 at 600.02 nm; sampled width = n/a nm.
 
-## K. Spectral comparison
-| wavelength nm | R_CMT | R_Maxwell | T_Maxwell |
-| --- | --- | --- | --- |
-| 599.91 | 0.014831 | 0.014094 | 0.98591 |
-| 600.01 | 0.016940 | 0.016095 | 0.98391 |
-| 600.11 | 0.014832 | 0.014086 | 0.98591 |
-| 600.21 | 0.0097055 | 0.0092117 | 0.99079 |
-| 600.31 | 0.0042872 | 0.0040667 | 0.99593 |
+## M. CMT error diagnostics
+Detuning, transition-width, and coupling diagnostics are compact controlled checks, not a broad optimization sweep.
+| case | parameter | R_CMT | R_Maxwell | |Delta R| |
+| --- | --- | --- | --- | --- |
+| detuning | bias 0.00075000 | 0.046631 | 0.046406 | 0.00022523 |
+| detuning | bias 0.0015000 | 0.021257 | 0.021204 | 5.2461e-5 |
+| detuning | bias 0.0030000 | 8.3233e-6 | 9.1068e-6 | 7.8349e-7 |
+| transition | edge 0.0000 mm | 0.041461 | 0.043915 | 0.0024532 |
+| transition | edge 0.25000 mm | 0.021257 | 0.021204 | 5.2461e-5 |
+| transition | edge 0.50000 mm | 0.019131 | 0.019046 | 8.5047e-5 |
+| coupling | Delta n 5.0000e-5 | 0.0045363 | 0.0045441 | 7.7549e-6 |
+| coupling | Delta n 0.00010000 | 0.021257 | 0.021204 | 5.2461e-5 |
+| coupling | Delta n 0.00020000 | 0.13794 | 0.13726 | 0.00068226 |
 
-## L. Spatial localization
-Maxwell spatial field reconstruction is not implemented yet. No Maxwell localization claim is made from boundary reflectance alone.
+## N. CMT validity conclusion
+SCALAR CMT IS QUANTITATIVELY ADEQUATE FOR THE TROUGH
 
-## M. Moving-trough validation
-Not run because the full static smooth trough is only partially validated.
+## O. Maxwell spatial reconstruction
+Not implemented in this packet. Boundary optics are converged enough for the reflectance verdict, but no Maxwell spatial localization metric is claimed.
 
-## N. 4-actuator validation
-Not warranted until single-trough high-fidelity validation is accepted.
+## P. Moving-trough result
+MOVING-TROUGH TRACKING REMAINS CMT-ONLY
 
-## O. CMT validity map
-SCALAR CMT IS QUALITATIVELY USEFUL BUT QUANTITATIVELY INACCURATE FOR THE TROUGH
-Tested range in this bounded run: short uniform, uniform-strain, sharp trough, and 0.25 mm smooth-trough proxy near the WP-v2-08B operating wavelength.
+## Q. 4-actuator result
+Not independently tested because comparable Maxwell spatial fields are not available.
 
-## P. Computational performance
-The script runs bounded explicit optical sampling and repeated uniform-cell checks. Full 10 mm smooth-trough validation still needs locally periodic repeated-block acceleration before it should be used as a decisive Maxwell reference.
-
-## Q. Primary architecture conclusion - REQUIRED HIGHLIGHT
+## R. Architecture result - REQUIRED HIGHLIGHT
 HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFORMANCE
 
-## R. Mechanical gate - REQUIRED HIGHLIGHT
-BIASED TROUGH REMAINS PROMISING BUT OPTICAL MODELING STILL NEEDS REFINEMENT
+## S. CMT result - REQUIRED HIGHLIGHT
+SCALAR CMT IS QUANTITATIVELY ADEQUATE FOR THE TROUGH
 
-## S. Documentation
+## T. Mechanical gate - REQUIRED HIGHLIGHT
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+
+## U. Mechanical requirements
+Not extracted because the mechanical gate remains closed.
+
+## V. Performance
+| case | R | runtime ms | heap delta MB |
+| --- | --- | --- | --- |
+| stress-1mm | 0.016728 | 0.049200 | 0.44140 |
+| stress-5mm | 0.0015577 | 0.023200 | 0.11140 |
+| stress-10mm | 0.0059841 | 0.023700 | 0.12883 |
+| stress-20mm | 0.020403 | 0.018000 | 0.099129 |
+| smooth-spectrum-9pt | 0.25584 | see JSON per point | bounded |
+
+## W. Documentation
 - `src/simulation/solvers/maxwell/longGratingScatteringSolver.ts`
+- `src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts`
 - `scripts/highFidelityBraggValidationStudy.mts`
 - `artifacts/issue-68/high-fidelity-bragg-validation-study.md`
 - `artifacts/issue-68/high-fidelity-bragg-validation-study.json`
+- `RESEARCH.md`
+- `ARCHITECTURE.md`
+- `HANDOFF.md`
+- `MILESTONES.md`
 
-## T. Verification
+## X. Verification
 Generated by `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts`. Full test/lint/build/browser results are recorded in `HANDOFF.md` after verification.
 
-## U. GitHub
-Issue #68; branch `codex/issue-68-high-fidelity-bragg-maxwell-solver`; stacked on PR #67 while it remains unmerged.
+## Y. GitHub
+Issue #68; branch `codex/issue-68-high-fidelity-bragg-maxwell-solver`; draft PR #69 stacked on `codex/issue-66-piezo-strain-window-addressing` while PR #67 remains open.
 
-## V. Recommended Next Step
-Promote the locally periodic repeated-block Maxwell path for strained envelope blocks before mechanical feasibility. Do not proceed to PZT mechanics from this partial optical validation.
+## Z. Recommended next step
+Complete Maxwell spatial-field reconstruction before mechanics. The boundary result supports a revised trough response, but moving-trough and array localization remain CMT-only.

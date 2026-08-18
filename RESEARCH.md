@@ -2565,3 +2565,43 @@ BIASED TROUGH REMAINS PROMISING BUT OPTICAL MODELING STILL NEEDS REFINEMENT
 ```
 
 Maxwell spatial field reconstruction is not implemented yet, so no Maxwell localization claim is made from boundary reflectance alone. Moving-trough tracking and 4-actuator validation remain gated until the static full-length smooth trough has accepted high-fidelity convergence.
+
+## WP-v2-09B Locally Periodic Long-Grating Maxwell Closeout
+
+Issue #68 now extends the Maxwell reference from bounded explicit sampling to locally periodic mechanical-envelope blocks. The updated `scripts/highFidelityBraggValidationStudy.mts` keeps the WP-v2-08C canonical model, but represents each slow strain-envelope block as a locally uniform sinusoidal Maxwell grating. Complete local optical periods use stable repeated-cell scattering, while the residual length is represented as an exact-length partial period. The microscopic phase is carried continuously between blocks.
+
+The required acceleration checks pass. Explicit chains and accelerated repeated cells agree for `N = 1, 2, 5, 10, 50, 100`; the `100`-period reflectance error is about `1.47e-17`. A fractional `10.65`-period block preserves physical length with reflectance error about `1.99e-13` versus explicit discretization. Split-grating identity is confirmed for `1`, `2`, `10`, and `100` mechanical blocks.
+
+Full-length `10 mm` boundary-optics results:
+
+- Uniform strained validation: `R_CMT = 0.0012026`, `R_Maxwell = 0.0011831`.
+- Sharp piecewise trough: `R_exact_CMT = 0.041461`, `R_spatial_CMT = 0.041461`, `R_Maxwell = 0.043915`.
+- Smooth biased trough at the operating wavelength: `R_CMT = 0.021257`, `R_Maxwell = 0.021204`, absolute error `5.25e-5`, relative error `0.2468%`.
+- The smooth-trough sampled Maxwell spectrum peaks at `R = 0.25584` near `600.02 nm`.
+- Maximum relevant energy error is about `1.16e-10`.
+
+Energy gate:
+
+```text
+MAXWELL ENERGY CONSERVATION ACCEPTABLE
+```
+
+CMT verdict for the tested boundary reflectance:
+
+```text
+SCALAR CMT IS QUANTITATIVELY ADEQUATE FOR THE TROUGH
+```
+
+Architecture verdict:
+
+```text
+HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFORMANCE
+```
+
+The result supports the biased-trough boundary response under a converged microscopic Maxwell representation, but Maxwell spatial field reconstruction was not implemented. Therefore moving-trough tracking and 4-actuator array selectivity remain CMT-only. The mechanical gate remains closed:
+
+```text
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+```
+
+The next optical task should reconstruct trustworthy Maxwell forward/backward fields before any PZT or mechanical feasibility study.

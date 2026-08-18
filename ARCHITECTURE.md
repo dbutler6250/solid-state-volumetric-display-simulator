@@ -232,4 +232,22 @@ The Maxwell path preserves the WP-v2-08C canonical reference-coordinate model:
 - microscopic grating phase is accumulated continuously across optical slices;
 - fractional physical lengths are preserved by assigning the final slice grid to the requested total length.
 
-The current WP-v2-09 study is a bounded first validation, not a full promotion of Maxwell into every architecture loop. It confirms energy conservation, short sinusoidal sampling, repeated uniform-cell stability, uniform strained parity, and a bounded smooth-trough proxy. Full 10 mm strained-envelope validation still needs locally periodic repeated-block acceleration with phase-preserving partial periods before the high-fidelity solver can be the decisive arbiter for mechanical feasibility.
+WP-v2-09 established the bounded first validation. WP-v2-09B extends the same solver path into the locally periodic long-grating workflow:
+
+```text
+strain envelope
+    -> mechanical blocks
+    -> locally periodic optical block
+    -> high-resolution unit cell
+    -> stable repeated-cell scattering
+    -> global Maxwell response
+```
+
+Each mechanical block samples the slow strain envelope once, computes the local `n_bar`, `Delta n`, and `Lambda`, then represents the microscopic optical carrier with Maxwell scattering. Complete local periods use repeated-cell composition; any residual block length is represented as an exact-length partial period. The running microscopic phase is carried into the next block so splitting a uniform grating into 2, 10, or 100 mechanical blocks reproduces the unsplit result within numerical tolerance.
+
+The two convergence axes remain separate:
+
+- optical carrier resolution: samples per optical period;
+- mechanical-envelope resolution: number of strain-envelope blocks.
+
+The long-grating Maxwell path is now adequate for full-length boundary reflectance/transmission validation of the biased trough. It still does not reconstruct Maxwell spatial fields, so the interactive CMT reflection-region view remains a CMT-derived backward-intensity visualization rather than an independently validated Maxwell localization map.
