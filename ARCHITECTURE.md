@@ -205,3 +205,31 @@ Current strain mapping:
 `validation/troughOpticalValidation.ts` owns the research-only solver-parity helpers. It exposes the canonical convention, exact piecewise CMT section multiplication, a continuous-phase sinusoidal TMM builder, uniform-strain and sharp-trough case helpers, and local `|delta| / |kappa|` diagnostics. This layer is intentionally separate from the production UI solver path.
 
 WP-v2-08C confirms that spatial CMT agrees with exact piecewise CMT for the sampled model, and that short uniform strained gratings have CMT/TMM parity under high-resolution TMM. Full-length biased-trough TMM convergence remains unresolved; the biased trough is therefore approximation-sensitive and should not advance to detailed mechanical design without a higher-fidelity optical validation path.
+
+## WP-v2-09 High-Fidelity Maxwell Reference Path
+
+The solver hierarchy is now explicit:
+
+```text
+Fast exploratory solver
+    -> scalar spatial CMT
+
+High-fidelity validation solver
+    -> stable 1D Maxwell/scattering solver
+
+Legacy / short-structure cross-check
+    -> ordinary TMM
+```
+
+`solvers/maxwell/longGratingScatteringSolver.ts` owns the first headless Maxwell reference path. It uses normal-incidence scalar 1D scattering matrices and Redheffer composition so long grating calculations compose boundary scattering amplitudes instead of naive transfer matrices with exponentially large intermediate fields. Uniform repeated cells can be composed with binary exponentiation.
+
+The Maxwell path preserves the WP-v2-08C canonical reference-coordinate model:
+
+- `n(z) = n_bar(z) + Delta_n cos(phi(z))`;
+- strain is sampled on reference `z`;
+- `n_bar` changes through the existing first-order material response;
+- local grating period changes as `Lambda0 * (1 + epsilon)`;
+- microscopic grating phase is accumulated continuously across optical slices;
+- fractional physical lengths are preserved by assigning the final slice grid to the requested total length.
+
+The current WP-v2-09 study is a bounded first validation, not a full promotion of Maxwell into every architecture loop. It confirms energy conservation, short sinusoidal sampling, repeated uniform-cell stability, uniform strained parity, and a bounded smooth-trough proxy. Full 10 mm strained-envelope validation still needs locally periodic repeated-block acceleration with phase-preserving partial periods before the high-fidelity solver can be the decisive arbiter for mechanical feasibility.
