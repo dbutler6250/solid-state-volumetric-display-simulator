@@ -8,19 +8,21 @@
 
 ## Latest Task
 
-- Added `src/simulation/solvers/maxwell/longGratingScatteringSolver.ts`.
-- Added focused solver tests in `src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts`.
-- Added `scripts/highFidelityBraggValidationStudy.mts`.
-- Generated `artifacts/issue-68/high-fidelity-bragg-validation-study.md` and `.json`.
+- Continued Issue #68 / PR #69 with WP-v2-09B locally periodic long-grating Maxwell validation.
+- Extended `src/simulation/solvers/maxwell/longGratingScatteringSolver.ts` with phase-continuous locally periodic mechanical blocks, repeated full-period composition, and exact-length partial-period tails.
+- Expanded `src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` to 20 tests covering repeated-cell acceleration, fractional periods, split-grating identity, mechanical block phase continuity, and 10 mm stability.
+- Replaced `scripts/highFidelityBraggValidationStudy.mts` with the full 10 mm locally periodic validation study.
+- Regenerated `artifacts/issue-68/high-fidelity-bragg-validation-study.md` and `.json`.
 - Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md`.
 
 ## Key Result
 
-- New Maxwell path: normal-incidence scalar 1D scattering matrices with Redheffer composition and binary repeated-cell exponentiation.
-- Energy conservation is confirmed in the bounded Maxwell study; worst relevant `|R + T - 1|` is about `1.02e-11`.
-- Uniform strained short-grating parity remains confirmed: `R_CMT = 0.00056544`, `R_Maxwell = 0.00055514`.
-- Bounded 0.25 mm smooth-trough proxy: `R_CMT = 0.014832`, `R_Maxwell = 0.014086`.
-- Full 10 mm smooth biased trough is not yet accepted as converged; locally periodic repeated-block acceleration is still needed before this can be the decisive architecture validation.
+- Full 10 mm locally periodic Maxwell boundary validation is now implemented.
+- Energy conservation is acceptable; worst relevant `|R + T - 1|` is about `1.16e-10`.
+- Uniform strained 10 mm validation: `R_CMT = 0.0012026`, `R_Maxwell = 0.0011831`.
+- Sharp piecewise 10 mm trough: `R_exact_CMT = 0.041461`, `R_spatial_CMT = 0.041461`, `R_Maxwell = 0.043915`.
+- Smooth 10 mm biased trough at the operating wavelength: `R_CMT = 0.021257`, `R_Maxwell = 0.021204`, absolute error `5.25e-5`, relative error `0.2468%`.
+- Maxwell spatial field reconstruction is not implemented, so moving-trough tracking and 4-actuator array selectivity remain CMT-only.
 
 Required conclusions recorded in the study:
 
@@ -29,21 +31,21 @@ HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFOR
 ```
 
 ```text
-BIASED TROUGH REMAINS PROMISING BUT OPTICAL MODELING STILL NEEDS REFINEMENT
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 ```
 
 ## Validation Performed
 
-- `npm.cmd run test -- src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` - passed, 1 file / 8 tests.
+- `npm.cmd run test -- src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` - passed, 1 file / 20 tests.
 - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts` - passed.
-- `npm.cmd run test` - passed, 34 files / 226 tests.
+- `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
+- `npm.cmd run test` - passed, 34 files / 238 tests.
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
 - `npm.cmd run test:browser` - passed, 14 tests.
-- `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
 
 ## Remaining Follow-Up
 
-- Extend the Maxwell solver from explicit strained slices to locally periodic repeated mechanical-envelope blocks with phase-preserving partial periods.
-- Add Maxwell spatial field reconstruction only after boundary scattering is fully validated.
-- Do not proceed to detailed PZT/mechanical feasibility until the full 10 mm smooth trough has accepted high-fidelity convergence.
+- Add Maxwell spatial field reconstruction with forward/backward components if feasible.
+- Revalidate moving-trough tracking and 4-actuator distinctness only after Maxwell spatial fields are trustworthy.
+- Do not proceed to detailed PZT/mechanical feasibility until Maxwell spatial localization supports the boundary-optics result.

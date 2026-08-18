@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildExplicitLocallyPeriodicBlockLayers,
   buildHybridBraggMaxwellLayers,
   buildSinusoidalUnitCell,
   composeScattering,
   identityScattering,
   repeatScattering,
+  solveHybridBraggMaxwellLocallyPeriodicPoint,
   solveHybridBraggMaxwellPoint,
+  solveLocallyPeriodicBlock,
   solveScatteringLayers,
+  type LocallyPeriodicBlock,
   type ScatteringMatrix,
 } from './longGratingScatteringSolver';
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../../structures/hybridBraggGrating';
@@ -111,5 +115,81 @@ describe('long grating Maxwell scattering solver', () => {
     expect(coarse.energyError).toBeLessThan(1e-9);
     expect(finer.energyError).toBeLessThan(1e-9);
     expect(Math.abs(coarse.reflectance - finer.reflectance)).toBeLessThan(0.05);
+  });
+
+  it.each([1, 2, 5, 10, 50, 100])('matches explicit chains for %i repeated cells', (repeatCount) => {
+    const block: LocallyPeriodicBlock = {
+      averageIndex: 1.45,
+      indexModulation: 1e-4,
+      periodM: 206.9e-9,
+      lengthM: repeatCount * 206.9e-9,
+      phaseRadians: 0.37,
+      samplesPerPeriod: 24,
+    };
+    const explicit = solveScatteringLayers(buildExplicitLocallyPeriodicBlockLayers(block), 600.01, block.averageIndex);
+    const accelerated = solveLocallyPeriodicBlock(block, 600.01, block.averageIndex);
+
+    expect(accelerated.reflectance).toBeCloseTo(explicit.reflectance, 8);
+    expect(accelerated.transmission).toBeCloseTo(explicit.transmission, 8);
+  });
+
+  it('matches explicit discretization for fractional-period blocks', () => {
+    const block: LocallyPeriodicBlock = {
+      averageIndex: 1.45,
+      indexModulation: 1e-4,
+      periodM: 206.9e-9,
+      lengthM: (0.25 + 10 + 0.4) * 206.9e-9,
+      phaseRadians: 0.19,
+      samplesPerPeriod: 48,
+    };
+    const explicit = solveScatteringLayers(buildExplicitLocallyPeriodicBlockLayers(block), 600.01, block.averageIndex);
+    const accelerated = solveLocallyPeriodicBlock(block, 600.01, block.averageIndex);
+
+    expect(accelerated.reflectance).toBeCloseTo(explicit.reflectance, 6);
+    expect(accelerated.transmission).toBeCloseTo(explicit.transmission, 6);
+  });
+
+  it.each([1, 2, 10, 100])('keeps split uniform gratings equivalent across %i mechanical blocks', (envelopeBlocks) => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      lengthMm: 0.1,
+      peakStrain: 0,
+      strainBias: 0,
+      indexModulation: 1e-4,
+      gratingPhaseRadians: 0.29,
+      fixedLaserWavelengthNm: 600.01,
+    };
+    const unsplit = solveHybridBraggMaxwellLocallyPeriodicPoint(design, 600.01, {
+      samplesPerPeriod: 24,
+      envelopeBlocks: 1,
+    });
+    const split = solveHybridBraggMaxwellLocallyPeriodicPoint(design, 600.01, {
+      samplesPerPeriod: 24,
+      envelopeBlocks,
+    });
+
+    expect(split.reflectance).toBeCloseTo(unsplit.reflectance, 8);
+    expect(split.transmission).toBeCloseTo(unsplit.transmission, 8);
+  });
+
+  it('keeps full-length locally periodic structures finite and energy conserving', () => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      lengthMm: 10,
+      indexModulation: 1e-4,
+      peakStrain: 0.0015,
+      strainBias: 0.0015,
+      strainShape: 'piezo-trough' as const,
+      perturbationEdgeWidthMm: 0.25,
+      fixedLaserWavelengthNm: 600.11,
+    };
+    const result = solveHybridBraggMaxwellLocallyPeriodicPoint(design, 600.11, {
+      samplesPerPeriod: 16,
+      envelopeBlocks: 100,
+    });
+
+    expect(Number.isFinite(result.reflectance)).toBe(true);
+    expect(Number.isFinite(result.transmission)).toBe(true);
+    expect(result.energyError).toBeLessThan(1e-9);
   });
 });
