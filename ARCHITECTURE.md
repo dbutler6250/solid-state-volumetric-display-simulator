@@ -138,3 +138,5 @@ Hybrid Bragg permanent gratings now support two structure modes:
 Segmented mode tracks section count, section length, gap length, and an inter-section grating phase mode. Supported phase relationships are continuous phase, fixed phase reset, alternating phase, explicit phase sequence, and deterministic seeded pseudo-random phase. These phase modes alter the permanent grating phase relationship between sections; they do not imply temporal decoherence of the optical source.
 
 The scalar spatial CMT solver now exposes calculated forward and backward optical amplitudes along the medium. The UI and analysis helpers use normalized backward intensity `|B(z)|^2` as the current reflection-region metric, while total reflectance remains the externally measured boundary result.
+
+Segmented structures split solver intervals at section starts, section ends, and grating-to-gap boundaries so structural discontinuities do not sit inside a numerical cell. The nominal resolution still comes from `segmentCount`, but exact structural boundaries may add intervals.

@@ -33,6 +33,9 @@ export type HybridBraggModel = {
 
 export type LocalBraggSample = {
   zM: number;
+  startM: number;
+  endM: number;
+  lengthM: number;
   sectionId: number | null;
   sectionStartM: number | null;
   sectionEndM: number | null;
@@ -48,6 +51,8 @@ export type LocalBraggSample = {
 
 const NM_PER_M = 1e9;
 const MM_PER_M = 1e3;
+
+const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
 /** Default v2 hybrid inputs use SI-derived UI units while keeping all fields explicit. */
 export const DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS: HybridBraggDesignInputs = {
@@ -143,9 +148,9 @@ export function sampleHybridBraggModel(
   model: HybridBraggModel,
   wavelengthM: number,
 ): LocalBraggSample[] {
-  const segmentLengthM = model.grating.lengthM / model.segmentCount;
-  return Array.from({ length: model.segmentCount }, (_, index) => {
-    const zM = (index + 0.5) * segmentLengthM;
+  const intervals = createSolverIntervals(model);
+  return intervals.map(({ startM, endM }) => {
+    const zM = (startM + endM) / 2;
     const section = getSectionAtZ(model.grating, zM);
     const strain = sampleStrainField(model.strain, zM);
     const local = applyMaterialStrainResponse(model.grating, model.materialResponse, strain);
@@ -159,6 +164,9 @@ export function sampleHybridBraggModel(
     const detuningPerM = betaPerM - gratingWaveNumberPerM;
     return {
       zM,
+      startM,
+      endM,
+      lengthM: endM - startM,
       sectionId: section.sectionId,
       sectionStartM: section.sectionStartM,
       sectionEndM: section.sectionEndM,
@@ -172,6 +180,38 @@ export function sampleHybridBraggModel(
       detuningPerM,
     };
   });
+}
+
+function createSolverIntervals(model: HybridBraggModel): Array<{ startM: number; endM: number }> {
+  const grid = Array.from({ length: model.segmentCount + 1 }, (_, index) =>
+    (model.grating.lengthM * index) / model.segmentCount,
+  );
+  const structuralBoundaries = model.grating.structure.mode === 'segmented'
+    ? getSegmentedStructureBoundaries(model.grating)
+    : [];
+  const boundaries = Array.from(new Set([...grid, ...structuralBoundaries]
+    .map((value) => clamp(value, 0, model.grating.lengthM))
+    .map((value) => Number(value.toPrecision(15)))))
+    .sort((left, right) => left - right);
+
+  const intervals: Array<{ startM: number; endM: number }> = [];
+  for (let index = 0; index < boundaries.length - 1; index += 1) {
+    const startM = boundaries[index];
+    const endM = boundaries[index + 1];
+    if (endM > startM) intervals.push({ startM, endM });
+  }
+  return intervals;
+}
+
+function getSegmentedStructureBoundaries(grating: PermanentBraggGrating): number[] {
+  if (grating.structure.mode === 'global') return [];
+  const pitchM = grating.structure.sectionLengthM + grating.structure.gapLengthM;
+  const boundaries = [0, grating.lengthM];
+  for (let sectionId = 0; sectionId < grating.structure.sectionCount; sectionId += 1) {
+    const sectionStartM = sectionId * pitchM;
+    boundaries.push(sectionStartM, sectionStartM + grating.structure.sectionLengthM);
+  }
+  return boundaries;
 }
 
 type SectionSample = Pick<

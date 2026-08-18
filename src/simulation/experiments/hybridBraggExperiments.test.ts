@@ -11,6 +11,7 @@ import {
   solveMovingResponseRegimeMapAsync,
   solveMovingPulseExperiment,
   solveMovingPulseExperimentAsync,
+  solveReflectionRegionEvolution,
   type FixedLaserPulsePoint,
 } from './hybridBraggExperiments';
 
@@ -267,6 +268,31 @@ describe('hybrid Bragg experiments', () => {
     expect(result.slices[0].cells[0]).toHaveLength(3);
     expect(result.slices[0].cells[0][0].strainWidthToCouplingLength).toBeCloseTo(0.25);
     expect(result.summary.classificationCounts['single-dominant'] + result.summary.classificationCounts['multi-peak'] + result.summary.classificationCounts.broad + result.summary.classificationCounts.weak + result.summary.classificationCounts['no-enhancement']).toBe(6);
+  });
+
+  it('uses one calculated spatial field for frame peaks and detected reflection regions', () => {
+    const result = solveReflectionRegionEvolution({
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      lengthMm: 3,
+      permanentGratingMode: 'segmented',
+      braggSectionCount: 3,
+      braggSectionPhaseMode: 'alternating',
+      strainShape: 'multi-tone',
+      peakStrain: 1e-4,
+      pulseSweepPointCount: 7,
+      segmentCount: 90,
+    });
+    const frame = result.frames[0];
+    const peakSample = frame.spatialField.reduce((best, sample) =>
+      sample.normalizedBackwardIntensity > best.normalizedBackwardIntensity ? sample : best,
+    frame.spatialField[0]);
+    const primaryRegion = frame.regions[0];
+
+    expect(result.thresholdFraction).toBe(0.5);
+    expect(primaryRegion.startMm).toBeLessThanOrEqual(peakSample.zM * 1e3);
+    expect(primaryRegion.endMm).toBeGreaterThanOrEqual(peakSample.zM * 1e3);
+    expect(primaryRegion.peakMm).toBeCloseTo(peakSample.zM * 1e3, 12);
+    expect(primaryRegion.peakNormalizedIntensity).toBeCloseTo(peakSample.normalizedBackwardIntensity, 12);
   });
 
   it('derives default detuning samples separately for each coupling slice', async () => {

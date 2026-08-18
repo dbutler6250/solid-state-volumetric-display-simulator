@@ -163,6 +163,36 @@ describe('spatial Bragg coupled-mode solver', () => {
     );
   });
 
+  it('places segmented section and gap boundaries on exact solver interval edges', () => {
+    const model = createHybridBraggModel({
+      ...baseDesign,
+      lengthMm: 10,
+      permanentGratingMode: 'segmented',
+      braggSectionCount: 3,
+      braggSectionGapMm: 0.17,
+      braggSectionPhaseMode: 'alternating',
+      segmentCount: 17,
+    });
+    const samples = sampleHybridBraggModel(model, 600e-9);
+    const intervalEdges = new Set(samples.flatMap((sample) => [
+      Number(sample.startM.toPrecision(12)),
+      Number(sample.endM.toPrecision(12)),
+    ]));
+    const sectionLengthM = (0.01 - 2 * 0.00017) / 3;
+    const expectedBoundaries = [
+      0,
+      sectionLengthM,
+      sectionLengthM + 0.00017,
+      2 * sectionLengthM + 0.00017,
+      2 * sectionLengthM + 2 * 0.00017,
+      3 * sectionLengthM + 2 * 0.00017,
+    ].map((value) => Number(value.toPrecision(12)));
+
+    expectedBoundaries.forEach((boundary) => {
+      expect(intervalEdges.has(boundary)).toBe(true);
+    });
+  });
+
   it('keeps continuous segmented phase equivalent to the global grating when there are no gaps', () => {
     const global = solveHybridBraggCoupledModePoint(createHybridBraggModel(baseDesign), 600);
     const segmented = solveHybridBraggCoupledModePoint(

@@ -64,6 +64,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Generalized perturbation-field architecture with prescribed localized, periodic, packet, and two-tone strain fields; phase-scanned periodic response; field-profile visualization; comparison helper; import/export metadata; and documented actuator/field separation
 - Comparative perturbation-field physics study with equal peak-strain and equal strain-energy normalizations, localized/periodic/standing/two-tone sweeps, phase-translation diagnostics, and a conditional multi-tone ranking under scalar spatial CMT
 - Segmented Bragg baseline with global/segmented permanent grating modes, inter-section phase modes, unmodulated section gaps, calculated spatial CMT field output, reflection-region detection from `|B(z)|^2`, playback/depth-time visualization, and issue-62 baseline artifacts
+- Segmented Bragg validation closeout with boundary-aware section/gap CMT intervals, per-section addressability metrics, gap and same-active-length comparisons, convergence tables, scaled TMM spot checks, and the conclusion that segmentation provides a trade-off but not a clear addressability improvement
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -83,6 +84,7 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Calculated reflection-region visualization baseline
 - [x] Depth-time reflection map baseline
 - [x] Synchronized illumination timing indicator baseline
+- [x] Segmented Bragg validation closeout
 - [ ] Realistic actuator-to-field models
 - [ ] Apodized grating support
 - [ ] Acoustic pulse propagation

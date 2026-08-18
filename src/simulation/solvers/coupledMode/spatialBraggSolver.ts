@@ -43,9 +43,8 @@ export function solveHybridBraggCoupledModePoint(
 ): CoupledModePointResult {
   const wavelengthM = wavelengthNm * M_PER_NM;
   const samples = sampleHybridBraggModel(model, wavelengthM);
-  const dzM = model.grating.lengthM / model.segmentCount;
   const segmentMatrices = samples.map((sample) =>
-    segmentMatrix(getComplexCoupling(sample.couplingCoefficientPerM, sample.gratingPhaseRadians), sample.detuningPerM, dzM),
+    segmentMatrix(getComplexCoupling(sample.couplingCoefficientPerM, sample.gratingPhaseRadians), sample.detuningPerM, sample.lengthM),
   );
   const system = segmentMatrices.reduce((matrix, segment) => multiplyMatrix(segment, matrix), identity());
   const reflectionAmplitude = scale(divide(system[1][0], system[1][1]), -1);
@@ -132,7 +131,7 @@ function calculateSpatialField(
     const halfSegment = segmentMatrix(
       getComplexCoupling(sample.couplingCoefficientPerM, sample.gratingPhaseRadians),
       sample.detuningPerM,
-      getSegmentLength(samples) / 2,
+      sample.lengthM / 2,
     );
     const centerState = multiplyMatrixVector(multiplyMatrix(halfSegment, prefix), inputState);
     prefix = multiplyMatrix(segmentMatrices[index], prefix);
@@ -164,11 +163,6 @@ function getComplexCoupling(couplingCoefficientPerM: number, phaseRadians: numbe
     couplingCoefficientPerM * Math.cos(phaseRadians),
     couplingCoefficientPerM * Math.sin(phaseRadians),
   );
-}
-
-function getSegmentLength(samples: LocalBraggSample[]): number {
-  if (samples.length < 2) return 0;
-  return samples[1].zM - samples[0].zM;
 }
 
 function sqrtRealToComplex(value: number): Complex {
