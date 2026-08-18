@@ -39,4 +39,30 @@ describe('generalized strain fields', () => {
     expect(Math.abs(sampleStrainField({ ...baseField, shape: 'carrier-envelope' }, 3))).toBeLessThan(0.01);
     expect(sampleStrainField({ ...baseField, shape: 'multi-tone' }, 0)).toBeCloseTo(1.5);
   });
+
+  it('samples prescribed piezo-like windows and biased troughs', () => {
+    expect(sampleStrainField({ ...baseField, shape: 'piezo-window', biasStrain: 0.2 }, 0)).toBeCloseTo(1.2);
+    expect(sampleStrainField({ ...baseField, shape: 'piezo-window', peakStrain: -1, biasStrain: 0.2 }, 0)).toBeCloseTo(-0.8);
+    expect(sampleStrainField({ ...baseField, shape: 'piezo-trough', peakStrain: 0.6, biasStrain: 1 }, 0)).toBeCloseTo(0.4);
+    expect(sampleStrainField({ ...baseField, shape: 'piezo-trough', peakStrain: 0.6, biasStrain: 1 }, 3)).toBeCloseTo(1);
+  });
+
+  it('sums overlapping prescribed piezo array windows deterministically', () => {
+    const arrayField: StrainField = {
+      ...baseField,
+      shape: 'piezo-array',
+      centerM: 0,
+      widthM: 1,
+      edgeWidthM: 0.5,
+      actuatorCount: 3,
+      actuatorPitchM: 1,
+      activeActuatorIndex: 1,
+      actuatorCommandAmplitude: 1,
+      actuatorAdjacentCommandAmplitude: 0.5,
+    };
+
+    expect(sampleStrainField(arrayField, 0)).toBeCloseTo(1);
+    expect(sampleStrainField(arrayField, -1)).toBeCloseTo(0.5);
+    expect(sampleStrainField(arrayField, 0.75)).toBeGreaterThan(0.5);
+  });
 });

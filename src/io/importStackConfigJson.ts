@@ -595,6 +595,12 @@ function parseHybridBraggDesign(
   const perturbationSecondaryPeriodMm = value.perturbationSecondaryPeriodMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryPeriodMm;
   const perturbationSecondaryAmplitudeRatio = value.perturbationSecondaryAmplitudeRatio ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryAmplitudeRatio;
   const perturbationSecondaryPhaseRadians = value.perturbationSecondaryPhaseRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryPhaseRadians;
+  const strainBias = value.strainBias ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.strainBias;
+  const actuatorCount = value.actuatorCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorCount;
+  const actuatorPitchMm = value.actuatorPitchMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorPitchMm;
+  const activeActuatorIndex = value.activeActuatorIndex ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.activeActuatorIndex;
+  const actuatorCommandAmplitude = value.actuatorCommandAmplitude ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorCommandAmplitude;
+  const actuatorAdjacentCommandAmplitude = value.actuatorAdjacentCommandAmplitude ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorAdjacentCommandAmplitude;
   const permanentGratingMode = value.permanentGratingMode ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.permanentGratingMode;
   const braggSectionCount = value.braggSectionCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionCount;
   const braggSectionGapMm = value.braggSectionGapMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionGapMm;
@@ -616,12 +622,21 @@ function parseHybridBraggDesign(
     !isFiniteNumber(perturbationVelocityMps) ||
     !isFiniteNumber(perturbationSecondaryPeriodMm) ||
     !isFiniteNumber(perturbationSecondaryAmplitudeRatio) ||
-    !isFiniteNumber(perturbationSecondaryPhaseRadians)
+    !isFiniteNumber(perturbationSecondaryPhaseRadians) ||
+    !isFiniteNumber(strainBias) ||
+    !isFiniteNumber(actuatorCount) ||
+    !isFiniteNumber(actuatorPitchMm) ||
+    !isFiniteNumber(activeActuatorIndex) ||
+    !isFiniteNumber(actuatorCommandAmplitude) ||
+    !isFiniteNumber(actuatorAdjacentCommandAmplitude)
   ) {
     return { ok: false, message: 'Hybrid perturbation fields must be finite numbers.' };
   }
   if (!Number.isInteger(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid pulse sweep points must be a whole number.' };
+  }
+  if (!Number.isInteger(actuatorCount) || !Number.isInteger(activeActuatorIndex)) {
+    return { ok: false, message: 'Hybrid actuator count and active actuator must be whole numbers.' };
   }
   if (permanentGratingMode !== 'global' && permanentGratingMode !== 'segmented') {
     return { ok: false, message: 'Hybrid permanent grating mode must be global or segmented.' };
@@ -683,6 +698,12 @@ function parseHybridBraggDesign(
       perturbationSecondaryPeriodMm,
       perturbationSecondaryAmplitudeRatio,
       perturbationSecondaryPhaseRadians,
+      strainBias,
+      actuatorCount,
+      actuatorPitchMm,
+      activeActuatorIndex,
+      actuatorCommandAmplitude,
+      actuatorAdjacentCommandAmplitude,
       effectivePhotoelasticCoefficient: design.effectivePhotoelasticCoefficient,
       segmentCount: design.segmentCount,
       fixedLaserWavelengthNm: design.fixedLaserWavelengthNm,
@@ -773,6 +794,9 @@ function isHybridStrainShape(value: unknown): value is NonNullable<QuarterWaveSt
     value === 'traveling-sinusoid' ||
     value === 'standing-wave' ||
     value === 'carrier-envelope' ||
-    value === 'multi-tone'
+    value === 'multi-tone' ||
+    value === 'piezo-window' ||
+    value === 'piezo-trough' ||
+    value === 'piezo-array'
   );
 }

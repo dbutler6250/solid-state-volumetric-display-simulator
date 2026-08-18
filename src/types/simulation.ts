@@ -29,7 +29,10 @@ export type HybridStrainShape =
   | 'traveling-sinusoid'
   | 'standing-wave'
   | 'carrier-envelope'
-  | 'multi-tone';
+  | 'multi-tone'
+  | 'piezo-window'
+  | 'piezo-trough'
+  | 'piezo-array';
 
 export type HybridPermanentGratingMode = 'global' | 'segmented';
 
@@ -80,6 +83,12 @@ export type HybridBraggDesignInputs = {
   perturbationSecondaryPeriodMm: number;
   perturbationSecondaryAmplitudeRatio: number;
   perturbationSecondaryPhaseRadians: number;
+  strainBias: number;
+  actuatorCount: number;
+  actuatorPitchMm: number;
+  activeActuatorIndex: number;
+  actuatorCommandAmplitude: number;
+  actuatorAdjacentCommandAmplitude: number;
   effectivePhotoelasticCoefficient: number;
   segmentCount: number;
   fixedLaserWavelengthNm: number;

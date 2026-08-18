@@ -64,6 +64,25 @@ test.describe('browser regression harness', () => {
     await expect(page.getByText('Sweep complete:')).toBeVisible();
   });
 
+  test('hybrid controls expose prescribed piezo actuator fields', async ({ page }) => {
+    await openSpectrum(page);
+
+    await page.getByRole('combobox', { name: 'Input mode' }).selectOption('hybrid');
+    const perturbationType = page.getByRole('combobox', { name: 'Perturbation type' });
+    await perturbationType.selectOption('piezo-window');
+    await expect(perturbationType).toHaveValue('piezo-window');
+    await expect(page.getByRole('textbox', { name: 'bias strain' })).toBeVisible();
+
+    await perturbationType.selectOption('piezo-trough');
+    await expect(perturbationType).toHaveValue('piezo-trough');
+    await expect(page.getByRole('textbox', { name: 'bias strain' })).toBeVisible();
+
+    await perturbationType.selectOption('piezo-array');
+    await expect(perturbationType).toHaveValue('piezo-array');
+    await expect(page.getByRole('textbox', { name: 'active actuator' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'adjacent command' })).toBeVisible();
+  });
+
   test('3D view opens and supports volume and plane modes', async ({ page }) => {
     await openSpectrum(page);
     await page.getByRole('tab', { name: '3D View' }).click();

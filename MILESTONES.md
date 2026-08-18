@@ -66,6 +66,9 @@ Keep this section as the historical record. Do not create issues for these items
 - Segmented Bragg baseline with global/segmented permanent grating modes, inter-section phase modes, unmodulated section gaps, calculated spatial CMT field output, reflection-region detection from `|B(z)|^2`, playback/depth-time visualization, and issue-62 baseline artifacts
 - Segmented Bragg validation closeout with boundary-aware section/gap CMT intervals, per-section addressability metrics, gap and same-active-length comparisons, convergence tables, scaled TMM spot checks, and the conclusion that segmentation provides a trade-off but not a clear addressability improvement
 - Target reflection-state optimization foundation with explicit depth-window objective metrics, parameterized coupling and phase profiles, deterministic coarse grating-profile search, multi-state depth-address lookup metrics, and issue-64 study artifacts
+- Piezo-defined prescribed strain fields with smooth window, biased trough, and actuator-array families in the existing hybrid Bragg perturbation pipeline
+- WP-v2-08 optical study artifacts comparing PZT window, biased trough, actuator arrays, interpolation, standing-wave, and multi-tone references
+- Biased strain-trough result identified as the strongest first-pass actuator-defined optical target, with mechanical feasibility deferred
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -90,6 +93,10 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Parameterized grating profiles
 - [x] Coarse grating-profile optimization
 - [x] Multi-state depth-address evaluation
+- [x] Prescribed piezo-like strain window
+- [x] Biased strain-trough architecture
+- [x] Sequential actuator-array optical study
+- [x] Inter-actuator interpolation optical study
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization

@@ -12,7 +12,7 @@ export type TargetReflectionState = {
   targetDepthMm: number;
   targetWidthMm: number;
   controlState: number;
-  controlKind: 'position' | 'phase';
+  controlKind: 'position' | 'phase' | 'actuator-index';
   targetSectionId?: number;
   weighting?: TargetRegionWeighting;
 };
@@ -139,7 +139,9 @@ export function compareObjectiveMetrics(left: ObjectiveMetrics, right: Objective
 function applyTargetControlState(design: HybridBraggDesignInputs, target: TargetReflectionState): HybridBraggDesignInputs {
   return target.controlKind === 'phase'
     ? { ...design, perturbationTemporalPhaseRadians: target.controlState }
-    : { ...design, strainCenterMm: target.controlState };
+    : target.controlKind === 'actuator-index'
+      ? { ...design, activeActuatorIndex: target.controlState }
+      : { ...design, strainCenterMm: target.controlState };
 }
 
 function integrateTargetPower(field: SpatialCoupledModeFieldSample[], target: TargetReflectionState): number {

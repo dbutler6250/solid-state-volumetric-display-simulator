@@ -161,3 +161,22 @@ ParameterizedGratingProfile
 `optimization/targetReflectionState.ts` owns `TargetReflectionState`, `ObjectiveMetrics`, multi-state aggregation, and deterministic depth-address lookup generation. It evaluates calculated normalized backward optical intensity `|B(z)|^2` against target windows and keeps target power, off-target power, strongest competitor, selectivity, reflectance, and active-region counts as separate raw outputs.
 
 `optimization/gratingProfileSearch.ts` owns bounded candidate enumeration and ranking. The initial search intentionally uses interpretable low-dimensional profiles and same-peak / same-integrated coupling variants. It does not perform arbitrary continuous inverse design or optimize every perturbation sample independently.
+
+## WP-v2-08 Actuator-Defined Prescribed Fields
+
+Piezo-oriented controls remain prescribed perturbation fields, not mechanical actuator solvers:
+
+```text
+ActuatorCommand
+-> PrescribedPerturbationField
+-> MaterialResponse
+-> PermanentGratingStructure
+-> SpatialCmtSolver
+-> TargetReflectionStateMetrics
+```
+
+`perturbations/strainField.ts` now supports prescribed piezo-like smooth windows, biased troughs, and actuator arrays. Array fields sum commanded neighboring windows directly so overlap is represented in the optical input instead of clipped or converted into separate optical regions.
+
+`HybridBraggDesignInputs` stores actuator parameters in UI units: background strain bias, actuator count, pitch, active actuator index, primary command amplitude, and adjacent command amplitude. `structures/hybridBraggGrating.ts` converts those into SI strain-field parameters before the material response is sampled. The solver still receives only local strain, local grating properties, coupling, phase, and detuning samples.
+
+Target-state evaluation accepts actuator-index control states for sequential array studies. This keeps lookup/addressability metrics shared across moving position scans, phase scans, and quasi-static actuator stepping.
