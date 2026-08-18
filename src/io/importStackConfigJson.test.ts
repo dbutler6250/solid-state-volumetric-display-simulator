@@ -442,6 +442,62 @@ describe('importStackConfigJson', () => {
     });
   });
 
+  it('preserves imported hybrid coupling and phase profiles', () => {
+    const hybridDesign = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      couplingProfile: {
+        family: 'piecewise' as const,
+        zoneMultipliers: [0.5, 1.2, 0.8, 1],
+        normalizeIntegratedCoupling: true,
+      },
+      phaseProfile: {
+        family: 'alternating' as const,
+        zoneCount: 4,
+        phaseStepRadians: Math.PI,
+      },
+    };
+    const payload = makeModernPayload({
+      structureType: 'hybrid-bragg-grating',
+      inputs: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: hybridDesign,
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: true,
+      inputs: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: hybridDesign,
+      },
+    });
+  });
+
+  it('rejects invalid imported hybrid profile fields', () => {
+    const payload = makeModernPayload({
+      structureType: 'hybrid-bragg-grating',
+      inputs: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: {
+          ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+          couplingProfile: {
+            family: 'piecewise',
+            zoneMultipliers: [1, 'bad'],
+            normalizeIntegratedCoupling: true,
+          },
+        },
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: false,
+      message: 'Hybrid piecewise coupling profile fields are invalid.',
+    });
+  });
+
   it('returns an error when modern units are missing', () => {
     const payload = makeModernPayload({ units: undefined });
 

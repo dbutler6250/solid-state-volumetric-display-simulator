@@ -65,6 +65,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Comparative perturbation-field physics study with equal peak-strain and equal strain-energy normalizations, localized/periodic/standing/two-tone sweeps, phase-translation diagnostics, and a conditional multi-tone ranking under scalar spatial CMT
 - Segmented Bragg baseline with global/segmented permanent grating modes, inter-section phase modes, unmodulated section gaps, calculated spatial CMT field output, reflection-region detection from `|B(z)|^2`, playback/depth-time visualization, and issue-62 baseline artifacts
 - Segmented Bragg validation closeout with boundary-aware section/gap CMT intervals, per-section addressability metrics, gap and same-active-length comparisons, convergence tables, scaled TMM spot checks, and the conclusion that segmentation provides a trade-off but not a clear addressability improvement
+- Target reflection-state optimization foundation with explicit depth-window objective metrics, parameterized coupling and phase profiles, deterministic coarse grating-profile search, multi-state depth-address lookup metrics, and issue-64 study artifacts
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -85,8 +86,13 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Depth-time reflection map baseline
 - [x] Synchronized illumination timing indicator baseline
 - [x] Segmented Bragg validation closeout
+- [x] Target reflection-state metrics
+- [x] Parameterized grating profiles
+- [x] Coarse grating-profile optimization
+- [x] Multi-state depth-address evaluation
 - [ ] Realistic actuator-to-field models
-- [ ] Apodized grating support
+- [x] Apodized grating support
+- [ ] Optimized reflection visualization
 - [ ] Acoustic pulse propagation
 - [ ] Disorder / fabrication tolerance model
 - [ ] Time-domain visualization

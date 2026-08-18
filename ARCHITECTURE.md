@@ -140,3 +140,24 @@ Segmented mode tracks section count, section length, gap length, and an inter-se
 The scalar spatial CMT solver now exposes calculated forward and backward optical amplitudes along the medium. The UI and analysis helpers use normalized backward intensity `|B(z)|^2` as the current reflection-region metric, while total reflectance remains the externally measured boundary result.
 
 Segmented structures split solver intervals at section starts, section ends, and grating-to-gap boundaries so structural discontinuities do not sit inside a numerical cell. The nominal resolution still comes from `segmentCount`, but exact structural boundaries may add intervals.
+
+## WP-v2-07 Optimization Foundation
+
+Target-state optimization is an experiment-layer capability, not React component logic:
+
+```text
+ParameterizedGratingProfile
++ PhaseProfile
++ PerturbationField control state
+-> MaterialResponse
+-> SpatialBraggSolver
+-> TargetReflectionState
+-> ObjectiveMetrics / MultiStateObjectiveMetrics
+-> deterministic search / study artifacts
+```
+
+`HybridCouplingProfile` supports uniform, Gaussian, raised-cosine, Tukey-like, and low-count piecewise coupling profiles. `HybridPhaseProfile` supports constant phase, global linear ramps, low-count piecewise phase zones, and alternating zones. These are sampled in `structures/hybridBraggGrating.ts` when solver intervals are created, so the solver still consumes piecewise-constant local coupling, phase, detuning, and material state.
+
+`optimization/targetReflectionState.ts` owns `TargetReflectionState`, `ObjectiveMetrics`, multi-state aggregation, and deterministic depth-address lookup generation. It evaluates calculated normalized backward optical intensity `|B(z)|^2` against target windows and keeps target power, off-target power, strongest competitor, selectivity, reflectance, and active-region counts as separate raw outputs.
+
+`optimization/gratingProfileSearch.ts` owns bounded candidate enumeration and ranking. The initial search intentionally uses interpretable low-dimensional profiles and same-peak / same-integrated coupling variants. It does not perform arbitrary continuous inverse design or optimize every perturbation sample independently.

@@ -33,6 +33,19 @@ export type HybridStrainShape =
 
 export type HybridPermanentGratingMode = 'global' | 'segmented';
 
+export type HybridCouplingProfile =
+  | { family: 'uniform' }
+  | { family: 'gaussian'; widthFraction: number; peakMultiplier: number; normalizeIntegratedCoupling: boolean }
+  | { family: 'raised-cosine'; floorMultiplier: number; peakMultiplier: number; normalizeIntegratedCoupling: boolean }
+  | { family: 'tukey'; taperFraction: number; floorMultiplier: number; peakMultiplier: number; normalizeIntegratedCoupling: boolean }
+  | { family: 'piecewise'; zoneMultipliers: number[]; normalizeIntegratedCoupling: boolean };
+
+export type HybridPhaseProfile =
+  | { family: 'constant' }
+  | { family: 'linear-ramp'; totalPhaseRadians: number }
+  | { family: 'piecewise'; zonePhaseRadians: number[] }
+  | { family: 'alternating'; zoneCount: number; phaseStepRadians: number };
+
 export type HybridSectionPhaseMode =
   | 'continuous'
   | 'fixed-reset'
@@ -47,6 +60,8 @@ export type HybridBraggDesignInputs = {
   indexModulation: number;
   gratingPeriodNm: number;
   gratingPhaseRadians: number;
+  couplingProfile?: HybridCouplingProfile;
+  phaseProfile?: HybridPhaseProfile;
   permanentGratingMode: HybridPermanentGratingMode;
   braggSectionCount: number;
   braggSectionGapMm: number;
