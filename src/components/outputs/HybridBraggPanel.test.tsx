@@ -25,4 +25,27 @@ describe('HybridBraggPanel', () => {
     expect(markup).toContain('Seeded pseudo-random');
     expect(markup).not.toContain('Explicit sequence');
   });
+
+  it('exposes actuator controls for prescribed piezo array fields', () => {
+    const markup = renderToStaticMarkup(
+      <HybridBraggPanel
+        inputs={{
+          ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+          thicknessMode: 'hybrid',
+          hybridBraggDesign: {
+            ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+            strainShape: 'piezo-array',
+          },
+        }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('Prescribed piezo array');
+    expect(markup).toContain('Bias strain');
+    expect(markup).toContain('Active actuator');
+    expect(markup).toContain('Adjacent command');
+    expect(markup).toContain('Array polarity');
+    expect(markup).toContain('Biased trough');
+  });
 });

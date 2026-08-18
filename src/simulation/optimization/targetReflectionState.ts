@@ -12,7 +12,7 @@ export type TargetReflectionState = {
   targetDepthMm: number;
   targetWidthMm: number;
   controlState: number;
-  controlKind: 'position' | 'phase';
+  controlKind: 'position' | 'phase' | 'actuator-index';
   targetSectionId?: number;
   weighting?: TargetRegionWeighting;
 };
@@ -29,6 +29,11 @@ export type ObjectiveMetrics = {
   activeRegionCount: number;
   secondaryPeakRatio: number | null;
 };
+
+export type UsefulResponseClassification =
+  | 'high-selectivity / meaningful-response'
+  | 'high-selectivity / weak-response'
+  | 'low-selectivity';
 
 export type MultiStateObjectiveMetrics = {
   states: Array<TargetReflectionState & { metrics: ObjectiveMetrics }>;
@@ -136,10 +141,25 @@ export function compareObjectiveMetrics(left: ObjectiveMetrics, right: Objective
   return leftSelectivity - rightSelectivity || left.peakEnhancement - right.peakEnhancement;
 }
 
+/** Flags research cases where a high ratio is produced by a weak optical response. */
+export function classifyUsefulResponse(
+  metrics: ObjectiveMetrics,
+  selectivityThreshold = 2,
+  minimumTargetPower = 0.05,
+): UsefulResponseClassification {
+  const selectivity = metrics.targetSelectivity ?? 0;
+  if (selectivity < selectivityThreshold) return 'low-selectivity';
+  return metrics.targetPower >= minimumTargetPower
+    ? 'high-selectivity / meaningful-response'
+    : 'high-selectivity / weak-response';
+}
+
 function applyTargetControlState(design: HybridBraggDesignInputs, target: TargetReflectionState): HybridBraggDesignInputs {
   return target.controlKind === 'phase'
     ? { ...design, perturbationTemporalPhaseRadians: target.controlState }
-    : { ...design, strainCenterMm: target.controlState };
+    : target.controlKind === 'actuator-index'
+      ? { ...design, activeActuatorIndex: target.controlState }
+      : { ...design, strainCenterMm: target.controlState };
 }
 
 function integrateTargetPower(field: SpatialCoupledModeFieldSample[], target: TargetReflectionState): number {

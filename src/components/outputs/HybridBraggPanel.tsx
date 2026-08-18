@@ -17,7 +17,9 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
   const isActiveMode = inputs.thicknessMode === 'hybrid';
   const usesWidth = ['rectangular', 'gaussian', 'smooth-top-hat', 'triangular', 'carrier-envelope'].includes(design.strainShape);
   const usesCenter = ['rectangular', 'gaussian', 'smooth-top-hat', 'triangular', 'carrier-envelope'].includes(design.strainShape);
-  const usesEdge = design.strainShape === 'smooth-top-hat';
+  const usesPiezo = ['piezo-window', 'piezo-trough', 'piezo-array'].includes(design.strainShape);
+  const usesPiezoSingle = ['piezo-window', 'piezo-trough'].includes(design.strainShape);
+  const usesEdge = design.strainShape === 'smooth-top-hat' || usesPiezo;
   const usesWave = ['traveling-sinusoid', 'standing-wave', 'carrier-envelope', 'multi-tone'].includes(design.strainShape);
   const usesSecondaryWave = design.strainShape === 'multi-tone';
   const updateDesign = (patch: Partial<HybridBraggDesignInputs>) => {
@@ -103,11 +105,35 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
             <option value="standing-wave">Standing wave</option>
             <option value="carrier-envelope">Carrier-envelope packet</option>
             <option value="multi-tone">Two-tone superposition</option>
+            <option value="piezo-window">Prescribed piezo-like strain window</option>
+            <option value="piezo-trough">Prescribed piezo-like strain trough</option>
+            <option value="piezo-array">Prescribed piezo array</option>
           </select>
         </label>
-        {usesCenter ? <HybridNumber label="Field center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
-        {usesWidth ? <HybridNumber label="Field width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} /> : null}
+        {usesCenter || usesPiezoSingle ? <HybridNumber label="Field center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
+        {usesWidth || usesPiezo ? <HybridNumber label="Field width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} /> : null}
         {usesEdge ? <HybridNumber label="Edge width (mm)" value={design.perturbationEdgeWidthMm} min={0} step={0.05} disabled={!isActiveMode} onChange={(perturbationEdgeWidthMm) => updateDesign({ perturbationEdgeWidthMm })} /> : null}
+        {usesPiezo ? <HybridNumber label="Bias strain" value={design.strainBias} step={0.00001} disabled={!isActiveMode} onChange={(strainBias) => updateDesign({ strainBias })} /> : null}
+        {design.strainShape === 'piezo-array' ? (
+          <>
+            <HybridNumber label="Actuator count" value={design.actuatorCount} min={1} step={1} integer disabled={!isActiveMode} onChange={(actuatorCount) => updateDesign({ actuatorCount })} />
+            <HybridNumber label="Actuator pitch (mm)" value={design.actuatorPitchMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(actuatorPitchMm) => updateDesign({ actuatorPitchMm })} />
+            <HybridNumber label="Active actuator" value={design.activeActuatorIndex} min={0} max={Math.max(0, design.actuatorCount - 1)} step={1} integer disabled={!isActiveMode} onChange={(activeActuatorIndex) => updateDesign({ activeActuatorIndex })} />
+            <HybridNumber label="Command amplitude" value={design.actuatorCommandAmplitude} step={0.1} disabled={!isActiveMode} onChange={(actuatorCommandAmplitude) => updateDesign({ actuatorCommandAmplitude })} />
+            <HybridNumber label="Adjacent command" value={design.actuatorAdjacentCommandAmplitude} step={0.1} disabled={!isActiveMode} onChange={(actuatorAdjacentCommandAmplitude) => updateDesign({ actuatorAdjacentCommandAmplitude })} />
+            <label className="field">
+              <span>Array polarity</span>
+              <select
+                value={design.actuatorPolarity}
+                disabled={!isActiveMode}
+                onChange={(event) => updateDesign({ actuatorPolarity: event.target.value as HybridBraggDesignInputs['actuatorPolarity'] })}
+              >
+                <option value="window">Positive window</option>
+                <option value="trough">Biased trough</option>
+              </select>
+            </label>
+          </>
+        ) : null}
         {usesWave ? <HybridNumber label="Wave period (mm)" value={design.perturbationPeriodMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(perturbationPeriodMm) => updateDesign({ perturbationPeriodMm })} /> : null}
         {usesWave ? <HybridNumber label="Spatial phase (rad)" value={design.perturbationPhaseRadians} step={0.1} disabled={!isActiveMode} onChange={(perturbationPhaseRadians) => updateDesign({ perturbationPhaseRadians })} /> : null}
         {usesWave ? <HybridNumber label="Time phase (rad)" value={design.perturbationTemporalPhaseRadians} step={0.1} disabled={!isActiveMode} onChange={(perturbationTemporalPhaseRadians) => updateDesign({ perturbationTemporalPhaseRadians })} /> : null}

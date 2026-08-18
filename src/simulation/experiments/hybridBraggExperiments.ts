@@ -189,7 +189,7 @@ export type ReflectionRegion = {
 
 export type ReflectionRegionFrame = {
   parameterValue: number;
-  parameterKind: 'position' | 'phase';
+  parameterKind: 'position' | 'phase' | 'actuator-index';
   reflectance: number;
   spatialField: SpatialCoupledModeFieldSample[];
   regions: ReflectionRegion[];
@@ -569,19 +569,25 @@ export function solveReflectionRegionEvolution(
   design: HybridBraggDesignInputs,
   thresholdFraction = 0.5,
 ): ReflectionRegionEvolutionResult {
-  const parameterKind: ReflectionRegionFrame['parameterKind'] = isPhaseScannedField(design.strainShape) ? 'phase' : 'position';
+  const parameterKind: ReflectionRegionFrame['parameterKind'] = design.strainShape === 'piezo-array'
+    ? 'actuator-index'
+    : isPhaseScannedField(design.strainShape) ? 'phase' : 'position';
   const parameterValues = parameterKind === 'phase'
     ? Array.from({ length: Math.max(3, design.pulseSweepPointCount) }, (_, index) =>
         Number((((2 * Math.PI) / Math.max(3, design.pulseSweepPointCount)) * index).toPrecision(12)),
       )
-    : Array.from({ length: design.pulseSweepPointCount }, (_, index) => {
+    : parameterKind === 'actuator-index'
+      ? Array.from({ length: Math.max(1, Math.round(design.actuatorCount)) }, (_, index) => index)
+      : Array.from({ length: design.pulseSweepPointCount }, (_, index) => {
         const step = (design.pulseSweepEndMm - design.pulseSweepStartMm) / (design.pulseSweepPointCount - 1);
         return Number((design.pulseSweepStartMm + step * index).toPrecision(12));
       });
   const frames = parameterValues.map((parameterValue) => {
     const frameDesign = parameterKind === 'phase'
       ? { ...design, perturbationTemporalPhaseRadians: parameterValue }
-      : { ...design, strainCenterMm: parameterValue };
+      : parameterKind === 'actuator-index'
+        ? { ...design, activeActuatorIndex: parameterValue }
+        : { ...design, strainCenterMm: parameterValue };
     const result = solveHybridBraggCoupledModePoint(createHybridBraggModel(frameDesign), design.fixedLaserWavelengthNm);
     const regions = detectReflectionRegions(result.spatialField, thresholdFraction);
     const activeSectionIds = getActiveSectionIds(regions);

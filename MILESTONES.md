@@ -66,6 +66,11 @@ Keep this section as the historical record. Do not create issues for these items
 - Segmented Bragg baseline with global/segmented permanent grating modes, inter-section phase modes, unmodulated section gaps, calculated spatial CMT field output, reflection-region detection from `|B(z)|^2`, playback/depth-time visualization, and issue-62 baseline artifacts
 - Segmented Bragg validation closeout with boundary-aware section/gap CMT intervals, per-section addressability metrics, gap and same-active-length comparisons, convergence tables, scaled TMM spot checks, and the conclusion that segmentation provides a trade-off but not a clear addressability improvement
 - Target reflection-state optimization foundation with explicit depth-window objective metrics, parameterized coupling and phase profiles, deterministic coarse grating-profile search, multi-state depth-address lookup metrics, and issue-64 study artifacts
+- Piezo-defined prescribed strain fields with smooth window, biased trough, and actuator-array families in the existing hybrid Bragg perturbation pipeline
+- WP-v2-08 optical study artifacts comparing PZT window, biased trough, actuator arrays, interpolation, standing-wave, and multi-tone references
+- Biased strain-trough result identified as the strongest first-pass actuator-defined optical target, with mechanical feasibility deferred
+- Biased strain-trough validation closeout: CMT convergence and moving-trough tracking are strong, biased-trough arrays improve discrete addressing, but TMM does not yet support the CMT trough reflectance result
+- Independent biased-trough optical validation gate: short uniform strained CMT/TMM parity is confirmed, exact piecewise CMT matches spatial CMT, and the full biased trough remains approximation-sensitive pending a higher-fidelity optical reference
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -90,6 +95,13 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Parameterized grating profiles
 - [x] Coarse grating-profile optimization
 - [x] Multi-state depth-address evaluation
+- [x] Prescribed piezo-like strain window
+- [x] Biased strain-trough architecture
+- [x] Sequential actuator-array optical study
+- [x] Inter-actuator interpolation optical study
+- [x] Biased strain-trough CMT validation
+- [x] Biased-trough actuator-array optical study
+- [x] Independent trough validation / improved TMM representation
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization
