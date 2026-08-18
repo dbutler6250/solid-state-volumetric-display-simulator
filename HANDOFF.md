@@ -2,9 +2,9 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-62-segmented-bragg-reflection-visualization`.
-- Draft PR #63 tracks Issue #62 / WP-v2-06 segmented Bragg media and reflection-region visualization.
-- Base: `main` after merged PR #61.
+- Current branch: `main`.
+- PR #63 for Issue #62 / WP-v2-06 segmented Bragg media and reflection-region visualization was squash-merged into `main` as `b8694c8`.
+- The remote and local `codex/issue-62-segmented-bragg-reflection-visualization` branches have been cleaned up.
 
 ## Latest Task
 
@@ -37,4 +37,4 @@
 
 ## Remaining Follow-Up
 
-- Commit the review-fix update and push PR #63.
+- Continue from `main` for the next issue or follow-up.
