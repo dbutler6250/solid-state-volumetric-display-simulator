@@ -1,0 +1,2151 @@
+{
+  "conclusion": "SEGMENTATION PROVIDES A TRADE-OFF BUT NOT A CLEAR IMPROVEMENT",
+  "visualizationConclusion": "VISUALIZED REFLECTION REGIONS ARE NUMERICALLY STABLE",
+  "rows": [
+    {
+      "label": "global coherent multi-tone reference",
+      "strainShape": "multi-tone",
+      "sectionCount": 1,
+      "phaseMode": "continuous",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 10,
+      "sectionLengthToCouplingLength": 5.235900490974806,
+      "staticReflectance": 0.006062708946837972,
+      "peakReflectance": 0.2248162453603682,
+      "peakEnhancement": 0.21875353641353024,
+      "secondaryPeakRatio": 0.43591887291359815,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0,
+      "bestSectionSelectivity": null,
+      "medianSectionSelectivity": null,
+      "addressableSectionCount": 0,
+      "patternType": "periodic band motion",
+      "addressability": []
+    },
+    {
+      "label": "2 sections / continuous / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 2,
+      "phaseMode": "continuous",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 5,
+      "sectionLengthToCouplingLength": 2.617950245487403,
+      "staticReflectance": 0.006062708946837972,
+      "peakReflectance": 0.2248162453603682,
+      "peakEnhancement": 0.21875353641353024,
+      "secondaryPeakRatio": 0.43591887291359815,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.33459383054899067,
+      "bestSectionSelectivity": 4.397201888061663,
+      "medianSectionSelectivity": 2.7370615536132203,
+      "addressableSectionCount": 2,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.46216333253,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.2274173498185255,
+          "selectivity": 4.397201888061663
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9285730304168072,
+          "selectivity": 1.0769212191647775
+        }
+      ]
+    },
+    {
+      "label": "2 sections / fixed-reset / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 2,
+      "phaseMode": "fixed-reset",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 5,
+      "sectionLengthToCouplingLength": 2.617950245487403,
+      "staticReflectance": 0.001719151911358667,
+      "peakReflectance": 0.37792854055990044,
+      "peakEnhancement": 0.37620938864854175,
+      "secondaryPeakRatio": 0.9898599914925225,
+      "detectedRegionCount": 4,
+      "strongestCompetingSectionResponse": 0.6452472838401293,
+      "bestSectionSelectivity": 3.3300629274563547,
+      "medianSectionSelectivity": 2.140046206362954,
+      "addressableSectionCount": 1,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 2.30810888835,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.30029462559250886,
+          "selectivity": 3.3300629274563547
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": false,
+          "bestControlState": 3.97507641883,
+          "targetResponse": 0.9500294852695536,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9500294852695536
+        }
+      ]
+    },
+    {
+      "label": "2 sections / alternating / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 2,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 5,
+      "sectionLengthToCouplingLength": 2.617950245487403,
+      "staticReflectance": 0.004589832394125894,
+      "peakReflectance": 0.3175647732184844,
+      "peakEnhancement": 0.3129749408243585,
+      "secondaryPeakRatio": 0.9642377709150834,
+      "detectedRegionCount": 4,
+      "strongestCompetingSectionResponse": 0.42414554231230234,
+      "bestSectionSelectivity": 3.699826070144407,
+      "medianSectionSelectivity": 2.2221613683794517,
+      "addressableSectionCount": 1,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.84684814725,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.2702829757510653,
+          "selectivity": 3.699826070144407
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": false,
+          "bestControlState": 2.82102197465,
+          "targetResponse": 0.7444966666144962,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7444966666144962
+        }
+      ]
+    },
+    {
+      "label": "2 sections / seeded-random / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 2,
+      "phaseMode": "seeded-random",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 5,
+      "sectionLengthToCouplingLength": 2.617950245487403,
+      "staticReflectance": 0.005410464328680239,
+      "peakReflectance": 0.2106213750894603,
+      "peakEnhancement": 0.20521091076078007,
+      "secondaryPeakRatio": 0.5848990288049951,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.3244870304676886,
+      "bestSectionSelectivity": 4.326738674617076,
+      "medianSectionSelectivity": 2.8958728338155617,
+      "addressableSectionCount": 2,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.46216333253,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.23112096089059547,
+          "selectivity": 4.326738674617076
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.6825905983852265,
+          "selectivity": 1.4650069930140475
+        }
+      ]
+    },
+    {
+      "label": "4 sections / continuous / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "continuous",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.006062708946837972,
+      "peakReflectance": 0.2248162453603682,
+      "peakEnhancement": 0.21875353641353024,
+      "secondaryPeakRatio": 0.43591887291359815,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.8987903914441884,
+      "bestSectionSelectivity": 1.1967913598403732,
+      "medianSectionSelectivity": 1.1005862292202555,
+      "addressableSectionCount": 3,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.48798950513,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8355675296096547,
+          "selectivity": 1.1967913598403732
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0.641141357875,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8894808963201332,
+          "selectivity": 1.1242512392757336
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 0.9514991365772387,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9514991365772387
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9285730304168072,
+          "selectivity": 1.0769212191647775
+        }
+      ]
+    },
+    {
+      "label": "4 sections / fixed-reset / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "fixed-reset",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.0013212236725084383,
+      "peakReflectance": 0.2779396383382723,
+      "peakEnhancement": 0.27661841466576387,
+      "secondaryPeakRatio": 0.8203157459071089,
+      "detectedRegionCount": 5,
+      "strongestCompetingSectionResponse": 0.8727778362955695,
+      "bestSectionSelectivity": 1.803513697246287,
+      "medianSectionSelectivity": 1.2191929539637556,
+      "addressableSectionCount": 4,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.48798950513,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.5544731939252028,
+          "selectivity": 1.803513697246287
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 2.94925024623,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8022294598819472,
+          "selectivity": 1.2465261499461213
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 5.89850049245,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9715652602016198,
+          "selectivity": 1.0292669375523775
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 5.51381567773,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8390248880402372,
+          "selectivity": 1.19185975798139
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00041474017527603205,
+      "peakReflectance": 0.7283517895997955,
+      "peakEnhancement": 0.7279370494245195,
+      "secondaryPeakRatio": 0.4366124537814854,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.29781683479010207,
+      "bestSectionSelectivity": 3.381499581822048,
+      "medianSectionSelectivity": 1.6063069886281327,
+      "addressableSectionCount": 2,
+      "patternType": "deterministic but non-monotonic switching",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.1033046904,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.2957267850558691,
+          "selectivity": 3.381499581822048
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0.769369629451,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.4066127827732397,
+          "selectivity": 2.459342259679232
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 5.6420439493,
+          "targetResponse": 0.7532717175770338,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7532717175770338
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 1.41051098733,
+          "targetResponse": 0.40257236319159145,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.40257236319159145
+        }
+      ]
+    },
+    {
+      "label": "4 sections / seeded-random / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "seeded-random",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.0029845117691370987,
+      "peakReflectance": 0.37458086454440326,
+      "peakEnhancement": 0.37159635277526615,
+      "secondaryPeakRatio": 0.6259966926824231,
+      "detectedRegionCount": 5,
+      "strongestCompetingSectionResponse": 0.9429670816298324,
+      "bestSectionSelectivity": 2.492086965192763,
+      "medianSectionSelectivity": 1.3766916795168838,
+      "addressableSectionCount": 3,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 6.02672876403,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.7047801698782954,
+          "selectivity": 1.418882146148755
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.7493436426619159,
+          "selectivity": 1.3345012128850122
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 1.41051098733,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.40127010572548377,
+          "selectivity": 2.492086965192763
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 0.4012232859021147,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.4012232859021147
+        }
+      ]
+    },
+    {
+      "label": "8 sections / continuous / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 8,
+      "phaseMode": "continuous",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 1.25,
+      "sectionLengthToCouplingLength": 0.6544875613718507,
+      "staticReflectance": 0.006062708946838034,
+      "peakReflectance": 0.22481532255769238,
+      "peakEnhancement": 0.21875261361085435,
+      "secondaryPeakRatio": 0.4359262277697738,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.9575472823474154,
+      "bestSectionSelectivity": 1.1799007141772864,
+      "medianSectionSelectivity": 1.043035955909457,
+      "addressableSectionCount": 5,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9834445367215222,
+          "selectivity": 1.0168341606062181
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 4.48798950513,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.847528938650803,
+          "selectivity": 1.1799007141772864
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9028121948554058,
+          "selectivity": 1.107650080158875
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 0.897597901026,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9352456914898778,
+          "selectivity": 1.0692377512126963
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": false,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 0.9514975381629074,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9514975381629074
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.93359247159367,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.93359247159367
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9285726351767184,
+          "selectivity": 1.0769216775483461
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.8291187808059344,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8291187808059344
+        }
+      ]
+    },
+    {
+      "label": "8 sections / fixed-reset / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 8,
+      "phaseMode": "fixed-reset",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 1.25,
+      "sectionLengthToCouplingLength": 0.6544875613718507,
+      "staticReflectance": 0.00008449100424638337,
+      "peakReflectance": 0.7867345557247086,
+      "peakEnhancement": 0.7866500647204623,
+      "secondaryPeakRatio": 0.9884420610738399,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.9908972293157962,
+      "bestSectionSelectivity": 3.591881744459254,
+      "medianSectionSelectivity": 0.39737618498670024,
+      "addressableSectionCount": 2,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.278405602172893,
+          "selectivity": 3.591881744459254
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9734012425972658,
+          "selectivity": 1.0273255839819584
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 3.33393506095,
+          "targetResponse": 0.7280903359866819,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7280903359866819
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 3.20570678938,
+          "targetResponse": 0.4793410847780396,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.4793410847780396
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": false,
+          "bestControlState": 0.897597901026,
+          "targetResponse": 0.31541128519536094,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.31541128519536094
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": false,
+          "bestControlState": 1.92342407363,
+          "targetResponse": 0.20860506136564083,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.20860506136564083
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": false,
+          "bestControlState": 2.0516523452,
+          "targetResponse": 0.11143948085841607,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.11143948085841607
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 0.05502012535099397,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.05502012535099397
+        }
+      ]
+    },
+    {
+      "label": "8 sections / alternating / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 8,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 1.25,
+      "sectionLengthToCouplingLength": 0.6544875613718507,
+      "staticReflectance": 0.001239938496631385,
+      "peakReflectance": 0.2664908291088036,
+      "peakEnhancement": 0.2652508906121722,
+      "secondaryPeakRatio": 0.8632338844606046,
+      "detectedRegionCount": 4,
+      "strongestCompetingSectionResponse": 0.9597138576163442,
+      "bestSectionSelectivity": 1.3641211797797719,
+      "medianSectionSelectivity": 1.0532399948481663,
+      "addressableSectionCount": 5,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.87267431985,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8374145956894116,
+          "selectivity": 1.1941516247119361
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 1.15405444418,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8894797252792869,
+          "selectivity": 1.1242527194040437
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 3.20570678938,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9407504375759808,
+          "selectivity": 1.062981169136298
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 0.384684814725,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.7330727026476074,
+          "selectivity": 1.3641211797797719
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": false,
+          "bestControlState": 6.02672876403,
+          "targetResponse": 0.980838710586701,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.980838710586701
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": true,
+          "bestControlState": 5.89850049245,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9583144516285229,
+          "selectivity": 1.0434988205600346
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": false,
+          "bestControlState": 5.77027222088,
+          "targetResponse": 0.9997355445318671,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9997355445318671
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 5.77027222088,
+          "targetResponse": 0.9886176495195864,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9886176495195864
+        }
+      ]
+    },
+    {
+      "label": "8 sections / seeded-random / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 8,
+      "phaseMode": "seeded-random",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 1.25,
+      "sectionLengthToCouplingLength": 0.6544875613718507,
+      "staticReflectance": 0.0004870849587210266,
+      "peakReflectance": 0.7154381399946542,
+      "peakEnhancement": 0.7149510550359331,
+      "secondaryPeakRatio": 0.9869455534527755,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.8447493595515374,
+      "bestSectionSelectivity": 1.7130124444771344,
+      "medianSectionSelectivity": 0.7313634858941349,
+      "addressableSectionCount": 3,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.23153296198,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9501343743206291,
+          "selectivity": 1.0524827087905604
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 3.20570678938,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.7630181244341567,
+          "selectivity": 1.3105848576553611
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.5837669207973744,
+          "selectivity": 1.7130124444771344
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 2.17988061678,
+          "targetResponse": 0.9482287561054799,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9482287561054799
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": false,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 0.5144982156827901,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.5144982156827901
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": false,
+          "bestControlState": 2.0516523452,
+          "targetResponse": 0.3509744018502948,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.3509744018502948
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": false,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 0.22383737969790307,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.22383737969790307
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 4.87267431985,
+          "targetResponse": 0.14391529030986022,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.14391529030986022
+        }
+      ]
+    },
+    {
+      "label": "16 sections / continuous / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 16,
+      "phaseMode": "continuous",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 0.625,
+      "sectionLengthToCouplingLength": 0.32724378068592536,
+      "staticReflectance": 0.006062708946837995,
+      "peakReflectance": 0.22481769359823467,
+      "peakEnhancement": 0.21875498465139667,
+      "secondaryPeakRatio": 0.4359178438453408,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.9575474217303546,
+      "bestSectionSelectivity": 1.1076507706910956,
+      "medianSectionSelectivity": 0.9674715422723956,
+      "addressableSectionCount": 6,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": false,
+          "bestControlState": 0,
+          "targetResponse": 0.8684156370824913,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8684156370824913
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9834454093059181,
+          "selectivity": 1.0168332583968902
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.9834454093059181,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9834454093059181
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 4.35976123355,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9079742561385596,
+          "selectivity": 1.1013528117557079
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": true,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9028116320237567,
+          "selectivity": 1.1076507706910956
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": true,
+          "bestControlState": 2.30810888835,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.953795527208069,
+          "selectivity": 1.0484427442506254
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": true,
+          "bestControlState": 0.897597901026,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.980060475516817,
+          "selectivity": 1.0203451980579752
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 0.5129130863,
+          "targetResponse": 0.9943122284645459,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9943122284645459
+        },
+        {
+          "section": 9,
+          "reachableAsDominant": false,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 0.9514976752388731,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9514976752388731
+        },
+        {
+          "section": 10,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.464915707979496,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.464915707979496
+        },
+        {
+          "section": 11,
+          "reachableAsDominant": false,
+          "bestControlState": 5.129130863,
+          "targetResponse": 0.9038130480205991,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9038130480205991
+        },
+        {
+          "section": 12,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.9335920876170749,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9335920876170749
+        },
+        {
+          "section": 13,
+          "reachableAsDominant": true,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9285860161753898,
+          "selectivity": 1.0769061590209448
+        },
+        {
+          "section": 14,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.7332857909534558,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7332857909534558
+        },
+        {
+          "section": 15,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.8291189546487956,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8291189546487956
+        },
+        {
+          "section": 16,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.6289258537806245,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.6289258537806245
+        }
+      ]
+    },
+    {
+      "label": "16 sections / fixed-reset / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 16,
+      "phaseMode": "fixed-reset",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 0.625,
+      "sectionLengthToCouplingLength": 0.32724378068592536,
+      "staticReflectance": 0.06634859082658426,
+      "peakReflectance": 0.11274254604485287,
+      "peakEnhancement": 0.04639395521826861,
+      "secondaryPeakRatio": 0,
+      "detectedRegionCount": 7,
+      "strongestCompetingSectionResponse": 0.9995495210525749,
+      "bestSectionSelectivity": 1.016049922063838,
+      "medianSectionSelectivity": 1.001870256679552,
+      "addressableSectionCount": 11,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9983815255636362,
+          "selectivity": 1.001621098142266
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 3.97507641883,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9989192325436057,
+          "selectivity": 1.0010819367784543
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 0.769369629451,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9869914235510913,
+          "selectivity": 1.0131800298751383
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 3.5903916041,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9842036087840678,
+          "selectivity": 1.016049922063838
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": true,
+          "bestControlState": 2.0516523452,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9978850672039125,
+          "selectivity": 1.0021194152168382
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": true,
+          "bestControlState": 6.02672876403,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9990519066252092,
+          "selectivity": 1.0009489931088702
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": true,
+          "bestControlState": 4.23153296198,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9946378748275759,
+          "selectivity": 1.00539103256384
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 4.6162177767,
+          "targetResponse": 0.9985779680202119,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9985779680202119
+        },
+        {
+          "section": 9,
+          "reachableAsDominant": true,
+          "bestControlState": 0.897597901026,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9953501215799376,
+          "selectivity": 1.0046716007957899
+        },
+        {
+          "section": 10,
+          "reachableAsDominant": true,
+          "bestControlState": 5.77027222088,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9859977145931426,
+          "selectivity": 1.014201133734509
+        },
+        {
+          "section": 11,
+          "reachableAsDominant": true,
+          "bestControlState": 2.30810888835,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9947273080529445,
+          "selectivity": 1.0053006405920193
+        },
+        {
+          "section": 12,
+          "reachableAsDominant": false,
+          "bestControlState": 2.5645654315,
+          "targetResponse": 0.9962564348473484,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9962564348473484
+        },
+        {
+          "section": 13,
+          "reachableAsDominant": false,
+          "bestControlState": 2.69279370308,
+          "targetResponse": 0.8905169040922454,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8905169040922454
+        },
+        {
+          "section": 14,
+          "reachableAsDominant": false,
+          "bestControlState": 3.20570678938,
+          "targetResponse": 0.9948090089947403,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9948090089947403
+        },
+        {
+          "section": 15,
+          "reachableAsDominant": true,
+          "bestControlState": 2.69279370308,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9918213025291343,
+          "selectivity": 1.0082461401565082
+        },
+        {
+          "section": 16,
+          "reachableAsDominant": false,
+          "bestControlState": 5.89850049245,
+          "targetResponse": 0.8834829720446278,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8834829720446278
+        }
+      ]
+    },
+    {
+      "label": "16 sections / alternating / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 16,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 0.625,
+      "sectionLengthToCouplingLength": 0.32724378068592536,
+      "staticReflectance": 0.04482934165140189,
+      "peakReflectance": 0.9498923084618407,
+      "peakEnhancement": 0.9050629668104389,
+      "secondaryPeakRatio": 0.988043738636539,
+      "detectedRegionCount": 3,
+      "strongestCompetingSectionResponse": 0.526605101570721,
+      "bestSectionSelectivity": 1.8989561571228033,
+      "medianSectionSelectivity": 0.21313250957124955,
+      "addressableSectionCount": 2,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 5.6420439493,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.526605101570721,
+          "selectivity": 1.8989561571228033
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 1.66696753048,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8498646694820784,
+          "selectivity": 1.1766579267372257
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 1.0258261726,
+          "targetResponse": 0.8084770357151095,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8084770357151095
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 6.1549570356,
+          "targetResponse": 0.5302776198724657,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.5302776198724657
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": false,
+          "bestControlState": 4.6162177767,
+          "targetResponse": 0.4558062263958162,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.4558062263958162
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": false,
+          "bestControlState": 3.46216333253,
+          "targetResponse": 0.40038157792767304,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.40038157792767304
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": false,
+          "bestControlState": 2.0516523452,
+          "targetResponse": 0.3797051193745118,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.3797051193745118
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 1.15405444418,
+          "targetResponse": 0.26146982217437953,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.26146982217437953
+        },
+        {
+          "section": 9,
+          "reachableAsDominant": false,
+          "bestControlState": 1.0258261726,
+          "targetResponse": 0.16479519696811956,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.16479519696811956
+        },
+        {
+          "section": 10,
+          "reachableAsDominant": false,
+          "bestControlState": 4.87267431985,
+          "targetResponse": 0.09702739036450289,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.09702739036450289
+        },
+        {
+          "section": 11,
+          "reachableAsDominant": false,
+          "bestControlState": 1.92342407363,
+          "targetResponse": 0.06429227259143551,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.06429227259143551
+        },
+        {
+          "section": 12,
+          "reachableAsDominant": false,
+          "bestControlState": 0.384684814725,
+          "targetResponse": 0.046399831389439435,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.046399831389439435
+        },
+        {
+          "section": 13,
+          "reachableAsDominant": false,
+          "bestControlState": 0,
+          "targetResponse": 0.03539074177467383,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.03539074177467383
+        },
+        {
+          "section": 14,
+          "reachableAsDominant": false,
+          "bestControlState": 5.00090259143,
+          "targetResponse": 0.02886064975859695,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.02886064975859695
+        },
+        {
+          "section": 15,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.019605307327391446,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.019605307327391446
+        },
+        {
+          "section": 16,
+          "reachableAsDominant": false,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 0.007194132735823607,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.007194132735823607
+        }
+      ]
+    },
+    {
+      "label": "16 sections / seeded-random / multi-tone",
+      "strainShape": "multi-tone",
+      "sectionCount": 16,
+      "phaseMode": "seeded-random",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 0.625,
+      "sectionLengthToCouplingLength": 0.32724378068592536,
+      "staticReflectance": 0.7331031121245979,
+      "peakReflectance": 0.7920696765613667,
+      "peakEnhancement": 0.05896656443676884,
+      "secondaryPeakRatio": 0,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.9718178050771249,
+      "bestSectionSelectivity": 1.8951150439067441,
+      "medianSectionSelectivity": 0.6274266197856129,
+      "addressableSectionCount": 2,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.35976123355,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.5276724509233586,
+          "selectivity": 1.8951150439067441
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 6.02672876403,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8145492126889056,
+          "selectivity": 1.2276729072009087
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 2.0516523452,
+          "targetResponse": 0.9361137545894116,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9361137545894116
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 2.69279370308,
+          "targetResponse": 0.6417985766290101,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.6417985766290101
+        },
+        {
+          "section": 5,
+          "reachableAsDominant": false,
+          "bestControlState": 2.43633715993,
+          "targetResponse": 0.3964136698726618,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.3964136698726618
+        },
+        {
+          "section": 6,
+          "reachableAsDominant": false,
+          "bestControlState": 5.38558740615,
+          "targetResponse": 0.7406951606961667,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7406951606961667
+        },
+        {
+          "section": 7,
+          "reachableAsDominant": false,
+          "bestControlState": 5.38558740615,
+          "targetResponse": 0.7436506399687608,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7436506399687608
+        },
+        {
+          "section": 8,
+          "reachableAsDominant": false,
+          "bestControlState": 5.38558740615,
+          "targetResponse": 0.5783382119993176,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.5783382119993176
+        },
+        {
+          "section": 9,
+          "reachableAsDominant": false,
+          "bestControlState": 5.38558740615,
+          "targetResponse": 0.6130546629422156,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.6130546629422156
+        },
+        {
+          "section": 10,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.6762975928319562,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.6762975928319562
+        },
+        {
+          "section": 11,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.675133527271776,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.675133527271776
+        },
+        {
+          "section": 12,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.38409467962884836,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.38409467962884836
+        },
+        {
+          "section": 13,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.3329933953248606,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.3329933953248606
+        },
+        {
+          "section": 14,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.1464339775667077,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.1464339775667077
+        },
+        {
+          "section": 15,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.1024359287833349,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.1024359287833349
+        },
+        {
+          "section": 16,
+          "reachableAsDominant": false,
+          "bestControlState": 3.5903916041,
+          "targetResponse": 0.09223008446406039,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.09223008446406039
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / standing-wave",
+      "strainShape": "standing-wave",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00041474017527603205,
+      "peakReflectance": 0.015965050315390368,
+      "peakEnhancement": 0.015550310140114336,
+      "secondaryPeakRatio": 0.7762456345656435,
+      "detectedRegionCount": 4,
+      "strongestCompetingSectionResponse": 0.9968559186647732,
+      "bestSectionSelectivity": 1.1577436653264455,
+      "medianSectionSelectivity": 1.0284174945696318,
+      "addressableSectionCount": 3,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.0774785178,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9968559186647732,
+          "selectivity": 1.0031539977607176
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.949053848538812,
+          "selectivity": 1.053680991378546
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 1.5387392589,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8637490577139396,
+          "selectivity": 1.1577436653264455
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 0.9999839308702964,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9999839308702964
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / traveling-wave",
+      "strainShape": "traveling-sinusoid",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00041474017527603205,
+      "peakReflectance": 0.021786395536711807,
+      "peakEnhancement": 0.021371655361435773,
+      "secondaryPeakRatio": 0.9999999999989141,
+      "detectedRegionCount": 3,
+      "strongestCompetingSectionResponse": 0.6704348295854852,
+      "bestSectionSelectivity": 1.8157925511209094,
+      "medianSectionSelectivity": 1.3915540549628944,
+      "addressableSectionCount": 4,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 0.769369629451,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9932671551438113,
+          "selectivity": 1.006778483332829
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 5.77027222088,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.5507237043034947,
+          "selectivity": 1.8157925511209094
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 1.92342407363,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.5768247721923018,
+          "selectivity": 1.7336287347704618
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9528534087218211,
+          "selectivity": 1.0494793751553269
+        }
+      ]
+    }
+  ],
+  "gapRows": [
+    {
+      "label": "4 sections / alternating / gap 0 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00041474017527603205,
+      "peakReflectance": 0.7283517895997955,
+      "peakEnhancement": 0.7279370494245195,
+      "secondaryPeakRatio": 0.4366124537814854,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.29781683479010207,
+      "bestSectionSelectivity": 3.381499581822048,
+      "medianSectionSelectivity": 1.6063069886281327,
+      "addressableSectionCount": 2,
+      "patternType": "deterministic but non-monotonic switching",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.1033046904,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.2957267850558691,
+          "selectivity": 3.381499581822048
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0.769369629451,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.4066127827732397,
+          "selectivity": 2.459342259679232
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 5.6420439493,
+          "targetResponse": 0.7532717175770338,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7532717175770338
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 1.41051098733,
+          "targetResponse": 0.40257236319159145,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.40257236319159145
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / gap 0.025 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0.025,
+      "totalActiveLengthMm": 9.925,
+      "sectionLengthMm": 2.48125,
+      "sectionLengthToCouplingLength": 1.2991578093231237,
+      "staticReflectance": 0.005176806222431247,
+      "peakReflectance": 0.5407507962791729,
+      "peakEnhancement": 0.5355739900567417,
+      "secondaryPeakRatio": 0.9556029705205422,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.48248895840394485,
+      "bestSectionSelectivity": 3.3131661850285825,
+      "medianSectionSelectivity": 1.0044995930190828,
+      "addressableSectionCount": 2,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 1.28228271575,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.30182609146464323,
+          "selectivity": 3.3131661850285825
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 5.129130863,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.749676638623119,
+          "selectivity": 1.3339084459622927
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 5.129130863,
+          "targetResponse": 0.6750907400758728,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.6750907400758728
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 4.87267431985,
+          "targetResponse": 0.3040131553046109,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.3040131553046109
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / gap 0.05 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0.05,
+      "totalActiveLengthMm": 9.85,
+      "sectionLengthMm": 2.4625,
+      "sectionLengthToCouplingLength": 1.2893404959025458,
+      "staticReflectance": 0.019387537677218486,
+      "peakReflectance": 0.16232326427395277,
+      "peakEnhancement": 0.14293572659673429,
+      "secondaryPeakRatio": 0.6974985097634101,
+      "detectedRegionCount": 2,
+      "strongestCompetingSectionResponse": 0.9104358610913501,
+      "bestSectionSelectivity": 1.2298064740270565,
+      "medianSectionSelectivity": 1.11154905217956,
+      "addressableSectionCount": 3,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.6162177767,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8131360674378751,
+          "selectivity": 1.2298064740270565
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0.5129130863,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8691230955509177,
+          "selectivity": 1.1505850035731962
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 4.74444604828,
+          "targetResponse": 0.9808756722076111,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9808756722076111
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": true,
+          "bestControlState": 5.38558740615,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.9323895430901616,
+          "selectivity": 1.0725131007859239
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / gap 0.1 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0.1,
+      "totalActiveLengthMm": 9.7,
+      "sectionLengthMm": 2.425,
+      "sectionLengthToCouplingLength": 1.2697058690613903,
+      "staticReflectance": 0.00036147770921290387,
+      "peakReflectance": 0.1983508517851653,
+      "peakEnhancement": 0.19798937407595238,
+      "secondaryPeakRatio": 0.9161966749000487,
+      "detectedRegionCount": 3,
+      "strongestCompetingSectionResponse": 0.5747017352256709,
+      "bestSectionSelectivity": 2.7390948886873967,
+      "medianSectionSelectivity": 1.7132315792818908,
+      "addressableSectionCount": 3,
+      "patternType": "deterministic but non-monotonic switching",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 0.128228271575,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.48960086233946815,
+          "selectivity": 2.042480062681432
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 4.23153296198,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.7225521778229931,
+          "selectivity": 1.3839830958823496
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 1.79519580205,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.3650841028290227,
+          "selectivity": 2.7390948886873967
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 3.97507641883,
+          "targetResponse": 0.25927078456580926,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.25927078456580926
+        }
+      ]
+    },
+    {
+      "label": "4 sections / alternating / gap 0.2 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0.2,
+      "totalActiveLengthMm": 9.4,
+      "sectionLengthMm": 2.35,
+      "sectionLengthToCouplingLength": 1.2304366153790793,
+      "staticReflectance": 0.002482475992323299,
+      "peakReflectance": 0.41173501094247644,
+      "peakEnhancement": 0.4092525349501531,
+      "secondaryPeakRatio": 0.9681457718091537,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.46604270373125806,
+      "bestSectionSelectivity": 2.3557671697739364,
+      "medianSectionSelectivity": 1.169427562785554,
+      "addressableSectionCount": 2,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.71861987568,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.4244901672927048,
+          "selectivity": 2.3557671697739364
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": false,
+          "bestControlState": 5.51381567773,
+          "targetResponse": 0.7672600486124919,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7672600486124919
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 6.1549570356,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.6411062184585099,
+          "selectivity": 1.5598039314053487
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 5.6420439493,
+          "targetResponse": 0.7790511941657593,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7790511941657593
+        }
+      ]
+    }
+  ],
+  "sameActiveLengthRows": [
+    {
+      "label": "4 sections / same active 10 mm / gap 0 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00041474017527603205,
+      "peakReflectance": 0.7283517895997955,
+      "peakEnhancement": 0.7279370494245195,
+      "secondaryPeakRatio": 0.4366124537814854,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.29781683479010207,
+      "bestSectionSelectivity": 3.381499581822048,
+      "medianSectionSelectivity": 1.6063069886281327,
+      "addressableSectionCount": 2,
+      "patternType": "deterministic but non-monotonic switching",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 4.1033046904,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.2957267850558691,
+          "selectivity": 3.381499581822048
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 0.769369629451,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.4066127827732397,
+          "selectivity": 2.459342259679232
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": false,
+          "bestControlState": 5.6420439493,
+          "targetResponse": 0.7532717175770338,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.7532717175770338
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 1.41051098733,
+          "targetResponse": 0.40257236319159145,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.40257236319159145
+        }
+      ]
+    },
+    {
+      "label": "4 sections / same active 10 mm / gap 0.05 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0.05,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00011881035027656515,
+      "peakReflectance": 0.4579071633334214,
+      "peakEnhancement": 0.45778835298314485,
+      "secondaryPeakRatio": 0.8185500343282609,
+      "detectedRegionCount": 1,
+      "strongestCompetingSectionResponse": 0.4837969202897959,
+      "bestSectionSelectivity": 2.8977430972947977,
+      "medianSectionSelectivity": 1.421452239265562,
+      "addressableSectionCount": 2,
+      "patternType": "stair-step/discrete sweep",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 3.5903916041,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.3450961546361908,
+          "selectivity": 2.8977430972947977
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": false,
+          "bestControlState": 5.25735913458,
+          "targetResponse": 0.8152174919143329,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.8152174919143329
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 5.89850049245,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.49317276611243954,
+          "selectivity": 2.027686986616791
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 5.51381567773,
+          "targetResponse": 0.6221568768235859,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.6221568768235859
+        }
+      ]
+    },
+    {
+      "label": "4 sections / same active 10 mm / gap 0.1 mm",
+      "strainShape": "multi-tone",
+      "sectionCount": 4,
+      "phaseMode": "alternating",
+      "gapLengthMm": 0.1,
+      "totalActiveLengthMm": 10,
+      "sectionLengthMm": 2.5,
+      "sectionLengthToCouplingLength": 1.3089751227437014,
+      "staticReflectance": 0.00408075510070692,
+      "peakReflectance": 0.17207104090376035,
+      "peakEnhancement": 0.16799028580305342,
+      "secondaryPeakRatio": 0.9177123682705427,
+      "detectedRegionCount": 5,
+      "strongestCompetingSectionResponse": 0.9412053992265399,
+      "bestSectionSelectivity": 1.6814359573102444,
+      "medianSectionSelectivity": 1.4428239431272458,
+      "addressableSectionCount": 3,
+      "patternType": "multi-region clutter",
+      "addressability": [
+        {
+          "section": 1,
+          "reachableAsDominant": true,
+          "bestControlState": 0.25645654315,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.6087902630146184,
+          "selectivity": 1.6426018298127543
+        },
+        {
+          "section": 2,
+          "reachableAsDominant": true,
+          "bestControlState": 1.92342407363,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.5947297580097417,
+          "selectivity": 1.6814359573102444
+        },
+        {
+          "section": 3,
+          "reachableAsDominant": true,
+          "bestControlState": 4.48798950513,
+          "targetResponse": 1,
+          "largestCompetingResponse": 0.8044754213392017,
+          "selectivity": 1.2430460564417376
+        },
+        {
+          "section": 4,
+          "reachableAsDominant": false,
+          "bestControlState": 3.97507641883,
+          "targetResponse": 0.9071326907280847,
+          "largestCompetingResponse": 1,
+          "selectivity": 0.9071326907280847
+        }
+      ]
+    }
+  ],
+  "convergence": [
+    {
+      "label": "global coherent multi-tone reference",
+      "segmentCount": 700,
+      "reflectance": 0.2248162453603682,
+      "dominantRegionCenterMm": 3.8642857142857125,
+      "dominantRegionWidthMm": 1.9142857142857155,
+      "secondaryRegionRatio": 0.8987903914441884,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": null
+    },
+    {
+      "label": "global coherent multi-tone reference",
+      "segmentCount": 1400,
+      "reflectance": 0.224836346631208,
+      "dominantRegionCenterMm": 3.8678571428571447,
+      "dominantRegionWidthMm": 1.9285714285714302,
+      "secondaryRegionRatio": 0.8988116631872127,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": null
+    },
+    {
+      "label": "global coherent multi-tone reference",
+      "segmentCount": 2100,
+      "reflectance": 0.22484006873905454,
+      "dominantRegionCenterMm": 3.866666666666668,
+      "dominantRegionWidthMm": 1.9285714285714257,
+      "secondaryRegionRatio": 0.8988214194451883,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": null
+    },
+    {
+      "label": "4 sections / alternating / multi-tone",
+      "segmentCount": 700,
+      "reflectance": 0.7283517895997955,
+      "dominantRegionCenterMm": 0.5285714285714286,
+      "dominantRegionWidthMm": 1.042857142857143,
+      "secondaryRegionRatio": null,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": 3.357768544900387
+    },
+    {
+      "label": "4 sections / alternating / multi-tone",
+      "segmentCount": 1400,
+      "reflectance": 0.7283870442491404,
+      "dominantRegionCenterMm": 0.5285714285714292,
+      "dominantRegionWidthMm": 1.0500000000000014,
+      "secondaryRegionRatio": null,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": 3.3576676933495637
+    },
+    {
+      "label": "4 sections / alternating / multi-tone",
+      "segmentCount": 2100,
+      "reflectance": 0.7283935723580623,
+      "dominantRegionCenterMm": 0.5285714285714288,
+      "dominantRegionWidthMm": 1.0523809523809529,
+      "secondaryRegionRatio": null,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": 3.3576344396151656
+    },
+    {
+      "label": "16 sections / alternating / multi-tone",
+      "segmentCount": 700,
+      "reflectance": 0.9498923084618407,
+      "dominantRegionCenterMm": 0.3500000000000001,
+      "dominantRegionWidthMm": 0.6857142857142859,
+      "secondaryRegionRatio": 0.5211672873383254,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": 1.8989561571228033
+    },
+    {
+      "label": "16 sections / alternating / multi-tone",
+      "segmentCount": 1400,
+      "reflectance": 0.949895313364128,
+      "dominantRegionCenterMm": 0.35000000000000003,
+      "dominantRegionWidthMm": 0.692857142857143,
+      "secondaryRegionRatio": 0.5191878057362834,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": 1.9062479181679117
+    },
+    {
+      "label": "16 sections / alternating / multi-tone",
+      "segmentCount": 2100,
+      "reflectance": 0.9498958709785933,
+      "dominantRegionCenterMm": 0.3499999999999999,
+      "dominantRegionWidthMm": 0.6952380952380951,
+      "secondaryRegionRatio": 0.5185212477268736,
+      "activeSectionId": 1,
+      "targetSectionSelectivity": 1.9086834131809525
+    }
+  ],
+  "tmmSpotChecks": [
+    {
+      "label": "static segmented scaled 0.05 mm",
+      "cmtReflectance": 0.0006814089897597784,
+      "tmmReflectance": 0.0006216135651715465,
+      "absoluteDifference": 0.000059795424588231835,
+      "peakWavelengthCmtNm": 600.07,
+      "peakWavelengthTmmNm": 600.07
+    },
+    {
+      "label": "activated alternating segmented scaled 0.05 mm",
+      "cmtReflectance": 0.0004302484846553092,
+      "tmmReflectance": 0.00038310961217208263,
+      "absoluteDifference": 0.00004713887248322657,
+      "peakWavelengthCmtNm": 600.07,
+      "peakWavelengthTmmNm": 600.07
+    },
+    {
+      "label": "phase reset plus gap scaled 0.05 mm",
+      "cmtReflectance": 0.00004243191779787937,
+      "tmmReflectance": 0.00003814721055288649,
+      "absoluteDifference": 0.000004284707244992878,
+      "peakWavelengthCmtNm": 600.07,
+      "peakWavelengthTmmNm": 600.07
+    }
+  ],
+  "bestSegmented": {
+    "label": "16 sections / fixed-reset / multi-tone",
+    "strainShape": "multi-tone",
+    "sectionCount": 16,
+    "phaseMode": "fixed-reset",
+    "gapLengthMm": 0,
+    "totalActiveLengthMm": 10,
+    "sectionLengthMm": 0.625,
+    "sectionLengthToCouplingLength": 0.32724378068592536,
+    "staticReflectance": 0.06634859082658426,
+    "peakReflectance": 0.11274254604485287,
+    "peakEnhancement": 0.04639395521826861,
+    "secondaryPeakRatio": 0,
+    "detectedRegionCount": 7,
+    "strongestCompetingSectionResponse": 0.9995495210525749,
+    "bestSectionSelectivity": 1.016049922063838,
+    "medianSectionSelectivity": 1.001870256679552,
+    "addressableSectionCount": 11,
+    "patternType": "multi-region clutter",
+    "addressability": [
+      {
+        "section": 1,
+        "reachableAsDominant": true,
+        "bestControlState": 3.71861987568,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9983815255636362,
+        "selectivity": 1.001621098142266
+      },
+      {
+        "section": 2,
+        "reachableAsDominant": true,
+        "bestControlState": 3.97507641883,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9989192325436057,
+        "selectivity": 1.0010819367784543
+      },
+      {
+        "section": 3,
+        "reachableAsDominant": true,
+        "bestControlState": 0.769369629451,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9869914235510913,
+        "selectivity": 1.0131800298751383
+      },
+      {
+        "section": 4,
+        "reachableAsDominant": true,
+        "bestControlState": 3.5903916041,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9842036087840678,
+        "selectivity": 1.016049922063838
+      },
+      {
+        "section": 5,
+        "reachableAsDominant": true,
+        "bestControlState": 2.0516523452,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9978850672039125,
+        "selectivity": 1.0021194152168382
+      },
+      {
+        "section": 6,
+        "reachableAsDominant": true,
+        "bestControlState": 6.02672876403,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9990519066252092,
+        "selectivity": 1.0009489931088702
+      },
+      {
+        "section": 7,
+        "reachableAsDominant": true,
+        "bestControlState": 4.23153296198,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9946378748275759,
+        "selectivity": 1.00539103256384
+      },
+      {
+        "section": 8,
+        "reachableAsDominant": false,
+        "bestControlState": 4.6162177767,
+        "targetResponse": 0.9985779680202119,
+        "largestCompetingResponse": 1,
+        "selectivity": 0.9985779680202119
+      },
+      {
+        "section": 9,
+        "reachableAsDominant": true,
+        "bestControlState": 0.897597901026,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9953501215799376,
+        "selectivity": 1.0046716007957899
+      },
+      {
+        "section": 10,
+        "reachableAsDominant": true,
+        "bestControlState": 5.77027222088,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9859977145931426,
+        "selectivity": 1.014201133734509
+      },
+      {
+        "section": 11,
+        "reachableAsDominant": true,
+        "bestControlState": 2.30810888835,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9947273080529445,
+        "selectivity": 1.0053006405920193
+      },
+      {
+        "section": 12,
+        "reachableAsDominant": false,
+        "bestControlState": 2.5645654315,
+        "targetResponse": 0.9962564348473484,
+        "largestCompetingResponse": 1,
+        "selectivity": 0.9962564348473484
+      },
+      {
+        "section": 13,
+        "reachableAsDominant": false,
+        "bestControlState": 2.69279370308,
+        "targetResponse": 0.8905169040922454,
+        "largestCompetingResponse": 1,
+        "selectivity": 0.8905169040922454
+      },
+      {
+        "section": 14,
+        "reachableAsDominant": false,
+        "bestControlState": 3.20570678938,
+        "targetResponse": 0.9948090089947403,
+        "largestCompetingResponse": 1,
+        "selectivity": 0.9948090089947403
+      },
+      {
+        "section": 15,
+        "reachableAsDominant": true,
+        "bestControlState": 2.69279370308,
+        "targetResponse": 1,
+        "largestCompetingResponse": 0.9918213025291343,
+        "selectivity": 1.0082461401565082
+      },
+      {
+        "section": 16,
+        "reachableAsDominant": false,
+        "bestControlState": 5.89850049245,
+        "targetResponse": 0.8834829720446278,
+        "largestCompetingResponse": 1,
+        "selectivity": 0.8834829720446278
+      }
+    ]
+  }
+}

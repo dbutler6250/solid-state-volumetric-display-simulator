@@ -19,6 +19,9 @@ export const MAX_PARAMETER_SWEEP_WORK = 25_000_000;
 /** Maximum piecewise-constant spatial samples for the hybrid coupled-mode solver. */
 export const MAX_HYBRID_SEGMENTS = 2_000;
 
+/** Maximum structural Bragg sections before boundary splitting becomes unsafe. */
+export const MAX_HYBRID_BRAGG_SECTIONS = 256;
+
 /** Maximum pulse-center positions evaluated in one fixed-laser moving-region experiment. */
 export const MAX_HYBRID_PULSE_POSITIONS = 500;
 

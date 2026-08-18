@@ -1,10 +1,19 @@
 import type { SpectrumPoint } from '../../results/spectrum';
 import type { HybridBraggModel, LocalBraggSample } from '../../structures/hybridBraggGrating';
 import { sampleHybridBraggModel } from '../../structures/hybridBraggGrating';
-import { add, complex, divide, magnitudeSquared, multiply, scale, subtract, type Complex } from '../../math/complex';
+import { add, complex, conjugate, divide, magnitudeSquared, multiply, scale, subtract, type Complex } from '../../math/complex';
 
 export type CoupledModePointResult = SpectrumPoint & {
   sampledSegments: LocalBraggSample[];
+  spatialField: SpatialCoupledModeFieldSample[];
+};
+
+export type SpatialCoupledModeFieldSample = LocalBraggSample & {
+  forwardAmplitude: Complex;
+  backwardAmplitude: Complex;
+  forwardIntensity: number;
+  backwardIntensity: number;
+  normalizedBackwardIntensity: number;
 };
 
 const M_PER_NM = 1e-9;
@@ -34,18 +43,19 @@ export function solveHybridBraggCoupledModePoint(
 ): CoupledModePointResult {
   const wavelengthM = wavelengthNm * M_PER_NM;
   const samples = sampleHybridBraggModel(model, wavelengthM);
-  const dzM = model.grating.lengthM / model.segmentCount;
-  const system = samples.reduce(
-    (matrix, sample) => multiplyMatrix(segmentMatrix(sample.couplingCoefficientPerM, sample.detuningPerM, dzM), matrix),
-    identity(),
+  const segmentMatrices = samples.map((sample) =>
+    segmentMatrix(getComplexCoupling(sample.couplingCoefficientPerM, sample.gratingPhaseRadians), sample.detuningPerM, sample.lengthM),
   );
+  const system = segmentMatrices.reduce((matrix, segment) => multiplyMatrix(segment, matrix), identity());
   const reflectionAmplitude = scale(divide(system[1][0], system[1][1]), -1);
   const reflectance = clampUnitInterval(magnitudeSquared(reflectionAmplitude));
+  const spatialField = calculateSpatialField(samples, segmentMatrices, reflectionAmplitude);
   return {
     wavelengthNm,
     reflectance,
     transmission: clampUnitInterval(1 - reflectance),
     sampledSegments: samples,
+    spatialField,
   };
 }
 
@@ -90,8 +100,8 @@ export function getUniformReflectance(
   return clampUnitInterval((kappa ** 2 * sin ** 2) / (qSquared * cos ** 2 + delta ** 2 * sin ** 2));
 }
 
-function segmentMatrix(kappa: number, detuning: number, lengthM: number): ComplexMatrix2 {
-  const gammaSquared = kappa ** 2 - detuning ** 2;
+function segmentMatrix(kappa: Complex, detuning: number, lengthM: number): ComplexMatrix2 {
+  const gammaSquared = magnitudeSquared(kappa) - detuning ** 2;
   const gamma = sqrtRealToComplex(gammaSquared);
   const argument = scale(gamma, lengthM);
   const cosh = complexCosh(argument);
@@ -101,13 +111,58 @@ function segmentMatrix(kappa: number, detuning: number, lengthM: number): Comple
   return [
     [
       add(cosh, multiply(multiply(i, complex(detuning)), sinhOverGamma)),
-      multiply(multiply(i, complex(kappa)), sinhOverGamma),
+      multiply(multiply(i, kappa), sinhOverGamma),
     ],
     [
-      multiply(multiply(complex(0, -1), complex(kappa)), sinhOverGamma),
+      multiply(multiply(complex(0, -1), conjugate(kappa)), sinhOverGamma),
       subtract(cosh, multiply(multiply(i, complex(detuning)), sinhOverGamma)),
     ],
   ];
+}
+
+function calculateSpatialField(
+  samples: LocalBraggSample[],
+  segmentMatrices: ComplexMatrix2[],
+  reflectionAmplitude: Complex,
+): SpatialCoupledModeFieldSample[] {
+  let prefix = identity();
+  const inputState: [Complex, Complex] = [complex(1), reflectionAmplitude];
+  const field = samples.map((sample, index) => {
+    const halfSegment = segmentMatrix(
+      getComplexCoupling(sample.couplingCoefficientPerM, sample.gratingPhaseRadians),
+      sample.detuningPerM,
+      sample.lengthM / 2,
+    );
+    const centerState = multiplyMatrixVector(multiplyMatrix(halfSegment, prefix), inputState);
+    prefix = multiplyMatrix(segmentMatrices[index], prefix);
+    return {
+      ...sample,
+      forwardAmplitude: centerState[0],
+      backwardAmplitude: centerState[1],
+      forwardIntensity: magnitudeSquared(centerState[0]),
+      backwardIntensity: magnitudeSquared(centerState[1]),
+      normalizedBackwardIntensity: 0,
+    };
+  });
+  const maxBackwardIntensity = Math.max(...field.map((sample) => sample.backwardIntensity), 0);
+  return field.map((sample) => ({
+    ...sample,
+    normalizedBackwardIntensity: maxBackwardIntensity > 0 ? sample.backwardIntensity / maxBackwardIntensity : 0,
+  }));
+}
+
+function multiplyMatrixVector(matrix: ComplexMatrix2, vector: [Complex, Complex]): [Complex, Complex] {
+  return [
+    add(multiply(matrix[0][0], vector[0]), multiply(matrix[0][1], vector[1])),
+    add(multiply(matrix[1][0], vector[0]), multiply(matrix[1][1], vector[1])),
+  ];
+}
+
+function getComplexCoupling(couplingCoefficientPerM: number, phaseRadians: number): Complex {
+  return complex(
+    couplingCoefficientPerM * Math.cos(phaseRadians),
+    couplingCoefficientPerM * Math.sin(phaseRadians),
+  );
 }
 
 function sqrtRealToComplex(value: number): Complex {

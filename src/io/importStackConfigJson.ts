@@ -1,6 +1,7 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import { isAcousticRepresentationMode } from '../simulation/structures/acoustoOpticGrating';
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
+import { MAX_HYBRID_BRAGG_SECTIONS } from '../simulation/simulationLimits';
 import type { Material, ComplexRefractiveIndex } from '../simulation/materials/material';
 import type {
   ParameterSweepSettings,
@@ -592,6 +593,12 @@ function parseHybridBraggDesign(
   const perturbationSecondaryPeriodMm = value.perturbationSecondaryPeriodMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryPeriodMm;
   const perturbationSecondaryAmplitudeRatio = value.perturbationSecondaryAmplitudeRatio ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryAmplitudeRatio;
   const perturbationSecondaryPhaseRadians = value.perturbationSecondaryPhaseRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.perturbationSecondaryPhaseRadians;
+  const permanentGratingMode = value.permanentGratingMode ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.permanentGratingMode;
+  const braggSectionCount = value.braggSectionCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionCount;
+  const braggSectionGapMm = value.braggSectionGapMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionGapMm;
+  const braggSectionPhaseMode = value.braggSectionPhaseMode ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionPhaseMode;
+  const braggSectionPhaseSequenceRadians = value.braggSectionPhaseSequenceRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionPhaseSequenceRadians;
+  const braggSectionRandomSeed = value.braggSectionRandomSeed ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionRandomSeed;
   if (!isFiniteNumber(pulseSweepStartMm) || !isFiniteNumber(pulseSweepEndMm) || !isFiniteNumber(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid moving-pulse sweep fields must be finite numbers.' };
   }
@@ -609,6 +616,24 @@ function parseHybridBraggDesign(
   }
   if (!Number.isInteger(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid pulse sweep points must be a whole number.' };
+  }
+  if (permanentGratingMode !== 'global' && permanentGratingMode !== 'segmented') {
+    return { ok: false, message: 'Hybrid permanent grating mode must be global or segmented.' };
+  }
+  if (!isHybridSectionPhaseMode(braggSectionPhaseMode)) {
+    return { ok: false, message: 'Hybrid section phase mode must be supported.' };
+  }
+  if (!isFiniteNumber(braggSectionCount) || !Number.isInteger(braggSectionCount) || braggSectionCount < 1) {
+    return { ok: false, message: 'Hybrid Bragg section count must be a whole number of at least 1.' };
+  }
+  if (braggSectionCount > MAX_HYBRID_BRAGG_SECTIONS) {
+    return { ok: false, message: `Hybrid Bragg section count must not exceed ${MAX_HYBRID_BRAGG_SECTIONS.toLocaleString()}.` };
+  }
+  if (!isFiniteNumber(braggSectionGapMm) || braggSectionGapMm < 0 || !isFiniteNumber(braggSectionRandomSeed)) {
+    return { ok: false, message: 'Hybrid Bragg segmentation fields must be finite non-negative numbers.' };
+  }
+  if (!Array.isArray(braggSectionPhaseSequenceRadians) || !braggSectionPhaseSequenceRadians.every(isFiniteNumber)) {
+    return { ok: false, message: 'Hybrid section phase sequence must contain only finite numbers.' };
   }
   const design = value as {
     lengthMm: number;
@@ -632,6 +657,12 @@ function parseHybridBraggDesign(
       indexModulation: design.indexModulation,
       gratingPeriodNm: design.gratingPeriodNm,
       gratingPhaseRadians: design.gratingPhaseRadians,
+      permanentGratingMode,
+      braggSectionCount,
+      braggSectionGapMm,
+      braggSectionPhaseMode,
+      braggSectionPhaseSequenceRadians,
+      braggSectionRandomSeed,
       peakStrain: design.peakStrain,
       strainCenterMm: design.strainCenterMm,
       strainWidthMm: design.strainWidthMm,
@@ -652,6 +683,18 @@ function parseHybridBraggDesign(
       pulseSweepPointCount,
     },
   };
+}
+
+function isHybridSectionPhaseMode(
+  value: unknown,
+): value is NonNullable<QuarterWaveStackInputs['hybridBraggDesign']>['braggSectionPhaseMode'] {
+  return (
+    value === 'continuous' ||
+    value === 'fixed-reset' ||
+    value === 'alternating' ||
+    value === 'explicit' ||
+    value === 'seeded-random'
+  );
 }
 
 function isHybridStrainShape(value: unknown): value is NonNullable<QuarterWaveStackInputs['hybridBraggDesign']>['strainShape'] {

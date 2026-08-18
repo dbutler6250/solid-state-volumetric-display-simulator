@@ -4,6 +4,7 @@ import {
   getCouplingCoefficientPerM,
   getHybridDesignBraggWavelengthNm,
 } from '../structures/hybridBraggGrating';
+import type { SpatialCoupledModeFieldSample } from '../solvers/coupledMode/spatialBraggSolver';
 import { solveHybridBraggCoupledModePoint, solveHybridBraggCoupledModeSpectrum } from '../solvers/coupledMode/spatialBraggSolver';
 
 export type FixedLaserPulsePoint = {
@@ -175,6 +176,29 @@ export type PerturbationFieldComparisonResult = {
   laserWavelengthNm: number;
   families: PerturbationFieldComparisonFamily[];
   mostPromising: PerturbationFieldComparisonFamily | null;
+};
+
+export type ReflectionRegion = {
+  startMm: number;
+  endMm: number;
+  centerMm: number;
+  peakMm: number;
+  peakNormalizedIntensity: number;
+  sectionIds: number[];
+};
+
+export type ReflectionRegionFrame = {
+  parameterValue: number;
+  parameterKind: 'position' | 'phase';
+  reflectance: number;
+  spatialField: SpatialCoupledModeFieldSample[];
+  regions: ReflectionRegion[];
+  activeSectionIds: number[];
+};
+
+export type ReflectionRegionEvolutionResult = {
+  thresholdFraction: number;
+  frames: ReflectionRegionFrame[];
 };
 
 const MINIMUM_RATIO_DENOMINATOR = 1e-9;
@@ -517,6 +541,63 @@ export function solvePerturbationFieldComparison(
   };
 }
 
+/** Detects active regions from calculated backward optical intensity, not perturbation amplitude. */
+export function detectReflectionRegions(
+  spatialField: SpatialCoupledModeFieldSample[],
+  thresholdFraction = 0.5,
+): ReflectionRegion[] {
+  if (spatialField.length === 0) return [];
+  const threshold = Math.max(0, Math.min(1, thresholdFraction));
+  const regions: ReflectionRegion[] = [];
+  let startIndex: number | null = null;
+
+  spatialField.forEach((sample, index) => {
+    const active = sample.normalizedBackwardIntensity >= threshold && sample.backwardIntensity > MINIMUM_RATIO_DENOMINATOR;
+    if (active && startIndex === null) startIndex = index;
+    if ((!active || index === spatialField.length - 1) && startIndex !== null) {
+      const endIndex = active && index === spatialField.length - 1 ? index : index - 1;
+      regions.push(createReflectionRegion(spatialField, startIndex, endIndex));
+      startIndex = null;
+    }
+  });
+
+  return regions.sort((left, right) => right.peakNormalizedIntensity - left.peakNormalizedIntensity);
+}
+
+/** Generates calculated optical-field frames for reflection-region playback and depth-time maps. */
+export function solveReflectionRegionEvolution(
+  design: HybridBraggDesignInputs,
+  thresholdFraction = 0.5,
+): ReflectionRegionEvolutionResult {
+  const parameterKind: ReflectionRegionFrame['parameterKind'] = isPhaseScannedField(design.strainShape) ? 'phase' : 'position';
+  const parameterValues = parameterKind === 'phase'
+    ? Array.from({ length: Math.max(3, design.pulseSweepPointCount) }, (_, index) =>
+        Number((((2 * Math.PI) / Math.max(3, design.pulseSweepPointCount)) * index).toPrecision(12)),
+      )
+    : Array.from({ length: design.pulseSweepPointCount }, (_, index) => {
+        const step = (design.pulseSweepEndMm - design.pulseSweepStartMm) / (design.pulseSweepPointCount - 1);
+        return Number((design.pulseSweepStartMm + step * index).toPrecision(12));
+      });
+  const frames = parameterValues.map((parameterValue) => {
+    const frameDesign = parameterKind === 'phase'
+      ? { ...design, perturbationTemporalPhaseRadians: parameterValue }
+      : { ...design, strainCenterMm: parameterValue };
+    const result = solveHybridBraggCoupledModePoint(createHybridBraggModel(frameDesign), design.fixedLaserWavelengthNm);
+    const regions = detectReflectionRegions(result.spatialField, thresholdFraction);
+    const activeSectionIds = getActiveSectionIds(regions);
+    return {
+      parameterValue,
+      parameterKind,
+      reflectance: result.reflectance,
+      spatialField: result.spatialField,
+      regions,
+      activeSectionIds,
+    };
+  });
+
+  return { thresholdFraction, frames };
+}
+
 /** Estimates an optical response FWHM only when one dominant enhancement peak exists. */
 export function calculateEffectiveOpticalResponseWidth(
   points: FixedLaserPulsePoint[],
@@ -828,6 +909,35 @@ function estimateRepeatSpacingMm(points: FixedLaserPulsePoint[]): number | null 
     points[index].strainCenterMm - points[peakIndexes[offset]].strainCenterMm,
   );
   return spacings.reduce((sum, spacing) => sum + spacing, 0) / spacings.length;
+}
+
+function createReflectionRegion(
+  spatialField: SpatialCoupledModeFieldSample[],
+  startIndex: number,
+  endIndex: number,
+): ReflectionRegion {
+  const samples = spatialField.slice(startIndex, endIndex + 1);
+  const peak = samples.reduce((best, sample) =>
+    sample.normalizedBackwardIntensity > best.normalizedBackwardIntensity ? sample : best,
+  samples[0]);
+  const startMm = spatialField[startIndex].zM * 1e3;
+  const endMm = spatialField[endIndex].zM * 1e3;
+  const sectionIds = Array.from(new Set(samples
+    .map((sample) => sample.sectionId)
+    .filter((sectionId): sectionId is number => sectionId !== null)));
+
+  return {
+    startMm,
+    endMm,
+    centerMm: (startMm + endMm) / 2,
+    peakMm: peak.zM * 1e3,
+    peakNormalizedIntensity: peak.normalizedBackwardIntensity,
+    sectionIds,
+  };
+}
+
+function getActiveSectionIds(regions: ReflectionRegion[]): number[] {
+  return Array.from(new Set(regions.flatMap((region) => region.sectionIds))).sort((left, right) => left - right);
 }
 
 function interpolateThresholdWidth(

@@ -138,6 +138,77 @@ describe('spatial Bragg coupled-mode solver', () => {
     expect(Math.max(...strainedSamples.map((sample) => sample.zM))).toBeLessThan(0.0013);
   });
 
+  it('samples segmented Bragg sections with gaps and phase-reset modes', () => {
+    const design = {
+      ...baseDesign,
+      lengthMm: 4,
+      permanentGratingMode: 'segmented' as const,
+      braggSectionCount: 4,
+      braggSectionGapMm: 0.1,
+      braggSectionPhaseMode: 'fixed-reset' as const,
+      segmentCount: 400,
+    };
+    const samples = sampleHybridBraggModel(createHybridBraggModel(design), 600e-9);
+    const braggSamples = samples.filter((sample) => sample.inBraggSection);
+    const gapSamples = samples.filter((sample) => !sample.inBraggSection);
+    const sectionIds = Array.from(new Set(braggSamples.map((sample) => sample.sectionId)));
+
+    expect(sectionIds).toEqual([0, 1, 2, 3]);
+    expect(gapSamples.length).toBeGreaterThan(0);
+    expect(Math.max(...gapSamples.map((sample) => sample.couplingCoefficientPerM))).toBe(0);
+    expect(braggSamples[0].sectionEndM! - braggSamples[0].sectionStartM!).toBeCloseTo(0.000925, 9);
+    expect(samples.find((sample) => sample.sectionId === 1)?.gratingPhaseRadians).not.toBeCloseTo(
+      samples.find((sample) => sample.sectionId === 0)?.gratingPhaseRadians ?? 0,
+      6,
+    );
+  });
+
+  it('places segmented section and gap boundaries on exact solver interval edges', () => {
+    const model = createHybridBraggModel({
+      ...baseDesign,
+      lengthMm: 10,
+      permanentGratingMode: 'segmented',
+      braggSectionCount: 3,
+      braggSectionGapMm: 0.17,
+      braggSectionPhaseMode: 'alternating',
+      segmentCount: 17,
+    });
+    const samples = sampleHybridBraggModel(model, 600e-9);
+    const intervalEdges = new Set(samples.flatMap((sample) => [
+      Number(sample.startM.toPrecision(12)),
+      Number(sample.endM.toPrecision(12)),
+    ]));
+    const sectionLengthM = (0.01 - 2 * 0.00017) / 3;
+    const expectedBoundaries = [
+      0,
+      sectionLengthM,
+      sectionLengthM + 0.00017,
+      2 * sectionLengthM + 0.00017,
+      2 * sectionLengthM + 2 * 0.00017,
+      3 * sectionLengthM + 2 * 0.00017,
+    ].map((value) => Number(value.toPrecision(12)));
+
+    expectedBoundaries.forEach((boundary) => {
+      expect(intervalEdges.has(boundary)).toBe(true);
+    });
+  });
+
+  it('keeps continuous segmented phase equivalent to the global grating when there are no gaps', () => {
+    const global = solveHybridBraggCoupledModePoint(createHybridBraggModel(baseDesign), 600);
+    const segmented = solveHybridBraggCoupledModePoint(
+      createHybridBraggModel({
+        ...baseDesign,
+        permanentGratingMode: 'segmented',
+        braggSectionCount: 4,
+        braggSectionGapMm: 0,
+        braggSectionPhaseMode: 'continuous',
+      }),
+      600,
+    );
+
+    expect(segmented.reflectance).toBeCloseTo(global.reflectance, 12);
+  });
+
   it('moves the prescribed pulse position without changing the permanent grating', () => {
     const left = sampleHybridBraggModel(
       createHybridBraggModel({ ...baseDesign, peakStrain: 500e-6, strainCenterMm: 0.5 }),
@@ -256,6 +327,19 @@ describe('spatial Bragg coupled-mode solver', () => {
         expect(result.reflectance + result.transmission).toBeCloseTo(1, 12);
       });
     });
+  });
+
+  it('exposes finite calculated spatial forward and backward optical fields', () => {
+    const result = solveHybridBraggCoupledModePoint(createHybridBraggModel(baseDesign), getHybridDesignBraggWavelengthNm(baseDesign));
+
+    expect(result.spatialField).toHaveLength(baseDesign.segmentCount);
+    result.spatialField.forEach((sample) => {
+      expect(Number.isFinite(sample.forwardIntensity)).toBe(true);
+      expect(Number.isFinite(sample.backwardIntensity)).toBe(true);
+      expect(sample.normalizedBackwardIntensity).toBeGreaterThanOrEqual(0);
+      expect(sample.normalizedBackwardIntensity).toBeLessThanOrEqual(1);
+    });
+    expect(Math.max(...result.spatialField.map((sample) => sample.normalizedBackwardIntensity))).toBeCloseTo(1, 12);
   });
 });
 

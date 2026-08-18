@@ -3,6 +3,7 @@ import type { Material } from '../materials/material';
 import type { AcousticRepresentationMode, QuarterWaveStackInputs } from '../../types/simulation';
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
+  MAX_HYBRID_BRAGG_SECTIONS,
   MAX_HYBRID_MOVING_PULSE_WORK,
   MAX_HYBRID_PULSE_POSITIONS,
   MAX_HYBRID_SEGMENTS,
@@ -169,8 +170,22 @@ describe('validateQuarterWaveStackInputs', () => {
       ...hybridInputs,
       hybridBraggDesign: {
         ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        permanentGratingMode: 'segmented',
+        braggSectionCount: MAX_HYBRID_BRAGG_SECTIONS + 1,
+      },
+    })).toContainEqual({
+      field: 'thicknessMode',
+      message: `Hybrid Bragg section count must not exceed ${MAX_HYBRID_BRAGG_SECTIONS.toLocaleString()}.`,
+    });
+
+    expect(validateQuarterWaveStackInputs({
+      ...hybridInputs,
+      hybridBraggDesign: {
+        ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        permanentGratingMode: 'segmented',
+        braggSectionCount: MAX_HYBRID_BRAGG_SECTIONS,
         segmentCount: MAX_HYBRID_SEGMENTS,
-        pulseSweepPointCount: Math.floor(MAX_HYBRID_MOVING_PULSE_WORK / MAX_HYBRID_SEGMENTS) + 1,
+        pulseSweepPointCount: Math.floor(MAX_HYBRID_MOVING_PULSE_WORK / (MAX_HYBRID_SEGMENTS + MAX_HYBRID_BRAGG_SECTIONS * 2)) + 1,
       },
     })).toContainEqual({
       field: 'thicknessMode',

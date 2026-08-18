@@ -4,6 +4,7 @@ import { importStackConfigJson } from './importStackConfigJson';
 import type { Material } from '../simulation/materials/material';
 import type { ParameterSweepSettings, QuarterWaveStackInputs } from '../types/simulation';
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
+import { MAX_HYBRID_BRAGG_SECTIONS } from '../simulation/simulationLimits';
 
 const makeMaterial = (id: string, name: string, refractiveIndex: Material['refractiveIndex']): Material => ({
   id,
@@ -418,6 +419,26 @@ describe('importStackConfigJson', () => {
           pulseSweepPointCount: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.pulseSweepPointCount,
         },
       },
+    });
+  });
+
+  it('rejects imported hybrid segmented designs above the section-count limit', () => {
+    const payload = makeModernPayload({
+      structureType: 'hybrid-bragg-grating',
+      inputs: {
+        ...inputs,
+        thicknessMode: 'hybrid',
+        hybridBraggDesign: {
+          ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+          permanentGratingMode: 'segmented',
+          braggSectionCount: MAX_HYBRID_BRAGG_SECTIONS + 1,
+        },
+      },
+    });
+
+    expect(importStackConfigJson(JSON.stringify(payload))).toEqual({
+      ok: false,
+      message: `Hybrid Bragg section count must not exceed ${MAX_HYBRID_BRAGG_SECTIONS.toLocaleString()}.`,
     });
   });
 

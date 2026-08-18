@@ -2442,3 +2442,16 @@ Display-architecture implications:
 - Two-tone fields imply electronically translated or rearranged activation envelopes.
 
 Physical generation was deliberately not ranked in this study. The remaining physical questions are whether the required strain amplitudes, periods, phase stability, and beat envelopes can be generated in the target optical medium by acoustic, piezoelectric, electro-optic, thermal, or mechanical mechanisms.
+## WP-v2-06B Segmented Bragg Validation Closeout
+
+Issue #62 validates the segmented/local-coherence Bragg implementation against the display-addressability goal. The permanent grating can be globally coherent or segmented into local Bragg sections with optional unmodulated gaps and configurable inter-section grating phase relationships.
+
+The closeout study is in `artifacts/issue-62/segmented-bragg-study.md` and `.json`. It compares the 10 mm multi-tone reference against 2, 4, 8, and 16 segmented cases, selected standing/traveling fields, gap sweeps, convergence checks at 700/1400/2100 CMT segments, and scaled TMM spot checks. Reflection regions are detected from calculated normalized backward optical intensity `|B(z)|^2 >= 50% max`.
+
+SEGMENTATION PROVIDES A TRADE-OFF BUT NOT A CLEAR IMPROVEMENT. Segmented phase disruption can raise peak response in some cases, but the best tested segmented states remain limited by high secondary ambiguity, static leakage, incomplete section reachability, or weak median section selectivity. The best scored segmented multi-tone case reached 11/16 sections as nominal dominant states, but median selectivity was only about 1.002, so the states are not cleanly addressable.
+
+VISUALIZED REFLECTION REGIONS ARE NUMERICALLY STABLE for the selected 700/1400/2100 segment checks. Dominant region centers and widths remain stable enough for qualitative research use, but the visualization remains a scalar-CMT backward-intensity view rather than a direct local-reflectivity measurement.
+
+Scaled TMM spot checks support the existence and magnitude of segmented optical responses in short representative structures. Full 10 mm optical-period TMM remains computationally impractical in the browser-oriented codebase.
+
+Terminology note: section phase reset means breaking or controlling the permanent grating phase relationship between local sections. It does not make a coherent optical source incoherent across the device.

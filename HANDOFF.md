@@ -2,39 +2,39 @@
 
 ## Repository Status
 
-- Current work is on `codex/issue-60-comparative-perturbation-study`.
-- GitHub issue #60 tracks WP-v2-05A comparative perturbation-field physics study.
-- Base is `main`, which already contains the merged WP-v2-05 generalized-field architecture.
+- Current branch: `codex/issue-62-segmented-bragg-reflection-visualization`.
+- Draft PR #63 tracks Issue #62 / WP-v2-06 segmented Bragg media and reflection-region visualization.
+- Base: `main` after merged PR #61.
 
 ## Latest Task
 
-- Added `scripts/comparativePerturbationStudy.mts`, a reproducible headless study runner that reuses the scalar spatial CMT hybrid Bragg APIs.
-- Generated study artifacts:
-  - `artifacts/issue-60/comparative-perturbation-study.md`;
-  - `artifacts/issue-60/comparative-perturbation-study.json`.
-- Updated `RESEARCH.md` with the WP-v2-05A comparative study and required highlights.
-- Updated `MILESTONES.md` to mark the quantitative full perturbation-family sweep complete.
+- Completed WP-v2-06B validation closeout for the segmented baseline.
+- Added boundary-aware CMT interval splitting at section starts, section ends, and grating-to-gap boundaries.
+- Resolved PR review findings by adding `MAX_HYBRID_BRAGG_SECTIONS = 256`, validating segmented section fields in app and import paths, folding structural boundary intervals into the moving-region workload estimate, and removing `Explicit sequence` from interactive phase controls.
+- Expanded `scripts/segmentedBraggStudy.mts` to report phase-mode sweeps, section addressability, gap-length comparisons, same-active-length comparisons, 700/1400/2100 convergence, selected standing/traveling cases, and scaled TMM spot checks.
+- Regenerated `artifacts/issue-62/segmented-bragg-study.md` and `.json`.
+- Updated `RESEARCH.md` and `ARCHITECTURE.md` with closeout findings and visualization semantics.
 
 ## Key Result
 
-- `MOST PROMISING PERTURBATION FIELD: multi-tone`
-- The best two-tone case is conditional, not a clean single plane: peak enhancement about `0.219`, secondary peak ratio about `0.436`, phase-response width about `1.762 rad`, activation-proxy width about `1.100 mm`, and two inferred active regions.
-- `LOCALIZED MOVING-FIELD LIMITATION REMAINS`; smooth top-hat, triangular, and carrier-envelope packets did not materially clean up the moving localized response under the current scalar-CMT model.
-- Continuous traveling excitation behaves as a periodic multi-plane candidate, not a single moving plane.
-- Standing waves can form separated inferred regions when the period is near or above `L_c`, but coherent Bragg interference still rearranges the apparent response.
-- Two-tone relative phase can translate the inferred activation maximum across the grating in the local Bragg-alignment diagnostic; physical generation remains unevaluated.
+- `SEGMENTATION PROVIDES A TRADE-OFF BUT NOT A CLEAR IMPROVEMENT`.
+- Best scored segmented multi-tone case: 16 sections / fixed-reset, 0.625 mm sections, `L_section / L_c = 0.327`, 11/16 nominal dominant sections, but median selectivity only about 1.002.
+- `VISUALIZED REFLECTION REGIONS ARE NUMERICALLY STABLE` for selected 700/1400/2100 checks.
+- Scaled TMM spot checks agree on segmented-response magnitude for short representative structures; full 10 mm optical-period TMM remains impractical.
 
 ## Validation Performed
 
-- Study runner: `npx.cmd tsx scripts/comparativePerturbationStudy.mts` - passed and regenerated artifacts.
-- Higher-segment convergence: best multi-tone and standing-wave candidates rerun at 700, 1400, and 2100 CMT segments; qualitative ranking persisted.
-- Unit tests: `npm.cmd run test` - passed, 30 files / 187 tests.
-- Lint: `npm.cmd run lint` - passed with no reported issues.
+- Targeted solver test: `npm.cmd run test -- src/simulation/solvers/coupledMode/spatialBraggSolver.test.ts` - passed, 16 tests.
+- Review-fix targeted tests: `npm.cmd run test -- src/simulation/validation/quarterWaveStackValidation.test.ts src/io/importStackConfigJson.test.ts src/components/outputs/HybridBraggPanel.test.tsx src/simulation/solvers/coupledMode/spatialBraggSolver.test.ts` - passed, 4 files / 54 tests.
+- Study runner: `npx.cmd tsx scripts/segmentedBraggStudy.mts` - passed.
+- Full unit tests: `npm.cmd run test` - passed, 30 files / 192 tests.
+- Review-fix full unit tests: `npm.cmd run test` - passed, 31 files / 194 tests.
+- Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
-- Targeted browser smoke: local Vite at `http://127.0.0.1:5173`, selected Hybrid Bragg, switched smooth top-hat and traveling sinusoid controls, opened Moving Region, and verified response/profile chart text plus metrics rendered.
-- Broader Playwright browser regression: `npx.cmd playwright test tests/browser/browser-regression.spec.ts` - passed, 12 tests across `edge-desktop` and `edge-mobile`.
-- The previously reported six Playwright failures were stale expectations: exact Plotly SVG text matching and the old parameter-sweep selector model. Updated the regression spec to assert current chart text and the current per-row sweep controls.
+- Playwright regression: `npx.cmd playwright test tests/browser/browser-regression.spec.ts` - passed, 12 tests.
+- Targeted segmented visualization smoke: local Playwright against `http://127.0.0.1:5173/` - passed.
+- Review-fix targeted segmented-control smoke: local Playwright verified max section count `256`, no `Explicit sequence` option, and calculated backward-intensity view rendered.
 
 ## Remaining Follow-Up
 
-- Commit and push the review-fix update to PR #61.
+- Commit the review-fix update and push PR #63.
