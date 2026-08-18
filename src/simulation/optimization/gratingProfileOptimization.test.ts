@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS, getCouplingProfileMultiplier, getPhaseProfileOffset } from '../structures/hybridBraggGrating';
-import { buildDepthAddressLookup, compareObjectiveMetrics, evaluateMultiStateObjective, evaluateTargetReflectionState } from './targetReflectionState';
+import { buildDepthAddressLookup, classifyUsefulResponse, compareObjectiveMetrics, evaluateMultiStateObjective, evaluateTargetReflectionState } from './targetReflectionState';
 import { enumerateGratingProfileCandidates, searchGratingProfiles } from './gratingProfileSearch';
 
 const design = {
@@ -86,6 +86,57 @@ describe('target reflection objective metrics', () => {
     };
 
     expect(compareObjectiveMetrics(selective, noCompetitor)).toBeGreaterThan(0);
+  });
+
+  it('flags high-selectivity metrics with weak target response separately', () => {
+    const weakSelective = {
+      targetPower: 0.001,
+      offTargetPower: 0.01,
+      strongestCompetitorPower: 0.0001,
+      targetSelectivity: 10,
+      totalReflectance: 0.002,
+      staticReflectance: 0,
+      peakEnhancement: 0.002,
+      activeRegionWidthMm: 0.1,
+      activeRegionCount: 1,
+      secondaryPeakRatio: 0.1,
+    };
+
+    expect(classifyUsefulResponse(weakSelective)).toBe('high-selectivity / weak-response');
+    expect(classifyUsefulResponse({ ...weakSelective, targetPower: 0.1 })).toBe('high-selectivity / meaningful-response');
+    expect(classifyUsefulResponse({ ...weakSelective, targetSelectivity: 1 })).toBe('low-selectivity');
+  });
+
+  it('uses actuator-index control states for biased trough arrays', () => {
+    const arrayDesign = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      strainShape: 'piezo-array' as const,
+      actuatorPolarity: 'trough' as const,
+      peakStrain: 0.0015,
+      strainBias: 0.0015,
+      actuatorCount: 3,
+      actuatorPitchMm: 2,
+      strainCenterMm: 5,
+      strainWidthMm: 1,
+      perturbationEdgeWidthMm: 0.25,
+      segmentCount: 80,
+      fixedLaserWavelengthNm: 600.11,
+    };
+    const first = evaluateTargetReflectionState(arrayDesign, {
+      targetDepthMm: 3,
+      targetWidthMm: 1,
+      controlKind: 'actuator-index',
+      controlState: 0,
+    });
+    const second = evaluateTargetReflectionState(arrayDesign, {
+      targetDepthMm: 5,
+      targetWidthMm: 1,
+      controlKind: 'actuator-index',
+      controlState: 1,
+    });
+
+    expect(Number.isFinite(first.targetPower)).toBe(true);
+    expect(Number.isFinite(second.targetPower)).toBe(true);
   });
 
   it('counts off-target power inside broad target-overlapping regions as a competitor', () => {

@@ -121,6 +121,17 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
             <HybridNumber label="Active actuator" value={design.activeActuatorIndex} min={0} max={Math.max(0, design.actuatorCount - 1)} step={1} integer disabled={!isActiveMode} onChange={(activeActuatorIndex) => updateDesign({ activeActuatorIndex })} />
             <HybridNumber label="Command amplitude" value={design.actuatorCommandAmplitude} step={0.1} disabled={!isActiveMode} onChange={(actuatorCommandAmplitude) => updateDesign({ actuatorCommandAmplitude })} />
             <HybridNumber label="Adjacent command" value={design.actuatorAdjacentCommandAmplitude} step={0.1} disabled={!isActiveMode} onChange={(actuatorAdjacentCommandAmplitude) => updateDesign({ actuatorAdjacentCommandAmplitude })} />
+            <label className="field">
+              <span>Array polarity</span>
+              <select
+                value={design.actuatorPolarity}
+                disabled={!isActiveMode}
+                onChange={(event) => updateDesign({ actuatorPolarity: event.target.value as HybridBraggDesignInputs['actuatorPolarity'] })}
+              >
+                <option value="window">Positive window</option>
+                <option value="trough">Biased trough</option>
+              </select>
+            </label>
           </>
         ) : null}
         {usesWave ? <HybridNumber label="Wave period (mm)" value={design.perturbationPeriodMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(perturbationPeriodMm) => updateDesign({ perturbationPeriodMm })} /> : null}

@@ -34,6 +34,8 @@ const isHybridStrainShape = (value: unknown): boolean =>
   value === 'piezo-array';
 const isHybridPermanentGratingMode = (value: unknown): boolean =>
   value === 'global' || value === 'segmented';
+const isHybridActuatorPolarity = (value: unknown): boolean =>
+  value === 'window' || value === 'trough';
 const isHybridSectionPhaseMode = (value: unknown): boolean =>
   value === 'continuous' ||
   value === 'fixed-reset' ||
@@ -317,6 +319,9 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       }
       if (!isFiniteNumber(design.actuatorCommandAmplitude) || !isFiniteNumber(design.actuatorAdjacentCommandAmplitude)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid actuator command amplitudes must be finite.' });
+      }
+      if (!isHybridActuatorPolarity(design.actuatorPolarity)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid actuator polarity must be window or trough.' });
       }
       if (!isFiniteNumber(design.effectivePhotoelasticCoefficient)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid photoelastic coefficient must be finite.' });

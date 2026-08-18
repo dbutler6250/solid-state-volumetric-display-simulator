@@ -70,9 +70,10 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
   const isPhaseScan = isPhaseScannedField(result.strainShape);
   const boundedFrameIndex = Math.min(frameIndex, reflectionEvolution.frames.length - 1);
   const currentFrame = reflectionEvolution.frames[boundedFrameIndex];
-  const currentParameterLabel = isPhaseScan ? 'phase' : 'position';
-  const parameterLabel = isPhaseScan ? 'Phase' : 'Position';
-  const parameterUnit = isPhaseScan ? 'rad' : 'mm';
+  const isActuatorScan = currentFrame.parameterKind === 'actuator-index';
+  const currentParameterLabel = isActuatorScan ? 'actuator' : isPhaseScan ? 'phase' : 'position';
+  const parameterLabel = isActuatorScan ? 'Actuator' : isPhaseScan ? 'Phase' : 'Position';
+  const parameterUnit = isActuatorScan ? 'index' : isPhaseScan ? 'rad' : 'mm';
   const metrics = [
     ['Static reflectance', formatMetric(result.metrics.staticReflectance)],
     ['Peak reflectance', formatMetric(result.metrics.peakReflectance)],
@@ -327,7 +328,7 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                   plot_bgcolor: '#101720',
                   font: { color: '#dce7f2', family: 'Inter, system-ui, sans-serif' },
                   margin: { t: 20, r: 76, b: 52, l: 66 },
-                  xaxis: { title: { text: isPhaseScan ? 'Time / phase parameter (rad)' : 'Field center position (mm)' }, gridcolor: '#263443' },
+                  xaxis: { title: { text: isActuatorScan ? 'Actuator state index' : isPhaseScan ? 'Time / phase parameter (rad)' : 'Field center position (mm)' }, gridcolor: '#263443' },
                   yaxis: { title: { text: 'Depth z (mm)' }, gridcolor: '#263443' },
                 }}
                 config={{ displaylogo: false, responsive: true }}

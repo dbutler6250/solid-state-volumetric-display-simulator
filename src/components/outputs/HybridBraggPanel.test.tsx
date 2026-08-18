@@ -45,5 +45,7 @@ describe('HybridBraggPanel', () => {
     expect(markup).toContain('Bias strain');
     expect(markup).toContain('Active actuator');
     expect(markup).toContain('Adjacent command');
+    expect(markup).toContain('Array polarity');
+    expect(markup).toContain('Biased trough');
   });
 });

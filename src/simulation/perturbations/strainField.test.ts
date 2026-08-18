@@ -64,5 +64,6 @@ describe('generalized strain fields', () => {
     expect(sampleStrainField(arrayField, 0)).toBeCloseTo(1);
     expect(sampleStrainField(arrayField, -1)).toBeCloseTo(0.5);
     expect(sampleStrainField(arrayField, 0.75)).toBeGreaterThan(0.5);
+    expect(sampleStrainField({ ...arrayField, biasStrain: 1, actuatorPolarity: 'trough' }, 0)).toBeCloseTo(0);
   });
 });

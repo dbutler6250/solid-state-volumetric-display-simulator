@@ -126,6 +126,31 @@ describe('hybrid Bragg experiments', () => {
     expect(result.families.every((family) => family.peakReflectance >= 0 && family.peakReflectance <= 1)).toBe(true);
   });
 
+  it('uses actuator-index frames for piezo-array reflection playback and maps', () => {
+    const first = solveReflectionRegionEvolution({
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      strainShape: 'piezo-array',
+      actuatorPolarity: 'trough',
+      strainBias: 0.0015,
+      peakStrain: 0.0015,
+      actuatorCount: 4,
+      segmentCount: 60,
+    });
+    const second = solveReflectionRegionEvolution({
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      strainShape: 'piezo-array',
+      actuatorPolarity: 'trough',
+      strainBias: 0.0015,
+      peakStrain: 0.0015,
+      actuatorCount: 4,
+      segmentCount: 60,
+    });
+
+    expect(first.frames.map((frame) => frame.parameterKind)).toEqual(['actuator-index', 'actuator-index', 'actuator-index', 'actuator-index']);
+    expect(first.frames.map((frame) => frame.parameterValue)).toEqual([0, 1, 2, 3]);
+    expect(first.frames.map((frame) => frame.reflectance)).toEqual(second.frames.map((frame) => frame.reflectance));
+  });
+
   it('reports progress while solving the moving-pulse experiment asynchronously', async () => {
     const design = {
       ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,

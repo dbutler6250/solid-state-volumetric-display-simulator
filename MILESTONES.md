@@ -69,6 +69,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Piezo-defined prescribed strain fields with smooth window, biased trough, and actuator-array families in the existing hybrid Bragg perturbation pipeline
 - WP-v2-08 optical study artifacts comparing PZT window, biased trough, actuator arrays, interpolation, standing-wave, and multi-tone references
 - Biased strain-trough result identified as the strongest first-pass actuator-defined optical target, with mechanical feasibility deferred
+- Biased strain-trough validation closeout: CMT convergence and moving-trough tracking are strong, biased-trough arrays improve discrete addressing, but TMM does not yet support the CMT trough reflectance result
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -97,6 +98,9 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Biased strain-trough architecture
 - [x] Sequential actuator-array optical study
 - [x] Inter-actuator interpolation optical study
+- [x] Biased strain-trough CMT validation
+- [x] Biased-trough actuator-array optical study
+- [ ] Independent trough validation / improved TMM representation
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization

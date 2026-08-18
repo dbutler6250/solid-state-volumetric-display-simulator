@@ -601,6 +601,7 @@ function parseHybridBraggDesign(
   const activeActuatorIndex = value.activeActuatorIndex ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.activeActuatorIndex;
   const actuatorCommandAmplitude = value.actuatorCommandAmplitude ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorCommandAmplitude;
   const actuatorAdjacentCommandAmplitude = value.actuatorAdjacentCommandAmplitude ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorAdjacentCommandAmplitude;
+  const actuatorPolarity = value.actuatorPolarity ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.actuatorPolarity;
   const permanentGratingMode = value.permanentGratingMode ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.permanentGratingMode;
   const braggSectionCount = value.braggSectionCount ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionCount;
   const braggSectionGapMm = value.braggSectionGapMm ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionGapMm;
@@ -637,6 +638,9 @@ function parseHybridBraggDesign(
   }
   if (!Number.isInteger(actuatorCount) || !Number.isInteger(activeActuatorIndex)) {
     return { ok: false, message: 'Hybrid actuator count and active actuator must be whole numbers.' };
+  }
+  if (actuatorPolarity !== 'window' && actuatorPolarity !== 'trough') {
+    return { ok: false, message: 'Hybrid actuator polarity must be window or trough.' };
   }
   if (permanentGratingMode !== 'global' && permanentGratingMode !== 'segmented') {
     return { ok: false, message: 'Hybrid permanent grating mode must be global or segmented.' };
@@ -704,6 +708,7 @@ function parseHybridBraggDesign(
       activeActuatorIndex,
       actuatorCommandAmplitude,
       actuatorAdjacentCommandAmplitude,
+      actuatorPolarity,
       effectivePhotoelasticCoefficient: design.effectivePhotoelasticCoefficient,
       segmentCount: design.segmentCount,
       fixedLaserWavelengthNm: design.fixedLaserWavelengthNm,

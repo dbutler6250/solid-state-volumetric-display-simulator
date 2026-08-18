@@ -180,3 +180,5 @@ ActuatorCommand
 `HybridBraggDesignInputs` stores actuator parameters in UI units: background strain bias, actuator count, pitch, active actuator index, primary command amplitude, and adjacent command amplitude. `structures/hybridBraggGrating.ts` converts those into SI strain-field parameters before the material response is sampled. The solver still receives only local strain, local grating properties, coupling, phase, and detuning samples.
 
 Target-state evaluation accepts actuator-index control states for sequential array studies. This keeps lookup/addressability metrics shared across moving position scans, phase scans, and quasi-static actuator stepping.
+
+Actuator arrays also carry an explicit `window` or `trough` polarity. Trough polarity applies the commanded smooth windows as local strain reductions on top of the global bias, preserving the distinction between positive local actuation and biased-background suppression.

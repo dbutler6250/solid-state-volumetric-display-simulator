@@ -30,6 +30,11 @@ export type ObjectiveMetrics = {
   secondaryPeakRatio: number | null;
 };
 
+export type UsefulResponseClassification =
+  | 'high-selectivity / meaningful-response'
+  | 'high-selectivity / weak-response'
+  | 'low-selectivity';
+
 export type MultiStateObjectiveMetrics = {
   states: Array<TargetReflectionState & { metrics: ObjectiveMetrics }>;
   minimumSelectivity: number | null;
@@ -134,6 +139,19 @@ export function compareObjectiveMetrics(left: ObjectiveMetrics, right: Objective
   const leftSelectivity = left.targetSelectivity ?? 0;
   const rightSelectivity = right.targetSelectivity ?? 0;
   return leftSelectivity - rightSelectivity || left.peakEnhancement - right.peakEnhancement;
+}
+
+/** Flags research cases where a high ratio is produced by a weak optical response. */
+export function classifyUsefulResponse(
+  metrics: ObjectiveMetrics,
+  selectivityThreshold = 2,
+  minimumTargetPower = 0.05,
+): UsefulResponseClassification {
+  const selectivity = metrics.targetSelectivity ?? 0;
+  if (selectivity < selectivityThreshold) return 'low-selectivity';
+  return metrics.targetPower >= minimumTargetPower
+    ? 'high-selectivity / meaningful-response'
+    : 'high-selectivity / weak-response';
 }
 
 function applyTargetControlState(design: HybridBraggDesignInputs, target: TargetReflectionState): HybridBraggDesignInputs {

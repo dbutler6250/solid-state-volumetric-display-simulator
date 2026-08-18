@@ -94,6 +94,7 @@ export const DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS: HybridBraggDesignInputs = {
   activeActuatorIndex: 0,
   actuatorCommandAmplitude: 1,
   actuatorAdjacentCommandAmplitude: 0,
+  actuatorPolarity: 'window',
   effectivePhotoelasticCoefficient: 0.22,
   segmentCount: 400,
   fixedLaserWavelengthNm: 600,
@@ -152,6 +153,7 @@ export function createHybridBraggModel(design: HybridBraggDesignInputs): HybridB
       activeActuatorIndex: design.activeActuatorIndex,
       actuatorCommandAmplitude: design.actuatorCommandAmplitude,
       actuatorAdjacentCommandAmplitude: design.actuatorAdjacentCommandAmplitude,
+      actuatorPolarity: design.actuatorPolarity,
     },
     materialResponse: {
       effectivePhotoelasticCoefficient: design.effectivePhotoelasticCoefficient,

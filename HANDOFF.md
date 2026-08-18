@@ -34,6 +34,9 @@
 - WP-v2-08 added prescribed piezo-like strain windows, biased troughs, and actuator arrays in the existing perturbation -> material response -> spatial CMT path.
 - Study runner: `scripts/piezoStrainWindowStudy.mts`.
 - Artifacts: `artifacts/issue-66/piezo-strain-window-study.md` and `.json`.
-- Major result: `PIEZO-DEFINED STRAIN STATES MATERIALLY IMPROVE ADDRESSABILITY` in the bounded first optical pass, with `BIASED STRAIN TROUGH PERFORMS BEST`.
-- Sequential arrays remain weak in the first pass: best tested array was `NO USEFUL DISCRETE ADDRESSING`; interpolation was partial/nonlinear.
-- Mechanical feasibility remains unverified; next work should test whether practical PZT/preload geometries can reproduce the desired trough field.
+- Closeout result: `BIASED STRAIN-TROUGH ADVANTAGE IS REAL BUT FRAGILE`.
+- CMT convergence at 700/1400/2100 segments is stable for target response and total reflectance, but the original `44.29` selectivity is revised to a finite-resolution ratio because the high-resolution competitor falls below the denominator floor.
+- Moving ideal trough tracking is strong in CMT: mean absolute optical-center error is about `0.109 mm`.
+- The revised biased-trough array result is promising: 4 actuators at `2.0 mm` pitch reached median selectivity about `7.62`, while positive-window arrays remain poor.
+- TMM does not support the CMT trough result in the current full-length discretized spot check, so the trough remains a leading CMT optical target rather than independently confirmed.
+- Mechanical feasibility remains unverified; next work should first improve independent numerical validation or TMM representation, then test whether practical PZT/preload geometries can reproduce the desired trough field.

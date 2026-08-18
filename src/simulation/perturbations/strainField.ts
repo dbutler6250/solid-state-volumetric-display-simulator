@@ -24,6 +24,7 @@ export type StrainField = {
   activeActuatorIndex?: number;
   actuatorCommandAmplitude?: number;
   actuatorAdjacentCommandAmplitude?: number;
+  actuatorPolarity?: 'window' | 'trough';
 };
 
 /** Samples a prescribed dimensionless strain field at one SI position. */
@@ -57,7 +58,8 @@ function samplePrescribedStrainField(field: StrainField, zM: number, tS: number)
     return biasStrain - Math.abs(field.peakStrain) * sampleSmoothTopHat(distance, field.widthM, edgeWidthM);
   }
   if (field.shape === 'piezo-array') {
-    return biasStrain + samplePiezoArrayField(field, zM, edgeWidthM);
+    const sign = field.actuatorPolarity === 'trough' ? -1 : 1;
+    return biasStrain + sign * samplePiezoArrayField(field, zM, edgeWidthM);
   }
   if (field.peakStrain === 0) return 0;
   if (field.shape === 'rectangular') {

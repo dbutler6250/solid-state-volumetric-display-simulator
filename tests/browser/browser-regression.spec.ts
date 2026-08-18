@@ -81,6 +81,13 @@ test.describe('browser regression harness', () => {
     await expect(perturbationType).toHaveValue('piezo-array');
     await expect(page.getByRole('textbox', { name: 'active actuator' })).toBeVisible();
     await expect(page.getByRole('textbox', { name: 'adjacent command' })).toBeVisible();
+    await page.getByRole('combobox', { name: 'Array polarity' }).selectOption('trough');
+    await expect(page.getByRole('combobox', { name: 'Array polarity' })).toHaveValue('trough');
+
+    await page.getByRole('tab', { name: 'Moving Region' }).click();
+    await expect(page.getByRole('heading', { name: 'Calculated Reflection Regions' })).toBeVisible();
+    await expect(page.getByText('Laser timing:')).toBeVisible();
+    await waitForChartText(page, 'Actuator state index');
   });
 
   test('3D view opens and supports volume and plane modes', async ({ page }) => {
