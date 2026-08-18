@@ -1,0 +1,761 @@
+{
+  "canonicalBestDesign": {
+    "lengthMm": 10,
+    "averageIndex": 1.45,
+    "indexModulation": 0.0001,
+    "gratingPeriodNm": 206.9,
+    "gratingPhaseRadians": 0,
+    "couplingProfile": {
+      "family": "uniform"
+    },
+    "phaseProfile": {
+      "family": "constant"
+    },
+    "permanentGratingMode": "global",
+    "braggSectionCount": 1,
+    "braggSectionGapMm": 0,
+    "braggSectionPhaseMode": "continuous",
+    "braggSectionPhaseSequenceRadians": [],
+    "braggSectionRandomSeed": 1,
+    "peakStrain": 0.0015,
+    "strainCenterMm": 5,
+    "strainWidthMm": 0.8,
+    "strainShape": "piezo-trough",
+    "perturbationEdgeWidthMm": 0.25,
+    "perturbationPeriodMm": 1,
+    "perturbationPhaseRadians": 0,
+    "perturbationTemporalPhaseRadians": 0,
+    "perturbationVelocityMps": 5000,
+    "perturbationSecondaryPeriodMm": 1.2,
+    "perturbationSecondaryAmplitudeRatio": 1,
+    "perturbationSecondaryPhaseRadians": 0,
+    "strainBias": 0.0015,
+    "actuatorCount": 8,
+    "actuatorPitchMm": 1,
+    "activeActuatorIndex": 0,
+    "actuatorCommandAmplitude": 1,
+    "actuatorAdjacentCommandAmplitude": 0,
+    "actuatorPolarity": "window",
+    "effectivePhotoelasticCoefficient": 0.22,
+    "segmentCount": 360,
+    "fixedLaserWavelengthNm": 600.11,
+    "pulseSweepStartMm": 0,
+    "pulseSweepEndMm": 10,
+    "pulseSweepPointCount": 17
+  },
+  "cases": {
+    "uniformUnstrained": {
+      "label": "Case 0 - uniform unstrained grating",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.0006814089897597801,
+      "spatialCmtReflectance": 0.0006814089897597801,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 1.7319479184152442e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.0006768685933586485,
+          "tmmReflectance": 0.0006754735610896423,
+          "tmmTransmission": 0.9993245264389207,
+          "tmmEnergyError": 1.021405182655144e-14
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.000683430798872474,
+          "tmmReflectance": 0.0006818114882552798,
+          "tmmTransmission": 0.999318188511737,
+          "tmmEnergyError": 7.66053886991358e-15
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.0006849518495589143,
+          "tmmReflectance": 0.0006831148017691472,
+          "tmmTransmission": 0.9993168851982168,
+          "tmmEnergyError": 1.3988810110276972e-14
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.0006814089897597801,
+          "tmmReflectance": 0.000679365532423665,
+          "tmmTransmission": 0.999320634467559,
+          "tmmEnergyError": 1.7319479184152442e-14
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.0006728691197982701,
+          "tmmReflectance": 0.0006706352004575579,
+          "tmmTransmission": 0.9993293647995329,
+          "tmmEnergyError": 9.547918011776346e-15
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.0006594870645433764,
+          "tmmReflectance": 0.0006570829471517176,
+          "tmmTransmission": 0.9993429170528488,
+          "tmmEnergyError": 4.440892098500626e-16
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.0006415017872105708,
+          "tmmReflectance": 0.0006389516195096237,
+          "tmmTransmission": 0.9993610483804813,
+          "tmmEnergyError": 8.992806499463768e-15
+        }
+      ]
+    },
+    "uniformStrained": {
+      "label": "Case 1 - uniform globally strained grating",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.0005654359211101666,
+      "spatialCmtReflectance": 0.0005654359211101666,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 1.4210854715202004e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.00046178109051923976,
+          "tmmReflectance": 0.0004537340713377336,
+          "tmmTransmission": 0.9995462659286677,
+          "tmmEnergyError": 5.329070518200751e-15
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.000498442212399,
+          "tmmReflectance": 0.0004895586979964827,
+          "tmmTransmission": 0.9995104413019984,
+          "tmmEnergyError": 5.10702591327572e-15
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.0005331820336253344,
+          "tmmReflectance": 0.0005235414787539278,
+          "tmmTransmission": 0.9994764585212506,
+          "tmmEnergyError": 4.440892098500626e-15
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.0005654359211101666,
+          "tmmReflectance": 0.0005551377302152244,
+          "tmmTransmission": 0.9994448622697807,
+          "tmmEnergyError": 4.107825191113079e-15
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.0005946699691659237,
+          "tmmReflectance": 0.0005838313230167853,
+          "tmmTransmission": 0.999416168676969,
+          "tmmEnergyError": 1.4210854715202004e-14
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.000620393062525108,
+          "tmmReflectance": 0.0006091461954334187,
+          "tmmTransmission": 0.9993908538045656,
+          "tmmEnergyError": 9.992007221626409e-16
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.0006421680657120264,
+          "tmmReflectance": 0.0006306570730231133,
+          "tmmTransmission": 0.9993693429269781,
+          "tmmEnergyError": 1.1102230246251565e-15
+        }
+      ]
+    },
+    "sharpTrough": {
+      "label": "Case 3 - sharp three-region biased trough",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.04482052636138889,
+      "spatialCmtReflectance": 0.04482052636138889,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 3.3084646133829665e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.000001943409643189014,
+          "tmmReflectance": 3.671928292570503e-7,
+          "tmmTransmission": 0.9999996328071736,
+          "tmmEnergyError": 2.886579864025407e-15
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.09013334667574924,
+          "tmmReflectance": 4.2112595389992814e-7,
+          "tmmTransmission": 0.9999995788740419,
+          "tmmEnergyError": 4.218847493575595e-15
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.14734262203265736,
+          "tmmReflectance": 2.659755297702725e-8,
+          "tmmTransmission": 0.9999999734024164,
+          "tmmEnergyError": 3.064215547965432e-14
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.04482052636138889,
+          "tmmReflectance": 4.785122812621482e-7,
+          "tmmTransmission": 0.9999995214877357,
+          "tmmEnergyError": 1.709743457922741e-14
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.0021811330073546547,
+          "tmmReflectance": 6.920117520439373e-8,
+          "tmmTransmission": 0.9999999307988418,
+          "tmmEnergyError": 1.687538997430238e-14
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.019394387733018655,
+          "tmmReflectance": 1.057473130666004e-7,
+          "tmmTransmission": 0.9999998942526758,
+          "tmmEnergyError": 1.1213252548714081e-14
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.010393116305390795,
+          "tmmReflectance": 3.9563109001056164e-8,
+          "tmmTransmission": 0.9999999604368579,
+          "tmmEnergyError": 3.3084646133829665e-14
+        }
+      ]
+    },
+    "smoothTrough": {
+      "label": "Case 4 - smooth WP-v2-08B biased trough",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.021084344789568967,
+      "spatialCmtReflectance": 0.021084344789568967,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 2.6867397195928788e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.0032624992671524264,
+          "tmmReflectance": 3.202374601523291e-7,
+          "tmmTransmission": 0.9999996797625463,
+          "tmmEnergyError": 6.439293542825908e-15
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.060410495316655016,
+          "tmmReflectance": 6.404753602745636e-8,
+          "tmmTransmission": 0.9999999359524516,
+          "tmmEnergyError": 1.2323475573339238e-14
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.2633148352857062,
+          "tmmReflectance": 7.029322328995384e-8,
+          "tmmTransmission": 0.9999999297068036,
+          "tmmEnergyError": 2.6867397195928788e-14
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.021084344789568967,
+          "tmmReflectance": 3.026638272559751e-7,
+          "tmmTransmission": 0.9999996973361757,
+          "tmmEnergyError": 2.886579864025407e-15
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.03774021251142472,
+          "tmmReflectance": 1.2317337843103615e-7,
+          "tmmTransmission": 0.9999998768266228,
+          "tmmEnergyError": 1.3322676295501878e-15
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.017412926993427832,
+          "tmmReflectance": 2.249756162468169e-8,
+          "tmmTransmission": 0.9999999775024565,
+          "tmmEnergyError": 1.8207657603852567e-14
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.00000826419103816834,
+          "tmmReflectance": 2.328098810083805e-7,
+          "tmmTransmission": 0.9999997671901196,
+          "tmmEnergyError": 6.661338147750939e-16
+        }
+      ]
+    }
+  },
+  "tmmConvergence": [
+    {
+      "label": "smooth trough full-length TMM 1 slices/period",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.021084344789568967,
+      "spatialCmtReflectance": 0.021084344789568967,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 2.886579864025407e-15,
+      "spectrum": [
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.021084344789568967,
+          "tmmReflectance": 3.026638272559751e-7,
+          "tmmTransmission": 0.9999996973361757,
+          "tmmEnergyError": 2.886579864025407e-15
+        }
+      ]
+    },
+    {
+      "label": "smooth trough full-length TMM 2 slices/period",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.021084344789568967,
+      "spatialCmtReflectance": 0.021084344789568967,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 2.9976021664879227e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.021084344789568967,
+          "tmmReflectance": 0.01143120399249883,
+          "tmmTransmission": 0.9885687960074712,
+          "tmmEnergyError": 2.9976021664879227e-14
+        }
+      ]
+    }
+  ],
+  "weakModulation": [
+    {
+      "label": "short uniform Delta n 0.00001",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.000006817146134695461,
+      "spatialCmtReflectance": 0.000006817146134695461,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 1.1657341758564144e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.0000067716892910813,
+          "tmmReflectance": 0.0000067577273143681505,
+          "tmmTransmission": 0.9999932422726866,
+          "tmmEnergyError": 8.881784197001252e-16
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.000006837387907140087,
+          "tmmReflectance": 0.000006821180624259043,
+          "tmmTransmission": 0.9999931788193761,
+          "tmmEnergyError": 4.440892098500626e-16
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.000006852616284544403,
+          "tmmReflectance": 0.000006834229287227249,
+          "tmmTransmission": 0.9999931657707128,
+          "tmmEnergyError": 0
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.000006817146134695461,
+          "tmmReflectance": 0.0000067966929986311665,
+          "tmmTransmission": 0.9999932033069933,
+          "tmmEnergyError": 8.104628079763643e-15
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.000006731648321683271,
+          "tmmReflectance": 0.00000670928892875544,
+          "tmmTransmission": 0.9999932907110596,
+          "tmmEnergyError": 1.1657341758564144e-14
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.000006597675429707641,
+          "tmmReflectance": 0.000006573612912906231,
+          "tmmTransmission": 0.9999934263870773,
+          "tmmEnergyError": 9.769962616701378e-15
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.00000641762363319735,
+          "tmmReflectance": 0.000006392100024135571,
+          "tmmTransmission": 0.9999936078999769,
+          "tmmEnergyError": 1.1102230246251565e-15
+        }
+      ]
+    },
+    {
+      "label": "short uniform Delta n 0.0001",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.0006814089897597801,
+      "spatialCmtReflectance": 0.0006814089897597801,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 1.7319479184152442e-14,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.0006768685933586485,
+          "tmmReflectance": 0.0006754735610896423,
+          "tmmTransmission": 0.9993245264389207,
+          "tmmEnergyError": 1.021405182655144e-14
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.000683430798872474,
+          "tmmReflectance": 0.0006818114882552798,
+          "tmmTransmission": 0.999318188511737,
+          "tmmEnergyError": 7.66053886991358e-15
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.0006849518495589143,
+          "tmmReflectance": 0.0006831148017691472,
+          "tmmTransmission": 0.9993168851982168,
+          "tmmEnergyError": 1.3988810110276972e-14
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.0006814089897597801,
+          "tmmReflectance": 0.000679365532423665,
+          "tmmTransmission": 0.999320634467559,
+          "tmmEnergyError": 1.7319479184152442e-14
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.0006728691197982701,
+          "tmmReflectance": 0.0006706352004575579,
+          "tmmTransmission": 0.9993293647995329,
+          "tmmEnergyError": 9.547918011776346e-15
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.0006594870645433764,
+          "tmmReflectance": 0.0006570829471517176,
+          "tmmTransmission": 0.9993429170528488,
+          "tmmEnergyError": 4.440892098500626e-16
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.0006415017872105708,
+          "tmmReflectance": 0.0006389516195096237,
+          "tmmTransmission": 0.9993610483804813,
+          "tmmEnergyError": 8.992806499463768e-15
+        }
+      ]
+    },
+    {
+      "label": "short uniform Delta n 0.001",
+      "convention": {
+        "coordinate": "reference-z",
+        "strainFieldCoordinate": "reference-z",
+        "physicalLength": "unchanged-reference-length",
+        "gratingPeriod": "locally-stretched-by-1-plus-epsilon",
+        "gratingPhase": "continuous-accumulated-local-period",
+        "averageIndex": "photoelastic-first-order",
+        "indexModulation": "peak-sinusoidal-delta-n"
+      },
+      "piecewiseCmtReflectance": 0.06519794245278743,
+      "spatialCmtReflectance": 0.06519794245278743,
+      "cmtAbsoluteDifference": 0,
+      "maxTmmEnergyError": 9.769962616701378e-15,
+      "spectrum": [
+        {
+          "wavelengthNm": 599.86,
+          "cmtReflectance": 0.06479321223200465,
+          "tmmReflectance": 0.06466479846403805,
+          "tmmTransmission": 0.9353352015359718,
+          "tmmEnergyError": 9.769962616701378e-15
+        },
+        {
+          "wavelengthNm": 599.94333333,
+          "cmtReflectance": 0.0653780522158743,
+          "tmmReflectance": 0.06522960558722007,
+          "tmmTransmission": 0.9347703944127809,
+          "tmmEnergyError": 8.881784197001252e-16
+        },
+        {
+          "wavelengthNm": 600.02666667,
+          "cmtReflectance": 0.06551350642750328,
+          "tmmReflectance": 0.06534551836233467,
+          "tmmTransmission": 0.9346544816376661,
+          "tmmEnergyError": 6.661338147750939e-16
+        },
+        {
+          "wavelengthNm": 600.11,
+          "cmtReflectance": 0.06519794245278743,
+          "tmmReflectance": 0.06501127585460553,
+          "tmmTransmission": 0.934988724145399,
+          "tmmEnergyError": 4.440892098500626e-15
+        },
+        {
+          "wavelengthNm": 600.19333333,
+          "cmtReflectance": 0.06443640601591606,
+          "tmmReflectance": 0.06423228879488907,
+          "tmmTransmission": 0.9357677112051178,
+          "tmmEnergyError": 6.8833827526759706e-15
+        },
+        {
+          "wavelengthNm": 600.27666667,
+          "cmtReflectance": 0.06324054327236397,
+          "tmmReflectance": 0.06302055450398424,
+          "tmmTransmission": 0.9369794454960162,
+          "tmmEnergyError": 4.440892098500626e-16
+        },
+        {
+          "wavelengthNm": 600.36,
+          "cmtReflectance": 0.06162843872668318,
+          "tmmReflectance": 0.061394487249867104,
+          "tmmTransmission": 0.9386055127501326,
+          "tmmEnergyError": 3.3306690738754696e-16
+        }
+      ]
+    }
+  ],
+  "detuningRatios": [
+    {
+      "zMm": 0.5,
+      "strain": 0.0015,
+      "localBraggWavelengthNm": 600.7015518044213,
+      "detuningPerM": 14945.152402367443,
+      "couplingCoefficientPerM": 522.987271158681,
+      "absoluteDetuningOverKappa": 28.576512711784325
+    },
+    {
+      "zMm": 4.6,
+      "strain": 0,
+      "localBraggWavelengthNm": 600.01,
+      "detuningPerM": -2530.2213633898646,
+      "couplingCoefficientPerM": 523.5900490974806,
+      "absoluteDetuningOverKappa": 4.832447384649961
+    },
+    {
+      "zMm": 5,
+      "strain": 0,
+      "localBraggWavelengthNm": 600.01,
+      "detuningPerM": -2530.2213633898646,
+      "couplingCoefficientPerM": 523.5900490974806,
+      "absoluteDetuningOverKappa": 4.832447384649961
+    },
+    {
+      "zMm": 5.4,
+      "strain": 0,
+      "localBraggWavelengthNm": 600.01,
+      "detuningPerM": -2530.2213633898646,
+      "couplingCoefficientPerM": 523.5900490974806,
+      "absoluteDetuningOverKappa": 4.832447384649961
+    },
+    {
+      "zMm": 9.5,
+      "strain": 0.0015,
+      "localBraggWavelengthNm": 600.7015518044213,
+      "detuningPerM": 14945.152402367443,
+      "couplingCoefficientPerM": 522.987271158681,
+      "absoluteDetuningOverKappa": 28.576512711784325
+    }
+  ],
+  "previousCmtLocalization": {
+    "targetPower": 0.6182831383342687,
+    "strongestCompetitorPower": 0.013959046846514295,
+    "targetSelectivity": 44.29264727975749,
+    "totalReflectance": 0.021256927777462974,
+    "dominantRegionCenterMm": 4.902777777777778,
+    "movingTroughMeanAbsErrorMm": 0.10912698412698514,
+    "biasedTroughArray": {
+      "actuatorCount": 4,
+      "pitchMm": 2,
+      "design": {
+        "lengthMm": 10,
+        "averageIndex": 1.45,
+        "indexModulation": 0.0001,
+        "gratingPeriodNm": 206.9,
+        "gratingPhaseRadians": 0,
+        "couplingProfile": {
+          "family": "uniform"
+        },
+        "phaseProfile": {
+          "family": "constant"
+        },
+        "permanentGratingMode": "global",
+        "braggSectionCount": 1,
+        "braggSectionGapMm": 0,
+        "braggSectionPhaseMode": "continuous",
+        "braggSectionPhaseSequenceRadians": [],
+        "braggSectionRandomSeed": 1,
+        "peakStrain": 0.0015,
+        "strainCenterMm": 5,
+        "strainWidthMm": 0.8,
+        "strainShape": "piezo-array",
+        "perturbationEdgeWidthMm": 0.25,
+        "perturbationPeriodMm": 1,
+        "perturbationPhaseRadians": 0,
+        "perturbationTemporalPhaseRadians": 0,
+        "perturbationVelocityMps": 5000,
+        "perturbationSecondaryPeriodMm": 1.2,
+        "perturbationSecondaryAmplitudeRatio": 1,
+        "perturbationSecondaryPhaseRadians": 0,
+        "strainBias": 0.0015,
+        "actuatorCount": 4,
+        "actuatorPitchMm": 2,
+        "activeActuatorIndex": 0,
+        "actuatorCommandAmplitude": 1,
+        "actuatorAdjacentCommandAmplitude": 0.1,
+        "actuatorPolarity": "trough",
+        "effectivePhotoelasticCoefficient": 0.22,
+        "segmentCount": 360,
+        "fixedLaserWavelengthNm": 600.11,
+        "pulseSweepStartMm": 0,
+        "pulseSweepEndMm": 10,
+        "pulseSweepPointCount": 17
+      },
+      "multi": {
+        "states": [
+          {
+            "targetDepthMm": 2,
+            "targetWidthMm": 1,
+            "controlKind": "actuator-index",
+            "controlState": 0,
+            "metrics": {
+              "targetPower": 0.5996561459847467,
+              "offTargetPower": 0.8903879878410881,
+              "strongestCompetitorPower": 0.08148768810995174,
+              "targetSelectivity": 7.358855796419548,
+              "totalReflectance": 0.02445284076210781,
+              "staticReflectance": 0.0012026237012231686,
+              "peakEnhancement": 0.02325021706088464,
+              "activeRegionWidthMm": 0.61111111111111,
+              "activeRegionCount": 8,
+              "secondaryPeakRatio": 0.13589069111621266
+            }
+          },
+          {
+            "targetDepthMm": 4,
+            "targetWidthMm": 1,
+            "controlKind": "actuator-index",
+            "controlState": 1,
+            "metrics": {
+              "targetPower": 0.6189565456979148,
+              "offTargetPower": 1.6365083642427662,
+              "strongestCompetitorPower": 0.044851876849215336,
+              "targetSelectivity": 13.8000143846543,
+              "totalReflectance": 0.03059303517014036,
+              "staticReflectance": 0.0012026237012231686,
+              "peakEnhancement": 0.02939041146891719,
+              "activeRegionWidthMm": 0.6111111111111103,
+              "activeRegionCount": 17,
+              "secondaryPeakRatio": 0.07246369258223427
+            }
+          },
+          {
+            "targetDepthMm": 6,
+            "targetWidthMm": 1,
+            "controlKind": "actuator-index",
+            "controlState": 2,
+            "metrics": {
+              "targetPower": 0.5986855843016597,
+              "offTargetPower": 3.0223472982180657,
+              "strongestCompetitorPower": 0.09867192895084431,
+              "targetSelectivity": 6.06743569997409,
+              "totalReflectance": 0.03059303517014029,
+              "staticReflectance": 0.0012026237012231686,
+              "peakEnhancement": 0.02939041146891712,
+              "activeRegionWidthMm": 0.6111111111111089,
+              "activeRegionCount": 27,
+              "secondaryPeakRatio": 0.16481427236291443
+            }
+          },
+          {
+            "targetDepthMm": 8,
+            "targetWidthMm": 1,
+            "controlKind": "actuator-index",
+            "controlState": 3,
+            "metrics": {
+              "targetPower": 0.6030814263474854,
+              "offTargetPower": 3.7873817301510244,
+              "strongestCompetitorPower": 0.07912222204689352,
+              "targetSelectivity": 7.622149767104062,
+              "totalReflectance": 0.024452840762107096,
+              "staticReflectance": 0.0012026237012231686,
+              "peakEnhancement": 0.023250217060883926,
+              "activeRegionWidthMm": 0.6111111111111143,
+              "activeRegionCount": 36,
+              "secondaryPeakRatio": 0.13119658240196677
+            }
+          }
+        ],
+        "minimumSelectivity": 6.06743569997409,
+        "medianSelectivity": 7.622149767104062,
+        "meanSelectivity": 8.712113912038,
+        "addressableFractions": {
+          "S>1.1": 1,
+          "S>1.5": 1,
+          "S>2": 1
+        }
+      }
+    }
+  },
+  "conclusions": {
+    "rootCause": "multiple contributing causes: full-length TMM convergence is unresolved and the biased trough remains scalar-CMT approximation-sensitive under high background detuning",
+    "uniformStrainParity": "UNIFORM-STRAIN SOLVER PARITY CONFIRMED",
+    "primary": "CMT–TMM DISAGREEMENT EXPLAINED — TROUGH REMAINS APPROXIMATION-SENSITIVE",
+    "architectureDecision": "BIASED TROUGH REMAINS PROMISING BUT REQUIRES A HIGHER-FIDELITY OPTICAL MODEL",
+    "cmtValidityEnvelope": "CMT section multiplication and spatial CMT agree for the sampled piecewise model; TMM agreement is only demonstrated for short, weak uniform gratings, not for the full biased trough.",
+    "tmmResolutionGuidance": "Use at least 32 slices/period for short uniform reference cases; full 10 mm trough TMM at 1-2 slices/period remains a low-resolution diagnostic and should not be treated as converged."
+  }
+}

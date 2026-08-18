@@ -10,33 +10,31 @@
 
 ## Latest Task
 
-- Implemented WP-v2-07 foundation modules for parameterized permanent coupling/phase profiles, target reflection-state objective metrics, multi-state aggregation, and deterministic coarse grating-profile search.
-- Added `scripts/gratingProfileOptimizationStudy.mts`.
-- Generated `artifacts/issue-64/grating-profile-optimization-study.md` and `.json`.
-- Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md`.
+- Continued Issue #66 / draft PR #67 with WP-v2-08C independent optical validation.
+- Added `src/simulation/validation/troughOpticalValidation.ts` for canonical convention, exact piecewise CMT, continuous-phase TMM, and detuning diagnostics.
+- Added `scripts/troughOpticalValidationStudy.mts`.
+- Generated `artifacts/issue-66/trough-optical-validation-study.md` and `.json`.
+- Updated `RESEARCH.md` and `ARCHITECTURE.md`.
 
 ## Key Result
 
-- `PERMANENT-GRATING PROFILE ENGINEERING PROVIDES ONLY A MODEST TRADE-OFF` in the first bounded coarse search.
-- The foundation can compare uniform, apodized, piecewise-coupling, phase-engineered, and segmented candidates against the same target-state metrics.
-- The first study uses the detuned multi-tone baseline at `600.11 nm`; convergence, optimized visualization smoke, and TMM spot checks remain follow-up.
+- Required conclusion: `CMT–TMM DISAGREEMENT EXPLAINED — TROUGH REMAINS APPROXIMATION-SENSITIVE`.
+- Uniform strained short-grating parity is confirmed: `R_CMT = 0.0005654`, `R_TMM = 0.0005551`.
+- Exact piecewise CMT and spatial CMT agree to numerical precision for sampled validation cases.
+- Full 10 mm smooth trough remains solver-sensitive: at the fixed laser `R_CMT = 0.02108`, 1-slice/period TMM gives `3.027e-7`, and 2-slice/period TMM gives `0.01143`, so full-length TMM is not converged enough to validate or invalidate the architecture alone.
+- Architecture decision: `BIASED TROUGH REMAINS PROMISING BUT REQUIRES A HIGHER-FIDELITY OPTICAL MODEL`.
 
 ## Validation Performed
 
-- Targeted optimization test: `npm.cmd run test -- src/simulation/optimization/gratingProfileOptimization.test.ts` - passed, 7 tests.
-- Study runner: `npx.cmd tsx scripts/gratingProfileOptimizationStudy.mts` - passed.
-- Full unit tests: `npm.cmd run test` - passed, 32 files / 205 tests.
+- Targeted validation test: `npm.cmd run test -- src/simulation/validation/troughOpticalValidation.test.ts` - passed, 7 tests.
+- Study runner: `npx.cmd tsx scripts/piezoStrainWindowStudy.mts` - passed.
+- Study runner: `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
+- Full unit tests: `npm.cmd run test` - passed, 33 files / 218 tests.
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
+- Browser regression: `npm.cmd run test:browser` - passed, 14 tests.
 
 ## Remaining Follow-Up
 
-- WP-v2-08 added prescribed piezo-like strain windows, biased troughs, and actuator arrays in the existing perturbation -> material response -> spatial CMT path.
-- Study runner: `scripts/piezoStrainWindowStudy.mts`.
-- Artifacts: `artifacts/issue-66/piezo-strain-window-study.md` and `.json`.
-- Closeout result: `BIASED STRAIN-TROUGH ADVANTAGE IS REAL BUT FRAGILE`.
-- CMT convergence at 700/1400/2100 segments is stable for target response and total reflectance, but the original `44.29` selectivity is revised to a finite-resolution ratio because the high-resolution competitor falls below the denominator floor.
-- Moving ideal trough tracking is strong in CMT: mean absolute optical-center error is about `0.109 mm`.
-- The revised biased-trough array result is promising: 4 actuators at `2.0 mm` pitch reached median selectivity about `7.62`, while positive-window arrays remain poor.
-- TMM does not support the CMT trough result in the current full-length discretized spot check, so the trough remains a leading CMT optical target rather than independently confirmed.
-- Mechanical feasibility remains unverified; next work should first improve independent numerical validation or TMM representation, then test whether practical PZT/preload geometries can reproduce the desired trough field.
+- Update PR #67 with the WP-v2-08C conclusion.
+- Do not move to detailed PZT mechanics yet; first constrain the optical architecture to an independently validated solver range or promote a higher-fidelity optical reference for future architecture studies.

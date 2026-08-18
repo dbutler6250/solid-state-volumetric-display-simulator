@@ -182,3 +182,26 @@ ActuatorCommand
 Target-state evaluation accepts actuator-index control states for sequential array studies. This keeps lookup/addressability metrics shared across moving position scans, phase scans, and quasi-static actuator stepping.
 
 Actuator arrays also carry an explicit `window` or `trough` polarity. Trough polarity applies the commanded smooth windows as local strain reductions on top of the global bias, preserving the distinction between positive local actuation and biased-background suppression.
+
+## WP-v2-08C Optical Validation Convention
+
+Independent trough validation uses an explicit reference-coordinate optical model:
+
+```text
+n(z) = n_bar(z) + Delta_n * cos(phi(z))
+```
+
+with `z` interpreted as the undeformed/reference grating coordinate. The prescribed strain field is sampled on reference `z`; trough center, trough width, and reported optical positions are also reference-coordinate quantities.
+
+Current strain mapping:
+
+- `n_bar(z)` changes through the first-order photoelastic response in `responses/strainOpticResponse.ts`.
+- `Lambda(z) = Lambda0 * (1 + epsilon(z))`.
+- `lambda_B(z) = 2 n_bar(z) Lambda(z)`.
+- `Delta n` remains the peak sinusoidal refractive-index modulation amplitude.
+- The research TMM validation stack accumulates grating phase continuously from the local period instead of resetting phase at strain-cell boundaries.
+- The current validation does not separately stretch total physical device length by integrating `dz_deformed = (1 + epsilon) dz_reference`.
+
+`validation/troughOpticalValidation.ts` owns the research-only solver-parity helpers. It exposes the canonical convention, exact piecewise CMT section multiplication, a continuous-phase sinusoidal TMM builder, uniform-strain and sharp-trough case helpers, and local `|delta| / |kappa|` diagnostics. This layer is intentionally separate from the production UI solver path.
+
+WP-v2-08C confirms that spatial CMT agrees with exact piecewise CMT for the sampled model, and that short uniform strained gratings have CMT/TMM parity under high-resolution TMM. Full-length biased-trough TMM convergence remains unresolved; the biased trough is therefore approximation-sensitive and should not advance to detailed mechanical design without a higher-fidelity optical validation path.

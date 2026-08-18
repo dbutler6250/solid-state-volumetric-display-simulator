@@ -70,6 +70,7 @@ Keep this section as the historical record. Do not create issues for these items
 - WP-v2-08 optical study artifacts comparing PZT window, biased trough, actuator arrays, interpolation, standing-wave, and multi-tone references
 - Biased strain-trough result identified as the strongest first-pass actuator-defined optical target, with mechanical feasibility deferred
 - Biased strain-trough validation closeout: CMT convergence and moving-trough tracking are strong, biased-trough arrays improve discrete addressing, but TMM does not yet support the CMT trough reflectance result
+- Independent biased-trough optical validation gate: short uniform strained CMT/TMM parity is confirmed, exact piecewise CMT matches spatial CMT, and the full biased trough remains approximation-sensitive pending a higher-fidelity optical reference
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -100,7 +101,7 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Inter-actuator interpolation optical study
 - [x] Biased strain-trough CMT validation
 - [x] Biased-trough actuator-array optical study
-- [ ] Independent trough validation / improved TMM representation
+- [x] Independent trough validation / improved TMM representation
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization

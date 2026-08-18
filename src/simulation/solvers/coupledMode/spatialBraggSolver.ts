@@ -16,6 +16,13 @@ export type SpatialCoupledModeFieldSample = LocalBraggSample & {
   normalizedBackwardIntensity: number;
 };
 
+export type CoupledModeSection = {
+  couplingCoefficientPerM: number;
+  detuningPerM: number;
+  lengthM: number;
+  phaseRadians?: number;
+};
+
 const M_PER_NM = 1e-9;
 
 type ComplexMatrix2 = [[Complex, Complex], [Complex, Complex]];
@@ -43,19 +50,39 @@ export function solveHybridBraggCoupledModePoint(
 ): CoupledModePointResult {
   const wavelengthM = wavelengthNm * M_PER_NM;
   const samples = sampleHybridBraggModel(model, wavelengthM);
-  const segmentMatrices = samples.map((sample) =>
-    segmentMatrix(getComplexCoupling(sample.couplingCoefficientPerM, sample.gratingPhaseRadians), sample.detuningPerM, sample.lengthM),
-  );
-  const system = segmentMatrices.reduce((matrix, segment) => multiplyMatrix(segment, matrix), identity());
-  const reflectionAmplitude = scale(divide(system[1][0], system[1][1]), -1);
-  const reflectance = clampUnitInterval(magnitudeSquared(reflectionAmplitude));
-  const spatialField = calculateSpatialField(samples, segmentMatrices, reflectionAmplitude);
+  const sectionResult = solveCoupledModeSections(samples.map((sample) => ({
+    couplingCoefficientPerM: sample.couplingCoefficientPerM,
+    detuningPerM: sample.detuningPerM,
+    lengthM: sample.lengthM,
+    phaseRadians: sample.gratingPhaseRadians,
+  })));
+  const reflectance = sectionResult.reflectance;
+  const spatialField = calculateSpatialField(samples, sectionResult.segmentMatrices, sectionResult.reflectionAmplitude);
   return {
     wavelengthNm,
     reflectance,
     transmission: clampUnitInterval(1 - reflectance),
     sampledSegments: samples,
     spatialField,
+  };
+}
+
+/** Multiplies exact uniform coupled-mode section propagators for piecewise-constant validation cases. */
+export function solveCoupledModeSections(sections: CoupledModeSection[]) {
+  const segmentMatrices = sections.map((section) =>
+    segmentMatrix(
+      getComplexCoupling(section.couplingCoefficientPerM, section.phaseRadians ?? 0),
+      section.detuningPerM,
+      section.lengthM,
+    ),
+  );
+  const system = segmentMatrices.reduce((matrix, segment) => multiplyMatrix(segment, matrix), identity());
+  const reflectionAmplitude = scale(divide(system[1][0], system[1][1]), -1);
+  return {
+    reflectance: clampUnitInterval(magnitudeSquared(reflectionAmplitude)),
+    transmission: clampUnitInterval(1 - magnitudeSquared(reflectionAmplitude)),
+    reflectionAmplitude,
+    segmentMatrices,
   };
 }
 
