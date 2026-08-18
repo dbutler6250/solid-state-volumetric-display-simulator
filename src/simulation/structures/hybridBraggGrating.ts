@@ -1,4 +1,9 @@
-import type { HybridBraggDesignInputs, HybridSectionPhaseMode } from '../../types/simulation';
+import type {
+  HybridBraggDesignInputs,
+  HybridCouplingProfile,
+  HybridPhaseProfile,
+  HybridSectionPhaseMode,
+} from '../../types/simulation';
 import type { StrainField } from '../perturbations/strainField';
 import { sampleStrainField } from '../perturbations/strainField';
 import type { MaterialStrainResponse } from '../responses/strainOpticResponse';
@@ -10,6 +15,8 @@ export type PermanentBraggGrating = {
   indexModulation: number;
   periodM: number;
   phaseRadians: number;
+  couplingProfile: HybridCouplingProfile;
+  phaseProfile: HybridPhaseProfile;
   structure:
     | { mode: 'global' }
     | {
@@ -61,6 +68,8 @@ export const DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS: HybridBraggDesignInputs = {
   indexModulation: 1e-4,
   gratingPeriodNm: 206.9,
   gratingPhaseRadians: 0,
+  couplingProfile: { family: 'uniform' },
+  phaseProfile: { family: 'constant' },
   permanentGratingMode: 'global',
   braggSectionCount: 1,
   braggSectionGapMm: 0,
@@ -104,6 +113,8 @@ export function createHybridBraggModel(design: HybridBraggDesignInputs): HybridB
       indexModulation: design.indexModulation,
       periodM: design.gratingPeriodNm / NM_PER_M,
       phaseRadians: design.gratingPhaseRadians,
+      couplingProfile: design.couplingProfile ?? { family: 'uniform' },
+      phaseProfile: design.phaseProfile ?? { family: 'constant' },
       structure: design.permanentGratingMode === 'segmented'
         ? {
             mode: 'segmented',
@@ -154,7 +165,9 @@ export function sampleHybridBraggModel(
     const section = getSectionAtZ(model.grating, zM);
     const strain = sampleStrainField(model.strain, zM);
     const local = applyMaterialStrainResponse(model.grating, model.materialResponse, strain);
-    const effectiveIndexModulation = section.inBraggSection ? model.grating.indexModulation : 0;
+    const effectiveIndexModulation = section.inBraggSection
+      ? model.grating.indexModulation * getCouplingProfileMultiplier(model.grating.couplingProfile, zM, model.grating.lengthM)
+      : 0;
     const couplingCoefficientPerM = getCouplingCoefficientPerM(
       effectiveIndexModulation,
       local.braggWavelengthM,
@@ -170,7 +183,7 @@ export function sampleHybridBraggModel(
       sectionId: section.sectionId,
       sectionStartM: section.sectionStartM,
       sectionEndM: section.sectionEndM,
-      gratingPhaseRadians: section.phaseRadians,
+      gratingPhaseRadians: section.phaseRadians + getPhaseProfileOffset(model.grating.phaseProfile, zM, model.grating.lengthM),
       inBraggSection: section.inBraggSection,
       strain,
       averageIndex: local.averageIndex,
@@ -180,6 +193,93 @@ export function sampleHybridBraggModel(
       detuningPerM,
     };
   });
+}
+
+/** Samples an interpretable permanent coupling profile at a normalized grating coordinate. */
+export function getCouplingProfileMultiplier(profile: HybridCouplingProfile, zM: number, lengthM: number): number {
+  const x = lengthM > 0 ? clamp(zM / lengthM, 0, 1) : 0;
+  switch (profile.family) {
+    case 'uniform':
+      return 1;
+    case 'gaussian': {
+      const sigma = Math.max(1e-6, profile.widthFraction);
+      const base = profile.peakMultiplier * Math.exp(-0.5 * ((x - 0.5) / sigma) ** 2);
+      return profile.normalizeIntegratedCoupling ? base / estimateMeanCouplingMultiplier(profile) : base;
+    }
+    case 'raised-cosine': {
+      const window = 0.5 - 0.5 * Math.cos(2 * Math.PI * x);
+      const base = profile.floorMultiplier + (profile.peakMultiplier - profile.floorMultiplier) * window;
+      return profile.normalizeIntegratedCoupling ? base / estimateMeanCouplingMultiplier(profile) : base;
+    }
+    case 'tukey': {
+      const alpha = clamp(profile.taperFraction, 0, 1);
+      const window = alpha <= 0 ? 1 : alpha >= 1 ? 0.5 - 0.5 * Math.cos(2 * Math.PI * x) : tukeyWindow(x, alpha);
+      const base = profile.floorMultiplier + (profile.peakMultiplier - profile.floorMultiplier) * window;
+      return profile.normalizeIntegratedCoupling ? base / estimateMeanCouplingMultiplier(profile) : base;
+    }
+    case 'piecewise': {
+      const zones = profile.zoneMultipliers.length > 0 ? profile.zoneMultipliers : [1];
+      const index = Math.min(zones.length - 1, Math.floor(x * zones.length));
+      const base = zones[index] ?? 1;
+      return profile.normalizeIntegratedCoupling ? base / estimateMeanCouplingMultiplier(profile) : base;
+    }
+    default:
+      return 1;
+  }
+}
+
+/** Samples low-dimensional permanent grating phase profiles without creating arbitrary high-resolution arrays. */
+export function getPhaseProfileOffset(profile: HybridPhaseProfile, zM: number, lengthM: number): number {
+  const x = lengthM > 0 ? clamp(zM / lengthM, 0, 1) : 0;
+  switch (profile.family) {
+    case 'constant':
+      return 0;
+    case 'linear-ramp':
+      return profile.totalPhaseRadians * x;
+    case 'piecewise': {
+      const zones = profile.zonePhaseRadians.length > 0 ? profile.zonePhaseRadians : [0];
+      return zones[Math.min(zones.length - 1, Math.floor(x * zones.length))] ?? 0;
+    }
+    case 'alternating': {
+      const zoneCount = Math.max(1, Math.round(profile.zoneCount));
+      return Math.floor(x * zoneCount) % 2 === 0 ? 0 : profile.phaseStepRadians;
+    }
+    default:
+      return 0;
+  }
+}
+
+function tukeyWindow(x: number, alpha: number): number {
+  if (x < alpha / 2) return 0.5 * (1 + Math.cos((2 * Math.PI / alpha) * (x - alpha / 2)));
+  if (x <= 1 - alpha / 2) return 1;
+  return 0.5 * (1 + Math.cos((2 * Math.PI / alpha) * (x - 1 + alpha / 2)));
+}
+
+function estimateMeanCouplingMultiplier(profile: HybridCouplingProfile): number {
+  const sampleCount = 401;
+  let sum = 0;
+  for (let index = 0; index < sampleCount; index += 1) {
+    const zM = index / (sampleCount - 1);
+    sum += getRawCouplingProfileMultiplier(profile, zM, 1);
+  }
+  return Math.max(1e-9, sum / sampleCount);
+}
+
+function getRawCouplingProfileMultiplier(profile: HybridCouplingProfile, zM: number, lengthM: number): number {
+  switch (profile.family) {
+    case 'gaussian':
+      return getCouplingProfileMultiplier({ ...profile, normalizeIntegratedCoupling: false }, zM, lengthM);
+    case 'raised-cosine':
+      return getCouplingProfileMultiplier({ ...profile, normalizeIntegratedCoupling: false }, zM, lengthM);
+    case 'tukey':
+      return getCouplingProfileMultiplier({ ...profile, normalizeIntegratedCoupling: false }, zM, lengthM);
+    case 'piecewise':
+      return getCouplingProfileMultiplier({ ...profile, normalizeIntegratedCoupling: false }, zM, lengthM);
+    case 'uniform':
+      return 1;
+    default:
+      return 1;
+  }
 }
 
 function createSolverIntervals(model: HybridBraggModel): Array<{ startM: number; endM: number }> {

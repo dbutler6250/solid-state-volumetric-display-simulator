@@ -9,6 +9,8 @@ import type {
   QuarterWaveStackInputs,
   SweepParameter,
   ThicknessMode,
+  HybridCouplingProfile,
+  HybridPhaseProfile,
 } from '../types/simulation';
 
 const STACK_CONFIG_SCHEMA = 'ssvds-stack-config-v1';
@@ -599,6 +601,10 @@ function parseHybridBraggDesign(
   const braggSectionPhaseMode = value.braggSectionPhaseMode ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionPhaseMode;
   const braggSectionPhaseSequenceRadians = value.braggSectionPhaseSequenceRadians ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionPhaseSequenceRadians;
   const braggSectionRandomSeed = value.braggSectionRandomSeed ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.braggSectionRandomSeed;
+  const couplingProfile = parseHybridCouplingProfile(value.couplingProfile);
+  if (!couplingProfile.ok) return couplingProfile;
+  const phaseProfile = parseHybridPhaseProfile(value.phaseProfile);
+  if (!phaseProfile.ok) return phaseProfile;
   if (!isFiniteNumber(pulseSweepStartMm) || !isFiniteNumber(pulseSweepEndMm) || !isFiniteNumber(pulseSweepPointCount)) {
     return { ok: false, message: 'Hybrid moving-pulse sweep fields must be finite numbers.' };
   }
@@ -657,6 +663,8 @@ function parseHybridBraggDesign(
       indexModulation: design.indexModulation,
       gratingPeriodNm: design.gratingPeriodNm,
       gratingPhaseRadians: design.gratingPhaseRadians,
+      couplingProfile: couplingProfile.profile,
+      phaseProfile: phaseProfile.profile,
       permanentGratingMode,
       braggSectionCount,
       braggSectionGapMm,
@@ -683,6 +691,65 @@ function parseHybridBraggDesign(
       pulseSweepPointCount,
     },
   };
+}
+
+function parseHybridCouplingProfile(
+  value: unknown,
+): { ok: true; profile: HybridCouplingProfile } | ImportFailure {
+  if (value === undefined) return { ok: true, profile: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.couplingProfile ?? { family: 'uniform' } };
+  if (!isRecord(value)) return { ok: false, message: 'Hybrid coupling profile must be an object.' };
+  switch (value.family) {
+    case 'uniform':
+      return { ok: true, profile: { family: 'uniform' } };
+    case 'gaussian':
+      if (!isPositiveFiniteNumber(value.widthFraction) || !isFiniteNumber(value.peakMultiplier) || typeof value.normalizeIntegratedCoupling !== 'boolean') {
+        return { ok: false, message: 'Hybrid Gaussian coupling profile fields are invalid.' };
+      }
+      return { ok: true, profile: { family: 'gaussian', widthFraction: value.widthFraction, peakMultiplier: value.peakMultiplier, normalizeIntegratedCoupling: value.normalizeIntegratedCoupling } };
+    case 'raised-cosine':
+      if (!isFiniteNumber(value.floorMultiplier) || !isFiniteNumber(value.peakMultiplier) || typeof value.normalizeIntegratedCoupling !== 'boolean') {
+        return { ok: false, message: 'Hybrid raised-cosine coupling profile fields are invalid.' };
+      }
+      return { ok: true, profile: { family: 'raised-cosine', floorMultiplier: value.floorMultiplier, peakMultiplier: value.peakMultiplier, normalizeIntegratedCoupling: value.normalizeIntegratedCoupling } };
+    case 'tukey':
+      if (!isFiniteNumber(value.taperFraction) || !isFiniteNumber(value.floorMultiplier) || !isFiniteNumber(value.peakMultiplier) || typeof value.normalizeIntegratedCoupling !== 'boolean') {
+        return { ok: false, message: 'Hybrid Tukey coupling profile fields are invalid.' };
+      }
+      return { ok: true, profile: { family: 'tukey', taperFraction: value.taperFraction, floorMultiplier: value.floorMultiplier, peakMultiplier: value.peakMultiplier, normalizeIntegratedCoupling: value.normalizeIntegratedCoupling } };
+    case 'piecewise':
+      if (!Array.isArray(value.zoneMultipliers) || !value.zoneMultipliers.every(isFiniteNumber) || typeof value.normalizeIntegratedCoupling !== 'boolean') {
+        return { ok: false, message: 'Hybrid piecewise coupling profile fields are invalid.' };
+      }
+      return { ok: true, profile: { family: 'piecewise', zoneMultipliers: value.zoneMultipliers, normalizeIntegratedCoupling: value.normalizeIntegratedCoupling } };
+    default:
+      return { ok: false, message: 'Hybrid coupling profile family must be supported.' };
+  }
+}
+
+function parseHybridPhaseProfile(
+  value: unknown,
+): { ok: true; profile: HybridPhaseProfile } | ImportFailure {
+  if (value === undefined) return { ok: true, profile: DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS.phaseProfile ?? { family: 'constant' } };
+  if (!isRecord(value)) return { ok: false, message: 'Hybrid phase profile must be an object.' };
+  switch (value.family) {
+    case 'constant':
+      return { ok: true, profile: { family: 'constant' } };
+    case 'linear-ramp':
+      if (!isFiniteNumber(value.totalPhaseRadians)) return { ok: false, message: 'Hybrid linear phase profile fields are invalid.' };
+      return { ok: true, profile: { family: 'linear-ramp', totalPhaseRadians: value.totalPhaseRadians } };
+    case 'piecewise':
+      if (!Array.isArray(value.zonePhaseRadians) || !value.zonePhaseRadians.every(isFiniteNumber)) {
+        return { ok: false, message: 'Hybrid piecewise phase profile fields are invalid.' };
+      }
+      return { ok: true, profile: { family: 'piecewise', zonePhaseRadians: value.zonePhaseRadians } };
+    case 'alternating':
+      if (!isFiniteNumber(value.zoneCount) || !Number.isInteger(value.zoneCount) || value.zoneCount < 1 || !isFiniteNumber(value.phaseStepRadians)) {
+        return { ok: false, message: 'Hybrid alternating phase profile fields are invalid.' };
+      }
+      return { ok: true, profile: { family: 'alternating', zoneCount: value.zoneCount, phaseStepRadians: value.phaseStepRadians } };
+    default:
+      return { ok: false, message: 'Hybrid phase profile family must be supported.' };
+  }
 }
 
 function isHybridSectionPhaseMode(
