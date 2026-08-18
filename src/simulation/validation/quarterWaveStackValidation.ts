@@ -2,6 +2,7 @@ import type { QuarterWaveStackInputs } from '../../types/simulation';
 import { getAcousticSlicesPerPeriod, isAcousticRepresentationMode } from '../structures/acoustoOpticGrating';
 import {
   DEFAULT_WAVELENGTH_POINT_COUNT,
+  MAX_HYBRID_BRAGG_SECTIONS,
   MAX_AUTOMATIC_ACOUSTIC_LAYERS,
   MAX_HYBRID_MOVING_PULSE_WORK,
   MAX_HYBRID_PULSE_POSITIONS,
@@ -28,6 +29,14 @@ const isHybridStrainShape = (value: unknown): boolean =>
   value === 'standing-wave' ||
   value === 'carrier-envelope' ||
   value === 'multi-tone';
+const isHybridPermanentGratingMode = (value: unknown): boolean =>
+  value === 'global' || value === 'segmented';
+const isHybridSectionPhaseMode = (value: unknown): boolean =>
+  value === 'continuous' ||
+  value === 'fixed-reset' ||
+  value === 'alternating' ||
+  value === 'explicit' ||
+  value === 'seeded-random';
 
 const validateRefractiveIndex = (
   value: QuarterWaveStackInputs['highIndexMaterial']['refractiveIndex'],
@@ -238,6 +247,26 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       if (!isFiniteNumber(design.gratingPeriodNm) || design.gratingPeriodNm <= 0) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid grating period must be greater than 0 nm.' });
       }
+      if (!isHybridPermanentGratingMode(design.permanentGratingMode)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid permanent grating mode must be global or segmented.' });
+      }
+      if (!isFiniteNumber(design.braggSectionCount) || design.braggSectionCount < 1 || !Number.isInteger(design.braggSectionCount)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid Bragg section count must be a whole number greater than 0.' });
+      } else if (design.braggSectionCount > MAX_HYBRID_BRAGG_SECTIONS) {
+        issues.push({ field: 'thicknessMode', message: `Hybrid Bragg section count must not exceed ${MAX_HYBRID_BRAGG_SECTIONS.toLocaleString()}.` });
+      }
+      if (!isFiniteNumber(design.braggSectionGapMm) || design.braggSectionGapMm < 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid Bragg section gap must be 0 or greater.' });
+      }
+      if (!isHybridSectionPhaseMode(design.braggSectionPhaseMode)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid section phase mode must be supported.' });
+      }
+      if (!Array.isArray(design.braggSectionPhaseSequenceRadians) || !design.braggSectionPhaseSequenceRadians.every(isFiniteNumber)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid section phase sequence must contain only finite numbers.' });
+      }
+      if (!isFiniteNumber(design.braggSectionRandomSeed) || design.braggSectionRandomSeed < 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid section phase seed must be 0 or greater.' });
+      }
       if (!isFiniteNumber(design.peakStrain)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid peak strain must be finite.' });
       }
@@ -305,7 +334,7 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
         Number.isInteger(design.segmentCount) &&
         isFiniteNumber(design.pulseSweepPointCount) &&
         Number.isInteger(design.pulseSweepPointCount) &&
-        design.segmentCount * design.pulseSweepPointCount > MAX_HYBRID_MOVING_PULSE_WORK
+        estimateHybridMovingRegionWork(design) > MAX_HYBRID_MOVING_PULSE_WORK
       ) {
         issues.push({ field: 'thicknessMode', message: `Hybrid moving-region work must not exceed ${MAX_HYBRID_MOVING_PULSE_WORK.toLocaleString()} segment-position evaluations.` });
       }
@@ -349,4 +378,13 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
   }
 
   return issues;
+}
+
+function estimateHybridMovingRegionWork(
+  design: NonNullable<QuarterWaveStackInputs['hybridBraggDesign']>,
+): number {
+  const boundaryIntervals = design.permanentGratingMode === 'segmented'
+    ? Math.max(0, Math.round(design.braggSectionCount) * 2)
+    : 0;
+  return (design.segmentCount + boundaryIntervals) * design.pulseSweepPointCount;
 }

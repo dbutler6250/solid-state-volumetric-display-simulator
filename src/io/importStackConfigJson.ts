@@ -1,6 +1,7 @@
 import { validateQuarterWaveStackInputs } from '../simulation/validation/quarterWaveStackValidation';
 import { isAcousticRepresentationMode } from '../simulation/structures/acoustoOpticGrating';
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
+import { MAX_HYBRID_BRAGG_SECTIONS } from '../simulation/simulationLimits';
 import type { Material, ComplexRefractiveIndex } from '../simulation/materials/material';
 import type {
   ParameterSweepSettings,
@@ -624,6 +625,9 @@ function parseHybridBraggDesign(
   }
   if (!isFiniteNumber(braggSectionCount) || !Number.isInteger(braggSectionCount) || braggSectionCount < 1) {
     return { ok: false, message: 'Hybrid Bragg section count must be a whole number of at least 1.' };
+  }
+  if (braggSectionCount > MAX_HYBRID_BRAGG_SECTIONS) {
+    return { ok: false, message: `Hybrid Bragg section count must not exceed ${MAX_HYBRID_BRAGG_SECTIONS.toLocaleString()}.` };
   }
   if (!isFiniteNumber(braggSectionGapMm) || braggSectionGapMm < 0 || !isFiniteNumber(braggSectionRandomSeed)) {
     return { ok: false, message: 'Hybrid Bragg segmentation fields must be finite non-negative numbers.' };

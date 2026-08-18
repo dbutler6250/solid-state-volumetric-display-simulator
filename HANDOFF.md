@@ -10,6 +10,7 @@
 
 - Completed WP-v2-06B validation closeout for the segmented baseline.
 - Added boundary-aware CMT interval splitting at section starts, section ends, and grating-to-gap boundaries.
+- Resolved PR review findings by adding `MAX_HYBRID_BRAGG_SECTIONS = 256`, validating segmented section fields in app and import paths, folding structural boundary intervals into the moving-region workload estimate, and removing `Explicit sequence` from interactive phase controls.
 - Expanded `scripts/segmentedBraggStudy.mts` to report phase-mode sweeps, section addressability, gap-length comparisons, same-active-length comparisons, 700/1400/2100 convergence, selected standing/traveling cases, and scaled TMM spot checks.
 - Regenerated `artifacts/issue-62/segmented-bragg-study.md` and `.json`.
 - Updated `RESEARCH.md` and `ARCHITECTURE.md` with closeout findings and visualization semantics.
@@ -24,13 +25,16 @@
 ## Validation Performed
 
 - Targeted solver test: `npm.cmd run test -- src/simulation/solvers/coupledMode/spatialBraggSolver.test.ts` - passed, 16 tests.
+- Review-fix targeted tests: `npm.cmd run test -- src/simulation/validation/quarterWaveStackValidation.test.ts src/io/importStackConfigJson.test.ts src/components/outputs/HybridBraggPanel.test.tsx src/simulation/solvers/coupledMode/spatialBraggSolver.test.ts` - passed, 4 files / 54 tests.
 - Study runner: `npx.cmd tsx scripts/segmentedBraggStudy.mts` - passed.
 - Full unit tests: `npm.cmd run test` - passed, 30 files / 192 tests.
+- Review-fix full unit tests: `npm.cmd run test` - passed, 31 files / 194 tests.
 - Lint: `npm.cmd run lint` - passed.
 - Build: `npm.cmd run build` - passed.
 - Playwright regression: `npx.cmd playwright test tests/browser/browser-regression.spec.ts` - passed, 12 tests.
 - Targeted segmented visualization smoke: local Playwright against `http://127.0.0.1:5173/` - passed.
+- Review-fix targeted segmented-control smoke: local Playwright verified max section count `256`, no `Explicit sequence` option, and calculated backward-intensity view rendered.
 
 ## Remaining Follow-Up
 
-- Commit the closeout update, push, and update PR #63.
+- Commit the review-fix update and push PR #63.

@@ -1,4 +1,5 @@
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../../simulation/structures/hybridBraggGrating';
+import { MAX_HYBRID_BRAGG_SECTIONS } from '../../simulation/simulationLimits';
 import type { HybridBraggDesignInputs, QuarterWaveStackInputs } from '../../types/simulation';
 import { FormattedNumberInput } from '../inputs/FormattedNumberInput';
 
@@ -66,7 +67,7 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
         </label>
         {design.permanentGratingMode === 'segmented' ? (
           <>
-            <HybridNumber label="Bragg sections" value={design.braggSectionCount} min={1} step={1} integer disabled={!isActiveMode} onChange={(braggSectionCount) => updateDesign({ braggSectionCount })} />
+            <HybridNumber label="Bragg sections" value={design.braggSectionCount} min={1} max={MAX_HYBRID_BRAGG_SECTIONS} step={1} integer disabled={!isActiveMode} onChange={(braggSectionCount) => updateDesign({ braggSectionCount })} />
             <HybridNumber label="Section gap (mm)" value={design.braggSectionGapMm} min={0} step={0.01} disabled={!isActiveMode} onChange={(braggSectionGapMm) => updateDesign({ braggSectionGapMm })} />
             <label className="field">
               <span>Section phase</span>
@@ -78,7 +79,6 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
                 <option value="continuous">Continuous phase</option>
                 <option value="fixed-reset">Fixed phase reset</option>
                 <option value="alternating">Alternating phase</option>
-                <option value="explicit">Explicit sequence</option>
                 <option value="seeded-random">Seeded pseudo-random</option>
               </select>
             </label>
@@ -147,6 +147,7 @@ function HybridNumber({
   onChange,
   disabled,
   min,
+  max,
   step = 0.001,
   integer = false,
 }: {
@@ -155,6 +156,7 @@ function HybridNumber({
   onChange: (value: number) => void;
   disabled: boolean;
   min?: number;
+  max?: number;
   step?: number;
   integer?: boolean;
 }) {
@@ -163,6 +165,7 @@ function HybridNumber({
       <span>{label}</span>
       <FormattedNumberInput
         min={min}
+        max={max}
         step={String(step)}
         parseMode={integer ? 'integer' : 'decimal'}
         normalizeOnBlur={integer ? Math.round : undefined}
