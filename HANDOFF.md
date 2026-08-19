@@ -3,49 +3,51 @@
 ## Repository Status
 
 - Current branch: `codex/issue-68-high-fidelity-bragg-maxwell-solver`.
-- Base/dependency: stacked on `codex/issue-66-piezo-strain-window-addressing` because draft PR #67 is still open and unmerged.
+- Base/dependency: PR #69 remains stacked on `codex/issue-66-piezo-strain-window-addressing` because draft PR #67 is still open and unmerged.
 - GitHub issue: #68, `WP-v2-09 high-fidelity long-grating Maxwell solver validation`.
+
+## PR Audit
+
+- PR #67: open draft, base `main`, head `codex/issue-66-piezo-strain-window-addressing`, mergeable, no review submissions, no review threads, CI `test-lint-build` passing as of 2026-08-18.
+- PR #69: open draft, base `codex/issue-66-piezo-strain-window-addressing`, head `codex/issue-68-high-fidelity-bragg-maxwell-solver`, mergeable, no review submissions, no review threads, no status-check rollup reported by GitHub.
+- Branch relationship after `git fetch --prune origin`: #67 is `0 behind / 3 ahead` of `origin/main`; #69 is `0 behind / 2 ahead` of #67 before the WP-v2-09C local commits.
+- No actionable review threads found.
 
 ## Latest Task
 
-- Continued Issue #68 / PR #69 with WP-v2-09B locally periodic long-grating Maxwell validation.
-- Extended `src/simulation/solvers/maxwell/longGratingScatteringSolver.ts` with phase-continuous locally periodic mechanical blocks, repeated full-period composition, and exact-length partial-period tails.
-- Expanded `src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` to 20 tests covering repeated-cell acceleration, fractional periods, split-grating identity, mechanical block phase continuity, and 10 mm stability.
-- Replaced `scripts/highFidelityBraggValidationStudy.mts` with the full 10 mm locally periodic validation study.
-- Regenerated `artifacts/issue-68/high-fidelity-bragg-validation-study.md` and `.json`.
+- Added Maxwell internal spatial-field reconstruction with stable prefix/suffix scattering around explicit layer centers.
+- Exposed forward, backward, total complex field amplitudes, amplitude intensities, refractive-index-weighted flux metrics, and normalized backward optical intensity.
+- Added solver regression coverage for boundary consistency, matched slab field behavior, short-grating reconstructed fields, and split-grating field identity.
+- Added `scripts/maxwellTroughSpatialValidationStudy.mts`.
+- Generated `artifacts/issue-68/maxwell-trough-spatial-validation-study.md` and `.json`.
 - Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md`.
 
 ## Key Result
 
-- Full 10 mm locally periodic Maxwell boundary validation is now implemented.
-- Energy conservation is acceptable; worst relevant `|R + T - 1|` is about `1.16e-10`.
-- Uniform strained 10 mm validation: `R_CMT = 0.0012026`, `R_Maxwell = 0.0011831`.
-- Sharp piecewise 10 mm trough: `R_exact_CMT = 0.041461`, `R_spatial_CMT = 0.041461`, `R_Maxwell = 0.043915`.
-- Smooth 10 mm biased trough at the operating wavelength: `R_CMT = 0.021257`, `R_Maxwell = 0.021204`, absolute error `5.25e-5`, relative error `0.2468%`.
-- Maxwell spatial field reconstruction is not implemented, so moving-trough tracking and 4-actuator array selectivity remain CMT-only.
+- Static trough: Maxwell primary backward-intensity center `4.8949 mm` for a `5.000 mm` target, versus CMT center `4.9028 mm`.
+- Static widths: CMT `0.611 mm`, Maxwell `0.644 mm`.
+- Static reduced-sampling boundary reflectance: `R_CMT = 0.021257`, `R_Maxwell = 0.019814`.
+- Moving trough: Maxwell mean absolute center error `0.127 mm`, median `0.130 mm`, maximum `0.156 mm`; CMT/Maxwell trajectory RMS difference `0.0057 mm`.
+- 4-actuator Maxwell spot check: partial support only; target fractions range from about `0.139` to `0.405`.
 
-Required conclusions recorded in the study:
-
-```text
-HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFORMANCE
-```
+Required conclusions recorded in the spatial study:
 
 ```text
+MAXWELL SPATIAL FIELDS PARTIALLY CONFIRM / REVISE TROUGH LOCALIZATION
+MAXWELL CONFIRMS MOVING-TROUGH TRACKING
+MAXWELL PARTIALLY SUPPORTS 4-ACTUATOR ADDRESSING
+CMT SPATIAL VISUALIZATION IS VALIDATED FOR QUALITATIVE TROUGH RESEARCH
 BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 ```
 
 ## Validation Performed
 
-- `npm.cmd run test -- src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` - passed, 1 file / 20 tests.
-- `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts` - passed.
-- `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
-- `npm.cmd run test` - passed, 34 files / 238 tests.
-- `npm.cmd run lint` - passed.
-- `npm.cmd run build` - passed.
-- `npm.cmd run test:browser` - passed, 14 tests.
+- `npm.cmd run test -- src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` - passed, 1 file / 24 tests.
+- `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts` - passed.
 
 ## Remaining Follow-Up
 
-- Add Maxwell spatial field reconstruction with forward/backward components if feasible.
-- Revalidate moving-trough tracking and 4-actuator distinctness only after Maxwell spatial fields are trustworthy.
-- Do not proceed to detailed PZT/mechanical feasibility until Maxwell spatial localization supports the boundary-optics result.
+- Run full required verification before publishing: Issue #66/#68 studies, full tests, lint, build, browser tests.
+- Push the WP-v2-09C local commits to PR #69 and refresh the PR description after verification.
+- Keep #69 stacked until PR #67 is merged; then retarget #69 to `main` and rerun verification.
+- Do not start detailed PZT/mechanical feasibility yet; refine optical localization/off-target requirements first.

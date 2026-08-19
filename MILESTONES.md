@@ -73,6 +73,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Independent biased-trough optical validation gate: short uniform strained CMT/TMM parity is confirmed, exact piecewise CMT matches spatial CMT, and the full biased trough remains approximation-sensitive pending a higher-fidelity optical reference
 - High-fidelity Maxwell reference solver foundation with Redheffer scattering composition, repeated-cell stability checks, bounded smooth-trough validation artifacts, and a mechanical-feasibility gate that keeps the biased trough in optical refinement
 - Locally periodic long-grating Maxwell closeout with phase-preserving mechanical blocks, fractional-period handling, full 10 mm smooth-trough boundary validation, quantitative CMT boundary parity, and mechanical gate still closed pending Maxwell spatial localization
+- Maxwell spatial-field validation closeout with stable prefix/suffix internal-field reconstruction, static trough localization, moving-trough Maxwell tracking, partial 4-actuator support, qualitative CMT visualization validation, and the mechanical gate still closed
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -112,7 +113,12 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Locally periodic long-grating Maxwell solver
 - [x] Full-length biased-trough Maxwell boundary validation
 - [x] Quantitative CMT boundary-reflectance trust region
-- [x] Mechanical gate kept closed pending Maxwell spatial localization
+- [x] Maxwell internal spatial field reconstruction
+- [x] Static trough spatial validation
+- [x] Moving trough Maxwell validation
+- [x] 4-actuator Maxwell validation
+- [x] CMT spatial visualization qualitative validation
+- [x] Mechanical gate kept closed after partial Maxwell spatial localization
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization
