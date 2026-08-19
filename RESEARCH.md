@@ -2513,3 +2513,142 @@ BIASED TROUGH REMAINS PROMISING BUT REQUIRES A HIGHER-FIDELITY OPTICAL MODEL
 ```
 
 The prior moving-trough CMT tracking result (`mean |Delta z| ~= 0.109 mm`) and the 4-actuator biased-trough array median selectivity (`~7.62`) are preserved as CMT-only findings, not independent optical validation. Do not proceed to detailed PZT mechanics from this result alone; first constrain the architecture to an independently validated optical range or promote a higher-fidelity optical solver for future architecture studies.
+
+## WP-v2-09 High-Fidelity Long-Grating Maxwell Reference
+
+Issue #68 adds the first high-fidelity Maxwell reference path in `src/simulation/solvers/maxwell/longGratingScatteringSolver.ts` and the reproducible study `scripts/highFidelityBraggValidationStudy.mts`. The generated artifacts are `artifacts/issue-68/high-fidelity-bragg-validation-study.md` and `.json`.
+
+The new solver is a normal-incidence scalar 1D Maxwell scattering formulation. It composes two-port scattering matrices with Redheffer composition and uses binary exponentiation for uniform repeated cells. This is the correct numerical direction for long Bragg structures because it avoids naive transfer-matrix chains whose internal amplitudes can overflow or become ill-conditioned in stop-band cases.
+
+The study preserves the canonical WP-v2-08C model:
+
+```text
+n(z) = n_bar(z) + Delta_n cos(phi(z))
+```
+
+with reference-coordinate strain sampling, photoelastic average-index response, local period stretch by `(1 + epsilon)`, peak sinusoidal `Delta n`, and continuously accumulated microscopic phase. The old full-length TMM results at 1 and 2 slices per optical period remain historical under-resolution diagnostics only.
+
+Validation status:
+
+- Fresnel / simple slab: PASS in focused solver tests with lossless energy conservation.
+- Short sinusoidal grating: PASS; 64 samples/period gives energy error about `4.5e-13` in the short uniform convergence case.
+- Repeated uniform sinusoidal grating: PASS for bounded brute-force equality and finite repeated-cell composition.
+- Long uniform grating: PASS/PARTIAL; weak-grating repeated-cell reflectance tracks analytic CMT from 10 to 10,000 periods (`R_Maxwell = 0.011607`, `R_CMT = 0.011644` at 10,000 periods).
+- Uniform strained grating: PASS; `R_CMT = 0.00056544`, `R_Maxwell = 0.00055514`.
+- Piecewise strained trough: PARTIAL; short sharp-trough comparison gives `R_CMT = 0.00064988`, `R_Maxwell = 0.00063919`.
+- Smooth biased trough: PARTIAL only; the bounded `0.25 mm` proxy gives `R_CMT = 0.014832`, `R_Maxwell = 0.014086`, but full `10 mm` convergence is not yet accepted.
+
+Energy conservation is confirmed for the bounded Maxwell calculations:
+
+```text
+MAXWELL SOLVER ENERGY CONSERVATION CONFIRMED
+```
+
+Worst relevant `|R + T - 1|` in the study is about `1.02e-11`.
+
+The practical CMT status from this bounded pass is:
+
+```text
+SCALAR CMT IS QUALITATIVELY USEFUL BUT QUANTITATIVELY INACCURATE FOR THE TROUGH
+```
+
+The required architecture conclusion for this partial WP-v2-09 pass is:
+
+```text
+HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFORMANCE
+```
+
+The required mechanical gate is:
+
+```text
+BIASED TROUGH REMAINS PROMISING BUT OPTICAL MODELING STILL NEEDS REFINEMENT
+```
+
+Maxwell spatial field reconstruction is not implemented yet, so no Maxwell localization claim is made from boundary reflectance alone. Moving-trough tracking and 4-actuator validation remain gated until the static full-length smooth trough has accepted high-fidelity convergence.
+
+## WP-v2-09B Locally Periodic Long-Grating Maxwell Closeout
+
+Issue #68 now extends the Maxwell reference from bounded explicit sampling to locally periodic mechanical-envelope blocks. The updated `scripts/highFidelityBraggValidationStudy.mts` keeps the WP-v2-08C canonical model, but represents each slow strain-envelope block as a locally uniform sinusoidal Maxwell grating. Complete local optical periods use stable repeated-cell scattering, while the residual length is represented as an exact-length partial period. The microscopic phase is carried continuously between blocks.
+
+The required acceleration checks pass. Explicit chains and accelerated repeated cells agree for `N = 1, 2, 5, 10, 50, 100`; the `100`-period reflectance error is about `1.47e-17`. A fractional `10.65`-period block preserves physical length with reflectance error about `1.99e-13` versus explicit discretization. Split-grating identity is confirmed for `1`, `2`, `10`, and `100` mechanical blocks.
+
+Full-length `10 mm` boundary-optics results:
+
+- Uniform strained validation: `R_CMT = 0.0012026`, `R_Maxwell = 0.0011831`.
+- Sharp piecewise trough: `R_exact_CMT = 0.041461`, `R_spatial_CMT = 0.041461`, `R_Maxwell = 0.043915`.
+- Smooth biased trough at the operating wavelength: `R_CMT = 0.021257`, `R_Maxwell = 0.021204`, absolute error `5.25e-5`, relative error `0.2468%`.
+- The smooth-trough sampled Maxwell spectrum peaks at `R = 0.25584` near `600.02 nm`.
+- Maximum relevant energy error is about `1.16e-10`.
+
+Energy gate:
+
+```text
+MAXWELL ENERGY CONSERVATION ACCEPTABLE
+```
+
+CMT verdict for the tested boundary reflectance:
+
+```text
+SCALAR CMT IS QUANTITATIVELY ADEQUATE FOR THE TROUGH
+```
+
+Architecture verdict:
+
+```text
+HIGH-FIDELITY MAXWELL MODEL PARTIALLY SUPPORTS THE TROUGH BUT REVISES ITS PERFORMANCE
+```
+
+The result supports the biased-trough boundary response under a converged microscopic Maxwell representation, but Maxwell spatial field reconstruction was not implemented. Therefore moving-trough tracking and 4-actuator array selectivity remain CMT-only. The mechanical gate remains closed:
+
+```text
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+```
+
+The next optical task should reconstruct trustworthy Maxwell forward/backward fields before any PZT or mechanical feasibility study.
+
+## WP-v2-09C Maxwell Spatial-Field Validation
+
+Issue #68 now adds internal Maxwell field reconstruction in `longGratingScatteringSolver.ts` and the companion study `scripts/maxwellTroughSpatialValidationStudy.mts`. The generated artifacts are `artifacts/issue-68/maxwell-trough-spatial-validation-study.md` and `.json`.
+
+The reconstruction uses stable prefix/suffix scattering states around each explicit Maxwell layer center. It solves the local right-going and left-going amplitudes from the already stable two-port representation instead of reverting to one giant transfer-matrix chain. The reported spatial metric is normalized backward optical intensity, `|E_backward(z)|^2 / max(|E_backward|^2)`. `|E_total(z)|^2` is also available, but it includes standing-wave interference and is not treated as equivalent to the CMT `|B(z)|^2` metric.
+
+Validation checks pass for a matched-index slab, dielectric slab boundary consistency, a short sinusoidal grating, and split uniform grating partition identity. The reconstructed entrance reflection amplitude reproduces the global scattering reflectance.
+
+Static smooth-trough spatial comparison at the WP-v2-08B/WP-v2-09 operating point:
+
+- Trough target center: `5.000 mm`.
+- CMT primary backward-intensity center: `4.9028 mm`.
+- Maxwell primary backward-intensity center: `4.8949 mm`.
+- Maxwell target-center error: about `-0.105 mm`.
+- CMT-Maxwell center difference: about `-0.0079 mm`.
+- CMT primary width: about `0.611 mm`; Maxwell primary width: about `0.644 mm`.
+- Maxwell normalized target fraction: about `0.249`; off-target fraction: about `0.751`.
+- Boundary reflectance remains comparable in the reduced spatial-field sampling: `R_CMT = 0.021257`, `R_Maxwell = 0.019814`.
+
+Moving-trough Maxwell validation over commanded centers `1` through `9 mm` confirms the trajectory at this sampling level: mean absolute Maxwell center error is about `0.127 mm`, median about `0.130 mm`, maximum about `0.156 mm`, and the CMT/Maxwell trajectory RMS difference is about `0.0057 mm`. This independently supports the earlier CMT moving-trough tracking result.
+
+The 4-actuator biased-trough array is weaker. Maxwell primary centers follow the commanded actuator order, but target fractions range from about `0.139` to `0.405`, with the two deeper states below the current usefulness threshold. The array result is therefore partial rather than a clean discrete-addressing confirmation.
+
+Required conclusions:
+
+```text
+MAXWELL SPATIAL FIELDS PARTIALLY CONFIRM / REVISE TROUGH LOCALIZATION
+```
+
+```text
+MAXWELL CONFIRMS MOVING-TROUGH TRACKING
+```
+
+```text
+MAXWELL PARTIALLY SUPPORTS 4-ACTUATOR ADDRESSING
+```
+
+```text
+CMT SPATIAL VISUALIZATION IS VALIDATED FOR QUALITATIVE TROUGH RESEARCH
+```
+
+```text
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+```
+
+The mechanical gate remains closed because the single-trough trajectory is encouraging but the spatial response still has substantial off-target normalized backward intensity and the first 4-actuator Maxwell spot check is not uniformly useful. The next packet should refine the optical target and localization metric before detailed PZT mechanics.
