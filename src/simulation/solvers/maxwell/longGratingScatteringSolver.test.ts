@@ -6,6 +6,8 @@ import {
   composeScattering,
   identityScattering,
   repeatScattering,
+  reconstructHybridBraggMaxwellFields,
+  reconstructScatteringLayerFields,
   solveHybridBraggMaxwellLocallyPeriodicPoint,
   solveHybridBraggMaxwellPoint,
   solveLocallyPeriodicBlock,
@@ -14,6 +16,7 @@ import {
   type ScatteringMatrix,
 } from './longGratingScatteringSolver';
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../../structures/hybridBraggGrating';
+import { magnitudeSquared } from '../../math/complex';
 
 const airBlock: ScatteringMatrix = {
   rLeft: { re: 0, im: 0 },
@@ -75,6 +78,46 @@ describe('long grating Maxwell scattering solver', () => {
 
     expect(slab.energyError).toBeLessThan(1e-12);
     expect(grating.energyError).toBeLessThan(1e-12);
+  });
+
+  it('reconstructs entrance reflection consistently with the scattering boundary result', () => {
+    const layers = [
+      { refractiveIndex: 1.7, thicknessM: 120e-9 },
+      { refractiveIndex: 1.35, thicknessM: 95e-9 },
+      { refractiveIndex: 1.55, thicknessM: 210e-9 },
+    ];
+    const boundary = solveScatteringLayers(layers, 600, 1);
+    const field = reconstructScatteringLayerFields(layers, 600, 1);
+
+    expect(field.reflectance).toBeCloseTo(boundary.reflectance, 12);
+    expect(field.transmission).toBeCloseTo(boundary.transmission, 12);
+    expect(magnitudeSquared(field.reflectionAmplitude)).toBeCloseTo(boundary.reflectance, 12);
+    expect(field.samples.every((sample) => Number.isFinite(sample.forwardIntensity))).toBe(true);
+    expect(field.samples.every((sample) => Number.isFinite(sample.backwardIntensity))).toBe(true);
+  });
+
+  it('keeps a matched-index slab backward field below numerical noise', () => {
+    const field = reconstructScatteringLayerFields([{ refractiveIndex: 1.45, thicknessM: 2e-6 }], 600, 1.45);
+
+    expect(field.reflectance).toBeLessThan(1e-24);
+    expect(field.samples[0].backwardIntensity).toBeLessThan(1e-24);
+    expect(field.samples[0].forwardFlux).toBeCloseTo(1.45, 12);
+  });
+
+  it('matches explicit short-grating field boundary metrics', () => {
+    const layers = buildSinusoidalUnitCell({
+      averageIndex: 1.45,
+      indexModulation: 1e-4,
+      periodM: 206.9e-9,
+      phaseRadians: 0.11,
+      samplesPerPeriod: 32,
+    });
+    const boundary = solveScatteringLayers(layers, 600.01, 1.45);
+    const field = reconstructScatteringLayerFields(layers, 600.01, 1.45);
+
+    expect(field.samples).toHaveLength(layers.length);
+    expect(field.reflectance).toBeCloseTo(boundary.reflectance, 12);
+    expect(Math.max(...field.samples.map((sample) => sample.normalizedBackwardIntensity))).toBeCloseTo(1, 12);
   });
 
   it('keeps large repeated lossless blocks finite', () => {
@@ -170,6 +213,33 @@ describe('long grating Maxwell scattering solver', () => {
 
     expect(split.reflectance).toBeCloseTo(unsplit.reflectance, 8);
     expect(split.transmission).toBeCloseTo(unsplit.transmission, 8);
+  });
+
+  it('keeps reconstructed hybrid fields independent of artificial mechanical block partitioning', () => {
+    const design = {
+      ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+      lengthMm: 0.02,
+      peakStrain: 0,
+      strainBias: 0,
+      indexModulation: 1e-4,
+      gratingPhaseRadians: 0.29,
+      fixedLaserWavelengthNm: 600.01,
+    };
+    const coarse = reconstructHybridBraggMaxwellFields(design, 600.01, {
+      samplesPerPeriod: 16,
+      envelopeBlocks: 1,
+    });
+    const split = reconstructHybridBraggMaxwellFields(design, 600.01, {
+      samplesPerPeriod: 16,
+      envelopeBlocks: 10,
+    });
+
+    expect(split.reflectance).toBeCloseTo(coarse.reflectance, 12);
+    expect(split.samples.length).toBe(coarse.samples.length);
+    expect(split.samples[split.samples.length - 1]?.normalizedBackwardIntensity).toBeCloseTo(
+      coarse.samples[coarse.samples.length - 1]!.normalizedBackwardIntensity,
+      12,
+    );
   });
 
   it('keeps full-length locally periodic structures finite and energy conserving', () => {

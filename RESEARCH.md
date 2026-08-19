@@ -2605,3 +2605,50 @@ BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 ```
 
 The next optical task should reconstruct trustworthy Maxwell forward/backward fields before any PZT or mechanical feasibility study.
+
+## WP-v2-09C Maxwell Spatial-Field Validation
+
+Issue #68 now adds internal Maxwell field reconstruction in `longGratingScatteringSolver.ts` and the companion study `scripts/maxwellTroughSpatialValidationStudy.mts`. The generated artifacts are `artifacts/issue-68/maxwell-trough-spatial-validation-study.md` and `.json`.
+
+The reconstruction uses stable prefix/suffix scattering states around each explicit Maxwell layer center. It solves the local right-going and left-going amplitudes from the already stable two-port representation instead of reverting to one giant transfer-matrix chain. The reported spatial metric is normalized backward optical intensity, `|E_backward(z)|^2 / max(|E_backward|^2)`. `|E_total(z)|^2` is also available, but it includes standing-wave interference and is not treated as equivalent to the CMT `|B(z)|^2` metric.
+
+Validation checks pass for a matched-index slab, dielectric slab boundary consistency, a short sinusoidal grating, and split uniform grating partition identity. The reconstructed entrance reflection amplitude reproduces the global scattering reflectance.
+
+Static smooth-trough spatial comparison at the WP-v2-08B/WP-v2-09 operating point:
+
+- Trough target center: `5.000 mm`.
+- CMT primary backward-intensity center: `4.9028 mm`.
+- Maxwell primary backward-intensity center: `4.8949 mm`.
+- Maxwell target-center error: about `-0.105 mm`.
+- CMT-Maxwell center difference: about `-0.0079 mm`.
+- CMT primary width: about `0.611 mm`; Maxwell primary width: about `0.644 mm`.
+- Maxwell normalized target fraction: about `0.249`; off-target fraction: about `0.751`.
+- Boundary reflectance remains comparable in the reduced spatial-field sampling: `R_CMT = 0.021257`, `R_Maxwell = 0.019814`.
+
+Moving-trough Maxwell validation over commanded centers `1` through `9 mm` confirms the trajectory at this sampling level: mean absolute Maxwell center error is about `0.127 mm`, median about `0.130 mm`, maximum about `0.156 mm`, and the CMT/Maxwell trajectory RMS difference is about `0.0057 mm`. This independently supports the earlier CMT moving-trough tracking result.
+
+The 4-actuator biased-trough array is weaker. Maxwell primary centers follow the commanded actuator order, but target fractions range from about `0.139` to `0.405`, with the two deeper states below the current usefulness threshold. The array result is therefore partial rather than a clean discrete-addressing confirmation.
+
+Required conclusions:
+
+```text
+MAXWELL SPATIAL FIELDS PARTIALLY CONFIRM / REVISE TROUGH LOCALIZATION
+```
+
+```text
+MAXWELL CONFIRMS MOVING-TROUGH TRACKING
+```
+
+```text
+MAXWELL PARTIALLY SUPPORTS 4-ACTUATOR ADDRESSING
+```
+
+```text
+CMT SPATIAL VISUALIZATION IS VALIDATED FOR QUALITATIVE TROUGH RESEARCH
+```
+
+```text
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+```
+
+The mechanical gate remains closed because the single-trough trajectory is encouraging but the spatial response still has substantial off-target normalized backward intensity and the first 4-actuator Maxwell spot check is not uniformly useful. The next packet should refine the optical target and localization metric before detailed PZT mechanics.

@@ -250,4 +250,23 @@ The two convergence axes remain separate:
 - optical carrier resolution: samples per optical period;
 - mechanical-envelope resolution: number of strain-envelope blocks.
 
-The long-grating Maxwell path is now adequate for full-length boundary reflectance/transmission validation of the biased trough. It still does not reconstruct Maxwell spatial fields, so the interactive CMT reflection-region view remains a CMT-derived backward-intensity visualization rather than an independently validated Maxwell localization map.
+The long-grating Maxwell path is now adequate for full-length boundary reflectance/transmission validation of the biased trough and can reconstruct internal fields on explicit Maxwell slices:
+
+```text
+Maxwell scattering solver
+    -> boundary solution
+    -> stable prefix/suffix internal-field reconstruction
+    -> forward/backward/total spatial field
+    -> reflection-region analysis over normalized backward optical intensity
+```
+
+The reconstruction exposes complex forward, backward, and total electric-field amplitudes at layer centers. `|E_backward(z)|^2` is the Maxwell metric used for comparison with scalar-CMT `|B(z)|^2`; `|E_total(z)|^2` is reported separately because standing-wave interference makes it a different quantity. Flux fields multiply the corresponding intensity by local refractive index.
+
+The current solver-role split is:
+
+```text
+CMT = interactive playback, fast sweeps, qualitative trough research
+Maxwell = boundary validation and high-fidelity spatial spot checks
+```
+
+WP-v2-09C validates the CMT moving-trough trajectory qualitatively against Maxwell spatial fields, but the 4-actuator result remains partial and the mechanical gate remains closed.
