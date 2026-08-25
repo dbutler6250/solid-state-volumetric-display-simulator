@@ -2,8 +2,9 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-70-maxwell-trough-robustness`.
-- GitHub issue #70: WP-v2-09D Maxwell trough robustness envelope and mechanical target.
+- Current branch: `main`.
+- GitHub issue #70 / PR #71: merged into `main` as squash commit `7785d8b`.
+- Cleanup: feature branch cleanup in progress after merge.
 - PR #67 was previously squash-merged into `main` as `f68a051`.
 - PR #69 was previously squash-merged into `main` as `fa886d5`.
 
