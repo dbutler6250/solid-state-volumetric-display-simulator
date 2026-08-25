@@ -2,50 +2,33 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-68-high-fidelity-bragg-maxwell-solver`.
-- Base/dependency: PR #69 now targets `main` after PR #67 was squash-merged.
-- GitHub issue: #68, `WP-v2-09 high-fidelity long-grating Maxwell solver validation`.
+- Current branch: `main`.
+- GitHub issue #68 / PR #69: merged into `main` as squash commit `fa886d5`.
+- Cleanup: local and remote branch `codex/issue-68-high-fidelity-bragg-maxwell-solver` were deleted after merge.
 
-## PR Audit
+## Latest Completed Work
 
-- PR #67: merged into `main` as squash commit `f68a051`; local and remote branch `codex/issue-66-piezo-strain-window-addressing` were deleted after `git fetch --prune`.
-- PR #69: open draft, base `main`, head `codex/issue-68-high-fidelity-bragg-maxwell-solver`, mergeable, no review submissions, no review threads, no status-check rollup reported by GitHub.
-- Branch relationship after retargeting: #69 contains only its Maxwell-specific commits on top of `origin/main`.
-
-## Latest Task
-
-- Added Maxwell internal spatial-field reconstruction with stable prefix/suffix scattering around explicit layer centers.
-- Exposed forward, backward, total complex field amplitudes, amplitude intensities, refractive-index-weighted flux metrics, and normalized backward optical intensity.
-- Added solver regression coverage for boundary consistency, matched slab field behavior, short-grating reconstructed fields, and split-grating field identity.
-- Added `scripts/maxwellTroughSpatialValidationStudy.mts`.
-- Generated `artifacts/issue-68/maxwell-trough-spatial-validation-study.md` and `.json`.
-- Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md`.
+- PR #67 was previously squash-merged into `main` as `f68a051` and its feature branch was removed.
+- PR #69 was marked ready, squash-merged, and local `main` was fast-forwarded to `origin/main`.
+- The merged WP-v2-09 work adds the high-fidelity Maxwell reference path, locally periodic long-grating acceleration, internal spatial-field reconstruction, validation scripts, artifacts, solver tests, and research/architecture/milestone documentation updates.
 
 ## Key Result
 
-- Static trough: Maxwell primary backward-intensity center `4.8949 mm` for a `5.000 mm` target, versus CMT center `4.9028 mm`.
-- Static widths: CMT `0.611 mm`, Maxwell `0.644 mm`.
-- Static reduced-sampling boundary reflectance: `R_CMT = 0.021257`, `R_Maxwell = 0.019814`.
-- Moving trough: Maxwell mean absolute center error `0.127 mm`, median `0.130 mm`, maximum `0.156 mm`; CMT/Maxwell trajectory RMS difference `0.0057 mm`.
-- 4-actuator Maxwell spot check: partial support only; target fractions range from about `0.139` to `0.405`.
+- Boundary validation: scalar CMT remains quantitatively adequate for the biased trough, with full smooth-trough Maxwell reflectance close to CMT while revising the performance estimate.
+- Spatial validation: Maxwell backward-intensity reconstruction partially confirms and revises trough localization, confirms moving-trough tracking, and only partially supports the 4-actuator addressing spot check.
+- Mechanical gate remains closed; this work supports optical validation only.
 
-Required conclusions recorded in the spatial study:
+## Validation Snapshot
 
-```text
-MAXWELL SPATIAL FIELDS PARTIALLY CONFIRM / REVISE TROUGH LOCALIZATION
-MAXWELL CONFIRMS MOVING-TROUGH TRACKING
-MAXWELL PARTIALLY SUPPORTS 4-ACTUATOR ADDRESSING
-CMT SPATIAL VISUALIZATION IS VALIDATED FOR QUALITATIVE TROUGH RESEARCH
-BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
-```
-
-## Validation Performed
-
-- `npm.cmd run test -- src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` - passed, 1 file / 24 tests.
-- `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts` - passed.
+- GitHub CI `test-lint-build` passed on PR #69 before merge.
+- Last local pre-merge verification on the PR branch:
+  - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts` - passed.
+  - `npm.cmd run test` - passed, 34 files / 242 tests.
+  - `npm.cmd run lint` - passed.
+  - `npm.cmd run build` - passed.
+  - `npm.cmd run test:browser` - passed, 14 tests.
 
 ## Remaining Follow-Up
 
-- Run full required verification before publishing/merging #69: Issue #68 studies, full tests, lint, build, browser tests.
-- Refresh PR #69 status after GitHub Actions runs; no remote check rollup was reported immediately after retargeting.
-- Do not start detailed PZT/mechanical feasibility yet; refine optical localization/off-target requirements first.
+- Start the next optical-localization follow-up from `main`.
+- Do not start detailed PZT/mechanical feasibility until optical localization and off-target requirements are refined.
