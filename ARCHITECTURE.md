@@ -205,3 +205,68 @@ Current strain mapping:
 `validation/troughOpticalValidation.ts` owns the research-only solver-parity helpers. It exposes the canonical convention, exact piecewise CMT section multiplication, a continuous-phase sinusoidal TMM builder, uniform-strain and sharp-trough case helpers, and local `|delta| / |kappa|` diagnostics. This layer is intentionally separate from the production UI solver path.
 
 WP-v2-08C confirms that spatial CMT agrees with exact piecewise CMT for the sampled model, and that short uniform strained gratings have CMT/TMM parity under high-resolution TMM. Full-length biased-trough TMM convergence remains unresolved; the biased trough is therefore approximation-sensitive and should not advance to detailed mechanical design without a higher-fidelity optical validation path.
+
+## WP-v2-09 High-Fidelity Maxwell Reference Path
+
+The solver hierarchy is now explicit:
+
+```text
+Fast exploratory solver
+    -> scalar spatial CMT
+
+High-fidelity validation solver
+    -> stable 1D Maxwell/scattering solver
+
+Legacy / short-structure cross-check
+    -> ordinary TMM
+```
+
+`solvers/maxwell/longGratingScatteringSolver.ts` owns the first headless Maxwell reference path. It uses normal-incidence scalar 1D scattering matrices and Redheffer composition so long grating calculations compose boundary scattering amplitudes instead of naive transfer matrices with exponentially large intermediate fields. Uniform repeated cells can be composed with binary exponentiation.
+
+The Maxwell path preserves the WP-v2-08C canonical reference-coordinate model:
+
+- `n(z) = n_bar(z) + Delta_n cos(phi(z))`;
+- strain is sampled on reference `z`;
+- `n_bar` changes through the existing first-order material response;
+- local grating period changes as `Lambda0 * (1 + epsilon)`;
+- microscopic grating phase is accumulated continuously across optical slices;
+- fractional physical lengths are preserved by assigning the final slice grid to the requested total length.
+
+WP-v2-09 established the bounded first validation. WP-v2-09B extends the same solver path into the locally periodic long-grating workflow:
+
+```text
+strain envelope
+    -> mechanical blocks
+    -> locally periodic optical block
+    -> high-resolution unit cell
+    -> stable repeated-cell scattering
+    -> global Maxwell response
+```
+
+Each mechanical block samples the slow strain envelope once, computes the local `n_bar`, `Delta n`, and `Lambda`, then represents the microscopic optical carrier with Maxwell scattering. Complete local periods use repeated-cell composition; any residual block length is represented as an exact-length partial period. The running microscopic phase is carried into the next block so splitting a uniform grating into 2, 10, or 100 mechanical blocks reproduces the unsplit result within numerical tolerance.
+
+The two convergence axes remain separate:
+
+- optical carrier resolution: samples per optical period;
+- mechanical-envelope resolution: number of strain-envelope blocks.
+
+The long-grating Maxwell path is now adequate for full-length boundary reflectance/transmission validation of the biased trough and can reconstruct internal fields on explicit Maxwell slices:
+
+```text
+Maxwell scattering solver
+    -> boundary solution
+    -> stable prefix/suffix internal-field reconstruction
+    -> forward/backward/total spatial field
+    -> reflection-region analysis over normalized backward optical intensity
+```
+
+The reconstruction exposes complex forward, backward, and total electric-field amplitudes at layer centers. `|E_backward(z)|^2` is the Maxwell metric used for comparison with scalar-CMT `|B(z)|^2`; `|E_total(z)|^2` is reported separately because standing-wave interference makes it a different quantity. Flux fields multiply the corresponding intensity by local refractive index.
+
+The current solver-role split is:
+
+```text
+CMT = interactive playback, fast sweeps, qualitative trough research
+Maxwell = boundary validation and high-fidelity spatial spot checks
+```
+
+WP-v2-09C validates the CMT moving-trough trajectory qualitatively against Maxwell spatial fields, but the 4-actuator result remains partial and the mechanical gate remains closed.

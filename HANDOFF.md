@@ -2,39 +2,50 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-66-piezo-strain-window-addressing`.
-- PR #63 for Issue #62 / WP-v2-06 segmented Bragg media and reflection-region visualization was squash-merged into `main` as `b8694c8`.
-- The remote and local `codex/issue-62-segmented-bragg-reflection-visualization` branches have been cleaned up.
-- PR #65 for Issue #64 / WP-v2-07 target reflection-state optimization foundation was squash-merged into `main` as `b5b4069`.
-- The remote and local `codex/issue-64-target-reflection-optimization` branches have been cleaned up.
+- Current branch: `codex/issue-68-high-fidelity-bragg-maxwell-solver`.
+- Base/dependency: PR #69 now targets `main` after PR #67 was squash-merged.
+- GitHub issue: #68, `WP-v2-09 high-fidelity long-grating Maxwell solver validation`.
+
+## PR Audit
+
+- PR #67: merged into `main` as squash commit `f68a051`; local and remote branch `codex/issue-66-piezo-strain-window-addressing` were deleted after `git fetch --prune`.
+- PR #69: open draft, base `main`, head `codex/issue-68-high-fidelity-bragg-maxwell-solver`, mergeable, no review submissions, no review threads, no status-check rollup reported by GitHub.
+- Branch relationship after retargeting: #69 contains only its Maxwell-specific commits on top of `origin/main`.
 
 ## Latest Task
 
-- Continued Issue #66 / draft PR #67 with WP-v2-08C independent optical validation.
-- Added `src/simulation/validation/troughOpticalValidation.ts` for canonical convention, exact piecewise CMT, continuous-phase TMM, and detuning diagnostics.
-- Added `scripts/troughOpticalValidationStudy.mts`.
-- Generated `artifacts/issue-66/trough-optical-validation-study.md` and `.json`.
-- Updated `RESEARCH.md` and `ARCHITECTURE.md`.
+- Added Maxwell internal spatial-field reconstruction with stable prefix/suffix scattering around explicit layer centers.
+- Exposed forward, backward, total complex field amplitudes, amplitude intensities, refractive-index-weighted flux metrics, and normalized backward optical intensity.
+- Added solver regression coverage for boundary consistency, matched slab field behavior, short-grating reconstructed fields, and split-grating field identity.
+- Added `scripts/maxwellTroughSpatialValidationStudy.mts`.
+- Generated `artifacts/issue-68/maxwell-trough-spatial-validation-study.md` and `.json`.
+- Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md`.
 
 ## Key Result
 
-- Required conclusion: `CMT–TMM DISAGREEMENT EXPLAINED — TROUGH REMAINS APPROXIMATION-SENSITIVE`.
-- Uniform strained short-grating parity is confirmed: `R_CMT = 0.0005654`, `R_TMM = 0.0005551`.
-- Exact piecewise CMT and spatial CMT agree to numerical precision for sampled validation cases.
-- Full 10 mm smooth trough remains solver-sensitive: at the fixed laser `R_CMT = 0.02108`, 1-slice/period TMM gives `3.027e-7`, and 2-slice/period TMM gives `0.01143`, so full-length TMM is not converged enough to validate or invalidate the architecture alone.
-- Architecture decision: `BIASED TROUGH REMAINS PROMISING BUT REQUIRES A HIGHER-FIDELITY OPTICAL MODEL`.
+- Static trough: Maxwell primary backward-intensity center `4.8949 mm` for a `5.000 mm` target, versus CMT center `4.9028 mm`.
+- Static widths: CMT `0.611 mm`, Maxwell `0.644 mm`.
+- Static reduced-sampling boundary reflectance: `R_CMT = 0.021257`, `R_Maxwell = 0.019814`.
+- Moving trough: Maxwell mean absolute center error `0.127 mm`, median `0.130 mm`, maximum `0.156 mm`; CMT/Maxwell trajectory RMS difference `0.0057 mm`.
+- 4-actuator Maxwell spot check: partial support only; target fractions range from about `0.139` to `0.405`.
+
+Required conclusions recorded in the spatial study:
+
+```text
+MAXWELL SPATIAL FIELDS PARTIALLY CONFIRM / REVISE TROUGH LOCALIZATION
+MAXWELL CONFIRMS MOVING-TROUGH TRACKING
+MAXWELL PARTIALLY SUPPORTS 4-ACTUATOR ADDRESSING
+CMT SPATIAL VISUALIZATION IS VALIDATED FOR QUALITATIVE TROUGH RESEARCH
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+```
 
 ## Validation Performed
 
-- Targeted validation test: `npm.cmd run test -- src/simulation/validation/troughOpticalValidation.test.ts` - passed, 7 tests.
-- Study runner: `npx.cmd tsx scripts/piezoStrainWindowStudy.mts` - passed.
-- Study runner: `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
-- Full unit tests: `npm.cmd run test` - passed, 33 files / 218 tests.
-- Lint: `npm.cmd run lint` - passed.
-- Build: `npm.cmd run build` - passed.
-- Browser regression: `npm.cmd run test:browser` - passed, 14 tests.
+- `npm.cmd run test -- src/simulation/solvers/maxwell/longGratingScatteringSolver.test.ts` - passed, 1 file / 24 tests.
+- `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts` - passed.
 
 ## Remaining Follow-Up
 
-- Update PR #67 with the WP-v2-08C conclusion.
-- Do not move to detailed PZT mechanics yet; first constrain the optical architecture to an independently validated solver range or promote a higher-fidelity optical reference for future architecture studies.
+- Run full required verification before publishing/merging #69: Issue #68 studies, full tests, lint, build, browser tests.
+- Refresh PR #69 status after GitHub Actions runs; no remote check rollup was reported immediately after retargeting.
+- Do not start detailed PZT/mechanical feasibility yet; refine optical localization/off-target requirements first.
