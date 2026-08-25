@@ -174,8 +174,8 @@
       "reflectance": 0.004964413041397604,
       "transmission": 0.9950355869529413,
       "energyError": 5.661138224866136e-12,
-      "runtimeMs": 0.06069999999999709,
-      "heapUsedMb": 0.18209075927734375
+      "runtimeMs": 0.1428000000000793,
+      "heapUsedMb": 0.1815032958984375
     },
     {
       "label": "uniform-10mm-spp-16",
@@ -183,7 +183,7 @@
       "reflectance": 0.005767374424113751,
       "transmission": 0.9942326256007987,
       "energyError": 2.4912516494168813e-11,
-      "runtimeMs": 0.04079999999999018,
+      "runtimeMs": 0.10760000000004766,
       "heapUsedMb": 0.1004638671875
     },
     {
@@ -192,8 +192,8 @@
       "reflectance": 0.005984141004336336,
       "transmission": 0.9940158589368917,
       "energyError": 5.877198727688437e-11,
-      "runtimeMs": 0.6548999999999978,
-      "heapUsedMb": 0
+      "runtimeMs": 0.11120000000005348,
+      "heapUsedMb": 0.1638641357421875
     },
     {
       "label": "uniform-10mm-spp-64",
@@ -201,8 +201,8 @@
       "reflectance": 0.0060393771567541395,
       "transmission": 0.9939606227494164,
       "energyError": 9.382938870317048e-11,
-      "runtimeMs": 0.06940000000000168,
-      "heapUsedMb": 0.23838043212890625
+      "runtimeMs": 0.21539999999981774,
+      "heapUsedMb": 0.293182373046875
     }
   ],
   "uniformLongSpectrum": {
@@ -223,7 +223,7 @@
       "reflectance": 0.0011831404709259949,
       "transmission": 0.9988168595217293,
       "energyError": 7.344680419407723e-12,
-      "runtimeMs": 11.09390000000002,
+      "runtimeMs": 21.590299999999843,
       "heapUsedMb": 0
     }
   },
@@ -8169,8 +8169,8 @@
       "reflectance": 0.04391458341371335,
       "transmission": 0.9560854165788912,
       "energyError": 7.395417611633093e-12,
-      "runtimeMs": 11.387200000000007,
-      "heapUsedMb": 0
+      "runtimeMs": 22.844900000000052,
+      "heapUsedMb": 2.218902587890625
     }
   },
   "smoothEnvelopeConvergence": [
@@ -8180,8 +8180,8 @@
       "reflectance": 0.0028266152691932603,
       "transmission": 0.9971733847197541,
       "energyError": 1.1052603277050821e-11,
-      "runtimeMs": 1.1598000000000184,
-      "heapUsedMb": 0
+      "runtimeMs": 1.246599999999944,
+      "heapUsedMb": 2.792205810546875
     },
     {
       "label": "smooth-10mm-blocks-50",
@@ -8189,8 +8189,8 @@
       "reflectance": 0.055712148706047335,
       "transmission": 0.9442878512770242,
       "energyError": 1.6928458634879462e-11,
-      "runtimeMs": 1.196200000000033,
-      "heapUsedMb": 5.0601654052734375
+      "runtimeMs": 3.398400000000038,
+      "heapUsedMb": 1.4167327880859375
     },
     {
       "label": "smooth-10mm-blocks-100",
@@ -8198,7 +8198,7 @@
       "reflectance": 0.025303758601180226,
       "transmission": 0.9746962413971292,
       "energyError": 1.6906476218991884e-12,
-      "runtimeMs": 6.300099999999986,
+      "runtimeMs": 11.890300000000025,
       "heapUsedMb": 0
     },
     {
@@ -8207,8 +8207,8 @@
       "reflectance": 0.02183111984608508,
       "transmission": 0.9781688801554651,
       "energyError": 1.5500933869816436e-12,
-      "runtimeMs": 4.306299999999965,
-      "heapUsedMb": 5.124122619628906
+      "runtimeMs": 8.736000000000331,
+      "heapUsedMb": 5.124977111816406
     },
     {
       "label": "smooth-10mm-blocks-400",
@@ -8216,7 +8216,7 @@
       "reflectance": 0.021204466372767156,
       "transmission": 0.9787955336256888,
       "energyError": 1.5439871603462052e-12,
-      "runtimeMs": 12.981200000000001,
+      "runtimeMs": 22.63779999999997,
       "heapUsedMb": 0
     }
   ],
@@ -8227,8 +8227,8 @@
       "reflectance": 0.020013443876905533,
       "transmission": 0.9799865561250266,
       "energyError": 1.9322321520576224e-12,
-      "runtimeMs": 4.042599999999993,
-      "heapUsedMb": 1.322235107421875
+      "runtimeMs": 9.322699999999713,
+      "heapUsedMb": 1.3216476440429688
     },
     {
       "label": "smooth-10mm-spp-16",
@@ -8236,8 +8236,8 @@
       "reflectance": 0.020961049599709472,
       "transmission": 0.9790389503989091,
       "energyError": 1.3814505095410823e-12,
-      "runtimeMs": 5.170000000000016,
-      "heapUsedMb": 4.327659606933594
+      "runtimeMs": 9.921600000000126,
+      "heapUsedMb": 4.3300628662109375
     },
     {
       "label": "smooth-10mm-spp-32",
@@ -8245,7 +8245,7 @@
       "reflectance": 0.021204466372767156,
       "transmission": 0.9787955336256888,
       "energyError": 1.5439871603462052e-12,
-      "runtimeMs": 11.102199999999982,
+      "runtimeMs": 16.39350000000013,
       "heapUsedMb": 0
     },
     {
@@ -8254,8 +8254,8 @@
       "reflectance": 0.02126577536094794,
       "transmission": 0.978734224646671,
       "energyError": 7.6190165287926e-12,
-      "runtimeMs": 17.91239999999999,
-      "heapUsedMb": 0
+      "runtimeMs": 25.084400000000187,
+      "heapUsedMb": 7.006011962890625
     }
   ],
   "convergenceGrid": [
@@ -8265,8 +8265,8 @@
       "reflectance": 0.025018203020492548,
       "transmission": 0.9749817969687582,
       "energyError": 1.0749290346723228e-11,
-      "runtimeMs": 1.2992000000000417,
-      "heapUsedMb": 6.9931182861328125
+      "runtimeMs": 2.02599999999984,
+      "heapUsedMb": 0
     },
     {
       "label": "grid-100-32",
@@ -8274,7 +8274,7 @@
       "reflectance": 0.025303758601180226,
       "transmission": 0.9746962413971292,
       "energyError": 1.6906476218991884e-12,
-      "runtimeMs": 2.349400000000003,
+      "runtimeMs": 4.5702000000001135,
       "heapUsedMb": 0
     },
     {
@@ -8283,8 +8283,8 @@
       "reflectance": 0.02158110373831029,
       "transmission": 0.9784188962602134,
       "energyError": 1.4763745781465332e-12,
-      "runtimeMs": 2.974199999999996,
-      "heapUsedMb": 4.141807556152344
+      "runtimeMs": 3.2876000000001113,
+      "heapUsedMb": 4.14337158203125
     },
     {
       "label": "grid-200-32",
@@ -8292,7 +8292,7 @@
       "reflectance": 0.02183111984608508,
       "transmission": 0.9781688801554651,
       "energyError": 1.5500933869816436e-12,
-      "runtimeMs": 6.376599999999996,
+      "runtimeMs": 5.555699999999888,
       "heapUsedMb": 0
     },
     {
@@ -8301,8 +8301,8 @@
       "reflectance": 0.021204466372767156,
       "transmission": 0.9787955336256888,
       "energyError": 1.5439871603462052e-12,
-      "runtimeMs": 8.875699999999995,
-      "heapUsedMb": 2.3611679077148438
+      "runtimeMs": 14.311400000000049,
+      "heapUsedMb": 2.3646011352539062
     },
     {
       "label": "grid-400-64",
@@ -8310,7 +8310,7 @@
       "reflectance": 0.02126577536094794,
       "transmission": 0.978734224646671,
       "energyError": 7.6190165287926e-12,
-      "runtimeMs": 19.94029999999998,
+      "runtimeMs": 24.14700000000039,
       "heapUsedMb": 0
     }
   ],
@@ -8602,8 +8602,8 @@
       "reflectance": 0.016728448572056354,
       "transmission": 0.983271551422093,
       "energyError": 5.85065329516965e-12,
-      "runtimeMs": 0.05299999999999727,
-      "heapUsedMb": 0.1158599853515625
+      "runtimeMs": 0.07549999999991996,
+      "heapUsedMb": 0.10791778564453125
     },
     {
       "label": "stress-5mm",
@@ -8611,8 +8611,8 @@
       "reflectance": 0.0015576755390329826,
       "transmission": 0.998442324431448,
       "energyError": 2.951905386794351e-11,
-      "runtimeMs": 0.024199999999950705,
-      "heapUsedMb": 0.11139678955078125
+      "runtimeMs": 0.05230000000028667,
+      "heapUsedMb": 0.1114501953125
     },
     {
       "label": "stress-10mm",
@@ -8620,8 +8620,8 @@
       "reflectance": 0.005984141004336336,
       "transmission": 0.9940158589368917,
       "energyError": 5.877198727688437e-11,
-      "runtimeMs": 0.02539999999999054,
-      "heapUsedMb": 0.12894439697265625
+      "runtimeMs": 0.03580000000010841,
+      "heapUsedMb": 0.1288299560546875
     },
     {
       "label": "stress-20mm",
@@ -8629,8 +8629,8 @@
       "reflectance": 0.020403127942377572,
       "transmission": 0.9795968719417947,
       "energyError": 1.1582779180230318e-10,
-      "runtimeMs": 0.02070000000003347,
-      "heapUsedMb": 0.09912872314453125
+      "runtimeMs": 0.028599999999642023,
+      "heapUsedMb": 0.0991668701171875
     }
   ],
   "historicalTmm": {

@@ -3,15 +3,14 @@
 ## Repository Status
 
 - Current branch: `codex/issue-68-high-fidelity-bragg-maxwell-solver`.
-- Base/dependency: PR #69 remains stacked on `codex/issue-66-piezo-strain-window-addressing` because draft PR #67 is still open and unmerged.
+- Base/dependency: PR #69 now targets `main` after PR #67 was squash-merged.
 - GitHub issue: #68, `WP-v2-09 high-fidelity long-grating Maxwell solver validation`.
 
 ## PR Audit
 
-- PR #67: open draft, base `main`, head `codex/issue-66-piezo-strain-window-addressing`, mergeable, no review submissions, no review threads, CI `test-lint-build` passing as of 2026-08-18.
-- PR #69: open draft, base `codex/issue-66-piezo-strain-window-addressing`, head `codex/issue-68-high-fidelity-bragg-maxwell-solver`, mergeable, no review submissions, no review threads, no status-check rollup reported by GitHub.
-- Branch relationship after `git fetch --prune origin`: #67 is `0 behind / 3 ahead` of `origin/main`; #69 is `0 behind / 2 ahead` of #67 before the WP-v2-09C local commits.
-- No actionable review threads found.
+- PR #67: merged into `main` as squash commit `f68a051`; local and remote branch `codex/issue-66-piezo-strain-window-addressing` were deleted after `git fetch --prune`.
+- PR #69: open draft, base `main`, head `codex/issue-68-high-fidelity-bragg-maxwell-solver`, mergeable, no review submissions, no review threads, no status-check rollup reported by GitHub.
+- Branch relationship after retargeting: #69 contains only its Maxwell-specific commits on top of `origin/main`.
 
 ## Latest Task
 
@@ -47,7 +46,6 @@ BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 
 ## Remaining Follow-Up
 
-- Run full required verification before publishing: Issue #66/#68 studies, full tests, lint, build, browser tests.
-- Push the WP-v2-09C local commits to PR #69 and refresh the PR description after verification.
-- Keep #69 stacked until PR #67 is merged; then retarget #69 to `main` and rerun verification.
+- Run full required verification before publishing/merging #69: Issue #68 studies, full tests, lint, build, browser tests.
+- Refresh PR #69 status after GitHub Actions runs; no remote check rollup was reported immediately after retargeting.
 - Do not start detailed PZT/mechanical feasibility yet; refine optical localization/off-target requirements first.
