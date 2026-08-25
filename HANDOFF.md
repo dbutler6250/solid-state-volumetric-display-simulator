@@ -31,6 +31,7 @@
 - Host baseline: `E_host = 2 GPa`, `A_host = 1 mm^2`.
 - Uniform preload: `0.0015` strain, `3 MPa`, `3 N`, `15 um` displacement over `10 mm`.
 - Leading active counter-strain concept: required free strain `-0.0015`, displacement scale `1.2 um` over `0.8 mm`.
+- Bonded/shear-lag sweep: no strict Maxwell pass found for `L_transfer = 0.025-0.32 mm`.
 
 ## Verification Snapshot
 
@@ -41,7 +42,7 @@
   - `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts`
   - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts`
 - Final standard checks passed:
-  - `npm.cmd run test` - 39 files / 255 tests.
+  - `npm.cmd run test` - 39 files / 257 tests.
   - `npm.cmd run lint`
   - `npm.cmd run build`
   - `npm.cmd run test:browser` - 14 tests.

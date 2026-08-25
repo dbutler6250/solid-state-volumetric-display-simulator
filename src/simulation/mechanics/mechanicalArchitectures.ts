@@ -1,4 +1,12 @@
-import { createLocalizedEigenstrainField, createShearLagCounterStrainField, createUniformField, type SampledStrainField } from './actuatorStrainTransfer';
+import {
+  createCoupledDifferentialArrayField,
+  createLocalizedEigenstrainField,
+  createMechanicallyIsolatedField,
+  createShearLagCounterStrainField,
+  createStiffnessEngineeredField,
+  createUniformField,
+  type SampledStrainField,
+} from './actuatorStrainTransfer';
 import { solveUniformAxialStrain, type AxialState, type HostMechanicalProperties } from './axialElasticity';
 import { calculateMechanicalTargetMetrics, type MechanicalStrainTarget, type MechanicalTargetMetrics } from './mechanicalTargetMetrics';
 
@@ -76,17 +84,17 @@ export function evaluateMechanicalArchitectures(input: {
     {
       architecture: 'local stiffness engineering',
       abstraction: 'constant-force bar with locally increased EA',
-      field: createLocalizedEigenstrainField({ ...base, eigenstrain: -0.9 * excursion }),
+      field: createStiffnessEngineeredField({ ...base, stiffnessRatio: 10 }),
       requiredFreeStrain: null,
       requiredDisplacementM: null,
       requiredForceN: preload.forceN,
       stressPa: preload.stressPa,
-      notes: 'Full relief would require an unbounded stiffness ratio; this case tests partial relief only.',
+      notes: 'A 10x local stiffness ratio gives only partial relief; exact zero strain would require an unbounded ratio under constant force.',
     },
     {
       architecture: 'mechanically isolated zone',
       abstraction: 'local optical region coupled through compliant effective interfaces',
-      field: createLocalizedEigenstrainField({ ...base, eigenstrain: -excursion, transfer: 0.88 }),
+      field: createMechanicallyIsolatedField({ ...base, interfaceCoupling: 0.12, edgeLeakageWidthM: target.transitionWidthM }),
       requiredFreeStrain: -excursion / 0.88,
       requiredDisplacementM: (excursion / 0.88) * target.widthM,
       requiredForceN: preload.forceN * 0.88,
@@ -96,7 +104,14 @@ export function evaluateMechanicalArchitectures(input: {
     {
       architecture: 'small differential actuator array',
       abstraction: 'four mechanically coupled zones with nearest-neighbor leakage',
-      field: createLocalizedEigenstrainField({ ...base, eigenstrain: -0.82 * excursion, transfer: 1 }),
+      field: createCoupledDifferentialArrayField({
+        ...base,
+        zoneCount: 4,
+        pitchM: target.widthM,
+        neighborCoupling: 0.18,
+        activeZoneIndex: 1,
+        actuatorFreeStrain: -excursion,
+      }),
       requiredFreeStrain: -excursion,
       requiredDisplacementM: excursion * target.widthM,
       requiredForceN: preload.forceN,

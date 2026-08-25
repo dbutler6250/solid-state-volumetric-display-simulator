@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { HybridBraggDesignInputs } from '../src/types/simulation';
 import { detectReflectionRegions, type ReflectionRegion } from '../src/simulation/experiments/hybridBraggExperiments';
-import { createSmoothTroughField, type SampledStrainField } from '../src/simulation/mechanics/actuatorStrainTransfer';
+import { createShearLagCounterStrainField, createSmoothTroughField, type SampledStrainField } from '../src/simulation/mechanics/actuatorStrainTransfer';
 import { evaluateMechanicalArchitectures, type MechanicalArchitectureResult } from '../src/simulation/mechanics/mechanicalArchitectures';
 import type { MechanicalStrainTarget } from '../src/simulation/mechanics/mechanicalTargetMetrics';
 import { reconstructHybridBraggMaxwellFieldsFromStrain, type HybridMaxwellOptions, type MaxwellFieldSample } from '../src/simulation/solvers/maxwell/longGratingScatteringSolver';
@@ -68,11 +68,15 @@ const targetField = createSmoothTroughField(target);
 const toleranceAudit = auditPriorTolerances();
 const refinedTolerances = refineMechanicalTolerances();
 const mechanics = evaluateMechanicalArchitectures({ target, targetField, host });
-const architectureResults = mechanics.architectures.map((architecture) => ({
-  ...architecture,
-  optical: rescoreMechanicalField(architecture.field),
-  opticalClassification: classifyOptical(rescoreMechanicalField(architecture.field)),
-}));
+const shearTransferStudy = runShearTransferStudy();
+const architectureResults = mechanics.architectures.map((architecture) => {
+  const optical = rescoreMechanicalField(architecture.field);
+  return {
+    ...architecture,
+    optical,
+    opticalClassification: classifyOptical(optical),
+  };
+});
 const best = [...architectureResults].sort((left, right) =>
   left.metrics.rmsStrainError - right.metrics.rmsStrainError)[0];
 const feasibilityConclusion = classifyFeasibility();
@@ -94,6 +98,7 @@ const payload = {
   toleranceAudit,
   refinedTolerances,
   toleranceInterpretation: 'PRIOR TOLERANCE RESULT WAS MIXED',
+  shearTransferStudy,
   host,
   uniformPreload: mechanics.preload,
   architectures: architectureResults.map(({ field: _field, ...architecture }) => ({
@@ -168,21 +173,67 @@ function refineMechanicalTolerances() {
       values: [0.00145, 0.001475, 0.0015, 0.001525, 0.00155],
       fieldFor: (value: number) => createSmoothTroughField({ ...target, troughStrain: target.backgroundStrain - value }),
     },
+    {
+      parameter: 'transition width mm',
+      values: [0.2, 0.225, 0.25, 0.275, 0.3],
+      fieldFor: (value: number) => createSmoothTroughField({ ...target, transitionWidthM: value * 1e-3 }),
+    },
   ];
-  return probes.map((probe) => {
+  const fieldProbes = probes.map((probe) => {
     const points = probe.values.map((value) => ({ value, optical: rescoreMechanicalField(probe.fieldFor(value)) }));
     const useful = points.filter((point) => point.optical.useful).map((point) => point.value);
     return {
       parameter: probe.parameter,
       points,
       lowerUseful: useful[0] ?? null,
-      upperUseful: useful.at(-1) ?? null,
+      upperUseful: useful.length > 0 ? useful[useful.length - 1] : null,
     };
   });
+  const laserValues = [600.09, 600.10, 600.11, 600.12, 600.13];
+  const laserPoints = laserValues.map((value) => ({ value, optical: rescoreMechanicalField(targetField, value) }));
+  const usefulLaser = laserPoints.filter((point) => point.optical.useful).map((point) => point.value);
+  return [
+    ...fieldProbes,
+    {
+      parameter: 'laser wavelength nm',
+      points: laserPoints,
+      lowerUseful: usefulLaser[0] ?? null,
+      upperUseful: usefulLaser.length > 0 ? usefulLaser[usefulLaser.length - 1] : null,
+    },
+  ];
 }
 
-function rescoreMechanicalField(field: SampledStrainField): RegionMetrics {
-  const result = reconstructHybridBraggMaxwellFieldsFromStrain(nominalDesign, nominalDesign.fixedLaserWavelengthNm, MAXWELL_OPTIONS, field);
+function runShearTransferStudy() {
+  const transferLengthsM = [0.000025, 0.00005, 0.000075, 0.0001, 0.000125, 0.00015, 0.0002, 0.00025, 0.00032];
+  const points = transferLengthsM.map((transferLengthM) => {
+    const field = createShearLagCounterStrainField({
+      ...target,
+      actuatorFreeStrain: -(target.backgroundStrain - target.troughStrain),
+      transferLengthM,
+    });
+    return {
+      transferLengthM,
+      transferLengthMm: transferLengthM * 1e3,
+      optical: rescoreMechanicalField(field),
+      sampleCenterStrain: field.sampleStrain(target.centerM),
+      sampleEdgeStrain: field.sampleStrain(target.centerM + target.widthM / 2 + target.transitionWidthM / 2),
+    };
+  });
+  const passing = points.filter((point) => point.optical.useful);
+  const shortestPassing = passing[0] ?? null;
+  return {
+    points,
+    requiredTransferLengthMm: shortestPassing?.transferLengthMm ?? null,
+    plausibility: shortestPassing === null
+      ? 'not found in tested range'
+      : shortestPassing.transferLengthMm <= 0.075 ? 'aggressive'
+        : shortestPassing.transferLengthMm <= 0.15 ? 'plausible but demanding'
+          : 'implausibly long or poorly localized',
+  };
+}
+
+function rescoreMechanicalField(field: SampledStrainField, wavelengthNm = nominalDesign.fixedLaserWavelengthNm): RegionMetrics {
+  const result = reconstructHybridBraggMaxwellFieldsFromStrain(nominalDesign, wavelengthNm, MAXWELL_OPTIONS, field);
   const metrics = metricsFromMaxwellSamples(result.samples, result.reflectance, result.transmission, result.energyError, nominalDesign.strainCenterMm, targetWidthMm);
   return {
     ...metrics,
@@ -315,6 +366,16 @@ function renderReport(): string {
     '',
     '## F. Uniform preload',
     `epsilon=${fmt(mechanics.preload.strain)}, sigma=${fmt(mechanics.preload.stressPa)} Pa, F=${fmt(mechanics.preload.forceN)} N, displacement=${fmt(mechanics.preload.displacementM)} m, energy=${fmt(mechanics.preload.elasticEnergyJ)} J.`,
+    '',
+    '## J. Bonded/shear-lag actuation transfer sweep',
+    `Required tested transfer length: ${fmt(shearTransferStudy.requiredTransferLengthMm)} mm; classification: ${shearTransferStudy.plausibility}.`,
+    table(['L_transfer mm', 'center strain', 'edge strain', 'R_Maxwell', 'useful'], shearTransferStudy.points.map((point) => [
+      fmt(point.transferLengthMm),
+      fmt(point.sampleCenterStrain),
+      fmt(point.sampleEdgeStrain),
+      fmt(point.optical.reflectance),
+      String(point.optical.useful),
+    ])),
     '',
     '## G-M. Mechanical architecture table',
     table([

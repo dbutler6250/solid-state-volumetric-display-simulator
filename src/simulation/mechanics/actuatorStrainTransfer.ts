@@ -19,6 +19,23 @@ export type ShearLagInput = SmoothTroughInput & {
   actuatorFreeStrain: number;
 };
 
+export type StiffnessEngineeringInput = SmoothTroughInput & {
+  stiffnessRatio: number;
+};
+
+export type IsolationInput = SmoothTroughInput & {
+  interfaceCoupling: number;
+  edgeLeakageWidthM: number;
+};
+
+export type CoupledArrayInput = SmoothTroughInput & {
+  zoneCount: number;
+  pitchM: number;
+  neighborCoupling: number;
+  activeZoneIndex: number;
+  actuatorFreeStrain: number;
+};
+
 const DEFAULT_SAMPLE_COUNT = 801;
 
 /** Creates the ideal optical strain-trough target as a reusable sampled field. */
@@ -53,6 +70,46 @@ export function createLocalizedEigenstrainField(input: SmoothTroughInput & { eig
 /** Creates a uniform field; a 1D local end force cannot localize axial strain in a continuous bar. */
 export function createUniformField(lengthM: number, strain: number, sampleCount = DEFAULT_SAMPLE_COUNT): SampledStrainField {
   return createSampledField(lengthM, sampleCount, () => strain);
+}
+
+/** Models local EA(z) changes under constant axial force, where strain scales inversely with stiffness. */
+export function createStiffnessEngineeredField(input: StiffnessEngineeringInput): SampledStrainField {
+  const ratio = Math.max(1, input.stiffnessRatio);
+  return createSampledField(input.lengthM, input.sampleCount, (zM) => {
+    const localStiffening = smoothTopHat(zM - input.centerM, input.widthM, input.transitionWidthM);
+    const localRatio = 1 + (ratio - 1) * localStiffening;
+    return input.backgroundStrain / localRatio;
+  });
+}
+
+/** Models a local zone coupled to the host through compliant effective interfaces. */
+export function createMechanicallyIsolatedField(input: IsolationInput): SampledStrainField {
+  const coupling = Math.min(1, Math.max(0, input.interfaceCoupling));
+  return createSampledField(input.lengthM, input.sampleCount, (zM) => {
+    const core = smoothTopHat(zM - input.centerM, input.widthM, input.transitionWidthM);
+    const distance = Math.max(0, Math.abs(zM - input.centerM) - input.widthM / 2);
+    const leakage = Math.exp(-distance / Math.max(1e-12, input.edgeLeakageWidthM));
+    const relief = (input.backgroundStrain - input.troughStrain) * core * (1 - coupling * (1 - leakage));
+    return input.backgroundStrain - relief;
+  });
+}
+
+/** Models a small differential actuator array with nearest-neighbor mechanical cross-coupling. */
+export function createCoupledDifferentialArrayField(input: CoupledArrayInput): SampledStrainField {
+  const count = Math.max(1, Math.round(input.zoneCount));
+  const active = Math.min(count - 1, Math.max(0, Math.round(input.activeZoneIndex)));
+  const firstCenter = input.centerM - ((count - 1) * input.pitchM) / 2;
+  const neighborCoupling = Math.min(1, Math.max(0, input.neighborCoupling));
+  return createSampledField(input.lengthM, input.sampleCount, (zM) => {
+    let strain = input.backgroundStrain;
+    for (let index = 0; index < count; index += 1) {
+      const distance = Math.abs(index - active);
+      const drive = distance === 0 ? 1 : distance === 1 ? neighborCoupling : neighborCoupling ** distance;
+      const center = firstCenter + index * input.pitchM;
+      strain += input.actuatorFreeStrain * drive * smoothTopHat(zM - center, input.widthM, input.transitionWidthM);
+    }
+    return strain;
+  });
 }
 
 function createSampledField(lengthM: number, sampleCount = DEFAULT_SAMPLE_COUNT, sampler: (zM: number) => number): SampledStrainField {
