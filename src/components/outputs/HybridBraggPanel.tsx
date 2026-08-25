@@ -1,6 +1,14 @@
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../../simulation/structures/hybridBraggGrating';
 import { MAX_HYBRID_BRAGG_SECTIONS } from '../../simulation/simulationLimits';
 import type { HybridBraggDesignInputs, QuarterWaveStackInputs } from '../../types/simulation';
+import {
+  formatMicrostrain,
+  formatNm,
+  formatSignedNm,
+  formatStrain,
+  getFixedGratingReadouts,
+  getOperatingPointInterpretation,
+} from '../researchReadouts';
 import { FormattedNumberInput } from '../inputs/FormattedNumberInput';
 
 type HybridBraggPanelProps = {
@@ -21,6 +29,7 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
   const usesEdge = design.strainShape === 'smooth-top-hat' || usesPiezo;
   const usesWave = ['traveling-sinusoid', 'standing-wave', 'carrier-envelope', 'multi-tone'].includes(design.strainShape);
   const usesSecondaryWave = design.strainShape === 'multi-tone';
+  const readouts = getFixedGratingReadouts(design);
   const updateDesign = (patch: Partial<HybridBraggDesignInputs>) => {
     const nextLengthMm = patch.lengthMm ?? design.lengthMm;
     const nextPulseRange = getNextPulseSweepRange(design, patch, nextLengthMm);
@@ -39,22 +48,84 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
       hybridBraggDesign: nextDesign,
     });
   };
+  const updateLaserDetuning = (laserDetuningNm: number) => {
+    updateDesign({ fixedLaserWavelengthNm: readouts.staticBraggWavelengthNm + laserDetuningNm });
+  };
 
   return (
-    <section className="acoustic-panel" aria-label="Hybrid Bragg grating inputs">
+    <section className="acoustic-panel" aria-label="Fixed grating display inputs">
       <div className="stack-panel-heading">
-        <h2>Hybrid Bragg Grating</h2>
-        <span>Permanent grating with a prescribed perturbation field.</span>
+        <h2>Fixed-Grating Display</h2>
+        <span>Preset: Current Research Baseline</span>
       </div>
       <div className="stack-panel-subtitle">
-        <span className="mode-pill mode-pill-hybrid">Hybrid</span>
-        <span>Prescribed field study; physical actuator propagation is not included yet.</span>
+        <span className="mode-pill mode-pill-hybrid">Fixed Grating</span>
+        <span>{getOperatingPointInterpretation(design)}</span>
       </div>
-      <div className="form-grid form-grid-global acoustic-form">
+      <dl className="architecture-status-grid operating-point-grid" aria-label="Operating point summary">
+        <div>
+          <dt>Static Bragg</dt>
+          <dd>{formatNm(readouts.staticBraggWavelengthNm)} nm</dd>
+        </div>
+        <div>
+          <dt>Laser</dt>
+          <dd>{formatNm(design.fixedLaserWavelengthNm)} nm</dd>
+        </div>
+        <div>
+          <dt>Detuning</dt>
+          <dd>{formatSignedNm(readouts.laserDetuningNm)} nm</dd>
+        </div>
+        <div>
+          <dt>Background strain</dt>
+          <dd>{formatMicrostrain(design.strainBias)}</dd>
+        </div>
+        <div>
+          <dt>Trough center</dt>
+          <dd>{design.strainCenterMm.toFixed(3)} mm</dd>
+        </div>
+        <div>
+          <dt>Solver</dt>
+          <dd>Interactive CMT; Maxwell validation stale after edits</dd>
+        </div>
+      </dl>
+      <dl className="derived-readout-grid" aria-label="Derived fixed grating values">
+        <div>
+          <dt>Background Bragg</dt>
+          <dd>{formatNm(readouts.backgroundBraggWavelengthNm)} nm</dd>
+        </div>
+        <div>
+          <dt>Local trough Bragg</dt>
+          <dd>{formatNm(readouts.troughBraggWavelengthNm)} nm</dd>
+        </div>
+        <div>
+          <dt>Strain relief</dt>
+          <dd>{formatStrain(readouts.strainRelief)} ({formatMicrostrain(readouts.strainRelief)})</dd>
+        </div>
+      </dl>
+      <div className="hybrid-control-groups" aria-label="Fixed grating display input groups">
+        <section className="control-group control-group-core" aria-label="Core experiment controls">
+          <h3>Core Experiment</h3>
+          <div className="form-grid form-grid-global acoustic-form">
+            <HybridNumber label="Laser detuning (nm)" value={readouts.laserDetuningNm} step={0.001} disabled={!isActiveMode} onChange={updateLaserDetuning} />
+            <HybridNumber label="Background strain" value={design.strainBias} step={0.00001} disabled={!isActiveMode} onChange={(strainBias) => updateDesign({ strainBias })} />
+            <HybridNumber label="Trough strain" value={readouts.troughStrain} step={0.00001} disabled={!isActiveMode} onChange={(troughStrain) => updateDesign({ peakStrain: troughStrain - design.strainBias })} />
+            {(usesCenter || usesPiezo) ? <HybridNumber label="Trough center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
+            {(usesWidth || usesPiezo) ? <HybridNumber label="Trough width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} /> : null}
+            {usesEdge ? <HybridNumber label="Edge transition (mm)" value={design.perturbationEdgeWidthMm} min={0} step={0.05} disabled={!isActiveMode} onChange={(perturbationEdgeWidthMm) => updateDesign({ perturbationEdgeWidthMm })} /> : null}
+          </div>
+        </section>
+        <details className="control-group" open>
+          <summary>Permanent Grating</summary>
+          <div className="form-grid form-grid-global acoustic-form">
         <HybridNumber label="Length (mm)" value={design.lengthMm} min={0.001} disabled={!isActiveMode} onChange={(lengthMm) => updateDesign({ lengthMm })} />
         <HybridNumber label="Average index" value={design.averageIndex} min={0.1} step={0.001} disabled={!isActiveMode} onChange={(averageIndex) => updateDesign({ averageIndex })} />
-        <HybridNumber label="Index modulation" value={design.indexModulation} min={0} step={0.00001} disabled={!isActiveMode} onChange={(indexModulation) => updateDesign({ indexModulation })} />
+        <HybridNumber label="Delta n" value={design.indexModulation} min={0} step={0.00001} disabled={!isActiveMode} onChange={(indexModulation) => updateDesign({ indexModulation })} />
         <HybridNumber label="Grating period (nm)" value={design.gratingPeriodNm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(gratingPeriodNm) => updateDesign({ gratingPeriodNm })} />
+          </div>
+        </details>
+        <details className="control-group">
+          <summary>Advanced Solver / Strain Model</summary>
+          <div className="form-grid form-grid-global acoustic-form">
         <label className="field">
           <span>Grating mode</span>
           <select
@@ -88,9 +159,8 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
             ) : null}
           </>
         ) : null}
-        <HybridNumber label="Peak strain" value={design.peakStrain} step={0.00001} disabled={!isActiveMode} onChange={(peakStrain) => updateDesign({ peakStrain })} />
         <label className="field">
-          <span>Perturbation type</span>
+          <span>Strain profile</span>
           <select
             value={design.strainShape}
             disabled={!isActiveMode}
@@ -109,10 +179,6 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
             <option value="piezo-array">Prescribed piezo array</option>
           </select>
         </label>
-        {usesCenter || usesPiezo ? <HybridNumber label="Field center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
-        {usesWidth || usesPiezo ? <HybridNumber label="Field width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} /> : null}
-        {usesEdge ? <HybridNumber label="Edge width (mm)" value={design.perturbationEdgeWidthMm} min={0} step={0.05} disabled={!isActiveMode} onChange={(perturbationEdgeWidthMm) => updateDesign({ perturbationEdgeWidthMm })} /> : null}
-        {usesPiezo ? <HybridNumber label="Bias strain" value={design.strainBias} step={0.00001} disabled={!isActiveMode} onChange={(strainBias) => updateDesign({ strainBias })} /> : null}
         {design.strainShape === 'piezo-array' ? (
           <>
             <HybridNumber label="Actuator count" value={design.actuatorCount} min={1} step={1} integer disabled={!isActiveMode} onChange={(actuatorCount) => updateDesign({ actuatorCount })} />
@@ -142,10 +208,17 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
         {usesSecondaryWave ? <HybridNumber label="Second phase (rad)" value={design.perturbationSecondaryPhaseRadians} step={0.1} disabled={!isActiveMode} onChange={(perturbationSecondaryPhaseRadians) => updateDesign({ perturbationSecondaryPhaseRadians })} /> : null}
         <HybridNumber label="Photoelastic pe" value={design.effectivePhotoelasticCoefficient} step={0.01} disabled={!isActiveMode} onChange={(effectivePhotoelasticCoefficient) => updateDesign({ effectivePhotoelasticCoefficient })} />
         <HybridNumber label="Segments" value={design.segmentCount} min={1} step={1} integer disabled={!isActiveMode} onChange={(segmentCount) => updateDesign({ segmentCount })} />
-        <HybridNumber label="Fixed laser (nm)" value={design.fixedLaserWavelengthNm} min={1} step={1} disabled={!isActiveMode} onChange={(fixedLaserWavelengthNm) => updateDesign({ fixedLaserWavelengthNm })} />
+        <HybridNumber label="Laser wavelength (nm)" value={design.fixedLaserWavelengthNm} min={1} step={0.001} disabled={!isActiveMode} onChange={(fixedLaserWavelengthNm) => updateDesign({ fixedLaserWavelengthNm })} />
+          </div>
+        </details>
+        <details className="control-group">
+          <summary>Spatial Addressing Playback</summary>
+          <div className="form-grid form-grid-global acoustic-form">
         <HybridNumber label="Pulse sweep start (mm)" value={design.pulseSweepStartMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(pulseSweepStartMm) => updateDesign({ pulseSweepStartMm })} />
         <HybridNumber label="Pulse sweep end (mm)" value={design.pulseSweepEndMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(pulseSweepEndMm) => updateDesign({ pulseSweepEndMm })} />
         <HybridNumber label="Pulse positions" value={design.pulseSweepPointCount} min={2} step={1} integer disabled={!isActiveMode} onChange={(pulseSweepPointCount) => updateDesign({ pulseSweepPointCount })} />
+          </div>
+        </details>
       </div>
     </section>
   );

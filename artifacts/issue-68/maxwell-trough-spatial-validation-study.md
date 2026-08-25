@@ -51,6 +51,6 @@ CMT SPATIAL VISUALIZATION IS VALIDATED FOR QUALITATIVE TROUGH RESEARCH
 BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 
 ## G. Performance
-Static reconstruction: 2180.6 ms, 645.01 MB heap delta.
-9-position moving sweep total: 1.3484e+4 ms.
-4-actuator sweep total: 6259.6 ms.
+Static reconstruction: 1968.8 ms, 645.72 MB heap delta.
+9-position moving sweep total: 1.2074e+4 ms.
+4-actuator sweep total: 5417.6 ms.

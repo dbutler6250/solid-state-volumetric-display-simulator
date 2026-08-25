@@ -36,8 +36,8 @@
   },
   "staticTrough": {
     "targetMm": 5,
-    "runtimeMs": 2180.6479,
-    "heapDeltaMb": 645.0101165771484,
+    "runtimeMs": 1968.8493999999998,
+    "heapDeltaMb": 645.7247848510742,
     "strainDiagnostics": [
       {
         "zMm": 5,
@@ -1082,8 +1082,8 @@
   "movingTrough": [
     {
       "targetMm": 1,
-      "runtimeMs": 1291.7394,
-      "heapDeltaMb": 633.1476516723633,
+      "runtimeMs": 1221.5227,
+      "heapDeltaMb": 613.0718078613281,
       "strainDiagnostics": [
         {
           "zMm": 1,
@@ -2127,7 +2127,7 @@
     },
     {
       "targetMm": 2,
-      "runtimeMs": 1524.5851999999995,
+      "runtimeMs": 1451.4047000000005,
       "heapDeltaMb": 0,
       "strainDiagnostics": [
         {
@@ -3172,8 +3172,8 @@
     },
     {
       "targetMm": 3,
-      "runtimeMs": 1452.8089,
-      "heapDeltaMb": 652.1002883911133,
+      "runtimeMs": 1286.7089000000005,
+      "heapDeltaMb": 622.1489868164062,
       "strainDiagnostics": [
         {
           "zMm": 3,
@@ -4217,7 +4217,7 @@
     },
     {
       "targetMm": 4,
-      "runtimeMs": 1636.684799999999,
+      "runtimeMs": 1385.5288,
       "heapDeltaMb": 0,
       "strainDiagnostics": [
         {
@@ -5262,8 +5262,8 @@
     },
     {
       "targetMm": 5,
-      "runtimeMs": 1275.6157000000003,
-      "heapDeltaMb": 618.0618209838867,
+      "runtimeMs": 1097.1495000000004,
+      "heapDeltaMb": 635.2267150878906,
       "strainDiagnostics": [
         {
           "zMm": 5,
@@ -6307,7 +6307,7 @@
     },
     {
       "targetMm": 6,
-      "runtimeMs": 1657.2305000000015,
+      "runtimeMs": 1423.7193000000007,
       "heapDeltaMb": 0,
       "strainDiagnostics": [
         {
@@ -7352,7 +7352,7 @@
     },
     {
       "targetMm": 7,
-      "runtimeMs": 1638.9973999999984,
+      "runtimeMs": 1534.0426000000007,
       "heapDeltaMb": 0,
       "strainDiagnostics": [
         {
@@ -8397,8 +8397,8 @@
     },
     {
       "targetMm": 8,
-      "runtimeMs": 1745.8633999999984,
-      "heapDeltaMb": 0,
+      "runtimeMs": 1557.9173999999985,
+      "heapDeltaMb": 36.40959930419922,
       "strainDiagnostics": [
         {
           "zMm": 8,
@@ -9442,8 +9442,8 @@
     },
     {
       "targetMm": 9,
-      "runtimeMs": 1260.2365999999984,
-      "heapDeltaMb": 601.0516128540039,
+      "runtimeMs": 1116.4532,
+      "heapDeltaMb": 625.7764434814453,
       "strainDiagnostics": [
         {
           "zMm": 9,
@@ -19191,7 +19191,7 @@
   "arrayCases": [
     {
       "targetMm": 2,
-      "runtimeMs": 1501.8270999999986,
+      "runtimeMs": 1264.4801000000007,
       "heapDeltaMb": 0,
       "strainDiagnostics": [
         {
@@ -20236,8 +20236,8 @@
     },
     {
       "targetMm": 4,
-      "runtimeMs": 1434.4052999999985,
-      "heapDeltaMb": 614.5926513671875,
+      "runtimeMs": 1250.615099999999,
+      "heapDeltaMb": 671.1025772094727,
       "strainDiagnostics": [
         {
           "zMm": 4,
@@ -21281,7 +21281,7 @@
     },
     {
       "targetMm": 6,
-      "runtimeMs": 1677.1532000000007,
+      "runtimeMs": 1442.8804000000018,
       "heapDeltaMb": 0,
       "strainDiagnostics": [
         {
@@ -22326,8 +22326,8 @@
     },
     {
       "targetMm": 8,
-      "runtimeMs": 1646.260299999998,
-      "heapDeltaMb": 652.1832962036133,
+      "runtimeMs": 1459.630799999999,
+      "heapDeltaMb": 6.2654266357421875,
       "strainDiagnostics": [
         {
           "zMm": 8,

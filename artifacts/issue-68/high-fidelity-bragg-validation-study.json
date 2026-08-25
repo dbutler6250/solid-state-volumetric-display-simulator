@@ -174,7 +174,7 @@
       "reflectance": 0.004964413041397604,
       "transmission": 0.9950355869529413,
       "energyError": 5.661138224866136e-12,
-      "runtimeMs": 0.1428000000000793,
+      "runtimeMs": 0.06430000000000291,
       "heapUsedMb": 0.1815032958984375
     },
     {
@@ -183,8 +183,8 @@
       "reflectance": 0.005767374424113751,
       "transmission": 0.9942326256007987,
       "energyError": 2.4912516494168813e-11,
-      "runtimeMs": 0.10760000000004766,
-      "heapUsedMb": 0.1004638671875
+      "runtimeMs": 0.06359999999995125,
+      "heapUsedMb": 0.10237884521484375
     },
     {
       "label": "uniform-10mm-spp-32",
@@ -192,8 +192,8 @@
       "reflectance": 0.005984141004336336,
       "transmission": 0.9940158589368917,
       "energyError": 5.877198727688437e-11,
-      "runtimeMs": 0.11120000000005348,
-      "heapUsedMb": 0.1638641357421875
+      "runtimeMs": 0.06649999999990541,
+      "heapUsedMb": 0.163848876953125
     },
     {
       "label": "uniform-10mm-spp-64",
@@ -201,8 +201,8 @@
       "reflectance": 0.0060393771567541395,
       "transmission": 0.9939606227494164,
       "energyError": 9.382938870317048e-11,
-      "runtimeMs": 0.21539999999981774,
-      "heapUsedMb": 0.293182373046875
+      "runtimeMs": 0.07949999999993906,
+      "heapUsedMb": 0.29320526123046875
     }
   ],
   "uniformLongSpectrum": {
@@ -223,8 +223,8 @@
       "reflectance": 0.0011831404709259949,
       "transmission": 0.9988168595217293,
       "energyError": 7.344680419407723e-12,
-      "runtimeMs": 21.590299999999843,
-      "heapUsedMb": 0
+      "runtimeMs": 9.922000000000025,
+      "heapUsedMb": 1.8627471923828125
     }
   },
   "piecewiseTrough": {
@@ -8169,8 +8169,8 @@
       "reflectance": 0.04391458341371335,
       "transmission": 0.9560854165788912,
       "energyError": 7.395417611633093e-12,
-      "runtimeMs": 22.844900000000052,
-      "heapUsedMb": 2.218902587890625
+      "runtimeMs": 10.201600000000099,
+      "heapUsedMb": 0
     }
   },
   "smoothEnvelopeConvergence": [
@@ -8180,8 +8180,8 @@
       "reflectance": 0.0028266152691932603,
       "transmission": 0.9971733847197541,
       "energyError": 1.1052603277050821e-11,
-      "runtimeMs": 1.246599999999944,
-      "heapUsedMb": 2.792205810546875
+      "runtimeMs": 0.9682999999999993,
+      "heapUsedMb": 2.7922210693359375
     },
     {
       "label": "smooth-10mm-blocks-50",
@@ -8189,8 +8189,8 @@
       "reflectance": 0.055712148706047335,
       "transmission": 0.9442878512770242,
       "energyError": 1.6928458634879462e-11,
-      "runtimeMs": 3.398400000000038,
-      "heapUsedMb": 1.4167327880859375
+      "runtimeMs": 1.5436000000001968,
+      "heapUsedMb": 0
     },
     {
       "label": "smooth-10mm-blocks-100",
@@ -8198,8 +8198,8 @@
       "reflectance": 0.025303758601180226,
       "transmission": 0.9746962413971292,
       "energyError": 1.6906476218991884e-12,
-      "runtimeMs": 11.890300000000025,
-      "heapUsedMb": 0
+      "runtimeMs": 3.477899999999863,
+      "heapUsedMb": 4.61358642578125
     },
     {
       "label": "smooth-10mm-blocks-200",
@@ -8207,8 +8207,8 @@
       "reflectance": 0.02183111984608508,
       "transmission": 0.9781688801554651,
       "energyError": 1.5500933869816436e-12,
-      "runtimeMs": 8.736000000000331,
-      "heapUsedMb": 5.124977111816406
+      "runtimeMs": 4.1240999999999985,
+      "heapUsedMb": 0
     },
     {
       "label": "smooth-10mm-blocks-400",
@@ -8216,8 +8216,8 @@
       "reflectance": 0.021204466372767156,
       "transmission": 0.9787955336256888,
       "energyError": 1.5439871603462052e-12,
-      "runtimeMs": 22.63779999999997,
-      "heapUsedMb": 0
+      "runtimeMs": 9.635899999999992,
+      "heapUsedMb": 2.2991561889648438
     }
   ],
   "smoothOpticalConvergence": [
@@ -8227,8 +8227,8 @@
       "reflectance": 0.020013443876905533,
       "transmission": 0.9799865561250266,
       "energyError": 1.9322321520576224e-12,
-      "runtimeMs": 9.322699999999713,
-      "heapUsedMb": 1.3216476440429688
+      "runtimeMs": 3.684400000000096,
+      "heapUsedMb": 0
     },
     {
       "label": "smooth-10mm-spp-16",
@@ -8236,8 +8236,8 @@
       "reflectance": 0.020961049599709472,
       "transmission": 0.9790389503989091,
       "energyError": 1.3814505095410823e-12,
-      "runtimeMs": 9.921600000000126,
-      "heapUsedMb": 4.3300628662109375
+      "runtimeMs": 5.576000000000022,
+      "heapUsedMb": 4.3309478759765625
     },
     {
       "label": "smooth-10mm-spp-32",
@@ -8245,8 +8245,8 @@
       "reflectance": 0.021204466372767156,
       "transmission": 0.9787955336256888,
       "energyError": 1.5439871603462052e-12,
-      "runtimeMs": 16.39350000000013,
-      "heapUsedMb": 0
+      "runtimeMs": 9.373900000000049,
+      "heapUsedMb": 2.3060989379882812
     },
     {
       "label": "smooth-10mm-spp-64",
@@ -8254,8 +8254,8 @@
       "reflectance": 0.02126577536094794,
       "transmission": 0.978734224646671,
       "energyError": 7.6190165287926e-12,
-      "runtimeMs": 25.084400000000187,
-      "heapUsedMb": 7.006011962890625
+      "runtimeMs": 17.668300000000045,
+      "heapUsedMb": 0
     }
   ],
   "convergenceGrid": [
@@ -8265,7 +8265,7 @@
       "reflectance": 0.025018203020492548,
       "transmission": 0.9749817969687582,
       "energyError": 1.0749290346723228e-11,
-      "runtimeMs": 2.02599999999984,
+      "runtimeMs": 1.4048999999999978,
       "heapUsedMb": 0
     },
     {
@@ -8274,7 +8274,7 @@
       "reflectance": 0.025303758601180226,
       "transmission": 0.9746962413971292,
       "energyError": 1.6906476218991884e-12,
-      "runtimeMs": 4.5702000000001135,
+      "runtimeMs": 2.217399999999998,
       "heapUsedMb": 0
     },
     {
@@ -8283,8 +8283,8 @@
       "reflectance": 0.02158110373831029,
       "transmission": 0.9784188962602134,
       "energyError": 1.4763745781465332e-12,
-      "runtimeMs": 3.2876000000001113,
-      "heapUsedMb": 4.14337158203125
+      "runtimeMs": 2.1621000000000095,
+      "heapUsedMb": 4.142982482910156
     },
     {
       "label": "grid-200-32",
@@ -8292,7 +8292,7 @@
       "reflectance": 0.02183111984608508,
       "transmission": 0.9781688801554651,
       "energyError": 1.5500933869816436e-12,
-      "runtimeMs": 5.555699999999888,
+      "runtimeMs": 3.8350000000000364,
       "heapUsedMb": 0
     },
     {
@@ -8301,8 +8301,8 @@
       "reflectance": 0.021204466372767156,
       "transmission": 0.9787955336256888,
       "energyError": 1.5439871603462052e-12,
-      "runtimeMs": 14.311400000000049,
-      "heapUsedMb": 2.3646011352539062
+      "runtimeMs": 8.858099999999922,
+      "heapUsedMb": 2.361358642578125
     },
     {
       "label": "grid-400-64",
@@ -8310,7 +8310,7 @@
       "reflectance": 0.02126577536094794,
       "transmission": 0.978734224646671,
       "energyError": 7.6190165287926e-12,
-      "runtimeMs": 24.14700000000039,
+      "runtimeMs": 16.874199999999973,
       "heapUsedMb": 0
     }
   ],
@@ -8602,8 +8602,8 @@
       "reflectance": 0.016728448572056354,
       "transmission": 0.983271551422093,
       "energyError": 5.85065329516965e-12,
-      "runtimeMs": 0.07549999999991996,
-      "heapUsedMb": 0.10791778564453125
+      "runtimeMs": 0.05079999999998108,
+      "heapUsedMb": 0
     },
     {
       "label": "stress-5mm",
@@ -8611,8 +8611,8 @@
       "reflectance": 0.0015576755390329826,
       "transmission": 0.998442324431448,
       "energyError": 2.951905386794351e-11,
-      "runtimeMs": 0.05230000000028667,
-      "heapUsedMb": 0.1114501953125
+      "runtimeMs": 0.022100000000136788,
+      "heapUsedMb": 0.11151123046875
     },
     {
       "label": "stress-10mm",
@@ -8620,7 +8620,7 @@
       "reflectance": 0.005984141004336336,
       "transmission": 0.9940158589368917,
       "energyError": 5.877198727688437e-11,
-      "runtimeMs": 0.03580000000010841,
+      "runtimeMs": 0.022699999999986176,
       "heapUsedMb": 0.1288299560546875
     },
     {
@@ -8629,8 +8629,8 @@
       "reflectance": 0.020403127942377572,
       "transmission": 0.9795968719417947,
       "energyError": 1.1582779180230318e-10,
-      "runtimeMs": 0.028599999999642023,
-      "heapUsedMb": 0.0991668701171875
+      "runtimeMs": 0.0181999999999789,
+      "heapUsedMb": 0.09912872314453125
     }
   ],
   "historicalTmm": {

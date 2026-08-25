@@ -219,9 +219,6 @@ export function QuarterWaveStackForm({
     <form className={`form-grid form-grid-${section}`}>
       {section === 'global' ? (
         <>
-      {renderMaterialField('highIndexMaterial', 'High-index material')}
-      {renderMaterialField('lowIndexMaterial', 'Low-index material')}
-
       <div className="field thickness-mode-group">
         <label className="field">
           <span>Input mode</span>
@@ -229,11 +226,18 @@ export function QuarterWaveStackForm({
             <option value="derived">Optical</option>
             <option value="manual">Manual</option>
             <option value="acoustic">Acoustic</option>
-            <option value="hybrid">Hybrid Bragg</option>
+            <option value="hybrid">Fixed Grating</option>
           </select>
           <FieldError message={getIssueForField(validationIssues, 'thicknessMode')} />
         </label>
       </div>
+
+      {thicknessMode !== 'hybrid' ? (
+        <>
+          {renderMaterialField('highIndexMaterial', 'High-index material')}
+          {renderMaterialField('lowIndexMaterial', 'Low-index material')}
+        </>
+      ) : null}
 
       {thicknessMode === 'manual' ? (
         <>
@@ -319,7 +323,7 @@ export function QuarterWaveStackForm({
             <strong>{formatNumericInput(visibleDesignWavelengthNm)} nm</strong>
           </div>
         </div>
-      ) : (
+      ) : thicknessMode !== 'hybrid' ? (
         <>
           <label className="field">
             <span>Periods</span>
@@ -360,7 +364,7 @@ export function QuarterWaveStackForm({
             <FieldError message={getIssueForField(validationIssues, 'designWavelengthNm')} />
           </label>
         </>
-      )}
+      ) : null}
 
       <label className="field">
         <span>Incident angle (degrees)</span>

@@ -74,6 +74,11 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
   const currentParameterLabel = isActuatorScan ? 'actuator' : isPhaseScan ? 'phase' : 'position';
   const parameterLabel = isActuatorScan ? 'Actuator' : isPhaseScan ? 'Phase' : 'Position';
   const parameterUnit = isActuatorScan ? 'index' : isPhaseScan ? 'rad' : 'mm';
+  const primaryRegion = currentFrame.regions[0] ?? null;
+  const trackingErrorMm =
+    primaryRegion && currentFrame.parameterKind === 'position'
+      ? primaryRegion.centerMm - currentFrame.parameterValue
+      : null;
   const metrics = [
     ['Static reflectance', formatMetric(result.metrics.staticReflectance)],
     ['Peak reflectance', formatMetric(result.metrics.peakReflectance)],
@@ -223,6 +228,15 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
         <div className="moving-pulse-metadata">
           <span>{`Total R: ${formatMetric(currentFrame.reflectance)}`}</span>
           <span>{`Detected regions: ${currentFrame.regions.length}`}</span>
+          {currentFrame.parameterKind === 'position' ? (
+            <span>{`Trough center: ${currentFrame.parameterValue.toFixed(3)} mm`}</span>
+          ) : null}
+          {primaryRegion ? (
+            <span>{`Optical center: ${primaryRegion.centerMm.toFixed(3)} mm`}</span>
+          ) : null}
+          {trackingErrorMm !== null ? (
+            <span>{`Tracking error: ${trackingErrorMm >= 0 ? '+' : ''}${trackingErrorMm.toFixed(3)} mm`}</span>
+          ) : null}
           <span>{`Active sections: ${currentFrame.activeSectionIds.length > 0 ? currentFrame.activeSectionIds.map((id) => id + 1).join(', ') : 'none'}`}</span>
           <span>{`Laser timing: ${currentFrame.regions.length > 0 ? 'ON candidate' : 'OFF'}`}</span>
         </div>
@@ -241,17 +255,17 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                     y: currentFrame.spatialField.map((sample) => sample.normalizedBackwardIntensity),
                     type: 'scatter' as const,
                     mode: 'lines' as const,
-                    name: 'Calculated |B(z)|²',
+                    name: 'Normalized backward optical intensity',
                     line: { color: '#f08a7a', width: 3 },
                     fill: 'tozeroy' as const,
-                    hovertemplate: 'z=%{x:.4f} mm<br>normalized |B|^2=%{y:.4f}<extra></extra>',
+                    hovertemplate: 'z=%{x:.4f} mm<br>normalized backward intensity=%{y:.4f}<extra></extra>',
                   },
                   {
                     x: currentFrame.spatialField.map((sample) => sample.zM * 1e3),
                     y: currentFrame.spatialField.map((sample) => sample.strain),
                     type: 'scatter' as const,
                     mode: 'lines' as const,
-                    name: 'Perturbation epsilon(z)',
+                    name: 'Strain profile epsilon(z)',
                     yaxis: 'y2',
                     line: { color: '#9fb7ff', width: 2, dash: 'dot' },
                     hovertemplate: 'z=%{x:.4f} mm<br>epsilon=%{y:.6g}<extra></extra>',
@@ -274,11 +288,23 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                   font: { color: '#dce7f2', family: 'Inter, system-ui, sans-serif' },
                   margin: { t: 24, r: 62, b: 52, l: 66 },
                   xaxis: { title: { text: 'Depth z (mm)' }, gridcolor: '#263443', zerolinecolor: '#334457' },
-                  yaxis: { title: { text: 'Normalized calculated backward intensity' }, range: [0, 1.05], gridcolor: '#263443', zerolinecolor: '#334457' },
-                  yaxis2: { title: { text: 'Perturbation' }, overlaying: 'y', side: 'right', showgrid: false },
+                  yaxis: { title: { text: 'Normalized backward optical intensity' }, range: [0, 1.05], gridcolor: '#263443', zerolinecolor: '#334457' },
+                  yaxis2: { title: { text: 'Strain profile' }, overlaying: 'y', side: 'right', showgrid: false },
                   legend: { orientation: 'h', x: 0, y: 1.16 },
                   shapes: [
                     ...getSectionShapes(currentFrame),
+                    ...(currentFrame.parameterKind === 'position'
+                      ? [{
+                          type: 'line' as const,
+                          xref: 'x' as const,
+                          yref: 'paper' as const,
+                          x0: currentFrame.parameterValue,
+                          x1: currentFrame.parameterValue,
+                          y0: 0,
+                          y1: 1,
+                          line: { color: '#9fb7ff', width: 2, dash: 'dash' as const },
+                        }]
+                      : []),
                     ...currentFrame.regions.map((region) => ({
                       type: 'rect' as const,
                       xref: 'x' as const,
@@ -318,8 +344,8 @@ export function MovingPulseExperimentChart({ result, design, progress }: MovingP
                     colorscale: 'Viridis' as const,
                     zmin: 0,
                     zmax: 1,
-                    colorbar: { title: { text: '|B|² norm' } },
-                    hovertemplate: `${currentParameterLabel}=%{x:.4f}<br>z=%{y:.4f} mm<br>|B|²=%{z:.4f}<extra></extra>`,
+                    colorbar: { title: { text: 'B intensity norm' } },
+                    hovertemplate: `${currentParameterLabel}=%{x:.4f}<br>z=%{y:.4f} mm<br>normalized backward intensity=%{z:.4f}<extra></extra>`,
                   },
                 ]}
                 layout={{

@@ -3,6 +3,16 @@ import { DEFAULT_ACOUSTIC_DESIGN_INPUTS } from '../simulation/structures/acousto
 import { DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS } from '../simulation/structures/hybridBraggGrating';
 import { getRefractiveIndexReal } from '../simulation/materials/material';
 
+const DEFAULT_FIXED_GRATING_DISPLAY_DESIGN = {
+  ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+  peakStrain: -0.0015,
+  strainWidthMm: 0.8,
+  strainShape: 'piezo-trough',
+  strainBias: 0.0015,
+  actuatorPolarity: 'trough',
+  fixedLaserWavelengthNm: 600.11,
+} satisfies typeof DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS;
+
 export type SimulationWorkspaceState = {
   activeMode: ThicknessMode;
   drafts: Record<ThicknessMode, QuarterWaveStackInputs>;
@@ -31,8 +41,12 @@ export function createSimulationWorkspaceState(
   const derivedLow =
     inputs.designWavelengthNm /
     (4 * getRefractiveIndexReal(inputs.lowIndexMaterial.refractiveIndex));
+  const hybridBraggDesign =
+    inputs.thicknessMode === 'hybrid' && inputs.hybridBraggDesign
+      ? inputs.hybridBraggDesign
+      : DEFAULT_FIXED_GRATING_DISPLAY_DESIGN;
   return {
-    activeMode: 'derived',
+    activeMode: 'hybrid',
     drafts: {
       derived: { ...inputs, thicknessMode: 'derived' },
       manual: {
@@ -49,7 +63,7 @@ export function createSimulationWorkspaceState(
       hybrid: {
         ...inputs,
         thicknessMode: 'hybrid',
-        hybridBraggDesign: inputs.hybridBraggDesign ?? DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+        hybridBraggDesign,
       },
     },
   };

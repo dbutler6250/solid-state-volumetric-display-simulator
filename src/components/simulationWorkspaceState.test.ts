@@ -9,6 +9,14 @@ import {
 describe('simulation workspace state', () => {
   it('preserves optical and manual drafts across an acoustic round trip', () => {
     let state = createSimulationWorkspaceState(DEFAULT_QUARTER_WAVE_STACK_INPUTS);
+    expect(state.activeMode).toBe('hybrid');
+    expect(state.drafts.hybrid.hybridBraggDesign).toMatchObject({
+      fixedLaserWavelengthNm: 600.11,
+      strainBias: 0.0015,
+      peakStrain: -0.0015,
+      strainShape: 'piezo-trough',
+    });
+    state = simulationWorkspaceReducer(state, { type: 'switch-mode', mode: 'derived' });
     state = simulationWorkspaceReducer(state, {
       type: 'update-active',
       inputs: { ...getActiveInputs(state), designWavelengthNm: 532, periodCount: 17 },

@@ -3,11 +3,13 @@ import { OUTPUT_TABS } from './SimulationShell';
 import { shouldRenderOutputPanelContent } from './outputPanelLifecycle';
 
 describe('simulation shell output tabs', () => {
-  it('omits the standalone heatmap tab', () => {
+  it('defines the research workflow tabs without a standalone heatmap tab', () => {
     expect(OUTPUT_TABS).toEqual([
+      'overview',
       'spectrum',
       'moving-region',
       'parameter-sweep',
+      'mechanics',
       'stack-definition',
       'reflectance-volume',
       'stl-slicer',

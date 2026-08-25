@@ -1,5 +1,30 @@
 # Architecture Notes
 
+## UI Information Architecture
+
+The application now presents the current research workflow before historical implementation paths:
+
+```text
+App
+|-- Overview
+|-- Current Architecture
+|   |-- Fixed-Grating Display
+|   |-- Spatial Addressing
+|   |-- Robustness
+|   `-- Mechanical Feasibility
+`-- Supporting Research
+    |-- Optical Stack
+    |-- Acoustic / Acousto-Optic Research
+    |-- Manual Layer Tuning
+    |-- Geometry / 3D
+    |-- Slicer / STL
+    `-- Import / Export
+```
+
+The default route remains Overview because a new user needs immediate orientation to the architecture, baseline state, validation status, and entry points before editing controls. Fixed-Grating Display is the primary working view and keeps the operating point visible beside the spectrum: static Bragg wavelength, laser wavelength, detuning, background strain, trough center, and solver provenance.
+
+Workspace state such as selected tab and expanded advanced panels remains UI state. Physics setup serialization is still owned by the existing simulation inputs and import/export helpers.
+
 ## v1 Conceptual Model
 
 ```text
