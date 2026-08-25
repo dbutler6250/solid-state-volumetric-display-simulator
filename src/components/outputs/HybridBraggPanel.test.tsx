@@ -42,6 +42,7 @@ describe('HybridBraggPanel', () => {
     );
 
     expect(markup).toContain('Prescribed piezo array');
+    expect(markup).toContain('Field center');
     expect(markup).toContain('Bias strain');
     expect(markup).toContain('Active actuator');
     expect(markup).toContain('Adjacent command');

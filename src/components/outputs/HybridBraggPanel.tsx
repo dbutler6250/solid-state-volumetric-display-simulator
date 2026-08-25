@@ -18,7 +18,6 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
   const usesWidth = ['rectangular', 'gaussian', 'smooth-top-hat', 'triangular', 'carrier-envelope'].includes(design.strainShape);
   const usesCenter = ['rectangular', 'gaussian', 'smooth-top-hat', 'triangular', 'carrier-envelope'].includes(design.strainShape);
   const usesPiezo = ['piezo-window', 'piezo-trough', 'piezo-array'].includes(design.strainShape);
-  const usesPiezoSingle = ['piezo-window', 'piezo-trough'].includes(design.strainShape);
   const usesEdge = design.strainShape === 'smooth-top-hat' || usesPiezo;
   const usesWave = ['traveling-sinusoid', 'standing-wave', 'carrier-envelope', 'multi-tone'].includes(design.strainShape);
   const usesSecondaryWave = design.strainShape === 'multi-tone';
@@ -110,7 +109,7 @@ export function HybridBraggPanel({ inputs, onChange }: HybridBraggPanelProps) {
             <option value="piezo-array">Prescribed piezo array</option>
           </select>
         </label>
-        {usesCenter || usesPiezoSingle ? <HybridNumber label="Field center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
+        {usesCenter || usesPiezo ? <HybridNumber label="Field center (mm)" value={design.strainCenterMm} min={0} step={0.1} disabled={!isActiveMode} onChange={(strainCenterMm) => updateDesign({ strainCenterMm })} /> : null}
         {usesWidth || usesPiezo ? <HybridNumber label="Field width (mm)" value={design.strainWidthMm} min={0.001} step={0.1} disabled={!isActiveMode} onChange={(strainWidthMm) => updateDesign({ strainWidthMm })} /> : null}
         {usesEdge ? <HybridNumber label="Edge width (mm)" value={design.perturbationEdgeWidthMm} min={0} step={0.05} disabled={!isActiveMode} onChange={(perturbationEdgeWidthMm) => updateDesign({ perturbationEdgeWidthMm })} /> : null}
         {usesPiezo ? <HybridNumber label="Bias strain" value={design.strainBias} step={0.00001} disabled={!isActiveMode} onChange={(strainBias) => updateDesign({ strainBias })} /> : null}
