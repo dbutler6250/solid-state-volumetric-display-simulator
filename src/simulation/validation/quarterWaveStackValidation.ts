@@ -28,9 +28,14 @@ const isHybridStrainShape = (value: unknown): boolean =>
   value === 'traveling-sinusoid' ||
   value === 'standing-wave' ||
   value === 'carrier-envelope' ||
-  value === 'multi-tone';
+  value === 'multi-tone' ||
+  value === 'piezo-window' ||
+  value === 'piezo-trough' ||
+  value === 'piezo-array';
 const isHybridPermanentGratingMode = (value: unknown): boolean =>
   value === 'global' || value === 'segmented';
+const isHybridActuatorPolarity = (value: unknown): boolean =>
+  value === 'window' || value === 'trough';
 const isHybridSectionPhaseMode = (value: unknown): boolean =>
   value === 'continuous' ||
   value === 'fixed-reset' ||
@@ -299,6 +304,24 @@ export function validateQuarterWaveStackInputs(inputs: QuarterWaveStackInputs): 
       }
       if (!isFiniteNumber(design.perturbationSecondaryPhaseRadians)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid secondary perturbation phase must be finite.' });
+      }
+      if (!isFiniteNumber(design.strainBias)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid strain bias must be finite.' });
+      }
+      if (!isFiniteNumber(design.actuatorCount) || design.actuatorCount < 1 || !Number.isInteger(design.actuatorCount)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid actuator count must be a whole number greater than 0.' });
+      }
+      if (!isFiniteNumber(design.actuatorPitchMm) || design.actuatorPitchMm <= 0) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid actuator pitch must be greater than 0 mm.' });
+      }
+      if (!isFiniteNumber(design.activeActuatorIndex) || design.activeActuatorIndex < 0 || !Number.isInteger(design.activeActuatorIndex)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid active actuator must be a non-negative whole number.' });
+      }
+      if (!isFiniteNumber(design.actuatorCommandAmplitude) || !isFiniteNumber(design.actuatorAdjacentCommandAmplitude)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid actuator command amplitudes must be finite.' });
+      }
+      if (!isHybridActuatorPolarity(design.actuatorPolarity)) {
+        issues.push({ field: 'thicknessMode', message: 'Hybrid actuator polarity must be window or trough.' });
       }
       if (!isFiniteNumber(design.effectivePhotoelasticCoefficient)) {
         issues.push({ field: 'thicknessMode', message: 'Hybrid photoelastic coefficient must be finite.' });

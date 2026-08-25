@@ -18,6 +18,13 @@ export type StrainField = {
   secondaryPeriodM?: number;
   secondaryAmplitudeRatio?: number;
   secondaryPhaseRadians?: number;
+  biasStrain?: number;
+  actuatorCount?: number;
+  actuatorPitchM?: number;
+  activeActuatorIndex?: number;
+  actuatorCommandAmplitude?: number;
+  actuatorAdjacentCommandAmplitude?: number;
+  actuatorPolarity?: 'window' | 'trough';
 };
 
 /** Samples a prescribed dimensionless strain field at one SI position. */
@@ -34,7 +41,6 @@ export function createStrainPerturbationField(field: StrainField): PerturbationF
 }
 
 function samplePrescribedStrainField(field: StrainField, zM: number, tS: number): number {
-  if (field.peakStrain === 0) return 0;
   const edgeWidthM = field.edgeWidthM ?? 0;
   const periodM = field.periodM ?? field.widthM;
   const phaseRadians = field.phaseRadians ?? 0;
@@ -43,7 +49,19 @@ function samplePrescribedStrainField(field: StrainField, zM: number, tS: number)
   const secondaryPeriodM = field.secondaryPeriodM ?? periodM;
   const secondaryAmplitudeRatio = field.secondaryAmplitudeRatio ?? 0;
   const secondaryPhaseRadians = field.secondaryPhaseRadians ?? 0;
+  const biasStrain = field.biasStrain ?? 0;
   const distance = zM - field.centerM;
+  if (field.shape === 'piezo-window') {
+    return biasStrain + field.peakStrain * sampleSmoothTopHat(distance, field.widthM, edgeWidthM);
+  }
+  if (field.shape === 'piezo-trough') {
+    return biasStrain - Math.abs(field.peakStrain) * sampleSmoothTopHat(distance, field.widthM, edgeWidthM);
+  }
+  if (field.shape === 'piezo-array') {
+    const sign = field.actuatorPolarity === 'trough' ? -1 : 1;
+    return biasStrain + sign * samplePiezoArrayField(field, zM, edgeWidthM);
+  }
+  if (field.peakStrain === 0) return 0;
   if (field.shape === 'rectangular') {
     if (field.widthM <= 0) return 0;
     return Math.abs(distance) <= field.widthM / 2 ? field.peakStrain : 0;
@@ -76,6 +94,25 @@ function samplePrescribedStrainField(field: StrainField, zM: number, tS: number)
   const secondary = secondaryAmplitudeRatio *
     Math.cos(wavePhase(secondaryPeriodM, zM, velocityMps, tS, secondaryPhaseRadians + temporalPhaseRadians));
   return field.peakStrain * (primary + secondary);
+}
+
+/** Samples a prescribed piezo-like actuator array, summing overlap without clipping. */
+export function samplePiezoArrayField(field: StrainField, zM: number, edgeWidthM = field.edgeWidthM ?? 0): number {
+  const count = Math.max(1, Math.round(field.actuatorCount ?? 1));
+  const pitchM = Math.max(0, field.actuatorPitchM ?? field.widthM);
+  const activeIndex = Math.min(count - 1, Math.max(0, Math.round(field.activeActuatorIndex ?? 0)));
+  const command = field.actuatorCommandAmplitude ?? 1;
+  const adjacentCommand = field.actuatorAdjacentCommandAmplitude ?? 0;
+  const firstCenterM = field.centerM - ((count - 1) * pitchM) / 2;
+  let strain = 0;
+  for (let index = 0; index < count; index += 1) {
+    const distanceFromActive = Math.abs(index - activeIndex);
+    const drive = distanceFromActive === 0 ? command : distanceFromActive === 1 ? adjacentCommand : 0;
+    if (drive === 0) continue;
+    const centerM = firstCenterM + index * pitchM;
+    strain += field.peakStrain * drive * sampleSmoothTopHat(zM - centerM, field.widthM, edgeWidthM);
+  }
+  return strain;
 }
 
 function gaussianEnvelope(distanceM: number, fwhmM: number): number {
