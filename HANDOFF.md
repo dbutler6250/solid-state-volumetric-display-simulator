@@ -2,81 +2,51 @@
 
 ## Repository Status
 
-- Current branch: `main`.
-- GitHub issue #70 / PR #71: merged into `main` as squash commit `7785d8b`.
-- Cleanup: feature branch cleanup in progress after merge.
-- PR #67 was previously squash-merged into `main` as `f68a051`.
-- PR #69 was previously squash-merged into `main` as `fa886d5`.
+- Current branch: `codex/issue-72-strain-trough-mechanical-feasibility`.
+- GitHub issue #72: WP-v2-10 reduced-order biased strain-trough mechanical feasibility.
+- PR #71 / Issue #70: merged into `main` as `7785d8b`; GitHub inspection returned no PR comments, reviews, or review threads.
+- Draft PR for #72 should be opened after final verification.
 
 ## Latest Work
 
-- Added `scripts/maxwellTroughRobustnessStudy.mts`.
-- Added `src/simulation/validation/strainTroughRequirement.ts` and focused regression coverage.
+- Added reduced-order mechanics modules under `src/simulation/mechanics/`.
+- Added direct Maxwell rescoring entry points for externally generated strain fields.
+- Added `scripts/strainTroughMechanicalFeasibilityStudy.mts`.
 - Generated:
-  - `artifacts/issue-70/maxwell-trough-robustness-study.md`
-  - `artifacts/issue-70/maxwell-trough-robustness-study.json`
-- Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md` for WP-v2-09D.
+  - `artifacts/issue-72/strain-trough-mechanical-feasibility.md`
+  - `artifacts/issue-72/strain-trough-mechanical-feasibility.json`
+- Updated `RESEARCH.md`, `ARCHITECTURE.md`, and `MILESTONES.md`.
 
-## Nominal Trough
+## Key Results
 
-- Source: `artifacts/issue-66/piezo-strain-window-study.json` at `bestTrough.design`.
-- Length: `10 mm`.
-- Average index: `1.45`.
-- Delta n: `1e-4`.
-- Grating period: `206.90 nm`.
-- Laser wavelength: `600.11 nm`.
-- Background strain: `0.0015`.
-- Trough strain: `0`.
-- Strain excursion: `0.0015`.
-- Center: `5 mm`.
-- Width: `0.8 mm`.
-- Transition width: `0.25 mm`.
+- Tolerance interpretation: `PRIOR TOLERANCE RESULT WAS MIXED`.
+- Main result: `REDUCED-ORDER MECHANICS SHOW A MARGINAL / HIGH-RISK PATH TO THE STRAIN TROUGH`.
+- Best concept: `PRELOAD + ACTIVE COUNTER-STRAIN IS THE LEADING MECHANICAL CONCEPT`.
+- Maxwell optical rescore: `MECHANICALLY GENERATED STRAIN FIELD PASSES MAXWELL OPTICAL REQUIREMENT`.
+- Bottleneck: `TRANSITION-WIDTH LOCALIZATION AND POSITION PRECISION ARE THE PRIMARY BOTTLENECKS`.
+- Detailed mechanics gate: `DETAILED MECHANICAL MODELING IS JUSTIFIED ONLY FOR A NARROW HIGH-RISK CONCEPT`.
 
-## Key Result
+## Mechanical Scale
 
-- Robustness: `MAXWELL-CONFIRMED TROUGH IS OPTICALLY VALID BUT TOLERANCE-LIMITED`.
-- Laser compensation: `LASER TUNING DOES NOT MATERIALLY RELAX STRAIN TOLERANCES`.
-- CMT-vs-Maxwell: `CMT TRACKS MAXWELL QUALITATIVELY BUT MISSTATES TOLERANCE WIDTHS`.
-- Mechanical gate: `BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED`.
-
-## Tolerance Table
-
-| Parameter | Nominal | Tested useful bounds |
-| --- | --- | --- |
-| background strain | `0.0015` | `0.0015` to `0.0015` |
-| trough strain / excursion | `0 / 0.0015` | trough strain `0` to `0` |
-| trough width | `0.8 mm` | `0.8` to `0.8 mm` |
-| transition width | `0.25 mm` | `0.25` to `0.32 mm` |
-| position error | `0 mm` | `0` to `0 mm` |
-| laser wavelength | `600.11 nm` | `600.11` to `600.11 nm` |
-
-Sensitivity is high across the mechanical/control variables because the useful envelope is narrow. Validated useful optical scan depth is `5-5 mm` inside the `0-10 mm` physical medium under the selected samples.
+- Host baseline: `E_host = 2 GPa`, `A_host = 1 mm^2`.
+- Uniform preload: `0.0015` strain, `3 MPa`, `3 N`, `15 um` displacement over `10 mm`.
+- Leading active counter-strain concept: required free strain `-0.0015`, displacement scale `1.2 um` over `0.8 mm`.
+- Bonded/shear-lag sweep: no strict Maxwell pass found for `L_transfer = 0.025-0.32 mm`.
 
 ## Verification Snapshot
 
-- Baseline from `main` before branching:
-  - `npx.cmd tsx scripts/piezoStrainWindowStudy.mts` - passed.
-  - `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
-  - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts` - passed.
-  - `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts` - passed.
-  - `npm.cmd run test` - passed, 34 files / 242 tests.
-  - `npm.cmd run lint` - passed.
-  - `npm.cmd run build` - passed.
-  - `npm.cmd run test:browser` - passed, 14 tests.
-- Final branch verification:
-  - `npx.cmd tsx scripts/piezoStrainWindowStudy.mts` - passed.
-  - `npx.cmd tsx scripts/troughOpticalValidationStudy.mts` - passed.
-  - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts` - passed.
-  - `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts` - passed.
-  - `npx.cmd tsx scripts/maxwellTroughRobustnessStudy.mts` - passed.
-  - `npm.cmd run test` - passed, 35 files / 245 tests.
-  - `npm.cmd run lint` - passed.
-  - `npm.cmd run build` - passed.
-  - `npm.cmd run test:browser` - passed, 14 tests.
-  - In-app Browser smoke: `http://127.0.0.1:5173` loaded, one Plotly chart rendered, no console errors.
+- Focused mechanics tests passed: `npx.cmd vitest run src/simulation/mechanics` - 4 files / 10 tests.
+- New study passed: `npx.cmd tsx scripts/strainTroughMechanicalFeasibilityStudy.mts`.
+- Optical regressions passed:
+  - `npx.cmd tsx scripts/maxwellTroughRobustnessStudy.mts`
+  - `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts`
+  - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts`
+- Final standard checks passed:
+  - `npm.cmd run test` - 39 files / 257 tests.
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - `npm.cmd run test:browser` - 14 tests.
 
 ## Recommended Next Packet
 
-Targeted Maxwell optical-envelope refinement before WP-v2-10.
-
-Start from the required `epsilon(z)` plus the narrow Maxwell-confirmed tolerance envelope and test whether revised trough geometry, calibration assumptions, or alternate control variables can produce finite nonzero primary tolerances and a nonzero useful scan-depth span. Do not begin detailed mechanical realization yet.
+WP-v2-11 should be detailed strain-transfer / FEM preparation only for the narrow high-risk preload plus active counter-strain concept. Keep actual predicted `epsilon(z)` fields directly rescored through Maxwell. Do not broaden into voltage drive, thermal effects, fatigue, or dynamics until the detailed static strain-transfer gate passes.

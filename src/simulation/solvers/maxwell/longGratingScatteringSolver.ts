@@ -64,6 +64,10 @@ export type HybridMaxwellOptions = {
   envelopeBlocks: number;
 };
 
+export type HybridMaxwellStrainSample = {
+  sampleStrain: (zM: number) => number;
+};
+
 export type LocallyPeriodicBlock = {
   averageIndex: number;
   indexModulation: number;
@@ -246,6 +250,21 @@ export function reconstructHybridBraggMaxwellFields(
   );
 }
 
+/** Reconstructs Maxwell fields from an externally generated strain field without refitting it to UI parameters. */
+export function reconstructHybridBraggMaxwellFieldsFromStrain(
+  design: HybridBraggDesignInputs,
+  wavelengthNm: number,
+  options: HybridMaxwellOptions,
+  strain: HybridMaxwellStrainSample,
+): MaxwellFieldResult {
+  return reconstructScatteringLayerFields(
+    buildHybridBraggMaxwellLayersFromStrain(design, options, strain),
+    wavelengthNm,
+    design.averageIndex,
+    design.averageIndex,
+  );
+}
+
 /** Solves repeated identical unit cells without materializing every optical slice. */
 export function solveRepeatedUnitCell(
   cell: SinusoidalGratingCell,
@@ -321,6 +340,18 @@ export function buildHybridBraggMaxwellLayers(
   options: HybridMaxwellOptions,
 ): LayerSlice[] {
   const model = createHybridBraggModel(design);
+  return buildHybridBraggMaxwellLayersFromStrain(design, options, {
+    sampleStrain: (zM) => sampleStrainField(model.strain, zM),
+  });
+}
+
+/** Samples a phase-continuous Maxwell layer chain from an actual mechanical strain sampler. */
+export function buildHybridBraggMaxwellLayersFromStrain(
+  design: HybridBraggDesignInputs,
+  options: HybridMaxwellOptions,
+  strain: HybridMaxwellStrainSample,
+): LayerSlice[] {
+  const model = createHybridBraggModel(design);
   const lengthM = model.grating.lengthM;
   const nominalPeriodM = design.gratingPeriodNm * 1e-9;
   const opticalSliceCount = Math.ceil((lengthM / nominalPeriodM) * Math.max(1, options.samplesPerPeriod));
@@ -332,8 +363,7 @@ export function buildHybridBraggMaxwellLayers(
 
   for (let index = 0; index < sliceCount; index += 1) {
     const zM = (index + 0.5) * thicknessM;
-    const strain = sampleStrainField(model.strain, zM);
-    const local = applyMaterialStrainResponse(model.grating, model.materialResponse, strain);
+    const local = applyMaterialStrainResponse(model.grating, model.materialResponse, strain.sampleStrain(zM));
     const layerPhase = phaseRadians + (Math.PI * thicknessM) / local.periodM;
     phaseRadians += (2 * Math.PI * thicknessM) / local.periodM;
     layers.push({

@@ -296,3 +296,21 @@ Maxwell confirmed
 The current Maxwell robustness artifact concludes that the biased trough is optically valid but tolerance-limited. The nominal useful state is retained, but the tested useful range is narrow: bias strain, trough excursion, trough width, position, and laser wavelength only pass at the nominal sampled point under the research criterion, while transition width allows a small tested increase from 0.25 mm to 0.32 mm. Width-and-transition coupling and laser-compensation points are reported explicitly in the artifact. CMT remains useful for qualitative trend scans, but Maxwell must set tolerance widths before mechanical optimization uses them.
 
 The mechanical layer remains future work, and the WP-v2-09D mechanical gate remains closed because this envelope does not yet demonstrate nonzero primary tolerances or a nonzero useful scan-depth span. A future mechanical study should consume `StrainTroughRequirement` only after optical refinement widens the Maxwell-confirmed envelope enough to make the requirement mechanically actionable.
+
+## WP-v2-10 Mechanics To Maxwell Handoff
+
+Reduced-order mechanics is now isolated under `simulation/mechanics/`:
+
+```text
+StrainTroughRequirement
+    -> MechanicalStrainTarget
+    -> ReducedOrderMechanicalModel
+    -> PredictedStrainField
+    -> StrainOpticResponse
+    -> MaxwellSolver
+    -> OpticalFeasibilityMetrics
+```
+
+`axialElasticity.ts` contains SI-unit axial bar helpers for preload strain, prescribed displacement, constant-force stiffness response, and eigenstrain superposition. `actuatorStrainTransfer.ts` owns sampled mechanical strain fields, ideal trough target sampling, local eigenstrain fields, uniform fields, and a first reduced-order shear-lag transfer model. `mechanicalTargetMetrics.ts` reports bias error, trough minimum error, strain-excursion error, center error, width error, transition-width error, RMS and maximum strain error, off-target disturbance, localization length, and cross-talk without collapsing them into one score. `mechanicalArchitectures.ts` composes the named candidate architectures for the headless study.
+
+Mechanics does not live inside the Maxwell solver. The Maxwell module exposes `buildHybridBraggMaxwellLayersFromStrain` and `reconstructHybridBraggMaxwellFieldsFromStrain` so an externally predicted `epsilon(z)` sampler can be optically rescored through the same first-order strain-optic material response and continuous microscopic phase convention. This path exists specifically to avoid refitting imperfect mechanical fields back to ideal trough parameters before optical validation.
