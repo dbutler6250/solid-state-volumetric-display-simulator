@@ -1,0 +1,1874 @@
+{
+  "issue": 72,
+  "baseline": {
+    "pr71": "merged into main as 7785d8b; no comments, reviews, or review threads returned by GitHub inspection",
+    "issue70": "closed by PR #71",
+    "branch": "codex/issue-72-strain-trough-mechanical-feasibility"
+  },
+  "nominalTarget": {
+    "lengthM": 0.01,
+    "centerM": 0.005,
+    "widthM": 0.0008,
+    "transitionWidthM": 0.00025,
+    "backgroundStrain": 0.0015,
+    "troughStrain": 0
+  },
+  "opticalRequirement": {
+    "totalOpticalLengthMm": 10,
+    "averageRefractiveIndex": 1.45,
+    "gratingDeltaN": 0.0001,
+    "gratingPeriodNm": 206.9,
+    "laserWavelengthNm": 600.11,
+    "backgroundBiasStrain": 0.0015,
+    "troughCenterStrain": 0,
+    "strainExcursion": 0.0015,
+    "troughCenterMm": 5,
+    "troughWidthMm": 0.8,
+    "transitionWidthMm": 0.25,
+    "effectivePhotoelasticCoefficient": 0.22,
+    "cmtResolutionSegments": 360,
+    "maxwellOpticalSamplesPerPeriod": 8,
+    "maxwellMechanicalEnvelopeBlocks": 300,
+    "targetWidthMm": 1,
+    "couplingLengthMm": 1.9102094579775466,
+    "backgroundBraggWavelengthNm": 600.7015518044213,
+    "troughBraggWavelengthNm": 600.01
+  },
+  "priorClassifications": {
+    "robustness": "MAXWELL-CONFIRMED TROUGH IS OPTICALLY VALID BUT TOLERANCE-LIMITED",
+    "laserCompensation": "LASER TUNING DOES NOT MATERIALLY RELAX STRAIN TOLERANCES",
+    "cmtVsMaxwell": "CMT TRACKS MAXWELL QUALITATIVELY BUT MISSTATES TOLERANCE WIDTHS",
+    "mechanicalGate": "BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED",
+    "usableDepth": "strongly position dependent",
+    "opticalPreference": "continuous moving trough"
+  },
+  "toleranceAudit": [
+    {
+      "parameter": "bias strain",
+      "nominal": 0.0015,
+      "sweepStep": 0.00039999999999999996,
+      "nearestTestedPassingPoint": 0.0015,
+      "nearestTestedFailingPoint": 0.0011
+    },
+    {
+      "parameter": "trough excursion",
+      "nominal": 0.0015,
+      "sweepStep": 0.0002999999999999999,
+      "nearestTestedPassingPoint": 0.0015,
+      "nearestTestedFailingPoint": 0.0012000000000000001
+    },
+    {
+      "parameter": "trough width mm",
+      "nominal": 0.8,
+      "sweepStep": 0.15999999999999992,
+      "nearestTestedPassingPoint": 0.8,
+      "nearestTestedFailingPoint": 0.6400000000000001
+    },
+    {
+      "parameter": "position offset mm",
+      "nominal": 0,
+      "sweepStep": 0.05,
+      "nearestTestedPassingPoint": 0,
+      "nearestTestedFailingPoint": -0.05
+    },
+    {
+      "parameter": "laser wavelength nm",
+      "nominal": 600.11,
+      "sweepStep": 0.03999999999996362,
+      "nearestTestedPassingPoint": 600.11,
+      "nearestTestedFailingPoint": 600.07
+    }
+  ],
+  "refinedTolerances": [
+    {
+      "parameter": "position offset mm",
+      "points": [
+        {
+          "value": -0.025,
+          "optical": {
+            "reflectance": 0.022165351251982286,
+            "transmission": 0.9778346487490849,
+            "energyError": 1.0671463712697005e-12,
+            "centerMm": 4.86080830494755,
+            "centerErrorMm": -0.13919169505244966,
+            "widthMm": 0.6496129684723604,
+            "targetFraction": 0.23646789075667865,
+            "offTargetFraction": 0.7635321092433214,
+            "strongestCompetitor": 0.022762400118291178,
+            "regionCount": 28,
+            "useful": false
+          }
+        },
+        {
+          "value": -0.01,
+          "optical": {
+            "reflectance": 0.02030273615647723,
+            "transmission": 0.9796972638445867,
+            "energyError": 1.063815702195825e-12,
+            "centerMm": 4.88233879289457,
+            "centerErrorMm": -0.11766120710542971,
+            "widthMm": 0.6464836122662474,
+            "targetFraction": 0.245674581745172,
+            "offTargetFraction": 0.754325418254828,
+            "strongestCompetitor": 0.0032996266241955684,
+            "regionCount": 150,
+            "useful": false
+          }
+        },
+        {
+          "value": 0,
+          "optical": {
+            "reflectance": 0.01991295737820055,
+            "transmission": 0.9800870426227442,
+            "energyError": 9.447997939560082e-13,
+            "centerMm": 4.894701043031117,
+            "centerErrorMm": -0.10529895696888314,
+            "widthMm": 0.6441559919476507,
+            "targetFraction": 0.2485648435556393,
+            "offTargetFraction": 0.7514351564443607,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        },
+        {
+          "value": 0.01,
+          "optical": {
+            "reflectance": 0.02025624226925879,
+            "transmission": 0.9797437577315173,
+            "energyError": 7.760458942129844e-13,
+            "centerMm": 4.905033091000888,
+            "centerErrorMm": -0.09496690899911187,
+            "widthMm": 0.6419576838689753,
+            "targetFraction": 0.2481123474450449,
+            "offTargetFraction": 0.751887652554955,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        },
+        {
+          "value": 0.025,
+          "optical": {
+            "reflectance": 0.022058372385478503,
+            "transmission": 0.9779416276153522,
+            "energyError": 8.306688670245421e-13,
+            "centerMm": 4.916270324650114,
+            "centerErrorMm": -0.08372967534988618,
+            "widthMm": 0.6391904019346439,
+            "targetFraction": 0.24095042028669197,
+            "offTargetFraction": 0.759049579713308,
+            "strongestCompetitor": 0.023007258480492534,
+            "regionCount": 31,
+            "useful": false
+          }
+        }
+      ],
+      "lowerUseful": 0,
+      "upperUseful": 0.01
+    },
+    {
+      "parameter": "trough width mm",
+      "points": [
+        {
+          "value": 0.76,
+          "optical": {
+            "reflectance": 0.032907763091250326,
+            "transmission": 0.9670922369094674,
+            "energyError": 7.178702077226262e-13,
+            "centerMm": 4.867002361239816,
+            "centerErrorMm": -0.1329976387601839,
+            "widthMm": 0.6520181761349102,
+            "targetFraction": 0.1972030757230377,
+            "offTargetFraction": 0.8027969242769624,
+            "strongestCompetitor": 0.08176232511772498,
+            "regionCount": 23,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.78,
+          "optical": {
+            "reflectance": 0.025795699940528258,
+            "transmission": 0.974204300060141,
+            "energyError": 6.692424392440444e-13,
+            "centerMm": 4.882299999222593,
+            "centerErrorMm": -0.11770000077740672,
+            "widthMm": 0.6470267236739193,
+            "targetFraction": 0.22155827668733735,
+            "offTargetFraction": 0.7784417233126626,
+            "strongestCompetitor": 0.04693801100518767,
+            "regionCount": 22,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.8,
+          "optical": {
+            "reflectance": 0.01991295737820055,
+            "transmission": 0.9800870426227442,
+            "energyError": 9.447997939560082e-13,
+            "centerMm": 4.894701043031117,
+            "centerErrorMm": -0.10529895696888314,
+            "widthMm": 0.6441559919476507,
+            "targetFraction": 0.2485648435556393,
+            "offTargetFraction": 0.7514351564443607,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        },
+        {
+          "value": 0.82,
+          "optical": {
+            "reflectance": 0.01539408796807007,
+            "transmission": 0.9846059120328765,
+            "energyError": 9.465761507954085e-13,
+            "centerMm": 4.904852053864998,
+            "centerErrorMm": -0.09514794613500221,
+            "widthMm": 0.6418542340770381,
+            "targetFraction": 0.27740908556022836,
+            "offTargetFraction": 0.7225909144397716,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        },
+        {
+          "value": 0.84,
+          "optical": {
+            "reflectance": 0.012170279186326042,
+            "transmission": 0.9878297208144967,
+            "energyError": 8.22675261247241e-13,
+            "centerMm": 4.91279182539621,
+            "centerErrorMm": -0.0872081746037896,
+            "widthMm": 0.639836963134254,
+            "targetFraction": 0.3068328144190941,
+            "offTargetFraction": 0.6931671855809058,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        }
+      ],
+      "lowerUseful": 0.8,
+      "upperUseful": 0.84
+    },
+    {
+      "parameter": "bias strain",
+      "points": [
+        {
+          "value": 0.00145,
+          "optical": {
+            "reflectance": 0.029977514416331768,
+            "transmission": 0.9700224855844746,
+            "energyError": 8.062439604827887e-13,
+            "centerMm": 4.880735321119536,
+            "centerErrorMm": -0.1192646788804641,
+            "widthMm": 0.6517595516550658,
+            "targetFraction": 0.2340084216778829,
+            "offTargetFraction": 0.7659915783221171,
+            "strongestCompetitor": 0.033119316487818025,
+            "regionCount": 25,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.001475,
+          "optical": {
+            "reflectance": 0.03091050841705326,
+            "transmission": 0.9690894915832917,
+            "energyError": 3.4505731605349865e-13,
+            "centerMm": 4.847786562387401,
+            "centerErrorMm": -0.1522134376125992,
+            "widthMm": 0.6423973454847101,
+            "targetFraction": 0.1893657479786507,
+            "offTargetFraction": 0.8106342520213493,
+            "strongestCompetitor": 0.08703467227509126,
+            "regionCount": 22,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.0015,
+          "optical": {
+            "reflectance": 0.01991295737820055,
+            "transmission": 0.9800870426227442,
+            "energyError": 9.447997939560082e-13,
+            "centerMm": 4.894701043031117,
+            "centerErrorMm": -0.10529895696888314,
+            "widthMm": 0.6441559919476507,
+            "targetFraction": 0.2485648435556393,
+            "offTargetFraction": 0.7514351564443607,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        },
+        {
+          "value": 0.001525,
+          "optical": {
+            "reflectance": 0.03918589350466627,
+            "transmission": 0.96081410649608,
+            "energyError": 7.462919171530302e-13,
+            "centerMm": 4.848058118091236,
+            "centerErrorMm": -0.15194188190876368,
+            "widthMm": 0.6503371170159236,
+            "targetFraction": 0.1950663252893643,
+            "offTargetFraction": 0.8049336747106357,
+            "strongestCompetitor": 0.07966177175716484,
+            "regionCount": 23,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.00155,
+          "optical": {
+            "reflectance": 0.01860866791790239,
+            "transmission": 0.9813913320827862,
+            "energyError": 6.885603198725221e-13,
+            "centerMm": 4.88351553427786,
+            "centerErrorMm": -0.11648446572213977,
+            "widthMm": 0.6378196921914707,
+            "targetFraction": 0.22597823421914562,
+            "offTargetFraction": 0.7740217657808545,
+            "strongestCompetitor": 0.03703656560233506,
+            "regionCount": 25,
+            "useful": false
+          }
+        }
+      ],
+      "lowerUseful": 0.0015,
+      "upperUseful": 0.0015
+    },
+    {
+      "parameter": "trough excursion",
+      "points": [
+        {
+          "value": 0.00145,
+          "optical": {
+            "reflectance": 0.093425733785475,
+            "transmission": 0.9065742662153701,
+            "energyError": 8.451017663446692e-13,
+            "centerMm": 2.5291146508182645,
+            "centerErrorMm": -2.4708853491817355,
+            "widthMm": 5.058203439188545,
+            "targetFraction": 0.11002222570693906,
+            "offTargetFraction": 0.8899777742930609,
+            "strongestCompetitor": 4.0447998482729295,
+            "regionCount": 1,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.001475,
+          "optical": {
+            "reflectance": 0.0513285573848722,
+            "transmission": 0.948671442615948,
+            "energyError": 8.202327705930657e-13,
+            "centerMm": 2.5869430845114008,
+            "centerErrorMm": -2.4130569154885992,
+            "widthMm": 5.173860306574817,
+            "targetFraction": 0.1515953223777953,
+            "offTargetFraction": 0.8484046776222047,
+            "strongestCompetitor": 3.515640897937595,
+            "regionCount": 1,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.0015,
+          "optical": {
+            "reflectance": 0.01991295737820055,
+            "transmission": 0.9800870426227442,
+            "energyError": 9.447997939560082e-13,
+            "centerMm": 4.894701043031117,
+            "centerErrorMm": -0.10529895696888314,
+            "widthMm": 0.6441559919476507,
+            "targetFraction": 0.2485648435556393,
+            "offTargetFraction": 0.7514351564443607,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": true
+          }
+        },
+        {
+          "value": 0.001525,
+          "optical": {
+            "reflectance": 0.003092551541741905,
+            "transmission": 0.9969074484590296,
+            "energyError": 7.713829575095588e-13,
+            "centerMm": 4.961684783310734,
+            "centerErrorMm": -0.03831521668926641,
+            "widthMm": 0.5771722516680331,
+            "targetFraction": 0.5175895597983745,
+            "offTargetFraction": 0.48241044020162555,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": false
+          }
+        },
+        {
+          "value": 0.00155,
+          "optical": {
+            "reflectance": 0.0005422041591863176,
+            "transmission": 0.9994577958424578,
+            "energyError": 1.6440182548649318e-12,
+            "centerMm": 5.01546574389431,
+            "centerErrorMm": 0.015465743894310435,
+            "widthMm": 0.5234042223084492,
+            "targetFraction": 0.8439943017354651,
+            "offTargetFraction": 0.15600569826453495,
+            "strongestCompetitor": 0,
+            "regionCount": 1,
+            "useful": false
+          }
+        }
+      ],
+      "lowerUseful": 0.0015,
+      "upperUseful": 0.0015
+    }
+  ],
+  "toleranceInterpretation": "PRIOR TOLERANCE RESULT WAS MIXED",
+  "host": {
+    "youngsModulusPa": 2000000000,
+    "crossSectionAreaM2": 0.000001,
+    "densityKgPerM3": 2200,
+    "poissonRatio": 0.25
+  },
+  "uniformPreload": {
+    "strain": 0.0015,
+    "stressPa": 3000000,
+    "forceN": 3,
+    "displacementM": 0.000015,
+    "elasticEnergyJ": 0.000022499999999999998
+  },
+  "architectures": [
+    {
+      "architecture": "local force in uniform medium",
+      "abstraction": "1D continuous preloaded bar with a local axial force surrogate",
+      "requiredFreeStrain": null,
+      "requiredDisplacementM": null,
+      "requiredForceN": 3,
+      "stressPa": 3000000,
+      "notes": "Static 1D axial equilibrium redistributes force globally and does not create localized relief.",
+      "metrics": {
+        "biasStrainError": -1.8648277366750676e-17,
+        "troughMinimumError": 0.0015,
+        "strainExcursionError": -0.0015000000000000187,
+        "centerErrorM": -0.0004000000000000002,
+        "widthErrorM": -0.0008,
+        "transitionWidthErrorM": -0.00025,
+        "rmsStrainError": 0.00047107336197194446,
+        "maxStrainError": 0.0015,
+        "offTargetStrainDisturbance": 0,
+        "localizationLengthM": 0,
+        "crossTalk": 0
+      },
+      "classification": "MECHANICALLY IMPLAUSIBLE UNDER TESTED ASSUMPTIONS",
+      "optical": {
+        "reflectance": 0.0011255565411897644,
+        "transmission": 0.9988744434601582,
+        "energyError": 1.348032796499865e-12,
+        "centerMm": 0.03080217554912365,
+        "centerErrorMm": -4.969197824450877,
+        "widthMm": 0.06157848865026315,
+        "targetFraction": 0.09930328680101665,
+        "offTargetFraction": 0.9006967131989834,
+        "strongestCompetitor": 0.08601933584599396,
+        "regionCount": 54,
+        "useful": false
+      },
+      "opticalClassification": "FAILS MAXWELL OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    },
+    {
+      "architecture": "preload + active counter-strain",
+      "abstraction": "uniform preload plus local negative eigenstrain over the optical trough",
+      "requiredFreeStrain": -0.0015,
+      "requiredDisplacementM": 0.0000012000000000000002,
+      "requiredForceN": 3,
+      "stressPa": 3000000,
+      "notes": "Ideal reduced-order eigenstrain directly matches the optical trough shape.",
+      "metrics": {
+        "biasStrainError": -0.00003872282608697545,
+        "troughMinimumError": 0,
+        "strainExcursionError": -0.00003872282608697545,
+        "centerErrorM": 0.000006249999999999312,
+        "widthErrorM": 0.00023749999999999932,
+        "transitionWidthErrorM": -0.00011249999999999954,
+        "rmsStrainError": 0,
+        "maxStrainError": 0,
+        "offTargetStrainDisturbance": 0.0014907662554463539,
+        "localizationLengthM": 0.0010374999999999994,
+        "crossTalk": 0.9938441702975692
+      },
+      "classification": "MECHANICALLY MARGINAL",
+      "optical": {
+        "reflectance": 0.01991295737820055,
+        "transmission": 0.9800870426227442,
+        "energyError": 9.447997939560082e-13,
+        "centerMm": 4.894701043031117,
+        "centerErrorMm": -0.10529895696888314,
+        "widthMm": 0.6441559919476507,
+        "targetFraction": 0.2485648435556393,
+        "offTargetFraction": 0.7514351564443607,
+        "strongestCompetitor": 0,
+        "regionCount": 1,
+        "useful": true
+      },
+      "opticalClassification": "PASSES MAXWELL OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0005182372542187855
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0
+        },
+        {
+          "zMm": 5,
+          "strain": 0
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0005182372542187933
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    },
+    {
+      "architecture": "opposed differential actuator pair",
+      "abstraction": "symmetric counter-strain pair represented as a high-transfer local eigenstrain",
+      "requiredFreeStrain": -0.0015625,
+      "requiredDisplacementM": 0.00000125,
+      "requiredForceN": 3,
+      "stressPa": 3000000,
+      "notes": "Symmetry reduces net translation in this reduced-order abstraction but still needs high strain transfer.",
+      "metrics": {
+        "biasStrainError": -0.0000371739130434973,
+        "troughMinimumError": 0.00006000000000000016,
+        "strainExcursionError": -0.00009717391304349746,
+        "centerErrorM": -8.673617379884035e-19,
+        "widthErrorM": 0.00022499999999999983,
+        "transitionWidthErrorM": -0.00009999999999999918,
+        "rmsStrainError": 0.000018842934478877814,
+        "maxStrainError": 0.00006000000000000016,
+        "offTargetStrainDisturbance": 0.0014311356052284995,
+        "localizationLengthM": 0.0010249999999999999,
+        "crossTalk": 0.9540904034856663
+      },
+      "classification": "MECHANICALLY MARGINAL",
+      "optical": {
+        "reflectance": 0.11182955122041234,
+        "transmission": 0.888170448780446,
+        "energyError": 8.58424442640171e-13,
+        "centerMm": 2.501597006162854,
+        "centerErrorMm": -2.498402993837146,
+        "widthMm": 5.003168149877724,
+        "targetFraction": 0.10007006897149898,
+        "offTargetFraction": 0.8999299310285009,
+        "strongestCompetitor": 4.077934659059177,
+        "regionCount": 1,
+        "useful": false
+      },
+      "opticalClassification": "PARTIALLY PASSES / REVISED OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0005575077640500341
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0.00006000000000000016
+        },
+        {
+          "zMm": 5,
+          "strain": 0.00006000000000000016
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0.00006000000000000016
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0005575077640500416
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    },
+    {
+      "architecture": "bonded/shear-lag actuator",
+      "abstraction": "local actuator free strain transferred through an exponential shear-lag length",
+      "requiredFreeStrain": -0.0015,
+      "requiredDisplacementM": 0.0000012000000000000002,
+      "requiredForceN": 3,
+      "stressPa": 3000000,
+      "notes": "Requires transfer length substantially below the optical transition scale to preserve localization.",
+      "metrics": {
+        "biasStrainError": -0.000022291375015229395,
+        "troughMinimumError": 0,
+        "strainExcursionError": -0.000022291375015229395,
+        "centerErrorM": -8.673617379884035e-19,
+        "widthErrorM": 0.00012500000000000044,
+        "transitionWidthErrorM": -0.00009999999999999918,
+        "rmsStrainError": 0.00007981598497168166,
+        "maxStrainError": 0.0005489701392874205,
+        "offTargetStrainDisturbance": 0.0013489010894732183,
+        "localizationLengthM": 0.0009250000000000005,
+        "crossTalk": 0.8992673929821455
+      },
+      "classification": "MECHANICALLY MARGINAL",
+      "optical": {
+        "reflectance": 0.05403019496997889,
+        "transmission": 0.9459698050311551,
+        "energyError": 1.1339817973521349e-12,
+        "centerMm": 2.5725377009840855,
+        "centerErrorMm": -2.4274622990159145,
+        "widthMm": 5.145049539520187,
+        "targetFraction": 0.14405191306629994,
+        "offTargetFraction": 0.8559480869337001,
+        "strongestCompetitor": 3.501816499751238,
+        "regionCount": 1,
+        "useful": false
+      },
+      "opticalClassification": "PARTIALLY PASSES / REVISED OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0010588655624292462
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0
+        },
+        {
+          "zMm": 5,
+          "strain": 0
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0010588655624292529
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    },
+    {
+      "architecture": "local stiffness engineering",
+      "abstraction": "constant-force bar with locally increased EA",
+      "requiredFreeStrain": null,
+      "requiredDisplacementM": null,
+      "requiredForceN": 3,
+      "stressPa": 3000000,
+      "notes": "Full relief would require an unbounded stiffness ratio; this case tests partial relief only.",
+      "metrics": {
+        "biasStrainError": -0.000034850543478279206,
+        "troughMinimumError": 0.00014999999999999996,
+        "strainExcursionError": -0.00018485054347827917,
+        "centerErrorM": -8.673617379884035e-19,
+        "widthErrorM": 0.00022499999999999983,
+        "transitionWidthErrorM": -0.00006249999999999897,
+        "rmsStrainError": 0.00004710733619719444,
+        "maxStrainError": 0.00014999999999999996,
+        "offTargetStrainDisturbance": 0.0013416896299017185,
+        "localizationLengthM": 0.0010249999999999999,
+        "crossTalk": 0.8944597532678124
+      },
+      "classification": "MECHANICALLY MARGINAL",
+      "optical": {
+        "reflectance": 0.24495051125997905,
+        "transmission": 0.7550494887407782,
+        "energyError": 7.571721027943568e-13,
+        "centerMm": 2.379177108628659,
+        "centerErrorMm": -2.620822891371341,
+        "widthMm": 4.758328354809334,
+        "targetFraction": 0.0679701433961894,
+        "offTargetFraction": 0.9320298566038107,
+        "strongestCompetitor": 4.199347334778696,
+        "regionCount": 1,
+        "useful": false
+      },
+      "opticalClassification": "PARTIALLY PASSES / REVISED OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0006164135287969069
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0.00014999999999999996
+        },
+        {
+          "zMm": 5,
+          "strain": 0.00014999999999999996
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0.00014999999999999996
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0006164135287969139
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    },
+    {
+      "architecture": "mechanically isolated zone",
+      "abstraction": "local optical region coupled through compliant effective interfaces",
+      "requiredFreeStrain": -0.0017045454545454547,
+      "requiredDisplacementM": 0.0000013636363636363638,
+      "requiredForceN": 2.64,
+      "stressPa": 2640000,
+      "notes": "Isolation improves localization in 1D but introduces fabrication and optical-continuity risks.",
+      "metrics": {
+        "biasStrainError": -0.000034076086956540564,
+        "troughMinimumError": 0.00018000000000000004,
+        "strainExcursionError": -0.0002140760869565406,
+        "centerErrorM": -8.673617379884035e-19,
+        "widthErrorM": 0.00022499999999999983,
+        "transitionWidthErrorM": 0.0003500000000000007,
+        "rmsStrainError": 0.00005652880343663335,
+        "maxStrainError": 0.00018000000000000004,
+        "offTargetStrainDisturbance": 0.0013118743047927915,
+        "localizationLengthM": 0.0010249999999999999,
+        "crossTalk": 0.874582869861861
+      },
+      "classification": "MECHANICALLY IMPLAUSIBLE UNDER TESTED ASSUMPTIONS",
+      "optical": {
+        "reflectance": 0.258814422577396,
+        "transmission": 0.7411855774236847,
+        "energyError": 1.0806910921701274e-12,
+        "centerMm": 2.3747158363513483,
+        "centerErrorMm": -2.6252841636486517,
+        "widthMm": 4.7494058102547125,
+        "targetFraction": 0.06679538357424501,
+        "offTargetFraction": 0.9332046164257549,
+        "strongestCompetitor": 4.2029384406590555,
+        "regionCount": 1,
+        "useful": false
+      },
+      "opticalClassification": "PARTIALLY PASSES / REVISED OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0006360487837125312
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0.00018000000000000004
+        },
+        {
+          "zMm": 5,
+          "strain": 0.00018000000000000004
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0.00018000000000000004
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0006360487837125381
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    },
+    {
+      "architecture": "small differential actuator array",
+      "abstraction": "four mechanically coupled zones with nearest-neighbor leakage",
+      "requiredFreeStrain": -0.0015,
+      "requiredDisplacementM": 0.0000012000000000000002,
+      "requiredForceN": 3,
+      "stressPa": 3000000,
+      "notes": "Array cross-coupling reduces trough depth before any detailed optimization.",
+      "metrics": {
+        "biasStrainError": -0.000031752717391322254,
+        "troughMinimumError": 0.00027000000000000006,
+        "strainExcursionError": -0.0003017527173913223,
+        "centerErrorM": -8.673617379884035e-19,
+        "widthErrorM": 0.00019999999999999998,
+        "transitionWidthErrorM": 0.0003500000000000007,
+        "rmsStrainError": 0.00008479320515495,
+        "maxStrainError": 0.00027000000000000006,
+        "offTargetStrainDisturbance": 0.00122242832946601,
+        "localizationLengthM": 0.001,
+        "crossTalk": 0.8149522196440067
+      },
+      "classification": "MECHANICALLY IMPLAUSIBLE UNDER TESTED ASSUMPTIONS",
+      "optical": {
+        "reflectance": 0.19553939977708545,
+        "transmission": 0.8044606002236797,
+        "energyError": 7.651657085716579e-13,
+        "centerMm": 2.4046516198933006,
+        "centerErrorMm": -2.5953483801066994,
+        "widthMm": 4.809277377338617,
+        "targetFraction": 0.07842227774348255,
+        "offTargetFraction": 0.9215777222565174,
+        "strongestCompetitor": 4.112234805393645,
+        "regionCount": 1,
+        "useful": false
+      },
+      "opticalClassification": "PARTIALLY PASSES / REVISED OPTICAL TARGET",
+      "profileSamples": [
+        {
+          "zMm": 0,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 0.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 1.7500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 2.7500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.2500000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.5000000000000004,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 3.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 4.500000000000001,
+          "strain": 0.0006949545484594041
+        },
+        {
+          "zMm": 4.750000000000001,
+          "strain": 0.00027000000000000006
+        },
+        {
+          "zMm": 5,
+          "strain": 0.00027000000000000006
+        },
+        {
+          "zMm": 5.25,
+          "strain": 0.00027000000000000006
+        },
+        {
+          "zMm": 5.500000000000001,
+          "strain": 0.0006949545484594105
+        },
+        {
+          "zMm": 5.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.500000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 6.750000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.000000000000001,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.249999999999999,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 7.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.25,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.5,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 8.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.000000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.250000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.500000000000002,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 9.75,
+          "strain": 0.0015
+        },
+        {
+          "zMm": 10,
+          "strain": 0.0015
+        }
+      ]
+    }
+  ],
+  "bestMechanicalConcept": "preload + active counter-strain",
+  "feasibilityConclusion": "REDUCED-ORDER MECHANICS SHOW A MARGINAL / HIGH-RISK PATH TO THE STRAIN TROUGH",
+  "opticalConclusion": "MECHANICALLY GENERATED STRAIN FIELD PASSES MAXWELL OPTICAL REQUIREMENT",
+  "dominantBottleneck": "TRANSITION-WIDTH LOCALIZATION AND POSITION PRECISION ARE THE PRIMARY BOTTLENECKS",
+  "detailedMechanicsGate": "DETAILED MECHANICAL MODELING IS JUSTIFIED ONLY FOR A NARROW HIGH-RISK CONCEPT"
+}

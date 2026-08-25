@@ -2690,3 +2690,43 @@ BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 ```
 
 This does not open WP-v2-10 yet. The useful optical target is explicit, but the packet does not demonstrate finite nonzero tolerance ranges for the primary mechanical/control variables or a nonzero useful scan-depth span. The next packet should first test whether targeted optical refinements, closed-loop calibration assumptions, or revised trough geometry can widen the Maxwell-confirmed envelope before detailed mechanical realization begins.
+
+## WP-v2-10 Reduced-Order Mechanical Feasibility
+
+Issue #72 evaluates reduced-order mechanics only: linear small-strain, quasi-static, 1D or quasi-1D axial models. It does not validate PZT geometry, voltage, electrodes, bond layers, preload hardware, 3D elasticity, dynamics, fatigue, reliability, or thermal behavior. The generated artifacts are `artifacts/issue-72/strain-trough-mechanical-feasibility.md` and `.json`.
+
+The mechanical target is the Maxwell-confirmed biased trough field: 10 mm length, background strain `0.0015`, local trough strain about `0`, strain excursion `0.0015`, center `5 mm`, trough width `0.8 mm`, and transition width `0.25 mm`. The host baseline is configurable; the initial study uses `E_host = 2 GPa`, `A_host = 1 mm^2`, density `2200 kg/m^3`, and Poisson ratio `0.25` only as documented reduced-order assumptions.
+
+The uniform preload scale is modest in this baseline but not free: `sigma_bias = 3 MPa`, `F_bias = 3 N`, end displacement `15 um` over 10 mm, and elastic energy about `2.25e-5 J`. A simple local force in a uniform continuous 1D medium fails the localization sanity check because static axial equilibrium redistributes force through the body rather than producing a local strain trough.
+
+The tolerance audit shows that the previous zero-width result was mixed. Prior sweeps were coarse for position (`0.05 mm` nearest step), width (`0.16 mm`), bias (`0.0004`), trough excursion (`0.0003`), and laser (`0.04 nm`). Narrow Maxwell probes found finite useful sampled ranges for position offset (`0` to `+0.01 mm`) and trough width (`0.8` to `0.84 mm`), while bias strain and trough excursion still passed only at the nominal sampled point. Therefore:
+
+```text
+PRIOR TOLERANCE RESULT WAS MIXED
+```
+
+Reduced-order candidates were evaluated as actual sampled mechanical strain fields and passed directly back into Maxwell rescoring without fitting them to an ideal trough. The local-force reference failed optically. Preload plus active counter-strain produced the leading actual field: `R_Maxwell = 0.019913`, optical center `4.8947 mm`, region width `0.644 mm`, target fraction `0.2486`, off-target fraction `0.7514`, and one reflection region, which passes the current research optical target. The required local strain magnitude remains `0.0015` (`1500 microstrain`) with about `1.2 um` displacement over the 0.8 mm active length. Opposed actuation, shear-lag transfer, stiffness engineering, isolation, and a small differential array are mechanically marginal or implausible under the tested assumptions because they either miss the exact strain relief, broaden/narrow the transition, or create excessive off-target disturbance.
+
+Required conclusions:
+
+```text
+REDUCED-ORDER MECHANICS SHOW A MARGINAL / HIGH-RISK PATH TO THE STRAIN TROUGH
+```
+
+```text
+PRELOAD + ACTIVE COUNTER-STRAIN IS THE LEADING MECHANICAL CONCEPT
+```
+
+```text
+MECHANICALLY GENERATED STRAIN FIELD PASSES MAXWELL OPTICAL REQUIREMENT
+```
+
+```text
+TRANSITION-WIDTH LOCALIZATION AND POSITION PRECISION ARE THE PRIMARY BOTTLENECKS
+```
+
+```text
+DETAILED MECHANICAL MODELING IS JUSTIFIED ONLY FOR A NARROW HIGH-RISK CONCEPT
+```
+
+The next technical gate should stay narrow: detailed strain-transfer/FEM preparation only for the preload plus active counter-strain concept, including real actuator geometry, bond/interface transfer, preload boundary conditions, and direct Maxwell rescoring of the resulting `epsilon(z)`. Dynamics, thermal expansion, heating, hysteresis, creep, fatigue, and drive electronics remain deferred coupled-physics risks.
