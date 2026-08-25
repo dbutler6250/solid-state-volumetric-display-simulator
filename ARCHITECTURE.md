@@ -270,3 +270,29 @@ Maxwell = boundary validation and high-fidelity spatial spot checks
 ```
 
 WP-v2-09C validates the CMT moving-trough trajectory qualitatively against Maxwell spatial fields, but the 4-actuator result remains partial and the mechanical gate remains closed.
+
+## WP-v2-09D Robustness Envelope And Mechanical Target
+
+The robustness packet keeps the handoff from optics to mechanics explicit:
+
+```text
+Maxwell optical validation
+    -> StrainTroughRequirement
+    -> future MechanicalRealization
+```
+
+`validation/strainTroughRequirement.ts` owns the headless requirement and range helpers. It classifies research-only useful optical states from raw metrics, extracts contiguous tested useful ranges around the nominal design point, and converts those ranges into a solver-independent `StrainTroughRequirement`. That requirement records strain, width, transition, position, usable-depth, and laser tolerances without adding any piezo voltage, electrode geometry, adhesive, or elastic-transfer model.
+
+The WP-v2-09D study preserves the solver hierarchy:
+
+```text
+CMT exploratory
+    -> trend and candidate-boundary scan
+
+Maxwell confirmed
+    -> selected robustness points and mechanical gate evidence
+```
+
+The current Maxwell robustness artifact concludes that the biased trough is optically valid but tolerance-limited. The nominal useful state is retained, but the tested useful range is narrow: bias strain, trough excursion, trough width, position, and laser wavelength only pass at the nominal sampled point under the research criterion, while transition width allows a small tested increase from 0.25 mm to 0.32 mm. Width-and-transition coupling and laser-compensation points are reported explicitly in the artifact. CMT remains useful for qualitative trend scans, but Maxwell must set tolerance widths before mechanical optimization uses them.
+
+The mechanical layer remains future work, and the WP-v2-09D mechanical gate remains closed because this envelope does not yet demonstrate nonzero primary tolerances or a nonzero useful scan-depth span. A future mechanical study should consume `StrainTroughRequirement` only after optical refinement widens the Maxwell-confirmed envelope enough to make the requirement mechanically actionable.
