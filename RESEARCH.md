@@ -2652,3 +2652,41 @@ BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
 ```
 
 The mechanical gate remains closed because the single-trough trajectory is encouraging but the spatial response still has substantial off-target normalized backward intensity and the first 4-actuator Maxwell spot check is not uniformly useful. The next packet should refine the optical target and localization metric before detailed PZT mechanics.
+
+## WP-v2-09D Maxwell Robustness Envelope
+
+Issue #70 freezes the canonical nominal biased trough from `artifacts/issue-66/piezo-strain-window-study.json`, not from prose, and evaluates a Maxwell-confirmed tolerance envelope in `scripts/maxwellTroughRobustnessStudy.mts`. The generated artifacts are `artifacts/issue-70/maxwell-trough-robustness-study.md` and `.json`.
+
+The nominal design point is: 10 mm optical length, average index 1.45, grating Delta n `1e-4`, grating period `206.90 nm`, laser wavelength `600.11 nm`, background strain `0.0015`, trough-center strain `0`, strain excursion `0.0015`, trough center `5 mm`, trough width `0.8 mm`, transition width `0.25 mm`, and coupling length about `1.91 mm`.
+
+The study uses CMT for bounded exploratory sweeps and Maxwell field reconstruction for selected validation points. Raw metrics remain visible for every point: total reflectance, reflection-region center, target-center error, region width, target fraction, off-target fraction, strongest competitor, and region count. The useful-state criterion is research-only and intentionally not a final display specification.
+
+Required robustness classification:
+
+```text
+MAXWELL-CONFIRMED TROUGH IS OPTICALLY VALID BUT TOLERANCE-LIMITED
+```
+
+The tested envelope is narrow. Bias strain, trough depth, trough width, trough position, and laser wavelength only remain useful at the nominal sampled point under the current criterion. Transition width has a small tested useful range from `0.25 mm` to `0.32 mm`. The sampled useful position-error range is `0 mm`, so this packet does not demonstrate a nonzero mechanical placement tolerance. The depth-dependence samples classify as strongly position dependent: the validated useful optical scan depth is `5-5 mm` inside the `0-10 mm` physical medium.
+
+Laser compensation result:
+
+```text
+LASER TUNING DOES NOT MATERIALLY RELAX STRAIN TOLERANCES
+```
+
+CMT-vs-Maxwell robustness result:
+
+```text
+CMT TRACKS MAXWELL QUALITATIVELY BUT MISSTATES TOLERANCE WIDTHS
+```
+
+The solver-independent mechanical target is a biased trough with background strain `0.0015`, trough strain `0`, strain excursion `0.0015`, trough width `0.8 mm`, transition width `0.25-0.32 mm` in the tested useful range, and laser wavelength `600.11 nm`. The corresponding Bragg-shift requirements are background Delta lambda_B about `0.69155 nm`, trough Delta lambda_B `0 nm`, and differential Delta lambda_B about `0.69155 nm`.
+
+Mechanical gate decision:
+
+```text
+BIASED TROUGH REMAINS OPTICALLY PROMISING BUT MECHANICAL GATE REMAINS CLOSED
+```
+
+This does not open WP-v2-10 yet. The useful optical target is explicit, but the packet does not demonstrate finite nonzero tolerance ranges for the primary mechanical/control variables or a nonzero useful scan-depth span. The next packet should first test whether targeted optical refinements, closed-loop calibration assumptions, or revised trough geometry can widen the Maxwell-confirmed envelope before detailed mechanical realization begins.

@@ -74,6 +74,7 @@ Keep this section as the historical record. Do not create issues for these items
 - High-fidelity Maxwell reference solver foundation with Redheffer scattering composition, repeated-cell stability checks, bounded smooth-trough validation artifacts, and a mechanical-feasibility gate that keeps the biased trough in optical refinement
 - Locally periodic long-grating Maxwell closeout with phase-preserving mechanical blocks, fractional-period handling, full 10 mm smooth-trough boundary validation, quantitative CMT boundary parity, and mechanical gate still closed pending Maxwell spatial localization
 - Maxwell spatial-field validation closeout with stable prefix/suffix internal-field reconstruction, static trough localization, moving-trough Maxwell tracking, partial 4-actuator support, qualitative CMT visualization validation, and the mechanical gate still closed
+- Maxwell trough robustness envelope with CMT exploration, selected Maxwell validation points, narrow tolerance ranges, solver-independent strain target extraction, and a reduced-order mechanical feasibility gate opening
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -119,6 +120,9 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] 4-actuator Maxwell validation
 - [x] CMT spatial visualization qualitative validation
 - [x] Mechanical gate kept closed after partial Maxwell spatial localization
+- [x] Maxwell trough robustness envelope
+- [x] Mechanical strain target extraction
+- [x] Mechanical feasibility gate decision
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization
