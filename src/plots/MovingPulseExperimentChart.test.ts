@@ -22,6 +22,25 @@ describe('MovingPulseExperimentChart', () => {
     expect(markup).not.toContain('Peak position');
     expect(markup).not.toContain('Position step');
   });
+
+  it('surfaces spatial addressing provenance and tracking labels', () => {
+    const result = makeResult('piezo-trough');
+    const markup = renderToStaticMarkup(
+      createElement(MovingPulseExperimentChart, {
+        result,
+        design: { ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS, strainShape: 'piezo-trough' },
+        progress: null,
+      }),
+    );
+
+    expect(markup).toContain('Interactive spatial model');
+    expect(markup).toContain('Reference validation');
+    expect(markup).toContain('Validate with Maxwell');
+    expect(markup).toContain('Commanded trough center');
+    expect(markup).toContain('Tracking error');
+    expect(markup).toContain('Current State');
+    expect(markup).toContain('Trajectory Map');
+  });
 });
 
 function makeResult(strainShape: MovingPulseExperimentResult['strainShape']): MovingPulseExperimentResult {
