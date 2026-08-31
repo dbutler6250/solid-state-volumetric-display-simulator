@@ -90,9 +90,9 @@ test.describe('browser regression harness', () => {
     await expect(page.getByRole('combobox', { name: 'Array polarity' })).toHaveValue('trough');
 
     await page.getByRole('tab', { name: 'Spatial Addressing' }).click();
-    await expect(page.getByRole('heading', { name: 'Calculated Reflection Regions' })).toBeVisible();
-    await expect(page.getByText('Optical center:')).toBeVisible();
-    await expect(page.getByText('Laser timing:')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Spatial Response' })).toBeVisible();
+    await expect(page.getByLabel('Tracking metrics').getByText('Optical center')).toBeVisible();
+    await expect(page.getByText('Dominant region count')).toBeVisible();
     await waitForChartText(page, 'Actuator state index');
   });
 
@@ -137,8 +137,9 @@ test.describe('browser regression harness', () => {
     await troughCenter.fill('4.8');
     await troughCenter.press('Tab');
     await page.getByRole('tab', { name: 'Spatial Addressing' }).click();
-    await expect(page.getByText('Trough center:')).toBeVisible();
-    await waitForChartText(page, 'Normalized backward optical intensity');
+    await expect(page.getByText('Commanded trough center')).toBeVisible();
+    await waitForChartText(page, 'CMT normalized backward optical intensity');
+    await waitForChartText(page, 'Local detuning lambda_B - lambda_laser');
   });
 
   test('3D view opens and supports volume and plane modes', async ({ page }) => {
