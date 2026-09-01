@@ -20,6 +20,13 @@ import { ReflectanceChart } from '../plots/ReflectanceChart';
 import { MovingPulseExperimentChart } from '../plots/MovingPulseExperimentChart';
 import { MovingResponseRegimeMapChart } from '../plots/MovingResponseRegimeMapChart';
 import type { ChartProgress } from '../plots/ChartProgressOverlay';
+import {
+  formatMicrostrain,
+  formatNm,
+  formatSignedNm,
+  getFixedGratingReadouts,
+  getOperatingPointInterpretation,
+} from './researchReadouts';
 import { DEFAULT_QUARTER_WAVE_STACK_INPUTS } from '../simulation/structures/quarterWaveStack';
 import {
   solveQuarterWaveStackParameterSweepAsync,
@@ -76,8 +83,23 @@ const DEFAULT_PARAMETER_SWEEP: ParameterSweepSettings = {
 const MAX_INCIDENT_ANGLE_DEGREES = 89.9;
 const DEFAULT_PERIOD_SWEEP_HALF_RANGE = 100;
 const ACOUSTIC_SOLVE_DEBOUNCE_MS = 150;
-export const OUTPUT_TABS = ['spectrum', 'moving-region', 'parameter-sweep', 'stack-definition', 'reflectance-volume', 'stl-slicer'] as const;
+export const OUTPUT_TABS = ['overview', 'spectrum', 'moving-region', 'parameter-sweep', 'mechanics', 'stack-definition', 'reflectance-volume', 'stl-slicer'] as const;
 type OutputTab = (typeof OUTPUT_TABS)[number];
+const OUTPUT_TAB_GROUPS: Array<{ label: string; tabs: OutputTab[] }> = [
+  { label: 'Research', tabs: ['overview'] },
+  { label: 'Current Architecture', tabs: ['spectrum', 'moving-region', 'parameter-sweep', 'mechanics'] },
+  { label: 'Supporting Research', tabs: ['stack-definition', 'reflectance-volume', 'stl-slicer'] },
+];
+const OUTPUT_TAB_LABELS: Record<OutputTab, string> = {
+  overview: 'Overview',
+  spectrum: 'Fixed-Grating Display',
+  'moving-region': 'Spatial Addressing',
+  'parameter-sweep': 'Robustness',
+  mechanics: 'Mechanical Feasibility',
+  'stack-definition': 'Optical Stack',
+  'reflectance-volume': 'Geometry / 3D',
+  'stl-slicer': 'Slicer / STL',
+};
 
 const formatParameterSweepInput = (value: number | undefined): string =>
   typeof value === 'number' && Number.isFinite(value) ? value.toString() : '';
@@ -93,7 +115,7 @@ export function SimulationShell() {
   const setInputs = (nextInputs: QuarterWaveStackInputs) =>
     dispatchWorkspace({ type: 'update-active', inputs: nextInputs });
   const [showTransmission, setShowTransmission] = useState(false);
-  const [activeTab, setActiveTab] = useState<OutputTab>('spectrum');
+  const [activeTab, setActiveTab] = useState<OutputTab>('overview');
   const [xRange, setXRange] = useState<[number, number] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [inputResetKey, setInputResetKey] = useState(0);
@@ -138,9 +160,11 @@ export function SimulationShell() {
   const acousticRequestId = useRef(0);
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const tabRefs = useRef<Record<OutputTab, HTMLButtonElement | null>>({
+    overview: null,
     spectrum: null,
     'moving-region': null,
     'parameter-sweep': null,
+    mechanics: null,
     'stack-definition': null,
     'reflectance-volume': null,
     'stl-slicer': null,
@@ -170,6 +194,9 @@ export function SimulationShell() {
     () => resolvedStructure?.sweepParameters ?? [],
     [resolvedStructure],
   );
+  const fixedGratingReadouts = inputs.hybridBraggDesign
+    ? getFixedGratingReadouts(inputs.hybridBraggDesign)
+    : null;
 
   useEffect(() => {
     if (simulationDocument?.structure.type !== 'acousto-optic-grating') return;
@@ -688,13 +715,13 @@ export function SimulationShell() {
       <header className="app-header">
         <h1>Solid State Volumetric Display Simulator</h1>
         <p>
-          Browser-based optics simulation platform for solid-state volumetric display design
+          Fixed-grating volumetric-display research: detuned laser illumination, localized strain tuning, spatial reflection, validation, and mechanical feasibility.
         </p>
       </header>
 
-      <section className="workspace" aria-label="Quarter-wave stack simulator">
+      <section className="workspace" aria-label="Fixed grating display simulator">
         <aside className="panel" aria-label="Simulation inputs">
-          <h2>Optical Stack Inputs</h2>
+          <h2>{inputs.thicknessMode === 'hybrid' ? 'Fixed-Grating Display Inputs' : 'Supporting Tool Inputs'}</h2>
           <QuarterWaveStackForm
             inputs={inputs}
             validationIssues={validationIssues}
@@ -713,20 +740,11 @@ export function SimulationShell() {
         <section className="output-area" aria-label="Simulation outputs">
           <div className="output-navigation">
             <div className="output-tabs" role="tablist" aria-label="Simulation output views">
-              {OUTPUT_TABS.map((tab) => {
-                const label =
-                  tab === 'spectrum'
-                    ? 'Spectrum'
-                    : tab === 'moving-region'
-                      ? 'Moving Region'
-                      : tab === 'parameter-sweep'
-                        ? 'Parameter Sweep'
-                        : tab === 'stack-definition'
-                          ? 'Stack Definition'
-                          : tab === 'reflectance-volume'
-                            ? '3D View'
-                            : 'STL Slicer';
-                return (
+              {OUTPUT_TAB_GROUPS.map((group) => (
+                <div className="output-tab-group" key={group.label}>
+                  <span className="output-tab-group-label">{group.label}</span>
+                  <div className="output-tab-group-buttons">
+                    {group.tabs.map((tab) => (
                   <button
                     key={tab}
                     ref={(node) => {
@@ -741,10 +759,12 @@ export function SimulationShell() {
                     onClick={() => setActiveTab(tab)}
                     onKeyDown={(event) => handleTabKeyDown(event, tab)}
                   >
-                    {label}
+                    {OUTPUT_TAB_LABELS[tab]}
                   </button>
-                );
-              })}
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
             <div className="global-toolbar" role="group" aria-label="Setup actions">
               <button type="button" onClick={openImportPicker}>
@@ -765,6 +785,23 @@ export function SimulationShell() {
           {importError ? <p className="chart-toolbar-message" role="alert">{importError}</p> : null}
 
           <section
+            className="chart-panel overview-panel"
+            id="overview-panel"
+            role="tabpanel"
+            aria-labelledby="overview-tab"
+            hidden={activeTab !== 'overview'}
+          >
+            {shouldRenderOutputPanelContent('overview', activeTab) ? (
+              <ArchitectureOverview
+                design={inputs.hybridBraggDesign ?? null}
+                onOpenWorkspace={() => setActiveTab('spectrum')}
+                onOpenSpatial={() => setActiveTab('moving-region')}
+                onOpenMechanics={() => setActiveTab('mechanics')}
+              />
+            ) : null}
+          </section>
+
+          <section
             className="chart-panel"
             id="spectrum-panel"
             role="tabpanel"
@@ -774,7 +811,7 @@ export function SimulationShell() {
             {shouldRenderOutputPanelContent('spectrum', activeTab) ? (
               <>
                 <div className="chart-heading">
-                  <h2>Spectrum</h2>
+                  <h2>Fixed-Grating Display Workspace</h2>
                   <div className="chart-toolbar">
                     <button type="button" className="action-button" onClick={exportCsv} disabled={!result}>
                       Export Spectrum CSV
@@ -785,6 +822,19 @@ export function SimulationShell() {
                     </label>
                   </div>
                 </div>
+                {fixedGratingReadouts && inputs.hybridBraggDesign ? (
+                  <section className="workspace-operating-point" aria-label="Fixed grating operating point">
+                    <dl>
+                      <div><dt>Static Bragg</dt><dd>{formatNm(fixedGratingReadouts.staticBraggWavelengthNm)} nm</dd></div>
+                      <div><dt>Laser</dt><dd>{formatNm(inputs.hybridBraggDesign.fixedLaserWavelengthNm)} nm</dd></div>
+                      <div><dt>Detuning</dt><dd>{formatSignedNm(fixedGratingReadouts.laserDetuningNm)} nm</dd></div>
+                      <div><dt>Background strain</dt><dd>{formatMicrostrain(inputs.hybridBraggDesign.strainBias)}</dd></div>
+                      <div><dt>Trough center</dt><dd>{inputs.hybridBraggDesign.strainCenterMm.toFixed(3)} mm</dd></div>
+                      <div><dt>Solver</dt><dd>CMT interactive; Maxwell reference stale after edits</dd></div>
+                    </dl>
+                    <p>{getOperatingPointInterpretation(inputs.hybridBraggDesign)}</p>
+                  </section>
+                ) : null}
                 <ReflectanceChart result={result} showTransmission={showTransmission} xRange={xRange} progress={spectrumProgress} />
                 {opticalSolveError ? (
                   <p className="chart-toolbar-message" role="alert">{opticalSolveError}</p>
@@ -824,13 +874,13 @@ export function SimulationShell() {
             {shouldRenderOutputPanelContent('moving-region', activeTab) ? (
               <>
                 <div className="chart-heading">
-                  <h2>Moving Active Region</h2>
+                  <h2>Spatial Addressing</h2>
                   <div className="chart-toolbar">
                     <button type="button" className="action-button" onClick={runRegimeMap} disabled={regimeMapIsSolving || validationIssues.length > 0}>
-                      {regimeMapIsSolving ? 'Running Regime Map...' : 'Run Regime Map'}
+                      {regimeMapIsSolving ? 'Running Robustness Map...' : 'Run Robustness Map'}
                     </button>
                     <button type="button" className="action-button" onClick={exportMovingRegionCsv} disabled={!movingPulseResult}>
-                      Export Moving Region CSV
+                      Export Spatial CSV
                     </button>
                   </div>
                 </div>
@@ -859,7 +909,7 @@ export function SimulationShell() {
             {shouldRenderOutputPanelContent('parameter-sweep', activeTab) ? (
               <>
                 <div className="chart-heading">
-                  <h2>Parameter Sweep</h2>
+                  <h2>Robustness</h2>
                   <button type="button" className="action-button" onClick={exportSweepCsv} disabled={!parameterSweepResult}>Export Sweep CSV</button>
                 </div>
                 <ParameterSweepChart result={parameterSweepResult} progress={parameterSweepProgress} />
@@ -985,6 +1035,12 @@ export function SimulationShell() {
             ) : null}
           </section>
 
+          <section className="chart-panel" id="mechanics-panel" role="tabpanel" aria-labelledby="mechanics-tab" hidden={activeTab !== 'mechanics'}>
+            {shouldRenderOutputPanelContent('mechanics', activeTab) ? (
+              <MechanicsWorkspace />
+            ) : null}
+          </section>
+
           <section className="chart-panel" id="stack-definition-panel" role="tabpanel" aria-labelledby="stack-definition-tab" hidden={activeTab !== 'stack-definition'}>
             {shouldRenderOutputPanelContent('stack-definition', activeTab) ? (
               <StackDefinitionPanel
@@ -1033,14 +1089,113 @@ export function SimulationShell() {
       </section>
 
       <section className="how-to-use-panel panel" aria-label="How To Use">
-        <h2>How To Use</h2>
+        <h2>Research Areas</h2>
         <div className="how-to-use-panel-body">
-          Choose Optical, Manual, or Acoustic input mode; configure the structure; then inspect the
-          spectrum, heatmap, and Stack Definition. Parameter Sweep only lists fields that change the active
-          physical structure. Import and export preserve the active structure and shared analysis range.
+          Current Architecture starts with Fixed-Grating Display, Spatial Addressing, Robustness, and Mechanical Feasibility.
+          Supporting Research preserves Optical Stack, Acoustic / Acousto-Optic Research, Manual, Geometry / 3D, Slicer / STL,
+          and Import / Export without making historical tools the default workflow.
         </div>
       </section>
     </main>
+  );
+}
+
+/** Introduces the current fixed-grating display architecture before detailed controls. */
+function ArchitectureOverview({
+  design,
+  onOpenWorkspace,
+  onOpenSpatial,
+  onOpenMechanics,
+}: {
+  design: import('../types/simulation').HybridBraggDesignInputs | null;
+  onOpenWorkspace: () => void;
+  onOpenSpatial: () => void;
+  onOpenMechanics: () => void;
+}) {
+  const readouts = design ? getFixedGratingReadouts(design) : null;
+  return (
+    <div className="architecture-overview">
+      <div className="chart-heading">
+        <h2>Current Architecture</h2>
+        <div className="chart-toolbar">
+          <button type="button" className="action-button" onClick={onOpenWorkspace}>Open Fixed-Grating Display</button>
+          <button type="button" className="action-button" onClick={onOpenSpatial}>Open Spatial Addressing</button>
+          <button type="button" className="action-button" onClick={onOpenMechanics}>Open Mechanics</button>
+        </div>
+      </div>
+      {design && readouts ? (
+        <section className="architecture-diagram" aria-label="Fixed grating architecture diagram">
+          <div className="laser-node">
+            <span>Fixed narrowband laser</span>
+            <strong>{formatNm(design.fixedLaserWavelengthNm)} nm</strong>
+            <em>{formatSignedNm(readouts.laserDetuningNm)} nm detuning</em>
+          </div>
+          <div className="grating-schematic">
+            <div className="grating-title">Permanent volume grating</div>
+            <div className="grating-values">
+              <span>Static Bragg {formatNm(readouts.staticBraggWavelengthNm)} nm</span>
+              <span>Background strain {formatMicrostrain(design.strainBias)}</span>
+            </div>
+            <div className="strain-trace" aria-hidden="true"><span /></div>
+            <div className="localized-marker" style={{ left: `${Math.min(95, Math.max(5, (design.strainCenterMm / design.lengthMm) * 100))}%` }}>
+              <span>Localized reflection</span>
+            </div>
+          </div>
+        </section>
+      ) : null}
+      <ol className="architecture-flow" aria-label="Fixed grating display architecture">
+        <li>Permanent volume grating</li>
+        <li>Detuned laser</li>
+        <li>Localized strain trough</li>
+        <li>Solver-derived reflection region</li>
+      </ol>
+      <dl className="architecture-status-grid architecture-status-grid-overview">
+        <div>
+          <dt>Optical Architecture</dt>
+          <dd>CMT exploration with Maxwell validation for promising states.</dd>
+        </div>
+        <div>
+          <dt>Spatial Tracking</dt>
+          <dd>Reflection regions are calculated from normalized backward optical intensity.</dd>
+        </div>
+        <div>
+          <dt>Mechanical Feasibility</dt>
+          <dd>Reduced-order preload plus active counter-strain feasibility.</dd>
+        </div>
+        <div>
+          <dt>Experimental Validation</dt>
+          <dd>Not performed; current evidence is simulation-derived.</dd>
+        </div>
+      </dl>
+      <dl className="architecture-status-grid architecture-status-grid-overview" aria-label="Start here">
+        <div>
+          <dt>Primary Workflow</dt>
+          <dd>Set grating and detuned laser, tune the local strain trough, then inspect solver-derived reflection regions.</dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+/** Presents the existing reduced-order mechanics stage without adding new mechanical claims. */
+function MechanicsWorkspace() {
+  return (
+    <div className="mechanics-workspace">
+      <div className="chart-heading">
+        <h2>Mechanical Feasibility</h2>
+      </div>
+      <div className="mechanics-risk-panel" role="status">
+        <strong>Reduced-order result: Marginal / high-risk</strong>
+        <span>Leading concept: preload plus active counter-strain.</span>
+        <span>Primary risks: transition localization and position precision.</span>
+      </div>
+      <ol className="mechanics-flow" aria-label="Mechanical feasibility workflow">
+        <li><strong>Optical Target</strong><span>Prescribed biased strain trough and solver-derived reflection region.</span></li>
+        <li><strong>Mechanical Candidate</strong><span>Reduced-order preload plus active counter-strain architecture.</span></li>
+        <li><strong>Predicted Strain</strong><span>Compare target strain profile against mechanically produced trough shape.</span></li>
+        <li><strong>Optical Rescore</strong><span>Re-score candidates through the optical validation path before advancing mechanics.</span></li>
+      </ol>
+    </div>
   );
 }
 

@@ -4,8 +4,10 @@ import { attachConsoleErrorGuard } from './helpers';
 
 async function openSpectrum(page: Page) {
   await page.goto('/');
-  await expect(page.getByRole('tab', { name: 'Spectrum' })).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('heading', { name: 'Spectrum' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('tab', { name: 'Fixed-Grating Display' }).click();
+  await expect(page.getByRole('tab', { name: 'Fixed-Grating Display' })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('heading', { name: 'Fixed-Grating Display Workspace' })).toBeVisible();
 }
 
 async function waitForChartText(page: Page, text: string) {
@@ -22,6 +24,7 @@ test.describe('browser regression harness', () => {
   test('app loads spectrum chart and metrics', async ({ page }) => {
     await openSpectrum(page);
     await waitForChartText(page, 'Wavelength (nm)');
+    await expect(page.getByLabel('Fixed grating operating point').getByText('Detuning')).toBeVisible();
     const metrics = page.getByLabel('Simulation metrics');
     await expect(metrics.getByText('Peak reflectance', { exact: true })).toBeVisible();
     await expect(metrics.getByText('Center wavelength', { exact: true })).toBeVisible();
@@ -52,7 +55,7 @@ test.describe('browser regression harness', () => {
     await openSpectrum(page);
 
     await page.getByRole('combobox', { name: 'Input mode' }).selectOption('acoustic');
-    await page.getByRole('tab', { name: 'Parameter Sweep' }).click();
+    await page.getByRole('tab', { name: 'Robustness' }).click();
 
     const acousticFrequencyRow = page.locator('.parameter-sweep-row').filter({
       has: page.getByRole('heading', { name: 'Acoustic frequency' }),
@@ -68,14 +71,16 @@ test.describe('browser regression harness', () => {
     await openSpectrum(page);
 
     await page.getByRole('combobox', { name: 'Input mode' }).selectOption('hybrid');
-    const perturbationType = page.getByRole('combobox', { name: 'Perturbation type' });
+    const advancedControls = page.getByText('Advanced Solver / Strain Model');
+    await advancedControls.click();
+    const perturbationType = page.getByRole('combobox', { name: 'Strain profile' });
     await perturbationType.selectOption('piezo-window');
     await expect(perturbationType).toHaveValue('piezo-window');
-    await expect(page.getByRole('textbox', { name: 'bias strain' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'background strain' })).toBeVisible();
 
     await perturbationType.selectOption('piezo-trough');
     await expect(perturbationType).toHaveValue('piezo-trough');
-    await expect(page.getByRole('textbox', { name: 'bias strain' })).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'trough center (mm)' })).toBeVisible();
 
     await perturbationType.selectOption('piezo-array');
     await expect(perturbationType).toHaveValue('piezo-array');
@@ -84,15 +89,61 @@ test.describe('browser regression harness', () => {
     await page.getByRole('combobox', { name: 'Array polarity' }).selectOption('trough');
     await expect(page.getByRole('combobox', { name: 'Array polarity' })).toHaveValue('trough');
 
-    await page.getByRole('tab', { name: 'Moving Region' }).click();
+    await page.getByRole('tab', { name: 'Spatial Addressing' }).click();
     await expect(page.getByRole('heading', { name: 'Calculated Reflection Regions' })).toBeVisible();
+    await expect(page.getByText('Optical center:')).toBeVisible();
     await expect(page.getByText('Laser timing:')).toBeVisible();
     await waitForChartText(page, 'Actuator state index');
   });
 
+  test('architecture navigation exposes current workflow and supporting tools', async ({ page }) => {
+    await page.goto('/');
+
+    for (const tabName of [
+      'Overview',
+      'Fixed-Grating Display',
+      'Spatial Addressing',
+      'Robustness',
+      'Mechanical Feasibility',
+      'Optical Stack',
+      'Geometry / 3D',
+      'Slicer / STL',
+    ]) {
+      await expect(page.getByRole('tab', { name: tabName })).toBeVisible();
+    }
+
+    await expect(page.getByText('Acoustic / Acousto-Optic Research')).toBeVisible();
+  });
+
+  test('core controls and advanced disclosure are separated', async ({ page }) => {
+    await openSpectrum(page);
+
+    await expect(page.getByLabel('Core experiment controls')).toBeVisible();
+    await expect(page.getByRole('textbox', { name: 'laser detuning (nm)' })).toBeVisible();
+    await expect(page.getByText('Advanced Solver / Strain Model')).toBeVisible();
+    await page.getByText('Advanced Solver / Strain Model').click();
+    await expect(page.getByRole('textbox', { name: 'segments' })).toBeVisible();
+  });
+
+  test('detuning and trough edits update derived readouts and spatial view', async ({ page }) => {
+    await openSpectrum(page);
+
+    const detuning = page.getByRole('textbox', { name: 'laser detuning (nm)' });
+    await detuning.fill('0.2');
+    await detuning.press('Tab');
+    await expect(page.getByLabel('Fixed grating operating point').getByText('+0.200 nm')).toBeVisible();
+
+    const troughCenter = page.getByRole('textbox', { name: 'trough center (mm)' });
+    await troughCenter.fill('4.8');
+    await troughCenter.press('Tab');
+    await page.getByRole('tab', { name: 'Spatial Addressing' }).click();
+    await expect(page.getByText('Trough center:')).toBeVisible();
+    await waitForChartText(page, 'Normalized backward optical intensity');
+  });
+
   test('3D view opens and supports volume and plane modes', async ({ page }) => {
     await openSpectrum(page);
-    await page.getByRole('tab', { name: '3D View' }).click();
+    await page.getByRole('tab', { name: 'Geometry / 3D' }).click();
 
     const canvas = page.locator('[aria-label="3D reflectance canvas"] canvas');
     await expect(canvas).toBeVisible();
@@ -107,7 +158,7 @@ test.describe('browser regression harness', () => {
 
   test('STL slicer loads the sample mesh and reports bounded coverage', async ({ page }) => {
     await openSpectrum(page);
-    await page.getByRole('tab', { name: 'STL Slicer' }).click();
+    await page.getByRole('tab', { name: 'Slicer / STL' }).click();
 
     await page.getByRole('button', { name: 'Load sample hollow sphere' }).click();
     await expect(page.getByText(/Coverage averages .*peak slice coverage of/i)).toBeVisible();

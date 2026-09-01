@@ -42,11 +42,36 @@ describe('HybridBraggPanel', () => {
     );
 
     expect(markup).toContain('Prescribed piezo array');
-    expect(markup).toContain('Field center');
-    expect(markup).toContain('Bias strain');
+    expect(markup).toContain('Trough center');
+    expect(markup).toContain('Background strain');
     expect(markup).toContain('Active actuator');
     expect(markup).toContain('Adjacent command');
     expect(markup).toContain('Array polarity');
     expect(markup).toContain('Biased trough');
+  });
+
+  it('prioritizes detuning and progressive disclosure for the current fixed-grating workflow', () => {
+    const markup = renderToStaticMarkup(
+      <HybridBraggPanel
+        inputs={{
+          ...DEFAULT_QUARTER_WAVE_STACK_INPUTS,
+          thicknessMode: 'hybrid',
+          hybridBraggDesign: {
+            ...DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS,
+            fixedLaserWavelengthNm: 600.11,
+            strainBias: 0.0015,
+            peakStrain: -0.0015,
+            strainShape: 'piezo-trough',
+          },
+        }}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('Preset: Current Research Baseline');
+    expect(markup).toContain('Operating point summary');
+    expect(markup).toContain('Laser detuning (nm)');
+    expect(markup).toContain('Core Experiment');
+    expect(markup).toContain('Advanced Solver / Strain Model');
   });
 });

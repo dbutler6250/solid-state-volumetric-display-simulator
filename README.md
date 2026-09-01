@@ -5,11 +5,11 @@ Last Updated 6/29/26
 
 ## Project Description
 
-Browser-based optics simulation platform for solid-state volumetric display design.
+Browser-based research simulator for fixed-grating solid-state volumetric-display architectures.
 
-Uses a Transfer Matrix Method (TMM) solver to simulate quarter-wave optical stacks and their reflectance/transmission performance metrics. The simulator also includes an acoustic generator tab that converts an acoustic drive into an equivalent discretized optical stack with derived acoustic outputs and progress-aware stack generation.
+The primary workflow centers on a permanent volume grating, a fixed detuned laser, localized strain tuning, solver-derived spatial reflection regions, robustness checks, and reduced-order mechanical feasibility. The interactive fixed-grating workspace uses scalar coupled-mode theory (CMT), while Maxwell studies remain the higher-fidelity validation reference for promising states.
 
-An early v2 foundation now adds a headless hybrid permanent Bragg grating model. This separates a fabricated optical grating from a prescribed localized strain perturbation, applies an explicit first-order strain/material response, and evaluates spectra with a spatial coupled-mode solver. This is an architectural foundation and validation path, not a complete acoustic propagation or final volumetric-display model.
+Supporting tools remain available for quarter-wave optical stacks, manual layer tuning, acoustic / acousto-optic research, geometry inspection, STL slicing, parameter sweeps, CSV export, and JSON setup import/export. These tools are intentionally organized around the current display architecture instead of presented as competing primary modes.
 
 Built with TypeScript, React, Vite, and Plotly. Metrics will be used to develop a novel volumetric display prototype.
 
@@ -23,6 +23,7 @@ Screenshots and instructions to be added once development is complete.
 
 Current stable capabilities:
 
+- Fixed-grating display workspace with operating-point readouts, laser detuning, strain-trough controls, spectrum view, spatial addressing view, robustness sweeps, and solver provenance.
 - Quarter-wave optical stack spectra through the TMM solver.
 - Manual optical layer thickness tuning.
 - Acoustic index-grating layer generation and shared stack/sweep/export paths.
