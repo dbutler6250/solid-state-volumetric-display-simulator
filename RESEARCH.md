@@ -2762,3 +2762,15 @@ LARGER DETUNING IMPROVES BACKGROUND SUPPRESSION BUT DOES NOT MATERIALLY SIMPLIFY
 ```
 
 No simulator default should change from this packet. Larger detuning helps background extinction in isolation, but source management remains coupled to fabrication center error, wavelength drift, required strain excursion, and spatial localization. The next useful step is not a silent baseline replacement; it is either a refined operating-point search with a stronger spatial objective or architecture changes that keep high reflectance localized at the commanded trough.
+
+## WP-v2-15 Permanent-Grating Architecture Optimization
+
+Issue #80 starts from the WP-v2-14 closeout conclusion that no robust detuning-only operating region was identified. The study therefore keeps the historical biased-trough operating state fixed and asks whether physically interpretable permanent-grating engineering can improve the active/background tradeoff without changing simulator defaults.
+
+The generated artifacts are `artifacts/issue-80/permanent-grating-architecture-study.md` and `.json`, produced by `scripts/permanentGratingArchitectureStudy.mts`. The current baseline has `kappa = 523.6 1/m`, `L_c = 1.91 mm`, and `kappa L = 5.236`. The local trough plus transition region provides about `1.30 mm`, or `0.681 L_c`, so the current active region is under-coupled relative to the available interaction length.
+
+Uniform coupling sweeps show the expected tradeoff: increasing `Delta n` can raise active reflectance, but it broadens the spectral response and produces off-target, millimeter-scale optical regions rather than a clean moving reflective plane. In this bounded CMT packet, smooth apodization and simple phase/segmentation cases provide only modest reshaping. Stronger combined apodized cases can reach higher active reflectance, but their dominant response shifts toward the entrance and broadens across several millimeters.
+
+The current Maxwell layer reconstruction does not yet represent engineered coupling profiles, phase profiles, or segmented permanent-grating structure. WP-v2-15 therefore keeps those candidates CMT-only and uses Maxwell only where the high-fidelity path represents the same uniform grating architecture. This is a model-boundary limitation, not solver agreement evidence.
+
+Required conclusions from this packet: `THE CURRENT ACTIVE REGION IS UNDER-COUPLED RELATIVE TO ITS AVAILABLE INTERACTION LENGTH`; `PERMANENT-GRATING ENGINEERING DOES NOT RESOLVE THE ACTIVE / BACKGROUND TRADEOFF`; `NO TESTED PERMANENT-GRATING ARCHITECTURE IS CLEARLY PREFERRED`; `NO TESTED PERMANENT-GRATING ARCHITECTURE SUPPORTS ROBUST MOVING SPATIAL ADDRESSING`. No simulator default should change from WP-v2-15.

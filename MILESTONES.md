@@ -140,6 +140,7 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Add explicit current-state Maxwell validation UX
 - [x] Add Spatial Addressing trajectory map overlays
 - [x] Fixed-grating optical operating-point optimization with explicit fabricated/background/active Bragg states, normalized background detuning, CMT Pareto sweeps, selected Maxwell checks, and a no-default-change conclusion because stronger reflectance candidates were not robustly localized
+- [x] Permanent-grating architecture study with coupling-length scale, bounded uniform/length/apodization/segmentation/phase/chirp-proxy sweeps, selected Maxwell model-boundary checks, and a no-default-change conclusion
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization
