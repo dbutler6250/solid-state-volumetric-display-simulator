@@ -2,60 +2,56 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-78-operating-point-optimization`.
-- GitHub Issue #78: `WP-v2-14 - Fixed-grating optical operating-point optimization`.
-- Branch started from updated `main` at `d5e8564` after `git fetch --prune origin`.
-- GitHub PR chain checked before branching:
-  - PR #75 `WP-v2-12 - UI information architecture and research workspace redesign` is merged.
-  - PR #77 `WP-v2-13 - Spatial addressing validation UX` is merged.
-  - PR #76 was the temporary stacked WP-v2-13 PR and is closed unmerged.
+- Current branch: `codex/issue-80-permanent-grating-architecture`.
+- GitHub Issue #80: `WP-v2-15 - Permanent-grating spectral and spatial coupling architecture optimization`.
+- WP-v2-14 / PR #79 was audited, marked ready, squash-merged to `main` as `0822501cc71f728eb0213c0094d5fb35f79f25e4`, and Issue #78 is closed.
+- Local `main` was fast-forwarded to `origin/main` before this branch was created.
 
-## WP-v2-14 Result
+## WP-v2-15 Result
 
 - Artifacts:
-  - `artifacts/issue-78/fixed-grating-operating-point-study.md`
-  - `artifacts/issue-78/fixed-grating-operating-point-study.json`
-- Runner: `npx.cmd tsx scripts/fixedGratingOperatingPointStudy.mts`.
-- Baseline audit:
-  - `lambda_B,0 = 600.01 nm`.
-  - `lambda_B,bg = 600.70 nm`.
-  - `lambda_B,active = 600.01 nm`.
-  - `lambda_L = 600.11 nm`.
-  - The physically relevant OFF-state detuning is `Delta lambda_bg ~= -0.592 nm`, not the historical static `+0.10 nm` spacing.
-- Bare 10 mm / `Delta n = 1e-4` CMT grating FWHM is about `0.056 nm`; the historical biased-background point is about `10.6` FWHM off the laser.
-- Existing strain/material model gives about `0.461 nm` Bragg shift per `1000 microstrain`.
+  - `artifacts/issue-80/permanent-grating-architecture-study.md`
+  - `artifacts/issue-80/permanent-grating-architecture-study.json`
+- Runner: `npx.cmd tsx scripts/permanentGratingArchitectureStudy.mts`.
+- Current uniform baseline:
+  - `kappa = 523.6 1/m`.
+  - `L_c = 1.91 mm`.
+  - `kappa L = 5.236`.
+  - Active trough plus transitions are about `1.30 mm`, or `0.681 L_c`.
+- Required coupling map shows that 0.8 mm active lengths need about `Delta n = 2.10e-4` for `R = 0.50` and `4.34e-4` for `R = 0.90` in the idealized uniform short-grating benchmark.
 
 ## Conclusions
 
 ```text
-NO ROBUST DETUNING OPERATING REGION WAS IDENTIFIED
+THE CURRENT ACTIVE REGION IS UNDER-COUPLED RELATIVE TO ITS AVAILABLE INTERACTION LENGTH
 ```
 
 ```text
-THE HISTORICAL ~0.10 NM OPERATING POINT WAS A REASONABLE BUT NON-OPTIMAL EXPLORATORY CHOICE
+PERMANENT-GRATING ENGINEERING DOES NOT RESOLVE THE ACTIVE / BACKGROUND TRADEOFF
 ```
 
 ```text
-LARGER DETUNING IMPROVES BACKGROUND SUPPRESSION BUT DOES NOT MATERIALLY SIMPLIFY OVERALL LIGHT MANAGEMENT
+NO TESTED PERMANENT-GRATING ARCHITECTURE IS CLEARLY PREFERRED
 ```
 
-- Larger `|Delta lambda_bg|` suppresses background reflection in isolation.
-- Stronger-reflectance CMT candidates were not robust localized display points after spatial/Maxwell inspection: they shifted toward the entrance or broadened across millimeters.
-- Historical baseline remains the only selected candidate with Maxwell-supported primary region near the trough target in this packet.
-- No simulator default should change from WP-v2-14.
+```text
+NO TESTED PERMANENT-GRATING ARCHITECTURE SUPPORTS ROBUST MOVING SPATIAL ADDRESSING
+```
+
+- Stronger uniform coupling raises active reflectance but broadens spectral response and shifts/broadens the optical region.
+- Smooth apodization and simple segmentation/phase cases provide only modest tradeoff changes in CMT.
+- Combined stronger-coupling/apodized cases produce higher active reflectance but are not localized at the commanded trough.
+- Current Maxwell layer reconstruction does not represent engineered coupling, phase, or segmented grating profiles, so those rows are intentionally CMT-only.
+- No simulator default should change from WP-v2-15.
 
 ## Verification Snapshot
 
-- Clean `main` baseline before branching:
-  - `npm.cmd run test` failed before implementation because `src/simulation/validation/spatialMaxwellValidation.test.ts` timed out at 5000 ms; 262/263 tests passed.
-- WP-v2-14 runner:
-  - `npx.cmd tsx scripts/fixedGratingOperatingPointStudy.mts` passed and regenerated both issue #78 artifacts.
-- Branch verification:
-  - `npm.cmd run test` passed: 41 files / 263 tests.
-  - `npm.cmd run lint` passed.
-  - `npm.cmd run build` passed.
+- `npx.cmd tsx scripts/permanentGratingArchitectureStudy.mts` passed and regenerated issue #80 artifacts.
+- `npm.cmd run test` passed: 41 files / 263 tests.
+- `npm.cmd run lint` passed.
+- `npm.cmd run build` passed.
 
 ## Remaining Work
 
-- The clean-main Maxwell test timeout may need either a test-timeout adjustment or performance follow-up, but it predates WP-v2-14 edits.
-- Future operating-point work should use a stronger spatial objective or architecture changes before proposing a new default baseline.
+- Create PR for Issue #80 if verification passes.
+- Future high-fidelity follow-up should extend the Maxwell layer path to represent engineered coupling/phase/segmented permanent gratings before claiming Maxwell support for those architecture classes.
