@@ -2,10 +2,10 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-80-permanent-grating-architecture`.
-- GitHub Issue #80: `WP-v2-15 - Permanent-grating spectral and spatial coupling architecture optimization`.
-- WP-v2-14 / PR #79 was audited, marked ready, squash-merged to `main` as `0822501cc71f728eb0213c0094d5fb35f79f25e4`, and Issue #78 is closed.
-- Local `main` was fast-forwarded to `origin/main` before this branch was created.
+- Current branch: `main`.
+- Local `main` and `origin/main` are at `9605db936100111dd707dffbf08e507eb37c1f79`.
+- WP-v2-15 / PR #81 was audited, verified, squash-merged to `main`, and Issue #80 is closed.
+- WP-v2-15 is the current research baseline for the architecture reset.
 
 ## WP-v2-15 Result
 
@@ -53,5 +53,5 @@ NO TESTED PERMANENT-GRATING ARCHITECTURE SUPPORTS ROBUST MOVING SPATIAL ADDRESSI
 
 ## Remaining Work
 
-- Create PR for Issue #80 if verification passes.
+- Begin WP-v2-16 from the architecture-reset question rather than another strain-trough or permanent-grating tuning pass.
 - Future high-fidelity follow-up should extend the Maxwell layer path to represent engineered coupling/phase/segmented permanent gratings before claiming Maxwell support for those architecture classes.
