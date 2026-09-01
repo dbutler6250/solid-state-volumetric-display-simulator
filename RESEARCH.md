@@ -2774,3 +2774,39 @@ Uniform coupling sweeps show the expected tradeoff: increasing `Delta n` can rai
 The current Maxwell layer reconstruction does not yet represent engineered coupling profiles, phase profiles, or segmented permanent-grating structure. WP-v2-15 therefore keeps those candidates CMT-only and uses Maxwell only where the high-fidelity path represents the same uniform grating architecture. This is a model-boundary limitation, not solver agreement evidence.
 
 Required conclusions from this packet: `THE CURRENT ACTIVE REGION IS UNDER-COUPLED RELATIVE TO ITS AVAILABLE INTERACTION LENGTH`; `PERMANENT-GRATING ENGINEERING DOES NOT RESOLVE THE ACTIVE / BACKGROUND TRADEOFF`; `NO TESTED PERMANENT-GRATING ARCHITECTURE IS CLEARLY PREFERRED`; `NO TESTED PERMANENT-GRATING ARCHITECTURE SUPPORTS ROBUST MOVING SPATIAL ADDRESSING`. No simulator default should change from WP-v2-15.
+
+## WP-v2-16 Architecture Reset - Localized Optical Interaction Mechanisms
+
+Issue #82 resets the forward research question. The project history now reads:
+
+```text
+Dynamic acoustic grating
+        ↓
+Hybrid permanent VBG + local tuning
+        ↓
+Biased strain trough
+        ↓
+Maxwell validation
+        ↓
+detuning optimization failure
+        ↓
+permanent-grating engineering failure
+        ↓
+architecture reset
+```
+
+This does not discard the biased strain-trough work. It reclassifies it as a validated reference rather than the assumed forward architecture. WP-v2-14 showed that the biased background was already substantially detuned by about `-0.592 nm`, and WP-v2-15 showed that the active region was under-coupled while tested permanent-grating engineering did not resolve the active/background/localization tradeoff.
+
+The generated artifacts are `artifacts/issue-82/localized-optical-interaction-architecture-study.md` and `.json`, produced by `scripts/localizedOpticalInteractionArchitectureStudy.mts`. The study establishes local interaction-strength scales before choosing physics. For a Bragg-like active region at `600.11 nm`, a `0.8 mm` region needs about `kappa = 687 1/m` (`Delta n ~= 1.31e-4`) for an ideal `25%` local reflection and about `kappa = 1102 1/m` (`Delta n ~= 2.10e-4`) for `50%`. Keeping a full `10 mm` inactive grating below `R = 1e-3` requires an off-coupling near `3.16 1/m`, so useful switchable-coupling architectures need large `kappa_on / kappa_off` ratios.
+
+Architecture status after the reset:
+
+- Historical / disfavored: directly generating the optical-period backward-reflection grating with ultrasound; thermo-optic switching for fast localized depth addressing; display-rate photorefractive writing without a static assist.
+- Validated reference: biased permanent-grating plus strain trough, including Maxwell boundary validation and the known spatial/mechanical limitations.
+- Active candidates: hybrid static momentum plus dynamic switchable coupling, local phase/resonant defects, coupling cancellation/restoration, resonant scattering, sparse embedded structures, and scanning thin active layers.
+- Leading candidate: hybrid static momentum or plane definition plus electro-optic switchable coupling.
+- Open question: whether continuous bulk depth addressing or discrete active planes should define the next simulator architecture.
+
+The shortlist is deliberately small. The top directions are: hybrid static momentum plus electro-optic switchable coupling; discrete EO/LC active planes; sparse resonant-scatterer or resonator planes; and a locally gated phase-defect grating. Discrete active planes are now a credible competing architecture because they make inactive per-plane loss, active efficiency, and electronic addressing explicit instead of requiring arbitrary 3D field localization through a homogeneous bulk.
+
+Required conclusions from this packet: `THE BIASED STRAIN-TROUGH ARCHITECTURE IS RETAINED AS A VALIDATED RESEARCH REFERENCE BUT IS NO LONGER THE ASSUMED FORWARD ARCHITECTURE`; `MULTIPLE ALTERNATIVE ARCHITECTURES REMAIN CREDIBLE AND REQUIRE TARGETED FOLLOW-UP`; `LOCALLY SWITCHING OPTICAL COUPLING IS A CREDIBLE PATH FORWARD`; `DISCRETE ACTIVE PLANES ARE A CREDIBLE COMPETING ARCHITECTURE`; `ELECTRO-OPTIC CONTROL IS THE LEADING DYNAMIC MECHANISM`; `ADVANCE MULTIPLE SURVIVING ARCHITECTURES TO SMALL TARGETED FEASIBILITY STUDIES`.
