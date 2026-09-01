@@ -2,59 +2,60 @@
 
 ## Repository Status
 
-- Current branch: `main`.
-- `main` includes WP-v2-12 and WP-v2-13 after squash merges:
-  - PR #75 `WP-v2-12 — UI information architecture and research workspace redesign` -> `ff7bb83`.
-  - PR #77 `WP-v2-13 — Spatial addressing validation UX` -> `1273478`.
-- Issue #74 is closed.
-- Closed PR #76 was the temporary stacked WP-v2-13 PR and was superseded by PR #77 after PR #75 merged.
+- Current branch: `codex/issue-78-operating-point-optimization`.
+- GitHub Issue #78: `WP-v2-14 - Fixed-grating optical operating-point optimization`.
+- Branch started from updated `main` at `d5e8564` after `git fetch --prune origin`.
+- GitHub PR chain checked before branching:
+  - PR #75 `WP-v2-12 - UI information architecture and research workspace redesign` is merged.
+  - PR #77 `WP-v2-13 - Spatial addressing validation UX` is merged.
+  - PR #76 was the temporary stacked WP-v2-13 PR and is closed unmerged.
 
-## Current UI State
+## WP-v2-14 Result
 
-- Information architecture is complete for the current research workflow:
-  - Overview
-  - Fixed-Grating Display
-  - Spatial Addressing
-  - Robustness
-  - Mechanical Feasibility
-  - Supporting Research tools
-- Spatial Addressing now uses an aligned-depth workflow:
-  - strain profile epsilon(z);
-  - local detuning `lambda_B - lambda_laser`;
-  - normalized backward optical intensity;
-  - distinct trough-target and optical-center markers.
-- CMT / Maxwell provenance is explicit:
-  - CMT is the responsive interactive spatial model.
-  - Maxwell is an explicit current-state reference validation.
-  - Maxwell validation is marked stale after solver-relevant input edits, and stale Maxwell fields are not overlaid as the current optical result.
-- `Trajectory Map` is available as a secondary Spatial Addressing view with commanded trough and calculated optical-center trajectory overlays.
+- Artifacts:
+  - `artifacts/issue-78/fixed-grating-operating-point-study.md`
+  - `artifacts/issue-78/fixed-grating-operating-point-study.json`
+- Runner: `npx.cmd tsx scripts/fixedGratingOperatingPointStudy.mts`.
+- Baseline audit:
+  - `lambda_B,0 = 600.01 nm`.
+  - `lambda_B,bg = 600.70 nm`.
+  - `lambda_B,active = 600.01 nm`.
+  - `lambda_L = 600.11 nm`.
+  - The physically relevant OFF-state detuning is `Delta lambda_bg ~= -0.592 nm`, not the historical static `+0.10 nm` spacing.
+- Bare 10 mm / `Delta n = 1e-4` CMT grating FWHM is about `0.056 nm`; the historical biased-background point is about `10.6` FWHM off the laser.
+- Existing strain/material model gives about `0.461 nm` Bragg shift per `1000 microstrain`.
+
+## Conclusions
+
+```text
+NO ROBUST DETUNING OPERATING REGION WAS IDENTIFIED
+```
+
+```text
+THE HISTORICAL ~0.10 NM OPERATING POINT WAS A REASONABLE BUT NON-OPTIMAL EXPLORATORY CHOICE
+```
+
+```text
+LARGER DETUNING IMPROVES BACKGROUND SUPPRESSION BUT DOES NOT MATERIALLY SIMPLIFY OVERALL LIGHT MANAGEMENT
+```
+
+- Larger `|Delta lambda_bg|` suppresses background reflection in isolation.
+- Stronger-reflectance CMT candidates were not robust localized display points after spatial/Maxwell inspection: they shifted toward the entrance or broadened across millimeters.
+- Historical baseline remains the only selected candidate with Maxwell-supported primary region near the trough target in this packet.
+- No simulator default should change from WP-v2-14.
 
 ## Verification Snapshot
 
-- Pre-merge WP-v2-13 head:
-  - `npm.cmd run test` - 41 files / 263 tests passed.
-  - `npm.cmd run lint` - passed.
-  - `npm.cmd run build` - passed.
-  - `npm.cmd run test:browser` - 20 tests passed.
-- Physics regression scripts completed with unchanged conclusions:
-  - `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts`
-  - `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts`
-  - `npx.cmd tsx scripts/maxwellTroughRobustnessStudy.mts`
-  - `npx.cmd tsx scripts/strainTroughMechanicalFeasibilityStudy.mts`
-- Browser smoke against `http://127.0.0.1:5173` passed:
-  - required workspaces opened;
-  - Spatial Addressing traces, trajectory map, Maxwell `Not run` / `Current` / `Stale` behavior verified;
-  - no console errors;
-  - 1920x1080, 1440x900, and 1366x768 had no horizontal overflow.
+- Clean `main` baseline before branching:
+  - `npm.cmd run test` failed before implementation because `src/simulation/validation/spatialMaxwellValidation.test.ts` timed out at 5000 ms; 262/263 tests passed.
+- WP-v2-14 runner:
+  - `npx.cmd tsx scripts/fixedGratingOperatingPointStudy.mts` passed and regenerated both issue #78 artifacts.
+- Branch verification:
+  - `npm.cmd run test` passed: 41 files / 263 tests.
+  - `npm.cmd run lint` passed.
+  - `npm.cmd run build` passed.
 
-## Remaining UI Debt
+## Remaining Work
 
-- Consider a dedicated Acoustic / Acousto-Optic Research workspace instead of keeping it selected through Input mode.
-- Consider moving explicit Maxwell validation to a cancellable async path if heavier configurations become common.
-- Maxwell trajectory validation remains sparse/current-state only; do not imply continuous Maxwell validation without additional data.
-
-## Next Research Direction
-
-- Start WP-v2-14 from updated `main`.
-- WP-v2-14 scope: Fixed-Grating Optical Operating-Point Optimization - detuning, contrast, and required strain.
-- Do not start WP-v2-14 from a stale UI branch.
+- The clean-main Maxwell test timeout may need either a test-timeout adjustment or performance follow-up, but it predates WP-v2-14 edits.
+- Future operating-point work should use a stronger spatial objective or architecture changes before proposing a new default baseline.
