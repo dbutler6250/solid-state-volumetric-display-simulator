@@ -2730,3 +2730,35 @@ DETAILED MECHANICAL MODELING IS JUSTIFIED ONLY FOR A NARROW HIGH-RISK CONCEPT
 ```
 
 The next technical gate should stay narrow: detailed strain-transfer/FEM preparation only for the preload plus active counter-strain concept, including real actuator geometry, bond/interface transfer, preload boundary conditions, and direct Maxwell rescoring of the resulting `epsilon(z)`. Dynamics, thermal expansion, heating, hysteresis, creep, fatigue, and drive electronics remain deferred coupled-physics risks.
+
+## WP-v2-14 Fixed-Grating Operating-Point Optimization
+
+Issue #78 revisits the historical `600.01 nm -> 600.11 nm` fixed-grating operating point without rewriting earlier work as incorrect. The earlier point remains a useful exploratory baseline that enabled biased-trough development, Maxwell validation, robustness work, mechanics, and UI alignment. The new study asks whether the inactive/background grating should sit farther from the laser after background strain is applied.
+
+The study explicitly separates three wavelength states:
+
+- `lambda_B,0`: fabricated/unstrained Bragg wavelength.
+- `lambda_B,bg`: background-biased Bragg wavelength.
+- `lambda_B,active`: active trough Bragg wavelength.
+
+The corresponding detunings are `Delta lambda_0 = lambda_L - lambda_B,0`, `Delta lambda_bg = lambda_L - lambda_B,bg`, and `Delta lambda_active = lambda_L - lambda_B,active`. The important OFF-state quantity is `Delta lambda_bg`, not the historical laser-minus-static spacing.
+
+The generated artifacts are `artifacts/issue-78/fixed-grating-operating-point-study.md` and `.json`, produced by `scripts/fixedGratingOperatingPointStudy.mts`. For the current baseline, `lambda_B,0 = 600.01 nm`, `lambda_B,bg = 600.70 nm`, `lambda_B,active = 600.01 nm`, and `lambda_L = 600.11 nm`, so the actual background detuning is about `-0.592 nm`. The bare 10 mm, `Delta n = 1e-4` CMT grating has sampled FWHM about `0.056 nm`, making the historical biased background detuning about `10.6` FWHM. The existing strain/material model gives a Bragg shift of about `0.461 nm` per `1000 microstrain`.
+
+CMT background sweeps confirm that larger `|Delta lambda_bg|` can suppress uniform background reflection, but CMT active-state sweeps also show that high boundary reflectance is often produced by broad or off-target optical regions. Representative Maxwell checks preserve that warning: the historical baseline remains quantitatively supported near the trough target (`R_CMT = 0.0211`, `R_Maxwell = 0.0198`, Maxwell center about `4.895 mm`, width about `0.644 mm`), while stronger-reflectance candidates shift primary response toward the entrance or broaden across several millimeters. The large-detuning high-contrast candidate suppresses background to about `4.7e-4` and gives `R_Maxwell = 0.278`, but the optical region centers near `2.37 mm` with width about `4.74 mm`, so it is not a localized display operating point.
+
+Required conclusions:
+
+```text
+NO ROBUST DETUNING OPERATING REGION WAS IDENTIFIED
+```
+
+```text
+THE HISTORICAL ~0.10 NM OPERATING POINT WAS A REASONABLE BUT NON-OPTIMAL EXPLORATORY CHOICE
+```
+
+```text
+LARGER DETUNING IMPROVES BACKGROUND SUPPRESSION BUT DOES NOT MATERIALLY SIMPLIFY OVERALL LIGHT MANAGEMENT
+```
+
+No simulator default should change from this packet. Larger detuning helps background extinction in isolation, but source management remains coupled to fabrication center error, wavelength drift, required strain excursion, and spatial localization. The next useful step is not a silent baseline replacement; it is either a refined operating-point search with a stronger spatial objective or architecture changes that keep high reflectance localized at the commanded trough.
