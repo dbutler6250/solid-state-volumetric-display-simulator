@@ -77,6 +77,7 @@ Keep this section as the historical record. Do not create issues for these items
 - Maxwell trough robustness envelope with CMT exploration, selected Maxwell validation points, narrow tolerance ranges, solver-independent strain target extraction, and a reduced-order mechanical feasibility gate opening
 - Reduced-order mechanical feasibility closeout with tolerance audit/refinement, SI-unit axial mechanics, sampled actual strain-field metrics, direct mechanical-field Maxwell rescoring, and a marginal high-risk preload plus active counter-strain path
 - Fixed-grating UI information architecture pass with Overview default, Current Architecture navigation, spatial-first workflow labels, core/advanced control hierarchy, operating-point readouts, mechanics status workspace, and supporting-tool separation
+- Spatial Addressing UX closeout with shared-depth strain/detuning/backward-intensity traces, tracking metrics, explicit CMT/Maxwell validation provenance, stale validation behavior, and a trajectory-map view
 
 ## v2 - Hybrid Static Bragg Grating Simulation
 
@@ -135,6 +136,9 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Organize supporting research tools
 - [x] Improve solver/validation presentation
 - [x] Browser regression for new workflow
+- [x] Align Spatial Addressing traces by depth
+- [x] Add explicit current-state Maxwell validation UX
+- [x] Add Spatial Addressing trajectory map overlays
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization
