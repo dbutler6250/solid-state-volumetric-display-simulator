@@ -50,7 +50,7 @@ Spatial optical structure
 -> derived metrics / visualization
 ```
 
-The current leading research direction separates the permanent optical grating from the dynamic perturbation:
+The best-characterized reference architecture separates the permanent optical grating from the dynamic perturbation:
 
 ```text
 PermanentBraggGrating
@@ -63,7 +63,9 @@ PermanentBraggGrating
 
 The first v2 implementation supports a permanent uniform Bragg grating plus prescribed perturbation fields. Rectangular and Gaussian localized strain remain the legacy reference cases, and the same abstraction now also supports smooth top-hat, triangular, traveling sinusoid, standing wave, carrier-envelope packet, and two-tone superposition fields. The field changes the local period and refractive index through explicit first-order material-response logic. The coupled-mode solver samples the physical model into segments only at solver time, so future solvers can choose their own discretization.
 
-This architecture is a guide, not a frozen API. The goal is to keep physical structure, perturbation, material response, solver, experiment setup, and metrics separable enough for unit tests, sweeps, worker execution, and later validation against TMM or measured data.
+After WP-v2-16, project-level architecture status is under investigation. The biased strain trough remains the best-characterized reference architecture, but it is no longer the assumed forward architecture. The next simulator architecture should be selected from localized-interaction feasibility studies rather than inherited from the existing fixed-grating UI.
+
+This architecture remains a guide for the validated reference path, not a frozen API. The goal is to keep physical structure, perturbation, material response, solver, experiment setup, and metrics separable enough for unit tests, sweeps, worker execution, and later validation against TMM or measured data.
 
 Current code boundaries:
 

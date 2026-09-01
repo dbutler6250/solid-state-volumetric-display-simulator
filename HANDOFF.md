@@ -2,10 +2,10 @@
 
 ## Repository Status
 
-- Current branch: `main`.
-- Local `main` and `origin/main` are at `9605db936100111dd707dffbf08e507eb37c1f79`.
-- WP-v2-15 / PR #81 was audited, verified, squash-merged to `main`, and Issue #80 is closed.
-- WP-v2-15 is the current research baseline for the architecture reset.
+- Current branch: `codex/issue-82-localized-interaction-architecture`.
+- GitHub Issue #82: `WP-v2-16 - Architecture reset: localized optical interaction mechanisms`.
+- Branch started from clean `main` after WP-v2-15 / PR #81 was audited, verified, squash-merged, and Issue #80 was closed.
+- WP-v2-16 is an architecture feasibility and physics-gating packet, not a UI redesign or FEM/device-engineering task.
 
 ## WP-v2-15 Result
 
@@ -51,7 +51,46 @@ NO TESTED PERMANENT-GRATING ARCHITECTURE SUPPORTS ROBUST MOVING SPATIAL ADDRESSI
 - `npm.cmd run lint` passed.
 - `npm.cmd run build` passed.
 
+## WP-v2-16 Result
+
+- Artifacts:
+  - `artifacts/issue-82/localized-optical-interaction-architecture-study.md`
+  - `artifacts/issue-82/localized-optical-interaction-architecture-study.json`
+- Runner: `npx.cmd tsx scripts/localizedOpticalInteractionArchitectureStudy.mts`.
+- Architecture reset decision: the biased strain trough is retained as a validated research reference but is no longer the assumed forward architecture.
+- Candidate families researched: switchable Bragg coupling, locally induced gratings, phase/resonant defects, coupling cancellation/restoration, resonant scattering, EO/AO/photorefractive/thermo-optic activation, hybrid static momentum plus dynamic coupling, discrete active planes, sparse embedded structures, and scanned thin active layers.
+- Rejected mechanisms: direct optical-period dynamic acoustic grating, fast thermo-optic bulk depth switching, and display-rate photorefractive writing without a static assist.
+- Surviving architectures: hybrid static momentum plus EO switchable coupling; discrete EO/LC active planes; sparse resonant-scatterer or resonator planes; locally gated phase-defect grating.
+- Leading control mechanism: electro-optic control, with field localization and electrode geometry still unresolved.
+- Continuous-vs-discrete result: discrete active planes are a credible competing architecture.
+
+## WP-v2-16 Conclusions
+
+```text
+THE BIASED STRAIN-TROUGH ARCHITECTURE IS RETAINED AS A VALIDATED RESEARCH REFERENCE BUT IS NO LONGER THE ASSUMED FORWARD ARCHITECTURE
+```
+
+```text
+MULTIPLE ALTERNATIVE ARCHITECTURES REMAIN CREDIBLE AND REQUIRE TARGETED FOLLOW-UP
+```
+
+```text
+LOCALLY SWITCHING OPTICAL COUPLING IS A CREDIBLE PATH FORWARD
+```
+
+```text
+DISCRETE ACTIVE PLANES ARE A CREDIBLE COMPETING ARCHITECTURE
+```
+
+```text
+ELECTRO-OPTIC CONTROL IS THE LEADING DYNAMIC MECHANISM
+```
+
+```text
+ADVANCE MULTIPLE SURVIVING ARCHITECTURES TO SMALL TARGETED FEASIBILITY STUDIES
+```
+
 ## Remaining Work
 
-- Begin WP-v2-16 from the architecture-reset question rather than another strain-trough or permanent-grating tuning pass.
+- Recommended next packet: compare a switchable-kappa static-momentum plus EO-control model against a discrete active-plane loss/efficiency model.
 - Future high-fidelity follow-up should extend the Maxwell layer path to represent engineered coupling/phase/segmented permanent gratings before claiming Maxwell support for those architecture classes.

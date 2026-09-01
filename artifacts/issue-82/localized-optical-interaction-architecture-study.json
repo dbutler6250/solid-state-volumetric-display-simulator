@@ -1,0 +1,1302 @@
+{
+  "issue": 82,
+  "assumptions": {
+    "wavelengthNm": 600.11,
+    "nominalIndex": 1.5,
+    "braggPeriodNm": 200.03666666666666,
+    "currentDeltaN": 0.0001,
+    "backgroundReflectanceLimit": 0.001,
+    "usefulActiveReflectance": 0.25
+  },
+  "displayRequirements": [
+    {
+      "requirement": "inactive-state transparency",
+      "classification": "Hard physical requirement",
+      "currentTarget": "TBD; must be high enough that many inactive depths do not haze or attenuate the image",
+      "rationale": "The display volume must remain visibly transparent except at the addressed optical event."
+    },
+    {
+      "requirement": "active-state optical efficiency",
+      "classification": "Engineering target",
+      "currentTarget": "Use 25% redirected/reflected fraction as a useful near-term reference, not a final product requirement",
+      "rationale": "WP-v2-15 showed ratio-only wins are not useful if absolute active response remains weak."
+    },
+    {
+      "requirement": "active-region thickness",
+      "classification": "Engineering target",
+      "currentTarget": "0.1-2.0 mm screened; thinner is better for depth precision but raises coupling demand",
+      "rationale": "Required interaction strength scales inversely with active thickness."
+    },
+    {
+      "requirement": "usable display depth",
+      "classification": "Unknown / requires decision",
+      "currentTarget": "TBD",
+      "rationale": "The simulator has used 10 mm optical stacks, but product depth has not been fixed."
+    },
+    {
+      "requirement": "spatial addressability",
+      "classification": "Hard physical requirement",
+      "currentTarget": "Must move or select the active optical event through useful depth",
+      "rationale": "A fixed reflector or one-depth resonance is not a volumetric display architecture."
+    },
+    {
+      "requirement": "switching / movement speed",
+      "classification": "Engineering target",
+      "currentTarget": "TBD; likely video-rate or faster for practical display use",
+      "rationale": "Fast optical/electrical mechanisms are preferred, but no frame-rate target is yet specified."
+    },
+    {
+      "requirement": "viewing geometry",
+      "classification": "Unknown / requires decision",
+      "currentTarget": "Separate voxel generation from wide-angle output engineering",
+      "rationale": "Specular or Bragg output can be useful for a projector relay but is not wide-angle scattering by itself."
+    },
+    {
+      "requirement": "wavelength compatibility",
+      "classification": "Engineering target",
+      "currentTarget": "Visible operation around the existing 600.11 nm baseline",
+      "rationale": "The current model and artifacts use 600.11 nm; other colors add dispersion and material constraints."
+    },
+    {
+      "requirement": "control-energy requirement",
+      "classification": "Engineering target",
+      "currentTarget": "TBD; compare required field, acoustic power, optical fluence, or heat load per active plane",
+      "rationale": "A mechanism that works only with damaging or heating control energy is not viable."
+    },
+    {
+      "requirement": "thermal load",
+      "classification": "Hard physical requirement",
+      "currentTarget": "Low; no persistent local heating buildup",
+      "rationale": "Thermal diffusion can erase depth localization and limit refresh."
+    },
+    {
+      "requirement": "fabrication feasibility",
+      "classification": "Engineering target",
+      "currentTarget": "Prefer wafer/layer, volume holographic, or mature EO/AO material paths",
+      "rationale": "Arbitrary 3D nanostructuring through a thick transparent volume is not assumed available."
+    },
+    {
+      "requirement": "scalability",
+      "classification": "Engineering target",
+      "currentTarget": "TBD",
+      "rationale": "Architecture must scale beyond a single demonstration voxel."
+    },
+    {
+      "requirement": "optical coherence sensitivity",
+      "classification": "Desirable property",
+      "currentTarget": "Lower is better",
+      "rationale": "Highly coherent full-volume participation drove several fixed-grating tradeoffs."
+    },
+    {
+      "requirement": "mechanical complexity",
+      "classification": "Desirable property",
+      "currentTarget": "Lower is better",
+      "rationale": "Detailed mechanics remain gated; moving bulk strain fields are no longer assumed."
+    },
+    {
+      "requirement": "material availability",
+      "classification": "Engineering target",
+      "currentTarget": "Prefer documented transparent EO/AO/LC/photonic materials",
+      "rationale": "Speculative material response is not enough for architecture selection."
+    }
+  ],
+  "localInteractionRequirements": [
+    {
+      "thicknessMm": 0.1,
+      "requirements": [
+        {
+          "redirectedFraction": 0.01,
+          "braggKappaPerM": 1003.3534773107561,
+          "equivalentDeltaN": 0.0001916615302053666,
+          "singlePassScatteringAlphaPerM": 100.5033585350145
+        },
+        {
+          "redirectedFraction": 0.05,
+          "braggKappaPerM": 2274.495360057914,
+          "equivalentDeltaN": 0.0004344762548908672,
+          "singlePassScatteringAlphaPerM": 512.9329438755058
+        },
+        {
+          "redirectedFraction": 0.1,
+          "braggKappaPerM": 3274.5015023725846,
+          "equivalentDeltaN": 0.0006254983739993796,
+          "singlePassScatteringAlphaPerM": 1053.6051565782627
+        },
+        {
+          "redirectedFraction": 0.25,
+          "braggKappaPerM": 5493.061443340547,
+          "equivalentDeltaN": 0.0010492897922320906,
+          "singlePassScatteringAlphaPerM": 2876.8207245178087
+        },
+        {
+          "redirectedFraction": 0.5,
+          "braggKappaPerM": 8813.73587019543,
+          "equivalentDeltaN": 0.0016836081619363273,
+          "singlePassScatteringAlphaPerM": 6931.471805599453
+        },
+        {
+          "redirectedFraction": 0.75,
+          "braggKappaPerM": 13169.578969248165,
+          "equivalentDeltaN": 0.0025156654304640032,
+          "singlePassScatteringAlphaPerM": 13862.943611198905
+        },
+        {
+          "redirectedFraction": 0.9,
+          "braggKappaPerM": 18184.464592320666,
+          "equivalentDeltaN": 0.0034736136252508745,
+          "singlePassScatteringAlphaPerM": 23025.850929940458
+        }
+      ]
+    },
+    {
+      "thicknessMm": 0.25,
+      "requirements": [
+        {
+          "redirectedFraction": 0.01,
+          "braggKappaPerM": 401.34139092430246,
+          "equivalentDeltaN": 0.00007666461208214663,
+          "singlePassScatteringAlphaPerM": 40.2013434140058
+        },
+        {
+          "redirectedFraction": 0.05,
+          "braggKappaPerM": 909.7981440231655,
+          "equivalentDeltaN": 0.00017379050195634688,
+          "singlePassScatteringAlphaPerM": 205.1731775502023
+        },
+        {
+          "redirectedFraction": 0.1,
+          "braggKappaPerM": 1309.8006009490339,
+          "equivalentDeltaN": 0.00025019934959975187,
+          "singlePassScatteringAlphaPerM": 421.44206263130513
+        },
+        {
+          "redirectedFraction": 0.25,
+          "braggKappaPerM": 2197.224577336219,
+          "equivalentDeltaN": 0.00041971591689283626,
+          "singlePassScatteringAlphaPerM": 1150.7282898071235
+        },
+        {
+          "redirectedFraction": 0.5,
+          "braggKappaPerM": 3525.494348078172,
+          "equivalentDeltaN": 0.000673443264774531,
+          "singlePassScatteringAlphaPerM": 2772.588722239781
+        },
+        {
+          "redirectedFraction": 0.75,
+          "braggKappaPerM": 5267.8315876992665,
+          "equivalentDeltaN": 0.0010062661721856015,
+          "singlePassScatteringAlphaPerM": 5545.177444479562
+        },
+        {
+          "redirectedFraction": 0.9,
+          "braggKappaPerM": 7273.785836928267,
+          "equivalentDeltaN": 0.0013894454501003496,
+          "singlePassScatteringAlphaPerM": 9210.340371976183
+        }
+      ]
+    },
+    {
+      "thicknessMm": 0.5,
+      "requirements": [
+        {
+          "redirectedFraction": 0.01,
+          "braggKappaPerM": 200.67069546215123,
+          "equivalentDeltaN": 0.000038332306041073314,
+          "singlePassScatteringAlphaPerM": 20.1006717070029
+        },
+        {
+          "redirectedFraction": 0.05,
+          "braggKappaPerM": 454.89907201158275,
+          "equivalentDeltaN": 0.00008689525097817344,
+          "singlePassScatteringAlphaPerM": 102.58658877510115
+        },
+        {
+          "redirectedFraction": 0.1,
+          "braggKappaPerM": 654.9003004745169,
+          "equivalentDeltaN": 0.00012509967479987593,
+          "singlePassScatteringAlphaPerM": 210.72103131565257
+        },
+        {
+          "redirectedFraction": 0.25,
+          "braggKappaPerM": 1098.6122886681096,
+          "equivalentDeltaN": 0.00020985795844641813,
+          "singlePassScatteringAlphaPerM": 575.3641449035617
+        },
+        {
+          "redirectedFraction": 0.5,
+          "braggKappaPerM": 1762.747174039086,
+          "equivalentDeltaN": 0.0003367216323872655,
+          "singlePassScatteringAlphaPerM": 1386.2943611198905
+        },
+        {
+          "redirectedFraction": 0.75,
+          "braggKappaPerM": 2633.9157938496332,
+          "equivalentDeltaN": 0.0005031330860928008,
+          "singlePassScatteringAlphaPerM": 2772.588722239781
+        },
+        {
+          "redirectedFraction": 0.9,
+          "braggKappaPerM": 3636.8929184641333,
+          "equivalentDeltaN": 0.0006947227250501748,
+          "singlePassScatteringAlphaPerM": 4605.170185988091
+        }
+      ]
+    },
+    {
+      "thicknessMm": 1,
+      "requirements": [
+        {
+          "redirectedFraction": 0.01,
+          "braggKappaPerM": 100.33534773107561,
+          "equivalentDeltaN": 0.000019166153020536657,
+          "singlePassScatteringAlphaPerM": 10.05033585350145
+        },
+        {
+          "redirectedFraction": 0.05,
+          "braggKappaPerM": 227.44953600579137,
+          "equivalentDeltaN": 0.00004344762548908672,
+          "singlePassScatteringAlphaPerM": 51.293294387550574
+        },
+        {
+          "redirectedFraction": 0.1,
+          "braggKappaPerM": 327.45015023725847,
+          "equivalentDeltaN": 0.00006254983739993797,
+          "singlePassScatteringAlphaPerM": 105.36051565782628
+        },
+        {
+          "redirectedFraction": 0.25,
+          "braggKappaPerM": 549.3061443340548,
+          "equivalentDeltaN": 0.00010492897922320907,
+          "singlePassScatteringAlphaPerM": 287.68207245178087
+        },
+        {
+          "redirectedFraction": 0.5,
+          "braggKappaPerM": 881.373587019543,
+          "equivalentDeltaN": 0.00016836081619363275,
+          "singlePassScatteringAlphaPerM": 693.1471805599452
+        },
+        {
+          "redirectedFraction": 0.75,
+          "braggKappaPerM": 1316.9578969248166,
+          "equivalentDeltaN": 0.0002515665430464004,
+          "singlePassScatteringAlphaPerM": 1386.2943611198905
+        },
+        {
+          "redirectedFraction": 0.9,
+          "braggKappaPerM": 1818.4464592320667,
+          "equivalentDeltaN": 0.0003473613625250874,
+          "singlePassScatteringAlphaPerM": 2302.5850929940457
+        }
+      ]
+    },
+    {
+      "thicknessMm": 2,
+      "requirements": [
+        {
+          "redirectedFraction": 0.01,
+          "braggKappaPerM": 50.16767386553781,
+          "equivalentDeltaN": 0.000009583076510268329,
+          "singlePassScatteringAlphaPerM": 5.025167926750725
+        },
+        {
+          "redirectedFraction": 0.05,
+          "braggKappaPerM": 113.72476800289569,
+          "equivalentDeltaN": 0.00002172381274454336,
+          "singlePassScatteringAlphaPerM": 25.646647193775287
+        },
+        {
+          "redirectedFraction": 0.1,
+          "braggKappaPerM": 163.72507511862923,
+          "equivalentDeltaN": 0.00003127491869996898,
+          "singlePassScatteringAlphaPerM": 52.68025782891314
+        },
+        {
+          "redirectedFraction": 0.25,
+          "braggKappaPerM": 274.6530721670274,
+          "equivalentDeltaN": 0.00005246448961160453,
+          "singlePassScatteringAlphaPerM": 143.84103622589043
+        },
+        {
+          "redirectedFraction": 0.5,
+          "braggKappaPerM": 440.6867935097715,
+          "equivalentDeltaN": 0.00008418040809681637,
+          "singlePassScatteringAlphaPerM": 346.5735902799726
+        },
+        {
+          "redirectedFraction": 0.75,
+          "braggKappaPerM": 658.4789484624083,
+          "equivalentDeltaN": 0.0001257832715232002,
+          "singlePassScatteringAlphaPerM": 693.1471805599452
+        },
+        {
+          "redirectedFraction": 0.9,
+          "braggKappaPerM": 909.2232296160333,
+          "equivalentDeltaN": 0.0001736806812625437,
+          "singlePassScatteringAlphaPerM": 1151.2925464970228
+        }
+      ]
+    }
+  ],
+  "braggDeltaNRequirements": [
+    {
+      "activeLengthMm": 0.25,
+      "targets": [
+        {
+          "reflectance": 0.01,
+          "kappaPerM": 401.34139092430246,
+          "deltaN": 0.00007666461208214663,
+          "factorVsCurrent": 0.7666461208214662
+        },
+        {
+          "reflectance": 0.05,
+          "kappaPerM": 909.7981440231655,
+          "deltaN": 0.00017379050195634688,
+          "factorVsCurrent": 1.7379050195634687
+        },
+        {
+          "reflectance": 0.1,
+          "kappaPerM": 1309.8006009490339,
+          "deltaN": 0.00025019934959975187,
+          "factorVsCurrent": 2.5019934959975187
+        },
+        {
+          "reflectance": 0.25,
+          "kappaPerM": 2197.224577336219,
+          "deltaN": 0.00041971591689283626,
+          "factorVsCurrent": 4.197159168928362
+        },
+        {
+          "reflectance": 0.5,
+          "kappaPerM": 3525.494348078172,
+          "deltaN": 0.000673443264774531,
+          "factorVsCurrent": 6.73443264774531
+        },
+        {
+          "reflectance": 0.75,
+          "kappaPerM": 5267.8315876992665,
+          "deltaN": 0.0010062661721856015,
+          "factorVsCurrent": 10.062661721856015
+        },
+        {
+          "reflectance": 0.9,
+          "kappaPerM": 7273.785836928267,
+          "deltaN": 0.0013894454501003496,
+          "factorVsCurrent": 13.894454501003494
+        }
+      ]
+    },
+    {
+      "activeLengthMm": 0.5,
+      "targets": [
+        {
+          "reflectance": 0.01,
+          "kappaPerM": 200.67069546215123,
+          "deltaN": 0.000038332306041073314,
+          "factorVsCurrent": 0.3833230604107331
+        },
+        {
+          "reflectance": 0.05,
+          "kappaPerM": 454.89907201158275,
+          "deltaN": 0.00008689525097817344,
+          "factorVsCurrent": 0.8689525097817343
+        },
+        {
+          "reflectance": 0.1,
+          "kappaPerM": 654.9003004745169,
+          "deltaN": 0.00012509967479987593,
+          "factorVsCurrent": 1.2509967479987594
+        },
+        {
+          "reflectance": 0.25,
+          "kappaPerM": 1098.6122886681096,
+          "deltaN": 0.00020985795844641813,
+          "factorVsCurrent": 2.098579584464181
+        },
+        {
+          "reflectance": 0.5,
+          "kappaPerM": 1762.747174039086,
+          "deltaN": 0.0003367216323872655,
+          "factorVsCurrent": 3.367216323872655
+        },
+        {
+          "reflectance": 0.75,
+          "kappaPerM": 2633.9157938496332,
+          "deltaN": 0.0005031330860928008,
+          "factorVsCurrent": 5.031330860928008
+        },
+        {
+          "reflectance": 0.9,
+          "kappaPerM": 3636.8929184641333,
+          "deltaN": 0.0006947227250501748,
+          "factorVsCurrent": 6.947227250501747
+        }
+      ]
+    },
+    {
+      "activeLengthMm": 0.8,
+      "targets": [
+        {
+          "reflectance": 0.01,
+          "kappaPerM": 125.41918466384452,
+          "deltaN": 0.000023957691275670825,
+          "factorVsCurrent": 0.23957691275670823
+        },
+        {
+          "reflectance": 0.05,
+          "kappaPerM": 284.3119200072392,
+          "deltaN": 0.0000543095318613584,
+          "factorVsCurrent": 0.543095318613584
+        },
+        {
+          "reflectance": 0.1,
+          "kappaPerM": 409.3126877965731,
+          "deltaN": 0.00007818729674992245,
+          "factorVsCurrent": 0.7818729674992244
+        },
+        {
+          "reflectance": 0.25,
+          "kappaPerM": 686.6326804175684,
+          "deltaN": 0.00013116122402901133,
+          "factorVsCurrent": 1.3116122402901131
+        },
+        {
+          "reflectance": 0.5,
+          "kappaPerM": 1101.7169837744289,
+          "deltaN": 0.0002104510202420409,
+          "factorVsCurrent": 2.1045102024204088
+        },
+        {
+          "reflectance": 0.75,
+          "kappaPerM": 1646.1973711560206,
+          "deltaN": 0.0003144581788080004,
+          "factorVsCurrent": 3.144581788080004
+        },
+        {
+          "reflectance": 0.9,
+          "kappaPerM": 2273.0580740400833,
+          "deltaN": 0.0004342017031563593,
+          "factorVsCurrent": 4.342017031563593
+        }
+      ]
+    },
+    {
+      "activeLengthMm": 1,
+      "targets": [
+        {
+          "reflectance": 0.01,
+          "kappaPerM": 100.33534773107561,
+          "deltaN": 0.000019166153020536657,
+          "factorVsCurrent": 0.19166153020536655
+        },
+        {
+          "reflectance": 0.05,
+          "kappaPerM": 227.44953600579137,
+          "deltaN": 0.00004344762548908672,
+          "factorVsCurrent": 0.43447625489086716
+        },
+        {
+          "reflectance": 0.1,
+          "kappaPerM": 327.45015023725847,
+          "deltaN": 0.00006254983739993797,
+          "factorVsCurrent": 0.6254983739993797
+        },
+        {
+          "reflectance": 0.25,
+          "kappaPerM": 549.3061443340548,
+          "deltaN": 0.00010492897922320907,
+          "factorVsCurrent": 1.0492897922320905
+        },
+        {
+          "reflectance": 0.5,
+          "kappaPerM": 881.373587019543,
+          "deltaN": 0.00016836081619363275,
+          "factorVsCurrent": 1.6836081619363275
+        },
+        {
+          "reflectance": 0.75,
+          "kappaPerM": 1316.9578969248166,
+          "deltaN": 0.0002515665430464004,
+          "factorVsCurrent": 2.515665430464004
+        },
+        {
+          "reflectance": 0.9,
+          "kappaPerM": 1818.4464592320667,
+          "deltaN": 0.0003473613625250874,
+          "factorVsCurrent": 3.4736136252508736
+        }
+      ]
+    },
+    {
+      "activeLengthMm": 2,
+      "targets": [
+        {
+          "reflectance": 0.01,
+          "kappaPerM": 50.16767386553781,
+          "deltaN": 0.000009583076510268329,
+          "factorVsCurrent": 0.09583076510268328
+        },
+        {
+          "reflectance": 0.05,
+          "kappaPerM": 113.72476800289569,
+          "deltaN": 0.00002172381274454336,
+          "factorVsCurrent": 0.21723812744543358
+        },
+        {
+          "reflectance": 0.1,
+          "kappaPerM": 163.72507511862923,
+          "deltaN": 0.00003127491869996898,
+          "factorVsCurrent": 0.31274918699968984
+        },
+        {
+          "reflectance": 0.25,
+          "kappaPerM": 274.6530721670274,
+          "deltaN": 0.00005246448961160453,
+          "factorVsCurrent": 0.5246448961160453
+        },
+        {
+          "reflectance": 0.5,
+          "kappaPerM": 440.6867935097715,
+          "deltaN": 0.00008418040809681637,
+          "factorVsCurrent": 0.8418040809681637
+        },
+        {
+          "reflectance": 0.75,
+          "kappaPerM": 658.4789484624083,
+          "deltaN": 0.0001257832715232002,
+          "factorVsCurrent": 1.257832715232002
+        },
+        {
+          "reflectance": 0.9,
+          "kappaPerM": 909.2232296160333,
+          "deltaN": 0.0001736806812625437,
+          "factorVsCurrent": 1.7368068126254368
+        }
+      ]
+    }
+  ],
+  "switchableCouplingRequirement": [
+    {
+      "activeLengthMm": 0.25,
+      "backgroundLimitReflectance": 0.001,
+      "activeTargetReflectance": 0.25,
+      "maxOffKappaPerMFor10Mm": 3.1633323856294115,
+      "requiredOnKappaPerM": 2197.224577336219,
+      "requiredKappaSwitchingRatio": 694.5917499273587,
+      "offDeltaNEquivalent": 6.042627441755977e-7,
+      "onDeltaNEquivalent": 0.00041971591689283626
+    },
+    {
+      "activeLengthMm": 0.5,
+      "backgroundLimitReflectance": 0.001,
+      "activeTargetReflectance": 0.25,
+      "maxOffKappaPerMFor10Mm": 3.1633323856294115,
+      "requiredOnKappaPerM": 1098.6122886681096,
+      "requiredKappaSwitchingRatio": 347.29587496367935,
+      "offDeltaNEquivalent": 6.042627441755977e-7,
+      "onDeltaNEquivalent": 0.00020985795844641813
+    },
+    {
+      "activeLengthMm": 0.8,
+      "backgroundLimitReflectance": 0.001,
+      "activeTargetReflectance": 0.25,
+      "maxOffKappaPerMFor10Mm": 3.1633323856294115,
+      "requiredOnKappaPerM": 686.6326804175684,
+      "requiredKappaSwitchingRatio": 217.05992185229957,
+      "offDeltaNEquivalent": 6.042627441755977e-7,
+      "onDeltaNEquivalent": 0.00013116122402901133
+    },
+    {
+      "activeLengthMm": 1,
+      "backgroundLimitReflectance": 0.001,
+      "activeTargetReflectance": 0.25,
+      "maxOffKappaPerMFor10Mm": 3.1633323856294115,
+      "requiredOnKappaPerM": 549.3061443340548,
+      "requiredKappaSwitchingRatio": 173.64793748183968,
+      "offDeltaNEquivalent": 6.042627441755977e-7,
+      "onDeltaNEquivalent": 0.00010492897922320907
+    },
+    {
+      "activeLengthMm": 2,
+      "backgroundLimitReflectance": 0.001,
+      "activeTargetReflectance": 0.25,
+      "maxOffKappaPerMFor10Mm": 3.1633323856294115,
+      "requiredOnKappaPerM": 274.6530721670274,
+      "requiredKappaSwitchingRatio": 86.82396874091984,
+      "offDeltaNEquivalent": 6.042627441755977e-7,
+      "onDeltaNEquivalent": 0.00005246448961160453
+    }
+  ],
+  "resonatorShiftRequirements": [
+    {
+      "q": 20,
+      "linewidthNm": 30.0055,
+      "indexShiftForOneLinewidth": 0.075,
+      "indexShiftForHalfLinewidth": 0.0375,
+      "eoFieldForHalfLinewidthVm": 716845878.1362005,
+      "temperatureRiseForHalfLinewidthK": 3749.9999999999995
+    },
+    {
+      "q": 50,
+      "linewidthNm": 12.0022,
+      "indexShiftForOneLinewidth": 0.03,
+      "indexShiftForHalfLinewidth": 0.015,
+      "eoFieldForHalfLinewidthVm": 286738351.25448024,
+      "temperatureRiseForHalfLinewidthK": 1499.9999999999998
+    },
+    {
+      "q": 100,
+      "linewidthNm": 6.0011,
+      "indexShiftForOneLinewidth": 0.015,
+      "indexShiftForHalfLinewidth": 0.0075,
+      "eoFieldForHalfLinewidthVm": 143369175.62724012,
+      "temperatureRiseForHalfLinewidthK": 749.9999999999999
+    },
+    {
+      "q": 250,
+      "linewidthNm": 2.40044,
+      "indexShiftForOneLinewidth": 0.006,
+      "indexShiftForHalfLinewidth": 0.003,
+      "eoFieldForHalfLinewidthVm": 57347670.25089605,
+      "temperatureRiseForHalfLinewidthK": 300
+    },
+    {
+      "q": 500,
+      "linewidthNm": 1.20022,
+      "indexShiftForOneLinewidth": 0.003,
+      "indexShiftForHalfLinewidth": 0.0015,
+      "eoFieldForHalfLinewidthVm": 28673835.125448026,
+      "temperatureRiseForHalfLinewidthK": 150
+    },
+    {
+      "q": 1000,
+      "linewidthNm": 0.60011,
+      "indexShiftForOneLinewidth": 0.0015,
+      "indexShiftForHalfLinewidth": 0.00075,
+      "eoFieldForHalfLinewidthVm": 14336917.562724013,
+      "temperatureRiseForHalfLinewidthK": 75
+    }
+  ],
+  "discretePlaneModel": [
+    {
+      "planeCount": 50,
+      "inactiveLossPerPlane": [
+        {
+          "loss": 0.0001,
+          "totalInactiveTransmission": 0.9950122304230093
+        },
+        {
+          "loss": 0.0005,
+          "totalInactiveTransmission": 0.9753038143277889
+        },
+        {
+          "loss": 0.001,
+          "totalInactiveTransmission": 0.9512056281970314
+        },
+        {
+          "loss": 0.002,
+          "totalInactiveTransmission": 0.9047468180040357
+        }
+      ],
+      "activePlaneEfficiencies": [
+        {
+          "efficiency": 0.05,
+          "outputAfterInactivePlanesAtLoss1e4": 0.04975558707985846,
+          "outputAfterInactivePlanesAtLoss1e3": 0.04760788929915072
+        },
+        {
+          "efficiency": 0.1,
+          "outputAfterInactivePlanesAtLoss1e4": 0.09951117415971691,
+          "outputAfterInactivePlanesAtLoss1e3": 0.09521577859830144
+        },
+        {
+          "efficiency": 0.25,
+          "outputAfterInactivePlanesAtLoss1e4": 0.24877793539929227,
+          "outputAfterInactivePlanesAtLoss1e3": 0.2380394464957536
+        },
+        {
+          "efficiency": 0.5,
+          "outputAfterInactivePlanesAtLoss1e4": 0.49755587079858454,
+          "outputAfterInactivePlanesAtLoss1e3": 0.4760788929915072
+        }
+      ]
+    },
+    {
+      "planeCount": 100,
+      "inactiveLossPerPlane": [
+        {
+          "loss": 0.0001,
+          "totalInactiveTransmission": 0.9900493386913719
+        },
+        {
+          "loss": 0.0005,
+          "totalInactiveTransmission": 0.9512175302423342
+        },
+        {
+          "loss": 0.001,
+          "totalInactiveTransmission": 0.9047921471137089
+        },
+        {
+          "loss": 0.002,
+          "totalInactiveTransmission": 0.8185668046884277
+        }
+      ],
+      "activePlaneEfficiencies": [
+        {
+          "efficiency": 0.05,
+          "outputAfterInactivePlanesAtLoss1e4": 0.049507417676336235,
+          "outputAfterInactivePlanesAtLoss1e3": 0.04528489224793339
+        },
+        {
+          "efficiency": 0.1,
+          "outputAfterInactivePlanesAtLoss1e4": 0.09901483535267247,
+          "outputAfterInactivePlanesAtLoss1e3": 0.09056978449586678
+        },
+        {
+          "efficiency": 0.25,
+          "outputAfterInactivePlanesAtLoss1e4": 0.24753708838168115,
+          "outputAfterInactivePlanesAtLoss1e3": 0.22642446123966692
+        },
+        {
+          "efficiency": 0.5,
+          "outputAfterInactivePlanesAtLoss1e4": 0.4950741767633623,
+          "outputAfterInactivePlanesAtLoss1e3": 0.45284892247933384
+        }
+      ]
+    },
+    {
+      "planeCount": 200,
+      "inactiveLossPerPlane": [
+        {
+          "loss": 0.0001,
+          "totalInactiveTransmission": 0.9801976930432228
+        },
+        {
+          "loss": 0.0005,
+          "totalInactiveTransmission": 0.904814789840326
+        },
+        {
+          "loss": 0.001,
+          "totalInactiveTransmission": 0.8186488294786356
+        },
+        {
+          "loss": 0.002,
+          "totalInactiveTransmission": 0.6700516137378225
+        }
+      ],
+      "activePlaneEfficiencies": [
+        {
+          "efficiency": 0.05,
+          "outputAfterInactivePlanesAtLoss1e4": 0.04901478613077422,
+          "outputAfterInactivePlanesAtLoss1e3": 0.0409734148888206
+        },
+        {
+          "efficiency": 0.1,
+          "outputAfterInactivePlanesAtLoss1e4": 0.09802957226154844,
+          "outputAfterInactivePlanesAtLoss1e3": 0.0819468297776412
+        },
+        {
+          "efficiency": 0.25,
+          "outputAfterInactivePlanesAtLoss1e4": 0.2450739306538711,
+          "outputAfterInactivePlanesAtLoss1e3": 0.204867074444103
+        },
+        {
+          "efficiency": 0.5,
+          "outputAfterInactivePlanesAtLoss1e4": 0.4901478613077422,
+          "outputAfterInactivePlanesAtLoss1e3": 0.409734148888206
+        }
+      ]
+    },
+    {
+      "planeCount": 500,
+      "inactiveLossPerPlane": [
+        {
+          "loss": 0.0001,
+          "totalInactiveTransmission": 0.9512270462715808
+        },
+        {
+          "loss": 0.0005,
+          "totalInactiveTransmission": 0.7787520933134594
+        },
+        {
+          "loss": 0.001,
+          "totalInactiveTransmission": 0.6063789448611847
+        },
+        {
+          "loss": 0.002,
+          "totalInactiveTransmission": 0.3675112548571586
+        }
+      ],
+      "activePlaneEfficiencies": [
+        {
+          "efficiency": 0.05,
+          "outputAfterInactivePlanesAtLoss1e4": 0.047566108924471495,
+          "outputAfterInactivePlanesAtLoss1e3": 0.030349296539598836
+        },
+        {
+          "efficiency": 0.1,
+          "outputAfterInactivePlanesAtLoss1e4": 0.09513221784894299,
+          "outputAfterInactivePlanesAtLoss1e3": 0.06069859307919767
+        },
+        {
+          "efficiency": 0.25,
+          "outputAfterInactivePlanesAtLoss1e4": 0.23783054462235745,
+          "outputAfterInactivePlanesAtLoss1e3": 0.15174648269799418
+        },
+        {
+          "efficiency": 0.5,
+          "outputAfterInactivePlanesAtLoss1e4": 0.4756610892447149,
+          "outputAfterInactivePlanesAtLoss1e3": 0.30349296539598836
+        }
+      ]
+    }
+  ],
+  "literatureReferences": [
+    {
+      "id": "hu-2024-tfln-review",
+      "title": "Integrated electro-optics on thin-film lithium niobate",
+      "authors": "Y. Hu et al.",
+      "venue": "arXiv / review article",
+      "year": 2024,
+      "url": "https://arxiv.org/pdf/2404.06398",
+      "relevance": "Reports LiNbO3 as a leading EO platform and r33 near 31 pm/V; useful for field-to-index estimates."
+    },
+    {
+      "id": "mercante-2018-tfln",
+      "title": "Thin film lithium niobate electro-optic modulator with terahertz operating bandwidth",
+      "authors": "A. J. Mercante et al.",
+      "venue": "Optics Express",
+      "year": 2018,
+      "doi": "10.1364/OE.26.014810",
+      "url": "https://muri2.engr.utexas.edu/sites/default/files/publication/oe-26-11-14810.pdf",
+      "relevance": "Demonstrates very high EO bandwidth while still using guided-wave overlap and mm-scale interaction lengths."
+    },
+    {
+      "id": "li-2005-lc-indices",
+      "title": "Refractive Indices Of Liquid Crystals And Their Applications In Display And Photonic Devices",
+      "authors": "J. Li",
+      "venue": "University of Central Florida dissertation",
+      "year": 2005,
+      "url": "https://stars.library.ucf.edu/etd/388/",
+      "relevance": "Documents large LC birefringence scale; supports LC as high-index-change but slower/geometry-constrained control."
+    },
+    {
+      "id": "rp-photonics-aom",
+      "title": "Acousto-optic Modulators",
+      "authors": "RP Photonics Encyclopedia",
+      "venue": "Technical encyclopedia",
+      "year": 2026,
+      "url": "https://www.rp-photonics.com/acousto_optic_modulators.html",
+      "relevance": "Summarizes typical AOM acoustic wavelengths of 10-100 micrometers and RF scale, reinforcing the optical-period backreflection mismatch."
+    },
+    {
+      "id": "baldry-2004-vph",
+      "title": "Volume Phase Holographic Gratings: Polarization Properties and Diffraction Efficiency",
+      "authors": "I. K. Baldry, J. Bland-Hawthorn, J. G. Robertson",
+      "venue": "PASP / arXiv",
+      "year": 2004,
+      "url": "https://arxiv.org/abs/astro-ph/0402402",
+      "relevance": "Gives volume holographic grating efficiency dependence on Delta n, thickness, period, and polarization."
+    },
+    {
+      "id": "tonkaev-2020-mie",
+      "title": "High-Q dielectric Mie-resonant nanostructures",
+      "authors": "P. Tonkaev and Y. Kivshar",
+      "venue": "arXiv mini-review",
+      "year": 2020,
+      "url": "https://arxiv.org/abs/2010.10854",
+      "relevance": "Supports dielectric resonator and high-Q nanophotonic architectures as real optical interaction platforms."
+    },
+    {
+      "id": "krasnok-2017-rdn",
+      "title": "Spectroscopy and Biosensing with Optically Resonant Dielectric Nanostructures",
+      "authors": "A. Krasnok, M. Caldarola, N. Bonod, and A. Alu",
+      "venue": "arXiv review",
+      "year": 2017,
+      "url": "https://arxiv.org/abs/1710.10233",
+      "relevance": "Documents resonant dielectric nanoparticle scattering and index-sensitive resonance behavior."
+    },
+    {
+      "id": "lange-2026-photorefraction",
+      "title": "Photorefraction Management in Lithium Niobate Waveguides",
+      "authors": "N. A. Lange et al.",
+      "venue": "arXiv",
+      "year": 2026,
+      "url": "https://arxiv.org/abs/2601.15817",
+      "relevance": "Treats photorefraction as a real optically induced index change but also as a stability/power-management concern."
+    },
+    {
+      "id": "rego-2024-thermo-optic",
+      "title": "Temperature Dependence of the Thermo-Optic Coefficient of Silica-Based Optical Fibers",
+      "authors": "G. M. Rego et al.",
+      "venue": "Sensors / PMC",
+      "year": 2024,
+      "doi": "10.3390/s24030938",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10819995/",
+      "relevance": "Provides silica thermo-optic coefficient scale; useful for temperature-rise and diffusion rejection checks."
+    }
+  ],
+  "architectureFamilies": [
+    {
+      "id": "switchable-bragg",
+      "name": "Locally switchable Bragg coupling",
+      "mechanism": "Permanent momentum structure plus locally increased coupling amplitude or polarization overlap.",
+      "viewingGeometry": "Directional Bragg reflection",
+      "evidenceIds": [
+        "hu-2024-tfln-review",
+        "baldry-2004-vph"
+      ],
+      "status": "SURVIVES",
+      "gate": "Requires local Delta n or equivalent coupling near 1e-4-1e-3 over sub-mm to mm lengths while keeping off coupling near 1e-5.",
+      "rationale": "Directly addresses WP-v2-15 by separating kappa_on from kappa_inactive."
+    },
+    {
+      "id": "induced-optical-period-grating",
+      "name": "Locally written / induced backward Bragg grating",
+      "mechanism": "Dynamic grating exists only at the active region.",
+      "viewingGeometry": "Directional Bragg reflection",
+      "evidenceIds": [
+        "rp-photonics-aom",
+        "lange-2026-photorefraction"
+      ],
+      "status": "REJECT",
+      "gate": "Backward Bragg period is about 200 nm; acoustic waves are typically orders of magnitude too coarse, while optical writing has power/persistence issues.",
+      "rationale": "Does not reliably avoid the optical-period momentum problem unless counterpropagating optical writing or a static assist supplies the period."
+    },
+    {
+      "id": "phase-defect",
+      "name": "Local phase defect / resonant defect",
+      "mechanism": "A mostly detuned or weakly reflective periodic structure is locally converted into a defect resonance.",
+      "viewingGeometry": "Narrowband directional reflection or resonant extraction",
+      "evidenceIds": [
+        "baldry-2004-vph"
+      ],
+      "status": "FOLLOW-UP",
+      "gate": "Promising optical leverage, but moving the defect requires controlled phase or optical-thickness shifts near pi at selected depth.",
+      "rationale": "Could reduce full-grating participation, but addressable defect creation is not yet demonstrated in the bulk geometry."
+    },
+    {
+      "id": "coupling-cancellation",
+      "name": "Local coupling cancellation / restoration",
+      "mechanism": "Two coupling contributions cancel in the inactive state; local control breaks cancellation.",
+      "viewingGeometry": "Directional, polarization-dependent, or symmetry-selected output",
+      "evidenceIds": [
+        "hu-2024-tfln-review"
+      ],
+      "status": "FOLLOW-UP",
+      "gate": "Attractive ON/OFF ratio, but fabrication and phase stability are high risk.",
+      "rationale": "Could produce low inactive coupling without requiring tiny absolute fabrication errors if a robust symmetry mechanism exists."
+    },
+    {
+      "id": "resonant-scattering",
+      "name": "Local resonant scattering",
+      "mechanism": "Embedded resonators or resonant planes are shifted into resonance locally.",
+      "viewingGeometry": "Potentially wider-angle scattering or engineered directional output",
+      "evidenceIds": [
+        "tonkaev-2020-mie",
+        "krasnok-2017-rdn"
+      ],
+      "status": "FOLLOW-UP",
+      "gate": "Index shift for high-Q switching is smaller, but high-Q also increases spectral/angular sensitivity and fabrication burden.",
+      "rationale": "Broadens beyond Bragg reflection and may provide better viewing geometry if loss/transparency can be controlled."
+    },
+    {
+      "id": "electro-optic-activation",
+      "name": "Electro-optic local activation",
+      "mechanism": "Electric field changes index, phase, coupling, polarization, or a resonant condition.",
+      "viewingGeometry": "Depends on structure; usually phase/coupling modulation",
+      "evidenceIds": [
+        "hu-2024-tfln-review",
+        "mercante-2018-tfln"
+      ],
+      "status": "SURVIVES",
+      "gate": "Fast and mature in guided devices; unresolved risk is localizing strong fields inside a thick volume.",
+      "rationale": "Best dynamic-control family for follow-up because the response is fast and electronically synchronized."
+    },
+    {
+      "id": "acousto-optic-gating",
+      "name": "Acousto-optic local activation",
+      "mechanism": "Acoustic field modulates phase, coupling, resonance, or a defect instead of directly writing the optical-period grating.",
+      "viewingGeometry": "Deflected Bragg output, gated defect, or moving interaction plane",
+      "evidenceIds": [
+        "rp-photonics-aom"
+      ],
+      "status": "FOLLOW-UP",
+      "gate": "Useful for moving envelopes and lower-frequency gating, but direct backward-grating generation remains rejected.",
+      "rationale": "Acoustics should be reconsidered only as a gate for another optical structure."
+    },
+    {
+      "id": "photorefractive-optical",
+      "name": "Optically controlled / photorefractive activation",
+      "mechanism": "Control light changes local index, carriers, or a holographic grating.",
+      "viewingGeometry": "Can be Bragg-like, phase-like, or absorptive/scattering",
+      "evidenceIds": [
+        "lange-2026-photorefraction"
+      ],
+      "status": "REJECT",
+      "gate": "Fast strong writing tends to require high optical fluence, persistence/erase management, or absorption.",
+      "rationale": "Potentially useful for slow reconfigurable calibration, not the leading display-rate voxel switch."
+    },
+    {
+      "id": "thermo-optic",
+      "name": "Thermo-optic activation",
+      "mechanism": "Temperature changes refractive index or resonance.",
+      "viewingGeometry": "Usually phase/resonance shift",
+      "evidenceIds": [
+        "rego-2024-thermo-optic"
+      ],
+      "status": "REJECT",
+      "gate": "Required temperature rises for large optical shifts are high, and diffusion destroys fast sub-mm localization.",
+      "rationale": "Good reference mechanism but not a leading display switch."
+    },
+    {
+      "id": "hybrid-static-dynamic",
+      "name": "Hybrid static momentum + dynamic strong coupling",
+      "mechanism": "Static structure supplies momentum/phase matching; EO/LC/AO/resonant control supplies local ON/OFF interaction.",
+      "viewingGeometry": "Architecture-dependent; can be directional or scattering",
+      "evidenceIds": [
+        "hu-2024-tfln-review",
+        "tonkaev-2020-mie",
+        "li-2005-lc-indices"
+      ],
+      "status": "SURVIVES",
+      "gate": "Most plausible way to avoid optical-period dynamic writing while gaining a large local switching ratio.",
+      "rationale": "This is the strongest architectural direction to model next."
+    },
+    {
+      "id": "discrete-active-planes",
+      "name": "Thin discrete active planes",
+      "mechanism": "Many transparent addressable planes replace continuous homogeneous depth.",
+      "viewingGeometry": "Plane-wise scattering, Bragg, or resonant output",
+      "evidenceIds": [
+        "hu-2024-tfln-review",
+        "li-2005-lc-indices"
+      ],
+      "status": "SURVIVES",
+      "gate": "Discrete depth may be visually acceptable and manufacturable, but inactive loss per plane must be extremely low.",
+      "rationale": "Challenges the continuous-depth assumption and gives a practical electronic-addressing route."
+    },
+    {
+      "id": "sparse-embedded-structures",
+      "name": "Sparse embedded structures",
+      "mechanism": "Sparse scattering/resonator/grating sheets reduce volume-wide optical burden.",
+      "viewingGeometry": "Scattering or directional extraction",
+      "evidenceIds": [
+        "krasnok-2017-rdn"
+      ],
+      "status": "FOLLOW-UP",
+      "gate": "Transparency and fabrication uniformity are central risks.",
+      "rationale": "May be a manufacturable compromise between bulk and layered architectures."
+    },
+    {
+      "id": "scanned-thin-layer",
+      "name": "Scanning a thin active layer",
+      "mechanism": "A moving excitation front or boundary creates one thin active optical layer.",
+      "viewingGeometry": "Architecture-dependent",
+      "evidenceIds": [
+        "rp-photonics-aom"
+      ],
+      "status": "FOLLOW-UP",
+      "gate": "Can be efficient if the optical interaction is strong; moving-front control and synchronization remain open.",
+      "rationale": "Worth keeping if the active layer is optical/electrical/acoustic, not merely the old strain trough renamed."
+    }
+  ],
+  "feasibilityChecks": [
+    {
+      "id": "bragg-local-dn",
+      "mechanism": "Localized Bragg reflection over 0.8 mm",
+      "requiredChange": "Delta n ~= 1.312e-4 for 25% ideal local reflectance",
+      "demonstratedChange": "Current permanent Delta n = 0.0001",
+      "requiredOverDemonstrated": 1.3116122402901131,
+      "result": "Requires about current-scale coupling for 25%, but higher targets require several times current Delta n."
+    },
+    {
+      "id": "eo-bulk-ln",
+      "mechanism": "Bulk LiNbO3 Pockels index shift",
+      "requiredChange": "Delta n ~= 1.312e-4 over the active length",
+      "demonstratedChange": "At 10 V/um, rough Delta n ~= 5.231e-4",
+      "requiredOverDemonstrated": 0.25072635417732153,
+      "result": "EO can plausibly tune phase/resonance, but direct full Bragg coupling modulation is field-geometry limited."
+    },
+    {
+      "id": "lc-index",
+      "mechanism": "Liquid-crystal birefringence switching",
+      "requiredChange": "Delta n scale 1e-4 to 1e-3 for coupling or resonance tuning",
+      "demonstratedChange": "Representative birefringence can be ~0.100",
+      "requiredOverDemonstrated": 0.01,
+      "result": "Large optical anisotropy is attractive; speed, scattering, alignment, and layered geometry dominate feasibility."
+    },
+    {
+      "id": "ao-backward-period",
+      "mechanism": "Acoustic direct backward grating",
+      "requiredChange": "Acoustic period near 200 nm for first-order backward Bragg momentum",
+      "demonstratedChange": "Typical AOM acoustic wavelength is about 10-100 micrometers",
+      "requiredOverDemonstrated": 49.99083501358084,
+      "result": "REJECT: direct acoustic optical-period grating remains mismatched by tens to hundreds of times even before power/localization."
+    },
+    {
+      "id": "resonator-q100",
+      "mechanism": "Q=100 resonator half-linewidth tuning",
+      "requiredChange": "Index shift ~= 0.0075",
+      "demonstratedChange": "10 V/um LiNbO3 rough Delta n ~= 5.231e-4",
+      "requiredOverDemonstrated": 14.336917562724013,
+      "result": "Ordinary EO index shift is too small for low-Q resonators; high-Q or LC/phase leverage is required."
+    },
+    {
+      "id": "thermo-q100",
+      "mechanism": "Thermo-optic resonator tuning",
+      "requiredChange": "Index shift ~= 0.0075 for Q=100 half-linewidth",
+      "demonstratedChange": "10 K silica-like thermal shift ~= 1.000e-4",
+      "requiredOverDemonstrated": 75,
+      "result": "REJECT for fast bulk voxel switching: temperature rise and diffusion are not compatible with sharp moving depth."
+    }
+  ],
+  "rejectedArchitectures": [
+    {
+      "id": "induced-optical-period-grating",
+      "name": "Locally written / induced backward Bragg grating",
+      "mechanism": "Dynamic grating exists only at the active region.",
+      "viewingGeometry": "Directional Bragg reflection",
+      "evidenceIds": [
+        "rp-photonics-aom",
+        "lange-2026-photorefraction"
+      ],
+      "status": "REJECT",
+      "gate": "Backward Bragg period is about 200 nm; acoustic waves are typically orders of magnitude too coarse, while optical writing has power/persistence issues.",
+      "rationale": "Does not reliably avoid the optical-period momentum problem unless counterpropagating optical writing or a static assist supplies the period."
+    },
+    {
+      "id": "photorefractive-optical",
+      "name": "Optically controlled / photorefractive activation",
+      "mechanism": "Control light changes local index, carriers, or a holographic grating.",
+      "viewingGeometry": "Can be Bragg-like, phase-like, or absorptive/scattering",
+      "evidenceIds": [
+        "lange-2026-photorefraction"
+      ],
+      "status": "REJECT",
+      "gate": "Fast strong writing tends to require high optical fluence, persistence/erase management, or absorption.",
+      "rationale": "Potentially useful for slow reconfigurable calibration, not the leading display-rate voxel switch."
+    },
+    {
+      "id": "thermo-optic",
+      "name": "Thermo-optic activation",
+      "mechanism": "Temperature changes refractive index or resonance.",
+      "viewingGeometry": "Usually phase/resonance shift",
+      "evidenceIds": [
+        "rego-2024-thermo-optic"
+      ],
+      "status": "REJECT",
+      "gate": "Required temperature rises for large optical shifts are high, and diffusion destroys fast sub-mm localization.",
+      "rationale": "Good reference mechanism but not a leading display switch."
+    }
+  ],
+  "survivingCandidates": [
+    {
+      "rank": 1,
+      "id": "hybrid-static-eo-switchable-coupling",
+      "name": "Hybrid static momentum + electro-optic switchable coupling",
+      "whyItSurvives": "It preserves a permanent phase-matching structure but makes the ON/OFF optical interaction a local electronic material requirement.",
+      "primaryAdvantage": "Fast control and a clear switchable-kappa model target.",
+      "primaryRisk": "Electrode geometry may not localize strong fields through bulk depth without layered construction.",
+      "nextModel": "Implement a switchable-kappa CMT reference with explicit kappa_off, kappa_on, active width, and field-localization assumptions.",
+      "screening": {
+        "inactiveTransparency": "Moderate",
+        "activeInteractionStrength": "Moderate",
+        "onOffRatio": "Strong",
+        "activeRegionThickness": "Moderate",
+        "addressability": "Moderate",
+        "expectedSwitchingSpeed": "Strong",
+        "requiredControlMagnitude": "Moderate",
+        "viewingGeometry": "Moderate",
+        "fabricationComplexity": "Weak",
+        "scalability": "Unknown",
+        "thermalBurden": "Strong",
+        "mechanicalBurden": "Strong",
+        "coherenceSensitivity": "Moderate",
+        "technologyMaturity": "Moderate"
+      }
+    },
+    {
+      "rank": 2,
+      "id": "discrete-eo-lc-active-planes",
+      "name": "Discrete EO/LC active planes",
+      "whyItSurvives": "It relaxes continuous-depth field localization and trades it for manufacturable plane addressing.",
+      "primaryAdvantage": "Electronic plane selection could be practical while inactive plane loss is directly quantifiable.",
+      "primaryRisk": "Many planes demand very low per-plane haze/loss and may produce discrete depth artifacts.",
+      "nextModel": "Build a layered loss/efficiency model tied to target depth resolution and acceptable inactive transmission.",
+      "screening": {
+        "inactiveTransparency": "Moderate",
+        "activeInteractionStrength": "Strong",
+        "onOffRatio": "Moderate",
+        "activeRegionThickness": "Strong",
+        "addressability": "Strong",
+        "expectedSwitchingSpeed": "Moderate",
+        "requiredControlMagnitude": "Moderate",
+        "viewingGeometry": "Moderate",
+        "fabricationComplexity": "Moderate",
+        "scalability": "Moderate",
+        "thermalBurden": "Strong",
+        "mechanicalBurden": "Strong",
+        "coherenceSensitivity": "Strong",
+        "technologyMaturity": "Moderate"
+      }
+    },
+    {
+      "rank": 3,
+      "id": "resonant-scatterer-planes",
+      "name": "Sparse resonant-scatterer or resonator planes",
+      "whyItSurvives": "It can create a stronger localized optical event than weak bulk Bragg reflection and may improve viewing geometry.",
+      "primaryAdvantage": "Resonant scattering gives optical leverage and can be placed only where needed.",
+      "primaryRisk": "Inactive transparency, linewidth control, and material tuning response are unresolved.",
+      "nextModel": "Model Q, filling fraction, inactive detuning, switching shift, and cumulative haze for sparse planes.",
+      "screening": {
+        "inactiveTransparency": "Unknown",
+        "activeInteractionStrength": "Strong",
+        "onOffRatio": "Moderate",
+        "activeRegionThickness": "Strong",
+        "addressability": "Moderate",
+        "expectedSwitchingSpeed": "Moderate",
+        "requiredControlMagnitude": "Weak",
+        "viewingGeometry": "Strong",
+        "fabricationComplexity": "Weak",
+        "scalability": "Unknown",
+        "thermalBurden": "Moderate",
+        "mechanicalBurden": "Strong",
+        "coherenceSensitivity": "Moderate",
+        "technologyMaturity": "Weak"
+      }
+    },
+    {
+      "rank": 4,
+      "id": "phase-defect-gated-grating",
+      "name": "Locally gated phase-defect grating",
+      "whyItSurvives": "It may create a localized resonant state without tuning the entire grating into resonance.",
+      "primaryAdvantage": "Uses coherent resonance for high optical interaction from a compact defect.",
+      "primaryRisk": "Moving or electronically creating the defect may be as hard as the original localization problem.",
+      "nextModel": "Create a transfer-matrix defect-grating reference model only after defining a plausible phase-control mechanism.",
+      "screening": {
+        "inactiveTransparency": "Moderate",
+        "activeInteractionStrength": "Strong",
+        "onOffRatio": "Moderate",
+        "activeRegionThickness": "Moderate",
+        "addressability": "Weak",
+        "expectedSwitchingSpeed": "Moderate",
+        "requiredControlMagnitude": "Weak",
+        "viewingGeometry": "Moderate",
+        "fabricationComplexity": "Weak",
+        "scalability": "Unknown",
+        "thermalBurden": "Strong",
+        "mechanicalBurden": "Moderate",
+        "coherenceSensitivity": "Weak",
+        "technologyMaturity": "Weak"
+      }
+    }
+  ],
+  "conclusions": {
+    "trough": "THE BIASED STRAIN-TROUGH ARCHITECTURE IS RETAINED AS A VALIDATED RESEARCH REFERENCE BUT IS NO LONGER THE ASSUMED FORWARD ARCHITECTURE",
+    "architectureReset": "MULTIPLE ALTERNATIVE ARCHITECTURES REMAIN CREDIBLE AND REQUIRE TARGETED FOLLOW-UP",
+    "coupling": "LOCALLY SWITCHING OPTICAL COUPLING IS A CREDIBLE PATH FORWARD",
+    "continuousVsDiscrete": "DISCRETE ACTIVE PLANES ARE A CREDIBLE COMPETING ARCHITECTURE",
+    "dynamicControl": "ELECTRO-OPTIC CONTROL IS THE LEADING DYNAMIC MECHANISM",
+    "nextArchitecture": "ADVANCE MULTIPLE SURVIVING ARCHITECTURES TO SMALL TARGETED FEASIBILITY STUDIES"
+  }
+}
