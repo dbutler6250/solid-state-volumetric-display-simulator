@@ -892,6 +892,32 @@ label {
   background: #111b25;
 }
 
+.spatial-provenance-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(12rem, 1fr)) auto;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.spatial-provenance-bar div {
+  border: 1px solid #2d3a4b;
+  border-radius: 6px;
+  background: #111b25;
+  padding: 0.65rem 0.75rem;
+}
+
+.spatial-provenance-bar span {
+  display: block;
+  color: #8fa0b1;
+  font-size: 0.78rem;
+}
+
+.spatial-provenance-bar strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1rem;
+}
+
 .moving-pulse-chart,
 .moving-pulse-chart .plot-container,
 .moving-pulse-chart .svg-container {
@@ -902,6 +928,12 @@ label {
 .moving-pulse-profile-chart .plot-container,
 .moving-pulse-profile-chart .svg-container {
   min-height: 250px;
+}
+
+.moving-pulse-spatial-chart,
+.moving-pulse-spatial-chart .plot-container,
+.moving-pulse-spatial-chart .svg-container {
+  min-height: 560px;
 }
 
 .moving-pulse-metrics {
@@ -934,6 +966,43 @@ label {
 
 .reflection-region-toolbar input[type='range'] {
   min-width: 11rem;
+}
+
+.spatial-view-tabs {
+  display: inline-flex;
+  width: fit-content;
+  overflow: hidden;
+  border: 1px solid #2d3a4b;
+  border-radius: 6px;
+  background: #0d131b;
+}
+
+.spatial-view-tabs button {
+  border: 0;
+  border-right: 1px solid #2d3a4b;
+  background: transparent;
+  color: #a7b7c8;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.spatial-view-tabs button:last-child {
+  border-right: 0;
+}
+
+.spatial-view-tabs button[aria-selected='true'] {
+  background: #172433;
+  color: #f4f7fb;
+}
+
+.spatial-instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.tracking-metrics {
+  margin: 0;
 }
 
 .regime-map-panel {
@@ -1906,6 +1975,11 @@ label {
     grid-template-columns: 1fr;
   }
 
+  .spatial-provenance-bar,
+  .spatial-instrument-grid {
+    grid-template-columns: 1fr;
+  }
+
   .heatmap-axis-grid {
     grid-template-columns: 1fr;
   }
@@ -2003,6 +2077,27 @@ label {
   .chart-toolbar {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .spatial-view-tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .spatial-view-tabs button {
+    border-right: 0;
+    border-bottom: 1px solid #2d3a4b;
+  }
+
+  .spatial-view-tabs button:last-child {
+    border-bottom: 0;
+  }
+
+  .moving-pulse-spatial-chart,
+  .moving-pulse-spatial-chart .plot-container,
+  .moving-pulse-spatial-chart .svg-container {
+    min-height: 520px;
   }
 
   .reflectance-volume-toolbar {

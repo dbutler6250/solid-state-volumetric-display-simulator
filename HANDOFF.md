@@ -2,52 +2,46 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-74-ui-ux-fixed-grating-realignment`.
-- Active issue: #74 `WP-v2-12 — UI information architecture and research workspace redesign`.
-- Base: `main` at `5651fb7` (`WP-v2-10 reduced-order strain trough mechanics (#73)`).
-- PR #73 is merged; GitHub inspection returned no PR comments or review threads.
+- Current branch: `codex/wp-v2-13-spatial-addressing-ux`.
+- Active work packet: `WP-v2-13` Spatial Addressing Visualization + CMT/Maxwell Validation UX.
+- Stacked on PR #75 / branch `codex/issue-74-ui-information-architecture` because PR #75 is still open and draft.
+- PR #75 inspection: open draft, base `main`, head `70252250`, CI `test-lint-build` passed, no comments/reviews/review threads returned by `gh` or the GitHub app.
 
 ## Latest Work
 
-- Recentered the app around WP-v2-12 fixed-grating display information architecture.
-- Kept `Overview` as the default route so first load explains the architecture before detailed controls.
-- Grouped navigation into `Research`, `Current Architecture`, and `Supporting Research`.
-- Current Architecture tabs are `Fixed-Grating Display`, `Spatial Addressing`, `Robustness`, and `Mechanical Feasibility`.
-- Supporting Research preserves `Optical Stack`, acoustic/manual mode inputs, `Geometry / 3D`, `Slicer / STL`, and Import / Export.
-- Kept a UI-only biased strain-trough startup preset:
-  - `fixedLaserWavelengthNm = 600.11`
-  - `strainBias = 0.0015`
-  - `peakStrain = -0.0015`
-  - `strainShape = piezo-trough`
-- Added a data-driven architecture diagram and operating-point summary.
-- Made Laser Detuning the primary illumination control and grouped controls into Core Experiment, Permanent Grating, Advanced Solver / Strain Model, and Spatial Addressing Playback.
-- Renamed primary labels away from generic perturbation language in the main workflow.
-- Clarified spatial visualization labels around normalized backward optical intensity, trough target, optical center, and tracking error.
-- Added a neutral mechanics workspace describing Optical Target -> Mechanical Candidate -> Predicted Strain -> Optical Rescore.
+- Reworked Spatial Addressing around a current-state research-instrument view.
+- Added a prominent provenance bar: interactive spatial model is CMT, reference validation is Not run / Running / Current / Stale / Unavailable.
+- Added an explicit `Validate with Maxwell` action for the current spatial state only.
+- Added deterministic validation identity from solver-relevant inputs and marks previous Maxwell results stale after changes.
+- Added compact tracking and validation panels:
+  - commanded trough center, optical center, tracking error, optical width, dominant region count, secondary-region ratio;
+  - CMT/Maxwell optical centers, width comparison, center difference, and boundary reflectance comparison.
+- Replaced the strain/intensity dual-axis overlay with aligned shared-depth traces:
+  - strain profile epsilon(z);
+  - local detuning `lambda_B - lambda_laser`, with zero resonance line;
+  - normalized backward optical intensity, with CMT and current Maxwell overlay when available.
+- Moved the depth-position intensity map behind `Current State` / `Trajectory Map` tabs and added commanded trough plus calculated optical-center trajectory overlays.
+- Added focused regression coverage for the new Spatial Addressing provenance/tracking labels.
 
-## Remaining UX Debt
+## Remaining Follow-Up
 
-- Spatial stacked traces are improved semantically but still share a Plotly overlay rather than fully separated aligned traces.
-- Maxwell validation is presented as stale/reference status; there is not yet an interactive Maxwell run control.
-- Acoustic / Acousto-Optic Research remains selected through Input mode rather than a dedicated output tab.
+- Current Maxwell validation is synchronous after the user clicks the button; if heavier configurations become common, move it to a cancellable async worker-style path.
+- Maxwell trajectory support remains honest/sparse: this change validates only the current state, not a sweep of validation points.
+- PR #75 still needs to merge before WP-v2-13 can be rebased or opened cleanly against `main`.
 
 ## Verification Snapshot
 
-- `npm.cmd run test` - 40 files / 260 tests passed.
+- `npm.cmd run test` - 40 files / 261 tests passed.
 - `npm.cmd run lint` - passed.
 - `npm.cmd run build` - passed.
-- `npm.cmd run test:browser` - 20 tests passed.
-- `npx.cmd tsx scripts/highFidelityBraggValidationStudy.mts` - passed; rewrote issue-68 artifacts with timing-only markdown diffs.
-- `npx.cmd tsx scripts/maxwellTroughSpatialValidationStudy.mts` - passed; rewrote issue-68 artifacts with timing-only markdown diffs.
-- `npx.cmd tsx scripts/strainTroughMechanicalFeasibilityStudy.mts` - passed; rewrote issue-72 artifacts.
 - In-app Browser manual review against `http://127.0.0.1:5173`:
-  - Overview, Fixed-Grating Display, Spatial Addressing, Robustness, Mechanical Feasibility, Optical Stack, Geometry / 3D, and Slicer / STL selected successfully.
-  - Acoustic / Acousto-Optic Research remains reachable through Input mode.
-  - Current Research Baseline, +0.100 nm detuning, and mechanics Marginal / high-risk status were visible on the appropriate tabs.
-  - No console errors.
-  - No horizontal overflow at 1920x1080, 1440x900, or 1366x768.
+  - Spatial Addressing opens.
+  - Stacked trace labels visible: strain profile, local detuning, CMT normalized backward optical intensity, trough target, optical center.
+  - Trajectory Map shows normalized intensity map plus commanded trough and calculated optical-center trajectory overlays.
+  - `Validate with Maxwell` transitions Reference validation to `Current` and exposes Maxwell normalized backward optical intensity overlay.
+  - Browser console had no errors.
 
 ## Notes
 
-- A Vite dev server was started in the background at `http://127.0.0.1:5173`.
-- The UI preset intentionally lives in `simulationWorkspaceState.ts`; `DEFAULT_HYBRID_BRAGG_DESIGN_INPUTS` remains the neutral solver/import baseline.
+- A Vite dev server was already running at `http://127.0.0.1:5173`.
+- This work did not change the physics model; it wires existing CMT spatial fields and the existing Maxwell field reconstruction into clearer UI provenance and validation readouts.
