@@ -67,6 +67,8 @@ After WP-v2-16, project-level architecture status is under investigation. The bi
 
 After WP-v2-17, discrete Bragg-plane stacks are a credible competing research architecture but are not yet canonical. The leading variant is finite written grating regions in a continuous substrate with electro-optic switchable coupling; bonded plate stacks remain optically risky because cumulative physical-interface reflection would require aggressive index matching or AR treatment.
 
+After WP-v2-18, EO-switched discrete Bragg planes remain promising but are not promoted to canonical architecture. The ideal switchable-kappa range is not validated by a simple bulk Pockels shift; a credible implementation must modulate periodic grating contrast, coupling phase, polarization coupling, cancellation balance, or equivalent effective kappa. Periodic domain engineering is the cleanest physical hypothesis, but optical-period domain scale, plane-selective electrodes, cumulative transparent-electrode loss, and aperture scaling remain device-level gates.
+
 This architecture remains a guide for the validated reference path, not a frozen API. The goal is to keep physical structure, perturbation, material response, solver, experiment setup, and metrics separable enough for unit tests, sweeps, worker execution, and later validation against TMM or measured data.
 
 Current code boundaries:
