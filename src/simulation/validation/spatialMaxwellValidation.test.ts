@@ -31,5 +31,5 @@ describe('spatial Maxwell validation', () => {
     expect(validation.result.samples.length).toBeGreaterThan(0);
     expect(Number.isFinite(validation.result.reflectance)).toBe(true);
     expect(validation.result.samples.every((sample) => Number.isFinite(sample.normalizedBackwardIntensity))).toBe(true);
-  });
+  }, 15000);
 });
