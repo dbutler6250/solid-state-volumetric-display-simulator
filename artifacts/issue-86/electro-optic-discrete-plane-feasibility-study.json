@@ -1,0 +1,1944 @@
+{
+  "issue": 86,
+  "assumptions": {
+    "wavelengthNm": 600.11,
+    "averageIndex": 1.45,
+    "planeCount": 10,
+    "planeThicknessMm": 0.25,
+    "pitchMm": 1,
+    "selectedPlaneIndex": 5,
+    "wp17OffDeltaN": 0.000001,
+    "wp17OnDeltaN": 0.00041971591689283626,
+    "transparentElectrodeTransmission": 0.99
+  },
+  "sources": [
+    {
+      "id": "liu-2024-ln-review",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11636424/",
+      "note": "LiNbO3 linear EO coefficient scale around r33 = 31.45 pm/V and thin-film device context."
+    },
+    {
+      "id": "zhou-2023-ktp",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9837062/",
+      "note": "Hydrothermal KTP EO coefficient measurements at 632.8 nm consistent with established KTP values."
+    },
+    {
+      "id": "castech-ktp",
+      "url": "https://www.castech.com/product/KTP---Potassium-Titanyl-Phosphate-186.html",
+      "note": "Manufacturer KTP electro-optic coefficient table with r33 about 35-36 pm/V."
+    },
+    {
+      "id": "krasnokutska-2021-submicron-ppln",
+      "url": "https://arxiv.org/abs/2108.10839",
+      "note": "Submicron LNOI domain engineering with periods down to about 200 nm over mm-scale waveguides."
+    },
+    {
+      "id": "opticsexpress-2023-100nm-domain",
+      "url": "https://opg.optica.org/oe/abstract.cfm?uri=oe-31-23-37464",
+      "note": "Lithium niobate thin-film domain fabrication down to about 102 nm period in a research setting."
+    },
+    {
+      "id": "bi-2023-ultrathin-ito",
+      "url": "https://arxiv.org/abs/2310.00984",
+      "note": "10 nm ITO transparent conductor reported about 91% transmittance at 550 nm; silver grid variant trades about 3% transmittance for lower sheet resistance."
+    },
+    {
+      "id": "rp-photonics-pockels",
+      "url": "https://www.rp-photonics.com/pockels_effect.html",
+      "note": "Pockels effect definition and linear index-change framing."
+    }
+  ],
+  "materials": [
+    {
+      "id": "linbo3",
+      "name": "LiNbO3, favorable r33 orientation",
+      "n": 2.2,
+      "rPmPerV": 31.45,
+      "demonstratedFieldVPerUm": 5,
+      "breakdownFieldVPerUm": 20,
+      "mechanismNotes": "Strong, mature Pockels material; bulk common-mode response is not switchable kappa unless domain/orientation contrast is engineered.",
+      "source": "liu-2024-ln-review"
+    },
+    {
+      "id": "litao3",
+      "name": "LiTaO3, favorable r33 orientation",
+      "n": 2.18,
+      "rPmPerV": 30.5,
+      "demonstratedFieldVPerUm": 5,
+      "breakdownFieldVPerUm": 20,
+      "mechanismNotes": "Similar EO scale to LiNbO3 with potentially lower photorefractive risk; still needs differential grating response.",
+      "source": "LiTaO3 r33 literature values near 30.5 pm/V at 632.8 nm."
+    },
+    {
+      "id": "ktp",
+      "name": "KTP-family crystal",
+      "n": 1.83,
+      "rPmPerV": 35,
+      "demonstratedFieldVPerUm": 4,
+      "breakdownFieldVPerUm": 15,
+      "mechanismNotes": "Mature Pockels-cell material; lower n keeps bulk index shift similar to LN despite comparable r.",
+      "source": "zhou-2023-ktp; castech-ktp"
+    },
+    {
+      "id": "eo-polymer",
+      "name": "High-r33 EO polymer",
+      "n": 1.65,
+      "rPmPerV": 100,
+      "demonstratedFieldVPerUm": 1.5,
+      "breakdownFieldVPerUm": 3,
+      "mechanismNotes": "Large r33 can reduce voltage, but long-term stability, poling, optical loss, and large-aperture uniformity are major gates.",
+      "source": "EO-polymer reviews and manufacturer/literature reports above 100 pm/V."
+    },
+    {
+      "id": "bto",
+      "name": "BaTiO3 / related ferroelectric",
+      "n": 2.4,
+      "rPmPerV": 1300,
+      "demonstratedFieldVPerUm": 0.5,
+      "breakdownFieldVPerUm": 2,
+      "mechanismNotes": "Very large tensor components are reported in thin-film/waveguide contexts; centimeter-scale free-space bulk planes are not demonstrated.",
+      "source": "BTO photonics literature reports r42 near 1300 pm/V in favorable geometries."
+    }
+  ],
+  "kappaRequirement": {
+    "wavelengthNm": 600.11,
+    "offDeltaN": 0.000001,
+    "onDeltaN": 0.00041971591689283626,
+    "kappaOffPerM": 5.235028000849499,
+    "kappaOnPerM": 2197.224577336219,
+    "kappaRatio": 419.7159168928363,
+    "deltaKappaPerM": 2191.9895493353697
+  },
+  "offSweep": [
+    {
+      "offDeltaN": 0.000001,
+      "minUsefulOnDeltaN": 0.000175,
+      "requiredRatio": 175,
+      "offReflectance": 0.00008006844546626756,
+      "onReflectance": 0.05394939201607259,
+      "selectedPlaneFraction": 0.9456400672905617,
+      "secondaryPlaneRatio": 0.00003265306122448979,
+      "useful": true
+    },
+    {
+      "offDeltaN": 0.0000025,
+      "minUsefulOnDeltaN": 0.000175,
+      "requiredRatio": 70,
+      "offReflectance": 0.0005003928810183648,
+      "onReflectance": 0.059049574045570055,
+      "selectedPlaneFraction": 0.9442624002213332,
+      "secondaryPlaneRatio": 0.00020408163265306123,
+      "useful": true
+    },
+    {
+      "offDeltaN": 0.000005,
+      "minUsefulOnDeltaN": 0.00015,
+      "requiredRatio": 29.999999999999996,
+      "offReflectance": 0.0020010706021960085,
+      "onReflectance": 0.052945965803709444,
+      "selectedPlaneFraction": 0.9192501240992744,
+      "secondaryPlaneRatio": 0.001111111111111112,
+      "useful": true
+    },
+    {
+      "offDeltaN": 0.00001,
+      "minUsefulOnDeltaN": 0.00041971591689283626,
+      "requiredRatio": 41.97159168928362,
+      "offReflectance": 0.007996124463747225,
+      "onReflectance": 0.3087637413764189,
+      "selectedPlaneFraction": 0.9851718095142573,
+      "secondaryPlaneRatio": 0.0005676610830176999,
+      "useful": false
+    },
+    {
+      "offDeltaN": 0.000025,
+      "minUsefulOnDeltaN": 0.00041971591689283626,
+      "requiredRatio": 16.788636675713448,
+      "offReflectance": 0.04958035044695605,
+      "onReflectance": 0.4030614280682482,
+      "selectedPlaneFraction": 0.9598095480019411,
+      "secondaryPlaneRatio": 0.003547881768860623,
+      "useful": false
+    },
+    {
+      "offDeltaN": 0.00005,
+      "minUsefulOnDeltaN": 0.00041971591689283626,
+      "requiredRatio": 8.394318337856724,
+      "offReflectance": 0.19082822584791864,
+      "onReflectance": 0.5636290712427771,
+      "selectedPlaneFraction": 0.8789924735239645,
+      "secondaryPlaneRatio": 0.01419152707544249,
+      "useful": false
+    },
+    {
+      "offDeltaN": 0.0001,
+      "minUsefulOnDeltaN": 0.00041971591689283626,
+      "requiredRatio": 4.197159168928362,
+      "offReflectance": 0.5989199541542941,
+      "onReflectance": 0.8169176945248027,
+      "selectedPlaneFraction": 0.6575324883029684,
+      "secondaryPlaneRatio": 0.056766108301769966,
+      "useful": false
+    }
+  ],
+  "electricFieldTable": [
+    {
+      "material": "LiNbO3, favorable r33 orientation",
+      "rows": [
+        {
+          "deltaN": 0.00001,
+          "fieldVPerUm": 0.059722957146389324,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.5972295714638932
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 1.4930739286597332
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 2.9861478573194664
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 5.972295714638933
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 14.930739286597332
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 29.861478573194663
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 59.72295714638933
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00005,
+          "fieldVPerUm": 0.2986147857319466,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 2.986147857319466
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 7.465369643298665
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 14.93073928659733
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 29.86147857319466
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 74.65369643298665
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 149.3073928659733
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 298.6147857319466
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0001,
+          "fieldVPerUm": 0.5972295714638932,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 5.972295714638932
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 14.93073928659733
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 29.86147857319466
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 59.72295714638932
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 149.3073928659733
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 298.6147857319466
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 597.2295714638932
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0002,
+          "fieldVPerUm": 1.1944591429277864,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 11.944591429277864
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 29.86147857319466
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 59.72295714638932
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 119.44591429277864
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 298.6147857319466
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 597.2295714638932
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 1194.4591429277864
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00041971591689283626,
+          "fieldVPerUm": 2.506667571824836,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 25.066675718248362
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 62.666689295620905
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 125.33337859124181
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 250.66675718248362
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 626.666892956209
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 1253.333785912418
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 2506.667571824836
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0005,
+          "fieldVPerUm": 2.986147857319466,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 29.86147857319466
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 74.65369643298665
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 149.3073928659733
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 298.6147857319466
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 746.5369643298665
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 1493.073928659733
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 2986.147857319466
+            }
+          ]
+        },
+        {
+          "deltaN": 0.001,
+          "fieldVPerUm": 5.972295714638932,
+          "practicality": "near practical limit",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 59.72295714638932
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 149.3073928659733
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 298.6147857319466
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 597.2295714638932
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 1493.073928659733
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 2986.147857319466
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 5972.295714638932
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "material": "LiTaO3, favorable r33 orientation",
+      "rows": [
+        {
+          "deltaN": 0.00001,
+          "fieldVPerUm": 0.06329372787385772,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.6329372787385772
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 1.582343196846443
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 3.164686393692886
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 6.329372787385772
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 15.82343196846443
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 31.64686393692886
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 63.29372787385772
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00005,
+          "fieldVPerUm": 0.3164686393692886,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 3.164686393692886
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 7.911715984232215
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 15.82343196846443
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 31.64686393692886
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 79.11715984232215
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 158.2343196846443
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 316.4686393692886
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0001,
+          "fieldVPerUm": 0.6329372787385772,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 6.329372787385772
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 15.82343196846443
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 31.64686393692886
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 63.29372787385772
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 158.2343196846443
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 316.4686393692886
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 632.9372787385772
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0002,
+          "fieldVPerUm": 1.2658745574771544,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 12.658745574771544
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 31.64686393692886
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 63.29372787385772
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 126.58745574771544
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 316.4686393692886
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 632.9372787385772
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 1265.8745574771544
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00041971591689283626,
+          "fieldVPerUm": 2.6565385028141857,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 26.565385028141858
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 66.41346257035464
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 132.82692514070928
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 265.65385028141856
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 664.1346257035465
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 1328.269251407093
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 2656.538502814186
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0005,
+          "fieldVPerUm": 3.1646863936928855,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 31.646863936928856
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 79.11715984232214
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 158.23431968464428
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 316.46863936928855
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 791.1715984232213
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 1582.3431968464427
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 3164.6863936928853
+            }
+          ]
+        },
+        {
+          "deltaN": 0.001,
+          "fieldVPerUm": 6.329372787385771,
+          "practicality": "near practical limit",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 63.29372787385771
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 158.23431968464428
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 316.46863936928855
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 632.9372787385771
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 1582.3431968464427
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 3164.6863936928853
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 6329.372787385771
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "material": "KTP-family crystal",
+      "rows": [
+        {
+          "deltaN": 0.00001,
+          "fieldVPerUm": 0.09324137775417839,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.9324137775417839
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 2.3310344438544597
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 4.662068887708919
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 9.324137775417839
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 23.310344438544597
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 46.620688877089194
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 93.24137775417839
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00005,
+          "fieldVPerUm": 0.46620688877089195,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 4.662068887708919
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 11.655172219272298
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 23.310344438544597
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 46.620688877089194
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 116.55172219272299
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 233.10344438544598
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 466.20688877089196
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0001,
+          "fieldVPerUm": 0.9324137775417839,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 9.324137775417839
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 23.310344438544597
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 46.620688877089194
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 93.24137775417839
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 233.10344438544598
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 466.20688877089196
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 932.4137775417839
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0002,
+          "fieldVPerUm": 1.8648275550835678,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 18.648275550835677
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 46.620688877089194
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 93.24137775417839
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 186.48275550835677
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 466.20688877089196
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 932.4137775417839
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 1864.8275550835679
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00041971591689283626,
+          "fieldVPerUm": 3.913489035644629,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 39.13489035644629
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 97.83722589111572
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 195.67445178223144
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 391.3489035644629
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 978.3722589111572
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 1956.7445178223145
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 3913.489035644629
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0005,
+          "fieldVPerUm": 4.662068887708919,
+          "practicality": "near practical limit",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 46.620688877089194
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 116.55172219272299
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 233.10344438544598
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 466.20688877089196
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 1165.51722192723
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 2331.03444385446
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 4662.06888770892
+            }
+          ]
+        },
+        {
+          "deltaN": 0.001,
+          "fieldVPerUm": 9.324137775417839,
+          "practicality": "near practical limit",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 93.24137775417839
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 233.10344438544598
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 466.20688877089196
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 932.4137775417839
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 2331.03444385446
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 4662.06888770892
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 9324.13777541784
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "material": "High-r33 EO polymer",
+      "rows": [
+        {
+          "deltaN": 0.00001,
+          "fieldVPerUm": 0.04452235857194536,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.4452235857194536
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 1.113058964298634
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 2.226117928597268
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 4.452235857194536
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 11.130589642986338
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 22.261179285972677
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 44.522358571945354
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00005,
+          "fieldVPerUm": 0.2226117928597268,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 2.226117928597268
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 5.56529482149317
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 11.13058964298634
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 22.26117928597268
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 55.6529482149317
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 111.3058964298634
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 222.6117928597268
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0001,
+          "fieldVPerUm": 0.4452235857194536,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 4.452235857194536
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 11.13058964298634
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 22.26117928597268
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 44.52235857194536
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 111.3058964298634
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 222.6117928597268
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 445.2235857194536
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0002,
+          "fieldVPerUm": 0.8904471714389072,
+          "practicality": "aggressive but demonstrated",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 8.904471714389071
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 22.26117928597268
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 44.52235857194536
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 89.04471714389072
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 222.6117928597268
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 445.2235857194536
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 890.4471714389072
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00041971591689283626,
+          "fieldVPerUm": 1.8686742550255673,
+          "practicality": "near practical limit",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 18.686742550255673
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 46.71685637563918
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 93.43371275127836
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 186.86742550255673
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 467.1685637563918
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 934.3371275127836
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 1868.6742550255672
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0005,
+          "fieldVPerUm": 2.226117928597268,
+          "practicality": "near practical limit",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 22.26117928597268
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 55.6529482149317
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 111.3058964298634
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 222.6117928597268
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 556.529482149317
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 1113.058964298634
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 2226.117928597268
+            }
+          ]
+        },
+        {
+          "deltaN": 0.001,
+          "fieldVPerUm": 4.452235857194536,
+          "practicality": "implausible",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 44.52235857194536
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 111.3058964298634
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 222.6117928597268
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 445.2235857194536
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 1113.058964298634
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 2226.117928597268
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 4452.235857194536
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "material": "BaTiO3 / related ferroelectric",
+      "rows": [
+        {
+          "deltaN": 0.00001,
+          "fieldVPerUm": 0.0011128917378917381,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.011128917378917382
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 0.027822293447293454
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 0.05564458689458691
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 0.11128917378917381
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 0.27822293447293456
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 0.5564458689458691
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 1.1128917378917382
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00005,
+          "fieldVPerUm": 0.005564458689458691,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.055644586894586914
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 0.13911146723646728
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 0.27822293447293456
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 0.5564458689458691
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 1.3911146723646728
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 2.7822293447293456
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 5.564458689458691
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0001,
+          "fieldVPerUm": 0.011128917378917382,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.11128917378917383
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 0.27822293447293456
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 0.5564458689458691
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 1.1128917378917382
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 2.7822293447293456
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 5.564458689458691
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 11.128917378917382
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0002,
+          "fieldVPerUm": 0.022257834757834764,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.22257834757834766
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 0.5564458689458691
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 1.1128917378917382
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 2.2257834757834765
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 5.564458689458691
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 11.128917378917382
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 22.257834757834765
+            }
+          ]
+        },
+        {
+          "deltaN": 0.00041971591689283626,
+          "fieldVPerUm": 0.046709837617169285,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.46709837617169286
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 1.167745940429232
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 2.335491880858464
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 4.670983761716928
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 11.677459404292321
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 23.354918808584642
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 46.709837617169285
+            }
+          ]
+        },
+        {
+          "deltaN": 0.0005,
+          "fieldVPerUm": 0.05564458689458691,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 0.5564458689458691
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 1.3911146723646728
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 2.7822293447293456
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 5.564458689458691
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 13.911146723646727
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 27.822293447293454
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 55.64458689458691
+            }
+          ]
+        },
+        {
+          "deltaN": 0.001,
+          "fieldVPerUm": 0.11128917378917381,
+          "practicality": "comfortable",
+          "voltages": [
+            {
+              "spacingUm": 10,
+              "voltage": 1.1128917378917382
+            },
+            {
+              "spacingUm": 25,
+              "voltage": 2.7822293447293456
+            },
+            {
+              "spacingUm": 50,
+              "voltage": 5.564458689458691
+            },
+            {
+              "spacingUm": 100,
+              "voltage": 11.128917378917382
+            },
+            {
+              "spacingUm": 250,
+              "voltage": 27.822293447293454
+            },
+            {
+              "spacingUm": 500,
+              "voltage": 55.64458689458691
+            },
+            {
+              "spacingUm": 1000,
+              "voltage": 111.28917378917382
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "differentialRequirements": [
+    {
+      "material": "LiNbO3, favorable r33 orientation",
+      "identicalRegionsDeltaGrating": 0,
+      "sameSignDifferentialFieldVPerUm": 2.506667571824836,
+      "oppositeDomainFieldVPerUm": 1.253333785912418,
+      "commonModeWarning": "Identical EO regions produce nearly no grating-contrast modulation; they primarily tune the average index and Bragg wavelength."
+    },
+    {
+      "material": "LiTaO3, favorable r33 orientation",
+      "identicalRegionsDeltaGrating": 0,
+      "sameSignDifferentialFieldVPerUm": 2.6565385028141857,
+      "oppositeDomainFieldVPerUm": 1.3282692514070928,
+      "commonModeWarning": "Identical EO regions produce nearly no grating-contrast modulation; they primarily tune the average index and Bragg wavelength."
+    },
+    {
+      "material": "KTP-family crystal",
+      "identicalRegionsDeltaGrating": 0,
+      "sameSignDifferentialFieldVPerUm": 3.913489035644629,
+      "oppositeDomainFieldVPerUm": 1.9567445178223144,
+      "commonModeWarning": "Identical EO regions produce nearly no grating-contrast modulation; they primarily tune the average index and Bragg wavelength."
+    },
+    {
+      "material": "High-r33 EO polymer",
+      "identicalRegionsDeltaGrating": 0,
+      "sameSignDifferentialFieldVPerUm": 1.8686742550255673,
+      "oppositeDomainFieldVPerUm": 0.9343371275127836,
+      "commonModeWarning": "Identical EO regions produce nearly no grating-contrast modulation; they primarily tune the average index and Bragg wavelength."
+    },
+    {
+      "material": "BaTiO3 / related ferroelectric",
+      "identicalRegionsDeltaGrating": 0,
+      "sameSignDifferentialFieldVPerUm": 0.046709837617169285,
+      "oppositeDomainFieldVPerUm": 0.023354918808584643,
+      "commonModeWarning": "Identical EO regions produce nearly no grating-contrast modulation; they primarily tune the average index and Bragg wavelength."
+    }
+  ],
+  "domainEngineering": {
+    "requiredFirstOrderPeriodNm": 206.9344827586207,
+    "demonstratedThinFilmPeriodsNm": [
+      370,
+      200,
+      102
+    ],
+    "bulkLargeApertureStatus": "Research-only at optical-period pitch; demonstrated submicron periods are thin-film or waveguide scale, not proven for centimeter free-space planes.",
+    "harmonics": [
+      {
+        "order": 1,
+        "periodNm": 206.9344827586207,
+        "squareWaveFourierAmplitudeRelativeToFirst": 1,
+        "requiredDeltaNForSameKappa": 0.00041971591689283626
+      },
+      {
+        "order": 3,
+        "periodNm": 620.8034482758621,
+        "squareWaveFourierAmplitudeRelativeToFirst": 0.3333333333333333,
+        "requiredDeltaNForSameKappa": 0.001259147750678509
+      },
+      {
+        "order": 5,
+        "periodNm": 1034.6724137931035,
+        "squareWaveFourierAmplitudeRelativeToFirst": 0.2,
+        "requiredDeltaNForSameKappa": 0.002098579584464181
+      },
+      {
+        "order": 7,
+        "periodNm": 1448.5413793103448,
+        "squareWaveFourierAmplitudeRelativeToFirst": 0.14285714285714285,
+        "requiredDeltaNForSameKappa": 0.002938011418249854
+      },
+      {
+        "order": 9,
+        "periodNm": 1862.4103448275864,
+        "squareWaveFourierAmplitudeRelativeToFirst": 0.1111111111111111,
+        "requiredDeltaNForSameKappa": 0.0037774432520355262
+      }
+    ]
+  },
+  "resonantEnhancement": [
+    {
+      "q": 100,
+      "linewidths": 0.5,
+      "linewidthNm": 6.0011,
+      "requiredResonanceShiftNm": 3.00055,
+      "equivalentDeltaN": 0.0072499999999999995
+    },
+    {
+      "q": 100,
+      "linewidths": 1,
+      "linewidthNm": 6.0011,
+      "requiredResonanceShiftNm": 6.0011,
+      "equivalentDeltaN": 0.014499999999999999
+    },
+    {
+      "q": 100,
+      "linewidths": 2,
+      "linewidthNm": 6.0011,
+      "requiredResonanceShiftNm": 12.0022,
+      "equivalentDeltaN": 0.028999999999999998
+    },
+    {
+      "q": 500,
+      "linewidths": 0.5,
+      "linewidthNm": 1.20022,
+      "requiredResonanceShiftNm": 0.60011,
+      "equivalentDeltaN": 0.00145
+    },
+    {
+      "q": 500,
+      "linewidths": 1,
+      "linewidthNm": 1.20022,
+      "requiredResonanceShiftNm": 1.20022,
+      "equivalentDeltaN": 0.0029
+    },
+    {
+      "q": 500,
+      "linewidths": 2,
+      "linewidthNm": 1.20022,
+      "requiredResonanceShiftNm": 2.40044,
+      "equivalentDeltaN": 0.0058
+    },
+    {
+      "q": 1000,
+      "linewidths": 0.5,
+      "linewidthNm": 0.60011,
+      "requiredResonanceShiftNm": 0.300055,
+      "equivalentDeltaN": 0.000725
+    },
+    {
+      "q": 1000,
+      "linewidths": 1,
+      "linewidthNm": 0.60011,
+      "requiredResonanceShiftNm": 0.60011,
+      "equivalentDeltaN": 0.00145
+    },
+    {
+      "q": 1000,
+      "linewidths": 2,
+      "linewidthNm": 0.60011,
+      "requiredResonanceShiftNm": 1.20022,
+      "equivalentDeltaN": 0.0029
+    },
+    {
+      "q": 5000,
+      "linewidths": 0.5,
+      "linewidthNm": 0.120022,
+      "requiredResonanceShiftNm": 0.060011,
+      "equivalentDeltaN": 0.000145
+    },
+    {
+      "q": 5000,
+      "linewidths": 1,
+      "linewidthNm": 0.120022,
+      "requiredResonanceShiftNm": 0.120022,
+      "equivalentDeltaN": 0.00029
+    },
+    {
+      "q": 5000,
+      "linewidths": 2,
+      "linewidthNm": 0.120022,
+      "requiredResonanceShiftNm": 0.240044,
+      "equivalentDeltaN": 0.00058
+    },
+    {
+      "q": 10000,
+      "linewidths": 0.5,
+      "linewidthNm": 0.060011,
+      "requiredResonanceShiftNm": 0.0300055,
+      "equivalentDeltaN": 0.0000725
+    },
+    {
+      "q": 10000,
+      "linewidths": 1,
+      "linewidthNm": 0.060011,
+      "requiredResonanceShiftNm": 0.060011,
+      "equivalentDeltaN": 0.000145
+    },
+    {
+      "q": 10000,
+      "linewidths": 2,
+      "linewidthNm": 0.060011,
+      "requiredResonanceShiftNm": 0.120022,
+      "equivalentDeltaN": 0.00029
+    }
+  ],
+  "electrodeLoss": [
+    {
+      "planeCount": 10,
+      "twoElectrodesPerPlaneTransmission": 0.8179069375972308,
+      "oneSharedElectrodePerPlaneTransmission": 0.8953382542587164
+    },
+    {
+      "planeCount": 20,
+      "twoElectrodesPerPlaneTransmission": 0.6689717585696803,
+      "oneSharedElectrodePerPlaneTransmission": 0.8097278682212584
+    },
+    {
+      "planeCount": 50,
+      "twoElectrodesPerPlaneTransmission": 0.3660323412732292,
+      "oneSharedElectrodePerPlaneTransmission": 0.598956006466161
+    },
+    {
+      "planeCount": 100,
+      "twoElectrodesPerPlaneTransmission": 0.13397967485796172,
+      "oneSharedElectrodePerPlaneTransmission": 0.3623720178604969
+    }
+  ],
+  "crossTalk": [
+    {
+      "geometry": "parallel transparent electrodes around plane",
+      "leakageFraction": 0.05,
+      "note": "Best reduced-order confinement if guard layers or grounded neighbors are allowed.",
+      "neighborDeltaNForWp17On": 0.000020985795844641815
+    },
+    {
+      "geometry": "coplanar edge electrodes",
+      "leakageFraction": 0.45,
+      "note": "Field fringing is comparable to plane pitch without full FEM optimization.",
+      "neighborDeltaNForWp17On": 0.0001888721626017763
+    },
+    {
+      "geometry": "interdigitated electrodes",
+      "leakageFraction": 0.25,
+      "note": "Can shape lateral field but introduces spatial nonuniformity and optical-metal routing risk.",
+      "neighborDeltaNForWp17On": 0.00010492897922320907
+    },
+    {
+      "geometry": "edge-addressed monolithic slab",
+      "leakageFraction": 0.8,
+      "note": "Low optical insertion loss but poor individual depth selectivity at 1 mm pitch.",
+      "neighborDeltaNForWp17On": 0.00033577273351426904
+    }
+  ],
+  "switchingEnergy": [
+    {
+      "areaCm2": 1,
+      "spacingUm": 10,
+      "capacitanceF": 2.6562563438400006e-9,
+      "voltage": 12.533337859124181,
+      "energyJ": 2.0862842670857622e-7
+    },
+    {
+      "areaCm2": 1,
+      "spacingUm": 25,
+      "capacitanceF": 1.0625025375360003e-9,
+      "voltage": 31.333344647810453,
+      "energyJ": 5.215710667714405e-7
+    },
+    {
+      "areaCm2": 1,
+      "spacingUm": 50,
+      "capacitanceF": 5.312512687680002e-10,
+      "voltage": 62.666689295620905,
+      "energyJ": 0.000001043142133542881
+    },
+    {
+      "areaCm2": 1,
+      "spacingUm": 100,
+      "capacitanceF": 2.656256343840001e-10,
+      "voltage": 125.33337859124181,
+      "energyJ": 0.000002086284267085762
+    },
+    {
+      "areaCm2": 1,
+      "spacingUm": 250,
+      "capacitanceF": 1.0625025375360002e-10,
+      "voltage": 313.3334464781045,
+      "energyJ": 0.000005215710667714404
+    },
+    {
+      "areaCm2": 1,
+      "spacingUm": 500,
+      "capacitanceF": 5.312512687680001e-11,
+      "voltage": 626.666892956209,
+      "energyJ": 0.000010431421335428809
+    },
+    {
+      "areaCm2": 1,
+      "spacingUm": 1000,
+      "capacitanceF": 2.6562563438400005e-11,
+      "voltage": 1253.333785912418,
+      "energyJ": 0.000020862842670857617
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 10,
+      "capacitanceF": 2.6562563438400005e-8,
+      "voltage": 12.533337859124181,
+      "energyJ": 0.000002086284267085762
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 25,
+      "capacitanceF": 1.0625025375360002e-8,
+      "voltage": 31.333344647810453,
+      "energyJ": 0.000005215710667714405
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 50,
+      "capacitanceF": 5.312512687680001e-9,
+      "voltage": 62.666689295620905,
+      "energyJ": 0.00001043142133542881
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 100,
+      "capacitanceF": 2.6562563438400006e-9,
+      "voltage": 125.33337859124181,
+      "energyJ": 0.00002086284267085762
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 250,
+      "capacitanceF": 1.0625025375360001e-9,
+      "voltage": 313.3334464781045,
+      "energyJ": 0.00005215710667714404
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 500,
+      "capacitanceF": 5.312512687680001e-10,
+      "voltage": 626.666892956209,
+      "energyJ": 0.00010431421335428809
+    },
+    {
+      "areaCm2": 10,
+      "spacingUm": 1000,
+      "capacitanceF": 2.6562563438400003e-10,
+      "voltage": 1253.333785912418,
+      "energyJ": 0.00020862842670857617
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 10,
+      "capacitanceF": 2.65625634384e-7,
+      "voltage": 12.533337859124181,
+      "energyJ": 0.00002086284267085762
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 25,
+      "capacitanceF": 1.0625025375360002e-7,
+      "voltage": 31.333344647810453,
+      "energyJ": 0.00005215710667714405
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 50,
+      "capacitanceF": 5.312512687680001e-8,
+      "voltage": 62.666689295620905,
+      "energyJ": 0.0001043142133542881
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 100,
+      "capacitanceF": 2.6562563438400005e-8,
+      "voltage": 125.33337859124181,
+      "energyJ": 0.0002086284267085762
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 250,
+      "capacitanceF": 1.0625025375360001e-8,
+      "voltage": 313.3334464781045,
+      "energyJ": 0.0005215710667714403
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 500,
+      "capacitanceF": 5.3125126876800004e-9,
+      "voltage": 626.666892956209,
+      "energyJ": 0.0010431421335428807
+    },
+    {
+      "areaCm2": 100,
+      "spacingUm": 1000,
+      "capacitanceF": 2.6562563438400002e-9,
+      "voltage": 1253.333785912418,
+      "energyJ": 0.0020862842670857614
+    }
+  ],
+  "scanRates": [
+    {
+      "planeCount": 10,
+      "frameRateHz": 30,
+      "sequentialPlaneRateHz": 300
+    },
+    {
+      "planeCount": 10,
+      "frameRateHz": 60,
+      "sequentialPlaneRateHz": 600
+    },
+    {
+      "planeCount": 10,
+      "frameRateHz": 120,
+      "sequentialPlaneRateHz": 1200
+    },
+    {
+      "planeCount": 20,
+      "frameRateHz": 30,
+      "sequentialPlaneRateHz": 600
+    },
+    {
+      "planeCount": 20,
+      "frameRateHz": 60,
+      "sequentialPlaneRateHz": 1200
+    },
+    {
+      "planeCount": 20,
+      "frameRateHz": 120,
+      "sequentialPlaneRateHz": 2400
+    },
+    {
+      "planeCount": 50,
+      "frameRateHz": 30,
+      "sequentialPlaneRateHz": 1500
+    },
+    {
+      "planeCount": 50,
+      "frameRateHz": 60,
+      "sequentialPlaneRateHz": 3000
+    },
+    {
+      "planeCount": 50,
+      "frameRateHz": 120,
+      "sequentialPlaneRateHz": 6000
+    },
+    {
+      "planeCount": 100,
+      "frameRateHz": 30,
+      "sequentialPlaneRateHz": 3000
+    },
+    {
+      "planeCount": 100,
+      "frameRateHz": 60,
+      "sequentialPlaneRateHz": 6000
+    },
+    {
+      "planeCount": 100,
+      "frameRateHz": 120,
+      "sequentialPlaneRateHz": 12000
+    }
+  ],
+  "concepts": [
+    {
+      "id": "periodic-domain-ln",
+      "name": "Periodically poled LiNbO3 switchable grating",
+      "requiredChange": 0.00020985795844641813,
+      "demonstratedCapability": 0.0008371990000000002,
+      "feasibilityMargin": 3.9893602615683386,
+      "classification": "Research-only",
+      "decision": "Most physically aligned with switchable kappa, but optical-period domain pitch and aperture scaling are major barriers."
+    },
+    {
+      "id": "eo-polymer-differential",
+      "name": "EO-polymer differential-index grating",
+      "requiredChange": 0.00041971591689283626,
+      "demonstratedCapability": 0.000336909375,
+      "feasibilityMargin": 0.8027081209932317,
+      "classification": "Very High",
+      "decision": "Field scale is plausible only if a low-loss periodic differential material grating can be fabricated and stabilized."
+    },
+    {
+      "id": "bto-domain-ferroelectric",
+      "name": "Domain-engineered BaTiO3-like ferroelectric grating",
+      "requiredChange": 0.00020985795844641813,
+      "demonstratedCapability": 0.004492799999999999,
+      "feasibilityMargin": 21.408766354444072,
+      "classification": "Research-only",
+      "decision": "Large tensor response is attractive, but bulk/free-space/aperture maturity is the limiting gap."
+    },
+    {
+      "id": "resonant-defect-plane",
+      "name": "Resonantly enhanced EO defect plane",
+      "requiredChange": 0.00029,
+      "demonstratedCapability": 0.0008371990000000002,
+      "feasibilityMargin": 2.8868931034482763,
+      "classification": "Very High",
+      "decision": "Material index shift becomes easier, but spectral, angular, thermal, and fabrication tolerance dominate."
+    }
+  ],
+  "physicalRescore": {
+    "offDeltaN": 0.000025,
+    "onDeltaN": 0.0002,
+    "offReflectance": 0.04958035044695605,
+    "onReflectance": 0.1838213714633308,
+    "selectedPlaneFraction": 0.8443009418208403,
+    "secondaryPlaneRatio": 0.015625,
+    "useful": false
+  },
+  "idealRescore": {
+    "offDeltaN": 0.000001,
+    "onDeltaN": 0.00041971591689283626,
+    "offReflectance": 0.00008006844546626756,
+    "onReflectance": 0.2556817900896221,
+    "selectedPlaneFraction": 0.9901053672658429,
+    "secondaryPlaneRatio": 0.000005676610830176998,
+    "useful": true
+  },
+  "conclusions": {
+    "idealVsPhysical": "A REDUCED BUT STILL USEFUL FRACTION OF THE WP-v2-17 SWITCHABLE-KAPPA RANGE APPEARS PHYSICALLY ACHIEVABLE",
+    "periodicPoling": "PERIODIC DOMAIN ENGINEERING IS PHYSICALLY ATTRACTIVE BUT THE REQUIRED OPTICAL-PERIOD DOMAIN SCALE IS A MAJOR BARRIER",
+    "resonantEnhancement": "RESONANT ENHANCEMENT MATERIALLY REDUCES THE REQUIRED EO INDEX CHANGE",
+    "electricalAddressing": "ELECTRIC-FIELD CROSS-TALK / ELECTRODE LOSS IS A PRIMARY LIMITATION",
+    "architecture": "EO-SWITCHED DISCRETE BRAGG PLANES REMAIN PROMISING BUT REQUIRE A DEVICE-LEVEL PROOF OF CONCEPT",
+    "nextStep": "ADVANCE TO A DEVICE-LEVEL ELECTRO-OPTIC PLANE MODEL"
+  }
+}

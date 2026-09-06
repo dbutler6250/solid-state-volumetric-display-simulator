@@ -143,6 +143,7 @@ Keep this section as the historical record. Do not create issues for these items
 - [x] Permanent-grating architecture study with coupling-length scale, bounded uniform/length/apodization/segmentation/phase/chirp-proxy sweeps, selected Maxwell model-boundary checks, and a no-default-change conclusion
 - [x] Architecture reset - localized optical interaction mechanisms, with the biased strain trough retained as a validated reference rather than the assumed forward architecture
 - [x] Discrete Bragg-plane architecture feasibility with coherent plane/gap CMT modeling, switchable-kappa plane activation, and continuous-substrate written-region follow-up identified
+- [x] Electro-optic switchable-coupling feasibility for discrete Bragg planes, with common-mode EO rejected as switchable kappa and periodic-domain/electrode constraints identified
 - [ ] Realistic actuator-to-field models
 - [x] Apodized grating support
 - [ ] Optimized reflection visualization
