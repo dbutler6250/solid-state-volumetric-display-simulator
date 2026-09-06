@@ -2,10 +2,10 @@
 
 ## Repository Status
 
-- Current branch: `codex/issue-82-localized-interaction-architecture`.
-- GitHub Issue #82: `WP-v2-16 - Architecture reset: localized optical interaction mechanisms`.
-- Branch started from clean `main` after WP-v2-15 / PR #81 was audited, verified, squash-merged, and Issue #80 was closed.
-- WP-v2-16 is an architecture feasibility and physics-gating packet, not a UI redesign or FEM/device-engineering task.
+- Current branch: `codex/issue-84-discrete-bragg-plane-architecture`.
+- GitHub Issue #84: `WP-v2-17 - Discrete Bragg-plane architecture feasibility`.
+- Branch started from clean `main` after WP-v2-16 / PR #83 was audited, verified, squash-merged as `474aa07a73d9032fe8d0c767a1a66fc2d9b43c6e`, and Issue #82 was closed.
+- WP-v2-17 is a headless architecture feasibility packet; no UI redesign is expected.
 
 ## WP-v2-15 Result
 
@@ -92,5 +92,47 @@ ADVANCE MULTIPLE SURVIVING ARCHITECTURES TO SMALL TARGETED FEASIBILITY STUDIES
 
 ## Remaining Work
 
-- Recommended next packet: compare a switchable-kappa static-momentum plus EO-control model against a discrete active-plane loss/efficiency model.
+- WP-v2-17 draft PR still needs creation/merge review after verification.
+- Recommended next packet: electro-optic discrete-plane feasibility with transparent-electrode/layer geometry assumptions and continuous-substrate written-region constraints.
 - Future high-fidelity follow-up should extend the Maxwell layer path to represent engineered coupling/phase/segmented permanent gratings before claiming Maxwell support for those architecture classes.
+
+## WP-v2-17 Result
+
+- Artifacts:
+  - `artifacts/issue-84/discrete-bragg-plane-architecture-study.md`
+  - `artifacts/issue-84/discrete-bragg-plane-architecture-study.json`
+- Runner: `npx.cmd tsx scripts/discreteBraggPlaneArchitectureStudy.mts`.
+- Headless model: `src/simulation/structures/discreteBraggPlaneStack.ts`.
+- Best bounded geometry: `10` planes, `0.25 mm` plane thickness, `1.0 mm` pitch, phase-scrambled spacing, switchable-kappa control.
+- Best bounded metrics: OFF reflectance about `8.0e-5`, selected-plane ON reflectance about `0.256`, selected-plane fraction about `0.990`, secondary/primary plane ratio about `5.7e-6`.
+- Required ON `Delta n` for the best bounded geometry is about `4.20e-4`; OFF `Delta n` reference is `1e-6`.
+- Equivalent strain is not applicable to switchable-kappa activation itself; direct Bragg wavelength-shift variants still convert through the prior `~0.461 nm / 1000 microstrain` scale.
+- Leading control mechanism: electro-optic plane activation.
+- Inter-plane coherence finding: manageable only with intentional phase/spacing engineering; planes must not be treated as incoherent independent mirrors.
+- Maxwell status: not run for this new architecture class; current Maxwell path should be extended only after a narrower discrete-plane candidate is selected.
+
+## WP-v2-17 Conclusions
+
+```text
+DISCRETE BRAGG PLANES PROVIDE A MODEST REDUCTION IN REQUIRED LOCAL TUNING / STRAIN
+```
+
+```text
+STRUCTURAL PLANE SEPARATION IMPROVES LOCALIZATION BUT COHERENT INTER-PLANE COUPLING REMAINS SIGNIFICANT
+```
+
+```text
+INTER-PLANE COHERENCE REQUIRES INTENTIONAL PHASE / SPACING ENGINEERING
+```
+
+```text
+ELECTRO-OPTICALLY ACTIVATED DISCRETE BRAGG PLANES ARE THE LEADING CONTROL CONCEPT
+```
+
+```text
+DISCRETE BRAGG PLANES ARE A CREDIBLE COMPETING ARCHITECTURE BUT NOT YET PREFERRED
+```
+
+```text
+DISCRETE DEPTH ADDRESSING IS OPTICALLY PROMISING BUT REQUIRES FABRICATION / ADDRESSING VALIDATION
+```

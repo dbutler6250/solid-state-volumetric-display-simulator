@@ -65,6 +65,8 @@ The first v2 implementation supports a permanent uniform Bragg grating plus pres
 
 After WP-v2-16, project-level architecture status is under investigation. The biased strain trough remains the best-characterized reference architecture, but it is no longer the assumed forward architecture. The next simulator architecture should be selected from localized-interaction feasibility studies rather than inherited from the existing fixed-grating UI.
 
+After WP-v2-17, discrete Bragg-plane stacks are a credible competing research architecture but are not yet canonical. The leading variant is finite written grating regions in a continuous substrate with electro-optic switchable coupling; bonded plate stacks remain optically risky because cumulative physical-interface reflection would require aggressive index matching or AR treatment.
+
 This architecture remains a guide for the validated reference path, not a frozen API. The goal is to keep physical structure, perturbation, material response, solver, experiment setup, and metrics separable enough for unit tests, sweeps, worker execution, and later validation against TMM or measured data.
 
 Current code boundaries:
